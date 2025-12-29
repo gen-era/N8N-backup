@@ -1,0 +1,1511 @@
+{
+  "updatedAt": "2025-12-26T09:24:17.000Z",
+  "createdAt": "2025-09-16T12:36:15.747Z",
+  "id": "ZHgMRKYDgvkEHsu0",
+  "name": "SampleSheet Generator",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "d284a362-750d-479d-b582-e1d9649419a8",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.path }}/RunInfo.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "52198fb1-cf6b-421a-8a32-4ad3980102c8",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b844c6c8-7919-4395-80e0-7762c5ca081e",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "548922c0-8a78-4b91-be30-b5d75e7aeae2",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "42bfc88d-81b7-4d42-be7f-fca3de5bc15d",
+              "name": "RunInfo.Run.Id",
+              "value": "={{ $('When Executed by Another Workflow').item.json.run_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6399e11c-7dc3-4712-bac9-50f14583b336",
+              "name": "RunInfo.Run.Number",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Number }}",
+              "type": "string"
+            },
+            {
+              "id": "8924b058-c571-4d94-93df-5a21ef00f6b4",
+              "name": "RunInfo.Run.Flowcell",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Flowcell }}",
+              "type": "string"
+            },
+            {
+              "id": "f6ff7558-2833-4d71-9adc-693c1f549fc1",
+              "name": "RunInfo.Run.Instrument",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Instrument }}",
+              "type": "string"
+            },
+            {
+              "id": "e2dadb3f-5e23-4a86-9840-66b9f7452dd7",
+              "name": "RunInfo.Run.Reads.Read[0].NumCycles",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Reads.Read[0].NumCycles }}",
+              "type": "string"
+            },
+            {
+              "id": "b09c57a0-ac52-4193-9399-4b3854291b97",
+              "name": "RunInfo.Run.Reads.Read[1].NumCycles",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Reads.Read[1].NumCycles }}",
+              "type": "string"
+            },
+            {
+              "id": "59063133-6b91-450c-8d1c-76ba0afe81d8",
+              "name": "RunInfo.Run.Reads.Read[2].NumCycles",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Reads.Read[2].NumCycles }}",
+              "type": "string"
+            },
+            {
+              "id": "0e4500b8-23ca-4e1d-a0f1-0d570da4a48e",
+              "name": "RunInfo.Run.Reads.Read[3].NumCycles",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Reads.Read[3].NumCycles }}",
+              "type": "string"
+            },
+            {
+              "id": "f6073e72-bdde-460d-89ba-e0b178793702",
+              "name": "Date",
+              "value": "={{ $('When Executed by Another Workflow').item.json.run_id.split(\"_\").first()}}",
+              "type": "string"
+            },
+            {
+              "id": "3d92252b-8bb4-4a42-bc3f-ac1339ff3fb9",
+              "name": "Part",
+              "value": "={{ $('When Executed by Another Workflow').item.json.run_id.split(\"_\").last().substring(0,1) }}",
+              "type": "string"
+            },
+            {
+              "id": "5f0332a6-06f6-401f-b50d-86c49e370667",
+              "name": "WorkflowType",
+              "value": "={{ $json.RunParameters.WorkflowType }}",
+              "type": "string"
+            },
+            {
+              "id": "10632474-267e-4f82-b5cb-dbe9c4f03b05",
+              "name": "IsReverseComplement",
+              "value": "={{ $('XML').item.json.RunInfo.Run.Reads.Read[2].IsReverseComplement }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "8c2966ab-58cf-4eaf-9565-0c92ee021865",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "This part reads and extracts information of the run",
+        "height": 224,
+        "width": 1344
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "0e412d14-9c50-4221-9792-a37bfdf81a64",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "command": "ls /home/genera/run_folder/samplesheets"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        192,
+        256
+      ],
+      "id": "f31e33e1-ce16-4483-a09f-6e83af941019",
+      "name": "list SampleSheets"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split the stdout into individual folder paths\nconst stdout = $input.first().json.stdout;\nconst folders = stdout.trim().split('\\n').filter(folder => folder.length > 0);\n\nconst items = folders.map(folder => ({\n  json: {\n    folder_path: folder,\n    folder_name: folder.split('/').pop()\n  }\n}));\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        256
+      ],
+      "id": "452f8455-8455-4c02-9a1d-07d3901b9fa5",
+      "name": "split into items"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "81b480ef-6710-476c-b822-2b6d71254452",
+              "leftValue": "={{ $json.folder_name }}",
+              "rightValue": "={{ $('Edit Fields').item.json.Date }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "99d0cfa8-0b99-4150-aa1a-76b9deed7383",
+              "leftValue": "={{ $json.folder_name }}",
+              "rightValue": "={{ $('Edit Fields').item.json.RunInfo.Run.Instrument }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "5c277a90-3c79-471c-ba7e-fc6e88f751e7",
+              "leftValue": "={{ $json.folder_name }}",
+              "rightValue": "={{ $('Edit Fields').item.json.Part }}Part",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        256
+      ],
+      "id": "2ee09d51-0f28-43ff-8520-46f827b78a84",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/home/genera/run_folder/samplesheets/{{ $json.folder_path }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        976,
+        256
+      ],
+      "id": "a4b1337a-6647-4d55-bdc2-d59cc78f8af7",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "content": "This part finds and reads corresponding samplesheet",
+        "height": 256,
+        "width": 1616
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        192
+      ],
+      "typeVersion": 1,
+      "id": "e4e48ce1-a523-476b-98ca-8c61f8f1ff73",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        256
+      ],
+      "id": "329b066c-f1cf-4448-ad68-d2fce126c777",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/genera/run_folder/samplesheets/Ekler/indices-NovaSeq.xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        688
+      ],
+      "id": "54719931-5ce0-4203-9bb4-2df51b376d40",
+      "name": "Read indices",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1888,
+        688
+      ],
+      "id": "bdfb9405-dc2d-4558-97f2-73a57721f78c",
+      "name": "indices"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track duplicate counts\nconst duplicateCounts = {};\n\n// Process each item and rename duplicates\nconst processedItems = items.map(item => {\n  const sampleId = item.json.Sample_ID;\n  \n  if (duplicateCounts[sampleId]) {\n    // Increment counter for this sample ID\n    duplicateCounts[sampleId] += 1;\n    // Add suffix to make it unique\n    item.json.Sample_ID = `${sampleId}-${duplicateCounts[sampleId]}`;\n  } else {\n    // First occurrence, just track it\n    duplicateCounts[sampleId] = 1;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        256
+      ],
+      "id": "49f0602d-52fe-4ace-96c8-ad8f3bd2a4ca",
+      "name": "Rename Duplicates"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "201c5ae1-f264-431b-8666-4bc2b7024d50",
+              "leftValue": "={{ $json.I7_Index_ID }}",
+              "rightValue": "sgUDI-",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            },
+            {
+              "id": "11547d99-053f-4d0b-ba56-dfcf200d2405",
+              "leftValue": "={{ $json.I5_Index_ID }}",
+              "rightValue": "sgUDI-",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        592
+      ],
+      "id": "ad94796c-aeae-4004-9949-c7a4ee25fa61",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8191843f-2c2e-49d3-81bb-371c27ef9226",
+              "name": "I7_Index_ID",
+              "value": "={{ $json.I7_Index_ID.replace(\"-\",\"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "97f7b76c-d77a-47ee-89c3-c825882d2a06",
+              "name": "I5_Index_ID",
+              "value": "={{ $json.I5_Index_ID.replace(\"-\",\"\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        528,
+        496
+      ],
+      "id": "61d57ef2-6fcd-46ec-86d4-1dfe39232a97",
+      "name": "Rename \"sgUDI-\""
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3691058-3b18-4be9-974b-98a1b5af6845",
+              "leftValue": "={{ $json.index }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "55d03e25-0dc2-4ec1-bbe7-ccec5881c816",
+              "leftValue": "={{ $json.index2 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        608
+      ],
+      "id": "eaf877bd-3cce-4a68-8549-a3beb7c12e2b",
+      "name": "check if index exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6f2f4d8b-4d1a-4eea-b936-c57feef0f206",
+              "leftValue": "={{ $json.index.length }}",
+              "rightValue": "={{ parseInt($('Edit Fields').item.json.RunInfo.Run.Reads.Read[1].NumCycles) }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "7600708e-a27e-49b6-8f16-75ee9ec1909b",
+              "leftValue": "={{ $json.index2.length }}",
+              "rightValue": "={{ parseInt($('Edit Fields').item.json.RunInfo.Run.Reads.Read[2].NumCycles) }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        1040
+      ],
+      "id": "c3e96386-53f0-45ff-a53d-10763bd7035b",
+      "name": "is index length > run setting"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "11383bd6-cc6a-4aa9-b2ba-2ed8b41cec20",
+              "name": "index",
+              "value": "={{ $json.index.substring(0,parseInt($('Edit Fields').item.json.RunInfo.Run.Reads.Read[1].NumCycles)) }}",
+              "type": "string"
+            },
+            {
+              "id": "88360465-0b8f-45a8-bd3a-ad0d1cf03ecb",
+              "name": "index2",
+              "value": "={{ $json.index2.substring(0, parseInt($('Edit Fields').item.json.RunInfo.Run.Reads.Read[2].NumCycles)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        928
+      ],
+      "id": "bdaa585f-b7e8-4920-ba98-5a7fa8d4bb3e",
+      "name": "trim index length"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "27fdf7ea-9a21-4a27-a8ec-3199d64adb36",
+              "name": "index",
+              "value": "={{ $json.index.trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "3716e554-6c44-4c34-9e8a-35b4e3abd9a1",
+              "name": "index2",
+              "value": "={{ $json.index2.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1104,
+        1040
+      ],
+      "id": "44fda2b2-cbac-4e9b-b0de-ce64bd90d591",
+      "name": "trim whitespace"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        608
+      ],
+      "id": "5e84b780-314b-4d62-9952-506ac17d130d",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        1040
+      ],
+      "id": "347bb741-54fb-460d-8149-df6b3255d431",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to normalize text to ASCII\nfunction normalizeToAscii(text) {\n  if (typeof text !== 'string') {\n    return text;\n  }\n  \n  // Normalize Unicode characters (NFKD decomposition)\n  let normalized = text.normalize('NFKD');\n  \n  // Remove diacritical marks and non-ASCII characters\n  normalized = normalized.replace(/[\\u0300-\\u036f]/g, '');\n  \n  // Convert Turkish-specific characters manually\n  const turkishMap = {\n    'ı': 'i', 'İ': 'I',\n    'ğ': 'g', 'Ğ': 'G',\n    'ü': 'u', 'Ü': 'U',\n    'ş': 's', 'Ş': 'S',\n    'ö': 'o', 'Ö': 'O',\n    'ç': 'c', 'Ç': 'C'\n  };\n  \n  // Replace Turkish characters\n  Object.keys(turkishMap).forEach(char => {\n    normalized = normalized.replace(new RegExp(char, 'g'), turkishMap[char]);\n  });\n  \n  // Keep only ASCII characters\n  normalized = normalized.replace(/[^\\x00-\\x7F]/g, '');\n  \n  // Replace non-alphanumeric characters with dashes\n  normalized = normalized.replace(/[^a-zA-Z0-9]+/g, '-');\n  \n  // Remove leading/trailing dashes\n  normalized = normalized.replace(/^-+|-+$/g, '');\n  \n  return normalized;\n}\n\n// Process all items\nconst items = $input.all();\n\nconst processedItems = items.map(item => {\n  const processedJson = {};\n  \n  // Normalize all string fields\n  Object.keys(item.json).forEach(key => {\n    processedJson[key] = normalizeToAscii(item.json[key]);\n  });\n  \n  return { json: processedJson };\n});\n\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        1040
+      ],
+      "id": "9027bb2d-b152-498d-a341-c1d21bde19bb",
+      "name": "Normalize to ASCII"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20e5cde8-1343-42a7-99f0-1b942b9a6ef0",
+              "name": "Lane",
+              "value": "={{ $json.Lane ? $json.Lane.replace(/[^\\d]/g, '') : $json.Lane }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        928
+      ],
+      "id": "5d87ade1-a8c3-48a1-99c8-e4c950cae21b",
+      "name": "Remove lane prefixes"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e2fb532e-50d8-4913-8546-35f277dd1b85",
+              "name": "overrideCycle1-I",
+              "value": "=I{{ $json.index.length }}",
+              "type": "string"
+            },
+            {
+              "id": "da1662d8-edb7-44c3-a75f-ebae9b70aa7c",
+              "name": "overrideCycle2-I",
+              "value": "=I{{ $json.index2.length }}",
+              "type": "string"
+            },
+            {
+              "id": "28164d28-38e3-4e85-b5ff-eb582914e79f",
+              "name": "overrideCycle1-N",
+              "value": "=N{{ $('Edit Fields').item.json.RunInfo.Run.Reads.Read[1].NumCycles - $json.index.length }}",
+              "type": "string"
+            },
+            {
+              "id": "50f6bed2-b9ab-4483-b649-964fe05ac309",
+              "name": "overrideCycle2-N",
+              "value": "=N{{ $('Edit Fields').item.json.RunInfo.Run.Reads.Read[2].NumCycles - $json.index2.length }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2528,
+        1024
+      ],
+      "id": "890f158f-1428-43f8-96df-99af96d60332",
+      "name": "set overrideCycles"
+    },
+    {
+      "parameters": {
+        "operation": "xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "1c314ef9-aa8b-4864-a84c-39c94b9daacc",
+      "name": "Extract from File2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "bcf0b9c6-320a-46e7-90b3-779246bf9427",
+      "name": "XML1"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $('When Executed by Another Workflow').item.json.path }}/RunParameters.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "a9db6eed-cf09-44f0-8777-7b557daf0303",
+      "name": "Read RunParameters"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b71aa86e-53c4-48bb-a114-d1d19f505e8c",
+              "name": "index",
+              "value": "={{ $json.index_new }}",
+              "type": "string"
+            },
+            {
+              "id": "4427c7dd-296e-44a2-95b9-3a610f5eea59",
+              "name": "index2",
+              "value": "={{ $json.index2_new }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2512,
+        608
+      ],
+      "id": "b6ee8158-041c-4acb-9d4e-1259d4371f58",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6a979ebd-334d-412f-9d88-3499b505a8fd",
+              "leftValue": "={{ $json.Sample_ID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        256
+      ],
+      "id": "0c0111f1-f8ac-4c1e-9bd8-81bd9006badd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "I7_Index_ID, I5_Index_ID",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2080,
+        608
+      ],
+      "id": "3a3ec488-1db6-41fe-859a-e559e157abc7",
+      "name": "left join"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        1040
+      ],
+      "id": "663bad5b-44cc-49a3-911a-68ee62fdecb9",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8eb59859-f8ca-4e24-8a8f-4dcacec3aed5",
+              "leftValue": "={{ $('Filter').item.json.folder_name }}",
+              "rightValue": "XP",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        1040
+      ],
+      "id": "da401700-f754-49ab-9039-80bd574270ef",
+      "name": "Check WF Type"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": []
+        },
+        "includeOtherFields": true,
+        "include": "except",
+        "excludeFields": "Lane",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1904,
+        1104
+      ],
+      "id": "fd3fb683-59aa-469e-9888-ff3f8775fd84",
+      "name": "Remove Lane"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('When Executed by Another Workflow').first().json.path }}/SampleSheet-Consolidation.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3424,
+        1152
+      ],
+      "id": "d47e59c5-742e-4dca-9553-4718b5afbdeb",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "Sample_ID, index_new, index2_new",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        608
+      ],
+      "id": "220c19aa-9bef-4bb3-8d67-aa0b47ce46a9",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('When Executed by Another Workflow').first().json.path }}/SampleSheet.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3424,
+        1344
+      ],
+      "id": "335cae26-7c07-4806-bf9f-6dfbd41d14e2",
+      "name": "Read/Write Files from Disk3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "eb17cb9c-c4c5-4ef4-aa0a-79a760288cec",
+              "leftValue": "={{ $('Edit Fields').item.json.IsReverseComplement }}",
+              "rightValue": "Y",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2816,
+        1024
+      ],
+      "id": "653e439c-49d2-47ea-8c7b-f1e5a14bbdfc",
+      "name": "Check Rev-comp"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('When Executed by Another Workflow').first().json.path }}/SampleSheet-Consolidation.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3424,
+        816
+      ],
+      "id": "edcbca23-c913-44e9-b1a2-53bff4f66798",
+      "name": "Read/Write Files from Disk4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input data from previous node\nconst items = $input.all();\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[0].NumCycles;\nconst read2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[3].NumCycles;\nconst index1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[1].NumCycles;\nconst index2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[2].NumCycles;\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\nsamplesheet += '[BCLConvert_Data]\\n';\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n}\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  const index2 = data.index2 || '';\n  \n  // Extract the new fields\n  const sampleProject = data.Sample_Project || '';\n  const preparedBy = data.Prepared_By || '';\n  const requestedBy = data.Requested_By || '';\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const seReads = data.SE_Reads || '';\n  const bdsNumber = data.BDS_Number || '';\n  const panel = data.Panel || '';\n  \n  // Check if this is a TSO library prep kit\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  \n  let overrideCycles;\n  \n  if (isTSO) {\n    // For TSO kits: use UMI pattern U7N1 and adjust Y cycles\n    // Subtract 8 from read cycles (7 for UMI + 1 for N)\n    const adjustedRead1Cycles = parseInt(read1Cycles) - 8;\n    const adjustedRead2Cycles = parseInt(read2Cycles) - 8;\n    overrideCycles = `U7N1Y${adjustedRead1Cycles};I${index1Cycles};I${index2Cycles};U7N1Y${adjustedRead2Cycles}`;\n  } else {\n    // For non-TSO kits: use the original logic\n    const overrideCycle1I = data['overrideCycle1-I'];\n    const overrideCycle2I = data['overrideCycle2-I'];\n    const overrideCycle1N = data['overrideCycle1-N'];\n    const overrideCycle2N = data['overrideCycle2-N'];\n    \n    // Build index1 component (omit N if N0 or not present)\n    const index1Component = (overrideCycle1N && overrideCycle1N !== 'N0') \n      ? `${overrideCycle1I}${overrideCycle1N}` \n      : overrideCycle1I;\n    \n    // Build index2 component (omit N if N0 or not present)\n    const index2Component = (overrideCycle2N && overrideCycle2N !== 'N0') \n      ? `${overrideCycle2I}${overrideCycle2N}` \n      : overrideCycle2I;\n    \n    overrideCycles = `Y${read1Cycles};${index1Component};${index2Component};Y${read2Cycles}`;\n  }\n  \n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},0,0,${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},0,0,${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  }\n});\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        1152
+      ],
+      "id": "f2a4e2c5-24e4-4395-b236-703adde834b6",
+      "name": "SampleSheet Full"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input data from previous node\nconst items = $input.all();\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[0].NumCycles;\nconst read2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[3].NumCycles;\nconst index1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[1].NumCycles;\nconst index2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[2].NumCycles;\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\nsamplesheet += '[BCLConvert_Data]\\n';\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n}\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  const index2 = data.index2 || '';\n  \n  // Extract library prep kit for TSO check\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const sampleProject = data.Sample_Project || '';\n  // Check if this is a TSO library prep kit\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  \n  let overrideCycles;\n  \n  if (isTSO) {\n    // For TSO kits: use UMI pattern U7N1 and adjust Y cycles\n    const adjustedRead1Cycles = parseInt(read1Cycles) - 8;\n    const adjustedRead2Cycles = parseInt(read2Cycles) - 8;\n    overrideCycles = `U7N1Y${adjustedRead1Cycles};I${index1Cycles};I${index2Cycles};U7N1Y${adjustedRead2Cycles}`;\n  } else {\n    // For non-TSO kits: use the original logic\n    const overrideCycle1I = data['overrideCycle1-I'];\n    const overrideCycle2I = data['overrideCycle2-I'];\n    const overrideCycle1N = data['overrideCycle1-N'];\n    const overrideCycle2N = data['overrideCycle2-N'];\n    \n    const index1Component = (overrideCycle1N && overrideCycle1N !== 'N0') \n      ? `${overrideCycle1I}${overrideCycle1N}` \n      : overrideCycle1I;\n    \n    const index2Component = (overrideCycle2N && overrideCycle2N !== 'N0') \n      ? `${overrideCycle2I}${overrideCycle2N}` \n      : overrideCycle2I;\n    \n    overrideCycles = `Y${read1Cycles};${index1Component};${index2Component};Y${read2Cycles}`;\n  }\n  \n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},${sampleProject},0,0\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},${sampleProject},0,0\\n`;\n  }\n});\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        1344
+      ],
+      "id": "b11eaa9d-ccb1-4cf2-a9f5-52c098a404ff",
+      "name": "SampleSheet conversion"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input data from previous node\nconst items = $input.all();\n\n// Function to get reverse complement of a DNA sequence\nfunction reverseComplement(seq) {\n  const complement = {\n    'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G',\n    'a': 't', 't': 'a', 'g': 'c', 'c': 'g',\n    'N': 'N', 'n': 'n'\n  };\n  return seq.split('').reverse().map(base => complement[base] || base).join('');\n}\n\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[0].NumCycles;\nconst read2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[3].NumCycles;\nconst index1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[1].NumCycles;\nconst index2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[2].NumCycles;\n\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\n\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\n\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\n\nsamplesheet += '[BCLConvert_Data]\\n';\n\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n}\n\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  \n  // CHANGE 1: Reverse complement index2\n  const originalIndex2 = data.index2 || '';\n  const index2 = reverseComplement(originalIndex2);\n  \n  // Extract the new fields\n  const preparedBy = data.Prepared_By || '';\n  const sampleProject = data.Sample_Project || '';\n  const requestedBy = data.Requested_By || '';\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const seReads = data.SE_Reads || '';\n  const bdsNumber = data.BDS_Number || '';\n  const panel = data.Panel || '';\n  \n  // Check if this is a TSO library prep kit\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  \n  let overrideCycles;\n  \n  if (isTSO) {\n    // For TSO kits: use UMI pattern U7N1 and adjust Y cycles\n    const adjustedRead1Cycles = parseInt(read1Cycles) - 8;\n    const adjustedRead2Cycles = parseInt(read2Cycles) - 8;\n    overrideCycles = `U7N1Y${adjustedRead1Cycles};I${index1Cycles};I${index2Cycles};U7N1Y${adjustedRead2Cycles}`;\n  } else {\n    // For non-TSO kits: use the original logic with SWAPPED order for index2\n    const overrideCycle1I = data['overrideCycle1-I'];\n    const overrideCycle2I = data['overrideCycle2-I'];\n    const overrideCycle1N = data['overrideCycle1-N'];\n    const overrideCycle2N = data['overrideCycle2-N'];\n    \n    // Build index1 component (N after I - unchanged)\n    const index1Component = (overrideCycle1N && overrideCycle1N !== 'N0') \n      ? `${overrideCycle1I}${overrideCycle1N}` \n      : overrideCycle1I;\n    \n    // CHANGE 2: Build index2 component with N BEFORE I (swapped order)\n    const index2Component = (overrideCycle2N && overrideCycle2N !== 'N0') \n      ? `${overrideCycle2N}${overrideCycle2I}` \n      : overrideCycle2I;\n    \n    overrideCycles = `Y${read1Cycles};${index1Component};${index2Component};Y${read2Cycles}`;\n  }\n  \n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},0,0,${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},0,0,${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  }\n});\n\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        816
+      ],
+      "id": "181dc189-f798-4f5d-8381-29eeba1ae182",
+      "name": "Samplesheet full REV"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input data from previous node\nconst items = $input.all();\n\n// Function to get reverse complement of a DNA sequence\nfunction reverseComplement(seq) {\n  const complement = {\n    'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G',\n    'a': 't', 't': 'a', 'g': 'c', 'c': 'g',\n    'N': 'N', 'n': 'n'\n  };\n  return seq.split('').reverse().map(base => complement[base] || base).join('');\n}\n\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[0].NumCycles;\nconst read2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[3].NumCycles;\nconst index1Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[1].NumCycles;\nconst index2Cycles = $('Edit Fields').first().json.RunInfo.Run.Reads.Read[2].NumCycles;\n\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\n\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\n\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\n\nsamplesheet += '[BCLConvert_Data]\\n';\n\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n}\n\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  \n  // CHANGE 1: Reverse complement index2\n  const originalIndex2 = data.index2 || '';\n  const index2 = reverseComplement(originalIndex2);\n  \n  // Extract library prep kit for TSO check\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const sampleProject = data.Sample_Project || '';\n  \n  // Check if this is a TSO library prep kit\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  \n  let overrideCycles;\n  \n  if (isTSO) {\n    // For TSO kits: use UMI pattern U7N1 and adjust Y cycles\n    const adjustedRead1Cycles = parseInt(read1Cycles) - 8;\n    const adjustedRead2Cycles = parseInt(read2Cycles) - 8;\n    overrideCycles = `U7N1Y${adjustedRead1Cycles};I${index1Cycles};I${index2Cycles};U7N1Y${adjustedRead2Cycles}`;\n  } else {\n    // For non-TSO kits: use the original logic with SWAPPED order for index2\n    const overrideCycle1I = data['overrideCycle1-I'];\n    const overrideCycle2I = data['overrideCycle2-I'];\n    const overrideCycle1N = data['overrideCycle1-N'];\n    const overrideCycle2N = data['overrideCycle2-N'];\n    \n    // index1: N after I (unchanged)\n    const index1Component = (overrideCycle1N && overrideCycle1N !== 'N0') \n      ? `${overrideCycle1I}${overrideCycle1N}` \n      : overrideCycle1I;\n    \n    // CHANGE 2: index2: N BEFORE I (swapped order)\n    const index2Component = (overrideCycle2N && overrideCycle2N !== 'N0') \n      ? `${overrideCycle2N}${overrideCycle2I}` \n      : overrideCycle2I;\n    \n    overrideCycles = `Y${read1Cycles};${index1Component};${index2Component};Y${read2Cycles}`;\n  }\n  \n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},${sampleProject},0,0\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},${sampleProject},0,0\\n`;\n  }\n});\n\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        992
+      ],
+      "id": "9138922a-471f-4476-a833-062968f81766",
+      "name": "Samplesheet Conversation REV"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $('When Executed by Another Workflow').first().json.path }}/SampleSheet.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3424,
+        992
+      ],
+      "id": "85b9f82b-104a-4921-8f54-8053180f7db2",
+      "name": "Read/Write Files from Disk5"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Read RunParameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "list SampleSheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "list SampleSheets": {
+      "main": [
+        [
+          {
+            "node": "split into items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split into items": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Rename Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read indices": {
+      "main": [
+        [
+          {
+            "node": "indices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "indices": {
+      "main": [
+        [
+          {
+            "node": "left join",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Rename Duplicates": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Rename \"sgUDI-\"",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Rename \"sgUDI-\"": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if index exists": {
+      "main": [
+        [
+          {
+            "node": "Read indices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "left join",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "is index length > run setting": {
+      "main": [
+        [
+          {
+            "node": "trim index length",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "trim index length": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "check if index exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "trim whitespace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trim whitespace": {
+      "main": [
+        [
+          {
+            "node": "Normalize to ASCII",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize to ASCII": {
+      "main": [
+        [
+          {
+            "node": "Check WF Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove lane prefixes": {
+      "main": [
+        [
+          {
+            "node": "set overrideCycles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File2": {
+      "main": [
+        [
+          {
+            "node": "XML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RunParameters": {
+      "main": [
+        [
+          {
+            "node": "Extract from File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "left join": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "is index length > run setting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check WF Type": {
+      "main": [
+        [
+          {
+            "node": "Remove lane prefixes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Remove Lane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Lane": {
+      "main": [
+        [
+          {
+            "node": "set overrideCycles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set overrideCycles": {
+      "main": [
+        [
+          {
+            "node": "Check Rev-comp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Rev-comp": {
+      "main": [
+        [
+          {
+            "node": "Samplesheet full REV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Samplesheet Conversation REV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SampleSheet Full",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SampleSheet conversion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Full": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet conversion": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Samplesheet full REV": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Samplesheet Conversation REV": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "run_id": "20251222_LH00897_0041_B237Y2NLT3",
+          "path": "/mnt/smb_share/Runs/20251222_LH00897_0041_B237Y2NLT3"
+        }
+      }
+    ]
+  },
+  "versionId": "71546839-b40c-4820-ad3a-2644e8c53f9b",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T12:36:15.758Z",
+      "createdAt": "2025-09-16T12:36:15.758Z",
+      "role": "workflow:owner",
+      "workflowId": "ZHgMRKYDgvkEHsu0",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
