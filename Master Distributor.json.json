@@ -1,0 +1,639 @@
+{
+  "updatedAt": "2025-09-01T13:45:56.000Z",
+  "createdAt": "2025-08-21T13:20:19.619Z",
+  "id": "8zVRo1DtkonpehVD",
+  "name": "Master Distributor",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ca4d30ca-c728-4ced-9619-b0c80a5cac02",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "PENDING"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d9897ba2-1828-4dc8-801e-a01de9f189b3",
+      "name": "Check PENDING",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "26242b5b-e1e0-4a06-ada9-91efaff35262",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "88b54c9f-06eb-4535-802e-86723e89d4f4",
+      "name": "If PENDING exists"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31d88221-54db-43cd-99f6-16ea620162b2",
+              "name": "command",
+              "value": "={{ $json.command }}",
+              "type": "string"
+            },
+            {
+              "id": "b4d8e40f-f619-4901-949f-703594b23fd8",
+              "name": "job_id",
+              "value": "={{ $json.job_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3e916ff2-49b5-4682-8540-77986216aa85",
+              "name": "priority",
+              "value": "={{ $json.priority }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "83e0b681-b6d4-47d0-99dd-0de144487943",
+      "name": "Get Job info"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "devices",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "device_type",
+              "condition": "eq",
+              "keyValue": "={{ $json.executor }}"
+            },
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "ONLINE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        -96
+      ],
+      "id": "352fb092-11b8-410d-87b5-302a66acb78f",
+      "name": "Get device list",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "current_jobs"
+            },
+            {
+              "fieldName": "workload_score"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        -96
+      ],
+      "id": "aaa3cc01-ae08-4808-82fc-8efff8eafa27",
+      "name": "Sort by availability"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        -96
+      ],
+      "id": "293ce54c-01e2-4c77-be56-39e9db381ece",
+      "name": "Select most available"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6b450835-8247-4fef-8e85-25c2c349c038",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1872,
+        -96
+      ],
+      "id": "8dd16ebc-2665-4374-930a-4b8b06a2f335",
+      "name": "İf any available"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93c047dc-8822-4a75-8c11-a505c7b47473",
+              "name": "command",
+              "value": "={{ $('Get Job info').item.json.command }}",
+              "type": "string"
+            },
+            {
+              "id": "65f8483b-9059-4d12-8509-dc8eafbaaf63",
+              "name": "job_id",
+              "value": "={{ $('Get Job info').item.json.job_id }}",
+              "type": "string"
+            },
+            {
+              "id": "4963b865-c252-48a3-acbb-15d30d28fae2",
+              "name": "priority",
+              "value": "={{ $('Get Job info').item.json.priority }}",
+              "type": "number"
+            },
+            {
+              "id": "d6f6b810-d8d5-4d33-9ea0-b8fbed0be695",
+              "name": "device_id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "57234e38-6404-4e4c-866d-049072350eed",
+              "name": "device_name",
+              "value": "={{ $json.device_name }}",
+              "type": "string"
+            },
+            {
+              "id": "2f878ff1-1df7-4b36-8096-02bf646d2928",
+              "name": "ip_address",
+              "value": "={{ $json.ip_address }}",
+              "type": "string"
+            },
+            {
+              "id": "187e3a58-4b21-4aef-986c-cfea5ab9d4ff",
+              "name": "status",
+              "value": "DISPATCHED",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2080,
+        -192
+      ],
+      "id": "b3056698-718d-4b6f-a50c-b06ce4d46ec8",
+      "name": "set device and job info"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "jobs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "job_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.job_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "assigned_device_id",
+              "fieldValue": "={{ $json.device_id }}"
+            },
+            {
+              "fieldId": "assigned_device_ip",
+              "fieldValue": "={{ $json.ip_address }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        -192
+      ],
+      "id": "ca1c579a-2cf8-46f0-b9ba-728ecf6821a3",
+      "name": "assign job",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "devices",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.assigned_device_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        96
+      ],
+      "id": "947590ef-7043-4295-93b4-662d9f9a7b04",
+      "name": "get assigned device",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "devices",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "current_jobs",
+              "fieldValue": "={{ $json.current_jobs + 1 }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        96
+      ],
+      "id": "1603459d-079c-4ab1-9cd7-88dad964a4f6",
+      "name": "increment device jobs",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "priority",
+              "order": "descending"
+            },
+            {
+              "fieldName": "submitted_at"
+            }
+          ]
+        },
+        "options": {
+          "disableDotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "bc7f6550-3390-4686-99fb-74c0417a1cc5",
+      "name": "Sort"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "a12fbcfd-d78d-460a-8c8f-0da10bde4fb8",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.n8n_webhook_url }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=command",
+              "value": "={{ $('Check PENDING').item.json.command }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2896,
+        96
+      ],
+      "id": "2373d23c-eabb-4379-9823-822f3554a840",
+      "name": "Dispatch to worker"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check PENDING",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check PENDING": {
+      "main": [
+        [
+          {
+            "node": "If PENDING exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If PENDING exists": {
+      "main": [
+        [
+          {
+            "node": "Get Job info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Job info": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get device list": {
+      "main": [
+        [
+          {
+            "node": "Sort by availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by availability": {
+      "main": [
+        [
+          {
+            "node": "Select most available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select most available": {
+      "main": [
+        [
+          {
+            "node": "İf any available",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "İf any available": {
+      "main": [
+        [
+          {
+            "node": "set device and job info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set device and job info": {
+      "main": [
+        [
+          {
+            "node": "assign job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "assign job": {
+      "main": [
+        [
+          {
+            "node": "get assigned device",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get assigned device": {
+      "main": [
+        [
+          {
+            "node": "increment device jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Get device list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "increment device jobs": {
+      "main": [
+        [
+          {
+            "node": "Dispatch to worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0af32f58-8082-41a1-b65c-c4b41725cc04",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-21T13:20:19.632Z",
+      "createdAt": "2025-08-21T13:20:19.632Z",
+      "role": "workflow:owner",
+      "workflowId": "8zVRo1DtkonpehVD",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
