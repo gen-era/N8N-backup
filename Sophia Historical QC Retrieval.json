@@ -1,0 +1,2289 @@
+{
+  "updatedAt": "2025-11-19T20:15:28.000Z",
+  "createdAt": "2025-11-19T13:19:56.163Z",
+  "id": "7sjWLziBLR4Zs2MK",
+  "name": "Sophia Historical QC Retrieval",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        256
+      ],
+      "id": "6ee3945b-1ba4-4e3a-92a8-a405bb85cb02",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=cd /usr/local/bin/ && python3 sg-upload-v2-wrapper login-iam --client-id {{ $json.platform_site_meta }} --force-platform "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        256
+      ],
+      "id": "7f89d3c9-116e-4bdb-bdb2-041d9e2586d1",
+      "name": "Account Login",
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "care_site_credentials",
+          "mode": "list",
+          "cachedResultName": "care_site_credentials"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -944,
+        256
+      ],
+      "id": "6e146851-bc38-476b-8557-9303abd0f9ec",
+      "name": "Get All Accounts",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cd /usr/local/bin/ && python3 sg-upload-v2-wrapper status --limit 99999"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        160
+      ],
+      "id": "45b02fcf-6508-4455-9609-f59b2ead6aad",
+      "name": "Get Batches",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $json;\n\nconst lines = inputData.stdout.split('\\n').filter(line => line.trim() !== '');\nconst jobs = [];\n\nlines.forEach(line => {\n  const jobMatch = line.match(/^(\\d+):\\s*(.+)$/);\n  if (jobMatch) {\n    jobs.push({\n      id: parseInt(jobMatch[1]),\n      status: jobMatch[2].trim()\n    });\n  }\n});\n\nreturn jobs;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        160
+      ],
+      "id": "e99202f0-a117-4d16-9ec1-a232f557ff60",
+      "name": "Tidy Batches",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper sample --run-id {{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        928,
+        160
+      ],
+      "id": "73457eeb-1e18-47b2-b16f-0f7a8c7b7dee",
+      "name": "Get Samples from the Batch",
+      "alwaysOutputData": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sample_id": "={{ $json.userRef }}",
+            "bdsnumber": "={{ $json.bdsNumber }}",
+            "requesting_caresite_ref": "={{ $('Get All Accounts').item.json.care_site_ref }}",
+            "kit_ref": "={{ $json.kits_ref }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conversion_ref",
+              "displayName": "conversion_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sample_id",
+              "displayName": "sample_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lane",
+              "displayName": "lane",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_target",
+              "displayName": "reads_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bdsnumber",
+              "displayName": "bdsnumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "kit_ref",
+              "displayName": "kit_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "requesting_caresite_ref",
+              "displayName": "requesting_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performing_caresite_ref",
+              "displayName": "performing_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads",
+              "displayName": "reads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "sample_project",
+              "displayName": "sample_project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "uniqueref"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2208,
+        160
+      ],
+      "id": "e52b11a8-63f5-46bf-b753-04b698976493",
+      "name": "Insert Reads",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        688,
+        160
+      ],
+      "id": "325ed0e4-0634-40ff-8aad-dc7d4003e7b8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.uniqueref }}",
+            "performed_at": "={{ new Date($('Tidy & Map Samples').all()[$itemIndex].json.processDate).toISOString() }}",
+            "recipe_ref": 5,
+            "status_concept_ref": 24,
+            "batch_source_value": "={{ $('Loop Over Items').item.json.id }}",
+            "analysis_source_value": "={{ $('Tidy & Map Samples').all()[$itemIndex].json.id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2416,
+        160
+      ],
+      "id": "d676dcd6-4c35-4458-8a5d-60bd83804526",
+      "name": "Insert Data Operations",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT data_operations.batch_source_value\nFROM data_operations\nINNER JOIN reads ON data_operations.read_ref = reads.uniqueref\nWHERE reads.requesting_caresite_ref = {{ $('Get All Accounts').item.json.care_site_ref }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "6a82a4ec-758d-42f1-9a4a-f7504004820d",
+      "name": "Get Processed Batches",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "query": "SELECT input2.*\nFROM input2\nLEFT JOIN input1 ON input2.id = input1.batch_source_value\nWHERE input1.batch_source_value IS NULL",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        160
+      ],
+      "id": "a4f9d37c-b42a-4184-9a05-3aa6a65b2a59",
+      "name": "Get Unprocessed Batches"
+    },
+    {
+      "parameters": {
+        "jsCode": "// stdout içeriğini al ve JSON kısmını ayıkla\nconst stdoutData = $json.stdout;\n\n// JSON array'in başlangıç ve bitiş noktalarını bul\nconst jsonStart = stdoutData.indexOf('[');\nconst jsonEnd = stdoutData.lastIndexOf(']') + 1;\n\n// Sadece JSON kısmını al\nconst jsonString = stdoutData.substring(jsonStart, jsonEnd);\n\n// JSON'u parse et\nconst parsedData = JSON.parse(jsonString);\n\n// Her JSON objesini n8n item formatına çevir\nreturn parsedData.map(item => ({\n  json: item\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        160
+      ],
+      "id": "34dee0ba-4654-46cf-9357-8a1262209644",
+      "name": "Tidy & Map Samples",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "33a26eba-abad-4aa6-897e-21c97ae58170",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "=read-counts-overview-table.csv",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        1040
+      ],
+      "id": "131a81f1-b7b1-4b86-8b70-6a24c74327f3",
+      "name": "Is QC Exists"
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file -l --run-id {{ $json.batch_source_value }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        160,
+        1040
+      ],
+      "id": "fbfa2235-a243-46b6-9218-ae3affe97699",
+      "name": "Get File List"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "batch_source_value": "={{ $('Loop Over Batches').item.json.batch_source_value }}",
+            "status_concept_ref": 27,
+            "error_text": "No metrics file found."
+          },
+          "matchingColumns": [
+            "batch_source_value"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        1200
+      ],
+      "id": "fb5704dc-3631-4d0c-aa51-61ea5ad8361a",
+      "name": "Update Data OPs as Failed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "numberInputs": 5,
+        "query": "SELECT * FROM input1 \nLEFT JOIN input2 ON input1.[DDM Patient ID] = input2.[DDM Patient ID]\nLEFT JOIN input3 ON input1.[DDM Patient ID] = input3.[DDM Patient ID]\nLEFT JOIN input4 ON input1.[DDM Patient ID] = input4.[DDM Patient ID]\nLEFT JOIN input5 ON input1.[DDM Patient ID] = input5.[DDM Patient ID]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1536,
+        976
+      ],
+      "id": "c0879f07-cad3-46b7-9da4-9031922bb8ac",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0f2a4d16-0973-4bd0-83be-45f6b116d161",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "read-counts-overview-table.csv",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "b886ca45-b833-4096-b73c-bd0d0ece2042",
+              "leftValue": "={{ $json.analysisId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        464
+      ],
+      "id": "7718eddc-c532-44d5-952b-304b7f9eb373",
+      "name": "Get Reads File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file --download --file-id {{ $json.id }} --file-out qctmp-{{ $json.id }}-{{ $json.name }} >/dev/null 2>&1 && grep -v '#' qctmp-{{ $json.id }}-{{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        464
+      ],
+      "id": "4cf3633f-46f1-4edd-ad14-21edea5638c3",
+      "name": "Get Reads",
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const csvData = $input.first().json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',').map(h => h.replace(/\"/g, ''));\n\nreturn lines.slice(1).map(line => {\n    const values = line.split(',').map(v => v.replace(/\"/g, ''));\n    const obj = {};\n    headers.forEach((header, i) => obj[header] = values[i] || '');\n    return { json: obj };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        464
+      ],
+      "id": "b3106099-d583-4265-88fb-1b29c5206736",
+      "name": "Tidy Reads"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "261f0ee1-cad9-47ec-b245-ba37ad2156ac",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "pcr-duplicates-table",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "68393c9d-b2ce-4308-972a-5877d22a2e69",
+              "leftValue": "={{ $json.analysisId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        608
+      ],
+      "id": "0e6d8467-2f59-4934-b73f-f7755f8fc407",
+      "name": "Get Dups File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file --download --file-id {{ $json.id }} --file-out qctmp-{{ $json.id }}-{{ $json.name }} >/dev/null 2>&1 && grep -v '#' qctmp-{{ $json.id }}-{{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        608
+      ],
+      "id": "10d2208f-ce61-43b3-ba61-26149ee472b1",
+      "name": "Get Dups",
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const csvData = $input.first().json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',').map(h => h.replace(/\"/g, ''));\n\nreturn lines.slice(1).map(line => {\n    const values = line.split(',').map(v => v.replace(/\"/g, ''));\n    const obj = {};\n    headers.forEach((header, i) => obj[header] = values[i] || '');\n    return { json: obj };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        608
+      ],
+      "id": "ebae8329-89fd-495c-9924-b61632719116",
+      "name": "Tidy Dups"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "261f0ee1-cad9-47ec-b245-ba37ad2156ac",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "ontarget-mapping-statistics-table",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "68393c9d-b2ce-4308-972a-5877d22a2e69",
+              "leftValue": "={{ $json.analysisId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        752
+      ],
+      "id": "80c33b17-ddea-4fd6-8789-3ce904391570",
+      "name": "Get Mapping File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const csvData = $input.first().json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',').map(h => h.replace(/\"/g, ''));\n\nreturn lines.slice(1).map(line => {\n    const values = line.split(',').map(v => v.replace(/\"/g, ''));\n    const obj = {};\n    headers.forEach((header, i) => obj[header] = values[i] || '');\n    return { json: obj };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        752
+      ],
+      "id": "77e85493-62bb-43d0-9156-eed1ebaf95e3",
+      "name": "Tidy Mapping"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "261f0ee1-cad9-47ec-b245-ba37ad2156ac",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "softclip-percentage-table",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "68393c9d-b2ce-4308-972a-5877d22a2e69",
+              "leftValue": "={{ $json.analysisId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        896
+      ],
+      "id": "e08b01f4-24ba-4fc6-97e3-6ea8a8781e22",
+      "name": "Get Clipping File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file --download --file-id {{ $json.id }} --file-out qctmp-{{ $json.id }}-{{ $json.name }} >/dev/null 2>&1 && grep -v '#' qctmp-{{ $json.id }}-{{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        752
+      ],
+      "id": "52ae7347-2910-4bcf-8d2e-b31b5dceaf8a",
+      "name": "Get Mapping",
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file --download --file-id {{ $json.id }} --file-out qctmp-{{ $json.id }}-{{ $json.name }} >/dev/null 2>&1 && grep -v '#' qctmp-{{ $json.id }}-{{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        896
+      ],
+      "id": "72407b29-a1ed-4e58-a8c9-ca744cb7e480",
+      "name": "Get Clipping",
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const csvData = $input.first().json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',').map(h => h.replace(/\"/g, ''));\n\nreturn lines.slice(1).map(line => {\n    const values = line.split(',').map(v => v.replace(/\"/g, ''));\n    const obj = {};\n    headers.forEach((header, i) => obj[header] = values[i] || '');\n    return { json: obj };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        896
+      ],
+      "id": "51bfa438-6f34-4603-84e8-62df8d5ae376",
+      "name": "Tidy Clipping"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "261f0ee1-cad9-47ec-b245-ba37ad2156ac",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "target-region-coverage-table",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "68393c9d-b2ce-4308-972a-5877d22a2e69",
+              "leftValue": "={{ $json.analysisId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        1040
+      ],
+      "id": "d0b308f9-d9a0-4597-87aa-b87438629f36",
+      "name": "Get Coverage File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "command": "=python3 /usr/local/bin/sg-upload-v2-wrapper file --download --file-id {{ $json.id }} --file-out qctmp-{{ $json.id }}-{{ $json.name }} >/dev/null 2>&1 && grep -v '#' qctmp-{{ $json.id }}-{{ $json.name }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        1040
+      ],
+      "id": "2ce8be41-ce86-42d9-b8be-fe739492d06b",
+      "name": "Get Coverage",
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const csvData = $input.first().json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',').map(h => h.replace(/\"/g, ''));\n\nreturn lines.slice(1).map(line => {\n    const values = line.split(',').map(v => v.replace(/\"/g, ''));\n    const obj = {};\n    headers.forEach((header, i) => obj[header] = values[i] || '');\n    return { json: obj };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1296,
+        1040
+      ],
+      "id": "adeae530-acf2-4f46-b149-3a49d23e40b1",
+      "name": "Tidy Coverage"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_class_id",
+              "value": "Analysis Metric - Sophia Genetics"
+            }
+          ]
+        },
+        "options": {
+          "outputColumns": [
+            "uniqueref",
+            "concept_name"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2432,
+        976
+      ],
+      "id": "0b3e0b8d-51d1-4ee8-8184-979b6ea14eaa",
+      "name": "Get Sophia QC Concepts",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -240,
+        1040
+      ],
+      "id": "f51175f9-a26b-4074-8bfe-ec4b44764c7f",
+      "name": "Loop Over Batches"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT\n    data_operations.batch_source_value\nFROM \n    data_operations\nJOIN \n    reads ON data_operations.read_ref = reads.uniqueref\nWHERE \n    data_operations.recipe_ref = 5\n    AND data_operations.status_concept_ref = 24\n    AND reads.requesting_caresite_ref = {{ $('Get All Accounts').item.json.care_site_ref }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -480,
+        1040
+      ],
+      "id": "475cd15a-eac9-4a4a-a7da-aaafa49df257",
+      "name": "Pull QC Retrieval Waiting Batches",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// stdout'u al\nconst stdoutData = $input.first().json.stdout;\n\n// İlk satırı al (JSON kısmı)\nconst jsonString = stdoutData.split('\\n')[0];\n\n// JSON'u parse et\nconst fileList = JSON.parse(jsonString);\n\n// Her dosyayı ayrı item olarak döndür\nreturn fileList.map(file => ({\n  json: {\n    name: file.name,\n    id: file.id,\n    filename: file.filename,\n    contentLength: file.contentLength,\n    ioType: file.ioType,\n    createdAt: file.createdAt\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        1040
+      ],
+      "id": "20322fba-59b9-487b-9cbf-15c8fee3e1b2",
+      "name": "Tidy Files",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7eb8c19c-3c17-4eff-96a3-4122899bd2fc",
+              "name": "analysis_source_value",
+              "value": "={{ $json['DDM Patient ID'].split('-')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "c65454fe-8932-4b9f-a9c9-04b9653d05c8",
+              "name": "Soft clip both ends",
+              "value": "={{ $json[\"Soft clip both ends\"].split(' ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "fb7ff241-d2e4-4d71-ad9c-52267309aca6",
+              "name": "Front soft clip",
+              "value": "={{ $json[\"Front soft clip\"].split(' ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "27a9226c-4feb-4375-9b02-047b7f7503e6",
+              "name": "End soft clip",
+              "value": "={{ $json[\"End soft clip\"].split(' ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "459b7ef2-8555-4149-8a00-616246500df1",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1856,
+        1184
+      ],
+      "id": "55725d84-72ad-4b2a-b0b3-188baeb4746a",
+      "name": "Metric Correction"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status_concept_ref": 29,
+            "uniqueref": "={{ $json.data_operations_ref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3248,
+        1296
+      ],
+      "id": "fb442384-e457-403d-bf6c-fa64db4e349b",
+      "name": "Update Data OPs as Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "measurement_reads",
+          "mode": "list",
+          "cachedResultName": "measurement_reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "value_as_number": "={{ $json.value }}",
+            "data_operations_ref": "={{ $json.data_operation_ref }}",
+            "measurement_concept_ref": "={{ $json.uniqueref }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_ref",
+              "displayName": "reads_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "measurement_concept_ref",
+              "displayName": "measurement_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value_as_number",
+              "displayName": "value_as_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_operations_ref",
+              "displayName": "data_operations_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3072,
+        976
+      ],
+      "id": "79e6aedf-8510-4deb-81e3-d9e09528beeb",
+      "name": "Insert Measurement Read Records",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst allTransposed = [];\n\n// Her bir kayıt için transpose işlemi yap\nitems.forEach(item => {\n  const data = item.json;\n  const refValue = data.data_operation_ref;\n  \n  // data_operation_ref dışındaki tüm alanları al\n  const keys = Object.keys(data).filter(key => key !== 'data_operation_ref');\n  \n  // Bu kayıt için transpose\n  keys.forEach(key => {\n    allTransposed.push({\n      data_operation_ref: refValue,\n      field: key,\n      value: data[key]\n    });\n  });\n});\n\nreturn allTransposed.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2432,
+        1168
+      ],
+      "id": "e10aedc1-deb1-4212-891f-96c0ca0406a8",
+      "name": "Transpose Measurements"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "concept_name",
+              "field2": "field"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2672,
+        976
+      ],
+      "id": "b1cb22e2-35f4-4f5e-ac20-c11fcd5276ad",
+      "name": "Add Refs to Transposed Results"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "batch_source_value",
+              "value": "={{ $('Loop Over Batches').item.json.batch_source_value }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1760,
+        976
+      ],
+      "id": "ff116eba-22a7-4b89-a7bd-4c6065cef82d",
+      "name": "Get Data Ops Refs",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06249aa2-b31a-48c2-8e20-5f1c3433b180",
+              "name": "data_operation_ref",
+              "value": "={{ $json.uniqueref }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "includeFields": "analysis_source_value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1952,
+        976
+      ],
+      "id": "d6eaeae8-851f-452c-8f1e-cfcc512f4a28",
+      "name": "Create New Variable"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "analysis_source_value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2192,
+        976
+      ],
+      "id": "e76d1cca-4d0e-4cb2-95c3-d68b9f87f281",
+      "name": "Add Data OP Ref to Metrics"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kits_mapping",
+          "mode": "list",
+          "cachedResultName": "kits_mapping"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "11"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1728,
+        32
+      ],
+      "id": "d7b4e97b-440f-4152-b02a-25bd42d71ccc",
+      "name": "Get Kits",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "source_value",
+              "field2": "genePanel"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2000,
+        160
+      ],
+      "id": "a4efd4ce-4c55-42a3-a27a-3abe47736316",
+      "name": "Add Kit Ref"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f597f16b-1506-4f09-be80-a40f2e885ef8",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "Finished",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        160
+      ],
+      "id": "6cb8cdb0-48cf-4137-bd04-454009d8e81e",
+      "name": "Filter Finished"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6fa33e1e-19f4-4970-a859-cddede0a36a6",
+              "leftValue": "={{ Math.max(...$input.all().map(item => item.json.processDate)) }}",
+              "rightValue": 1735689600000,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        160
+      ],
+      "id": "e06d1b23-c518-4aa3-aeba-93a4e8de4e72",
+      "name": "In 2025"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c08bb13f-1de4-4e6d-890c-438f1605619f",
+              "name": "value",
+              "value": "={{ $json[\"value\"].split(' ')[0] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2880,
+        976
+      ],
+      "id": "b29daad0-ae05-43e7-8662-f78db8afac20",
+      "name": "Correction"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get All Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Account Login": {
+      "main": [
+        [
+          {
+            "node": "Get Batches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pull QC Retrieval Waiting Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Accounts": {
+      "main": [
+        [
+          {
+            "node": "Account Login",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Batches": {
+      "main": [
+        [
+          {
+            "node": "Tidy Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Batches": {
+      "main": [
+        [
+          {
+            "node": "Get Processed Batches",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Unprocessed Batches",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Samples from the Batch": {
+      "main": [
+        [
+          {
+            "node": "Tidy & Map Samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Reads": {
+      "main": [
+        [
+          {
+            "node": "Insert Data Operations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get Samples from the Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Data Operations": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Processed Batches": {
+      "main": [
+        [
+          {
+            "node": "Get Unprocessed Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unprocessed Batches": {
+      "main": [
+        [
+          {
+            "node": "Filter Finished",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy & Map Samples": {
+      "main": [
+        [
+          {
+            "node": "In 2025",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is QC Exists": {
+      "main": [
+        [
+          {
+            "node": "Tidy Files",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Data OPs as Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File List": {
+      "main": [
+        [
+          {
+            "node": "Is QC Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Metric Correction",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Data Ops Refs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reads File": {
+      "main": [
+        [
+          {
+            "node": "Get Reads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reads": {
+      "main": [
+        [
+          {
+            "node": "Tidy Reads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Reads": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dups File": {
+      "main": [
+        [
+          {
+            "node": "Get Dups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dups": {
+      "main": [
+        [
+          {
+            "node": "Tidy Dups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Dups": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Mapping File": {
+      "main": [
+        [
+          {
+            "node": "Get Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Mapping": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Get Clipping File": {
+      "main": [
+        [
+          {
+            "node": "Get Clipping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Mapping": {
+      "main": [
+        [
+          {
+            "node": "Tidy Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Clipping": {
+      "main": [
+        [
+          {
+            "node": "Tidy Clipping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Clipping": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Get Coverage File": {
+      "main": [
+        [
+          {
+            "node": "Get Coverage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Coverage": {
+      "main": [
+        [
+          {
+            "node": "Tidy Coverage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Coverage": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Get Sophia QC Concepts": {
+      "main": [
+        [
+          {
+            "node": "Add Refs to Transposed Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Data OPs as Failed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Batches": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get File List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull QC Retrieval Waiting Batches": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Files": {
+      "main": [
+        [
+          {
+            "node": "Get Reads File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Dups File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Mapping File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Clipping File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Coverage File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Metric Correction": {
+      "main": [
+        [
+          {
+            "node": "Add Data OP Ref to Metrics",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Insert Measurement Read Records": {
+      "main": [
+        [
+          {
+            "node": "Update Data OPs as Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transpose Measurements": {
+      "main": [
+        [
+          {
+            "node": "Add Refs to Transposed Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Refs to Transposed Results": {
+      "main": [
+        [
+          {
+            "node": "Correction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Data OPs as Completed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Data Ops Refs": {
+      "main": [
+        [
+          {
+            "node": "Create New Variable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create New Variable": {
+      "main": [
+        [
+          {
+            "node": "Add Data OP Ref to Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Data OP Ref to Metrics": {
+      "main": [
+        [
+          {
+            "node": "Get Sophia QC Concepts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Transpose Measurements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Kits": {
+      "main": [
+        [
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Insert Reads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Finished": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "In 2025": {
+      "main": [
+        [
+          {
+            "node": "Get Kits",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        []
+      ]
+    },
+    "Correction": {
+      "main": [
+        [
+          {
+            "node": "Insert Measurement Read Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f3732166-5983-431d-bd78-011e02aa6cd9",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-19T13:19:56.171Z",
+      "createdAt": "2025-11-19T13:19:56.171Z",
+      "role": "workflow:owner",
+      "workflowId": "7sjWLziBLR4Zs2MK",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
