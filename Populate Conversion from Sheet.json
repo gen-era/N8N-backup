@@ -1,0 +1,118 @@
+{
+  "updatedAt": "2025-12-18T06:24:33.000Z",
+  "createdAt": "2025-12-18T06:19:32.983Z",
+  "id": "71O8qNJcQg5BY87o",
+  "name": "Populate Conversion from Sheet",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        -112
+      ],
+      "id": "0c039d0a-6c44-4658-acd2-10884dfd1ef6",
+      "name": "When chat message received",
+      "webhookId": "df28d481-1f91-43a8-bfee-11a9cf3633b8"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "data0",
+        "options": {
+          "delimiter": ";"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "393b09f3-8882-430e-b09d-1c345df89fbf",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a1ced2fb-2710-4480-b28e-b8cab2f072e7",
+              "leftValue": "={{ $json['﻿Sample_ID'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "8e2628f5-5342-49c2-9ceb-b51ab1adba2d",
+      "name": "Filter"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "12f8b6fd-049b-470a-9a92-0a51c0ba4973",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-18T06:19:32.996Z",
+      "createdAt": "2025-12-18T06:19:32.996Z",
+      "role": "workflow:owner",
+      "workflowId": "71O8qNJcQg5BY87o",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
