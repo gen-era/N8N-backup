@@ -1,0 +1,776 @@
+{
+  "updatedAt": "2025-12-20T12:11:56.000Z",
+  "createdAt": "2025-11-28T08:38:31.327Z",
+  "id": "gwp1kOT0jKnrCvpw",
+  "name": "DRAGEN Conversion",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
+              "name": "run_id",
+              "value": "=251212_A01832R_0233_BHJ23JDRX7",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -272,
+        -320
+      ],
+      "id": "10c2d4f6-7a39-4927-bf5f-a5278122b4ff",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=/opt/dragen/4.3.13/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').item.json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        -16
+      ],
+      "id": "79ce44dc-d457-4a80-a809-dcca4887976c",
+      "name": "Convert Run",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=rclone copy /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq \\\n    /mnt/koza_alldata/Conversions/{{ $('Edit Fields').item.json.run_id }}-Fastq \\\n    --transfers=32 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=128M \\\n    --no-traverse \\\n    --stats=10s \\\n    --stats-one-line \\\n    -v"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2768,
+        -16
+      ],
+      "id": "86e8c7ed-fbcc-46d2-a573-d22e1fdc4c39",
+      "name": "Push Conversion to AllData",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        160
+      ],
+      "id": "8fe40d3d-8dce-40a2-b3b1-73675735c754",
+      "name": "Dummy | Cleanup DRAGEN",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "command": "=du -sb /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }} | awk '{print $1}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -464
+      ],
+      "id": "892b6418-dbd3-4e15-9f6a-bb026d0d4441",
+      "name": "Run File Size",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "df -B1 /staging | tail -1 | awk '{print $3}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -464
+      ],
+      "id": "382e1bef-c24f-41ea-b679-0422f199f39d",
+      "name": "Available Space on DRAGEN",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d8f44fa5-d3f0-4219-8dc1-2ac2a4b9c2c0",
+              "leftValue": "={{ parseFloat($('Run File Size').item.json.stdout) * 1.8}}",
+              "rightValue": "={{ parseFloat($('Available Space on DRAGEN').item.json.stdout) }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -464
+      ],
+      "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
+      "name": "Is it available for Transfer and Conversion"
+    },
+    {
+      "parameters": {
+        "command": "= rclone copy /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -464
+      ],
+      "id": "77be8478-9b87-43e6-bf2b-e774e32b766f",
+      "name": "Pull Run from AllData",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -320
+      ],
+      "id": "c41b00f0-86c7-40e0-97cc-21f1d1cbacb8",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "=ls /staging/run_folder/{{ $('Edit Fields').item.json.run_id }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -320
+      ],
+      "id": "c0fd0dc9-5e98-44d6-99c6-d7676027920b",
+      "name": "Check Run in DRAGEN ",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=ls /staging/run_folder/{{ $('Edit Fields').item.json.run_id }}/SampleSheet.csv"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -304
+      ],
+      "id": "68bec732-d444-4824-81d8-6c1fa42b8b22",
+      "name": "Check SampleSheet",
+      "credentials": {
+        "sshPassword": {
+          "id": "2KgBkvNiNUPxE0oC",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    r.sample_id,\n    r.sample_project,\n    r.lane,\n    i.i7_sequence as Index,\n    i.i5_sequence as Index2\nFROM reads r\nLEFT JOIN indices i ON r.index_ref = i.uniqueref\nJOIN conversions c ON r.conversion_ref = c.uniqueref\nJOIN runs run ON c.run_ref = run.uniqueref\nWHERE run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND c.status_concept_ref = 24\nORDER BY r.sample_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "890a7f37-c401-4315-8bfa-9930bcf53546",
+      "name": "Get Planned Reads",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    split_part(c.concept_name, '-', 1) as Read1Cycles,\n    split_part(c.concept_name, '-', 4) as Read2Cycles,\n    split_part(c.concept_name, '-', 2) as Index1Cycles,\n    split_part(c.concept_name, '-', 3) as Index2Cycles\nFROM runs r\nJOIN concepts c ON r.reads_settings_concept_ref = c.uniqueref\nWHERE r.run_id = '{{ $('Edit Fields').item.json.run_id }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "f8152686-4be8-4402-897a-93a91096386a",
+      "name": "Get Reads Settings",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\n\n// Check if any lane is not 0 (handle both string and number)\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\n// Build SampleSheet content\nlet sampleSheet = '[Header]\\n';\nsampleSheet += 'FileFormatVersion,2\\n\\n';\n\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\n\nsampleSheet += '[Sequencing_Settings]\\n\\n';\n\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,2.2.2\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += 'CreateFastqForIndexReads,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex1,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex2,0\\n\\n';\n\nsampleSheet += '[BCLConvert_Data]\\n';\n\n// Header with conditional Lane column\nif (hasLanes) {\n  sampleSheet += 'Sample_ID,Sample_Project,Lane,Index,Index2,OverrideCycles\\n';\n} else {\n  sampleSheet += 'Sample_ID,Sample_Project,Index,Index2,OverrideCycles\\n';\n}\n\n// Add sample rows\nfor (const sample of samples) {\n  const s = sample.json;\n  \n  // Calculate OverrideCycles\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = s.index2 ? s.index2.length : 0;\n  \n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n  \n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n  \n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    index2Part = `I${i5Length}N${mask2}`;\n  }\n  \n  const overrideCycles = `Y${readsSettings.read1cycles};${index1Part};${index2Part};Y${readsSettings.read2cycles}`;\n  \n  // Build row\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${s.sample_id},${s.sample_project},${laneValue},${s.index},${s.index2},${overrideCycles}\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.sample_project},${s.index},${s.index2},${overrideCycles}\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -16
+      ],
+      "id": "09850efd-3983-4054-a05b-494442067590",
+      "name": "Generate SampleSheet"
+    },
+    {
+      "parameters": {
+        "command": "=echo '{{ $json.sampleSheet }}' > /staging/run_folder/{{ $json.run_id }}/SampleSheet.csv"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -16
+      ],
+      "id": "a66319e2-7e07-4617-be4b-1b849b921018",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "58c4103c-a6b9-49f5-b2b9-546195543d52",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        -320
+      ],
+      "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
+      "name": "Is Run absent on  DRAGEN"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6a4bacf6-992a-44b6-8e23-d53232fb06da",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        144
+      ],
+      "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
+      "name": "Is SampleSheet Absent"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE conversions\nSET status_concept_ref = 26\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND conversions.status_concept_ref = 24\nRETURNING conversions.uniqueref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1648,
+        144
+      ],
+      "id": "76f73dd9-0682-446e-a29a-f81f4f49a2b8",
+      "name": "Update Conversion to In Progress",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE conversions\nSET status_concept_ref = 29,\n    conversion_time = NOW()\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2544,
+        -16
+      ],
+      "id": "3c7ed7ab-feec-4f6e-ad02-5dbcc0338b40",
+      "name": "Update Conversion to In Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "run_id",
+              "value": "={{ $json.run_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -64,
+        -320
+      ],
+      "id": "57ed4b27-b70e-4213-83c0-494b87fe529b",
+      "name": "Get Run Ref",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=ls /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        144
+      ],
+      "id": "3eb3aea9-43eb-4a87-9fd7-0d904ba2db14",
+      "name": "Check Destination Folder",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7cdf7150-5837-4b09-8768-2dd268d1a565",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2096,
+        144
+      ],
+      "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
+      "name": "Is Destination Folder Absent"
+    }
+  ],
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get Run Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Run": {
+      "main": [
+        [
+          {
+            "node": "Update Conversion to In Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run File Size": {
+      "main": [
+        [
+          {
+            "node": "Available Space on DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Available Space on DRAGEN": {
+      "main": [
+        [
+          {
+            "node": "Is it available for Transfer and Conversion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is it available for Transfer and Conversion": {
+      "main": [
+        [
+          {
+            "node": "Pull Run from AllData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Run in DRAGEN ": {
+      "main": [
+        [
+          {
+            "node": "Is Run absent on  DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Run from AllData": {
+      "main": [
+        [
+          {
+            "node": "Check SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Is SampleSheet Absent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Planned Reads": {
+      "main": [
+        [
+          {
+            "node": "Generate SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reads Settings": {
+      "main": [
+        [
+          {
+            "node": "Get Planned Reads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Update Conversion to In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Run absent on  DRAGEN": {
+      "main": [
+        [
+          {
+            "node": "Run File Size",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is SampleSheet Absent": {
+      "main": [
+        [
+          {
+            "node": "Get Reads Settings",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Conversion to In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Conversion to In Progress": {
+      "main": [
+        [
+          {
+            "node": "Check Destination Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Conversion to In Completed": {
+      "main": [
+        [
+          {
+            "node": "Push Conversion to AllData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run Ref": {
+      "main": [
+        [
+          {
+            "node": "Check Run in DRAGEN ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Destination Folder": {
+      "main": [
+        [
+          {
+            "node": "Is Destination Folder Absent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Destination Folder Absent": {
+      "main": [
+        [
+          {
+            "node": "Convert Run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dummy | Cleanup DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push Conversion to AllData": {
+      "main": [
+        [
+          {
+            "node": "Dummy | Cleanup DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "840dd887-9d82-4dec-8418-8d0627080f89",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-28T08:38:31.332Z",
+      "createdAt": "2025-11-28T08:38:31.332Z",
+      "role": "workflow:owner",
+      "workflowId": "gwp1kOT0jKnrCvpw",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
