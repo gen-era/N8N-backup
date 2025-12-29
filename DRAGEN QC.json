@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-29T08:20:28.000Z",
+  "updatedAt": "2025-12-29T12:35:40.000Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -99,7 +99,7 @@
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
               "leftValue": "={{ $json.Sample_ID}}",
-              "rightValue": "YCES",
+              "rightValue": "YWES",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -538,7 +538,7 @@
     },
     {
       "parameters": {
-        "command": "=export TERM=xterm\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/project/qc_test/output \\\n--output-file-prefix \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Is R1R2 Present').item.json.r1 }}\" \\\n-2 \"{{ $('Is R1R2 Present').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-down-sampler true \\\n--down-sampler-reads 10400000 \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/project/qc_test/bed_folder/{{ $('Loop Over CES Samples').item.json.bed_file_path }}"
+        "command": "=export TERM=xterm\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/project/qc_test/output \\\n--output-file-prefix \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Is R1R2 Present').item.json.r1 }}\" \\\n-2 \"{{ $('Is R1R2 Present').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-down-sampler true \\\n--down-sampler-reads 33000000 \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/project/qc_test/bed_folder/{{ $('Loop Over CES Samples').item.json.bed_file_path }}"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -1279,7 +1279,7 @@
             {
               "id": "842b4747-71ca-4c92-8fef-590dfe4c82c1",
               "name": "Library_Prep_Kit",
-              "value": "Sophia-CES-v3",
+              "value": "Twist-Human-Core-Exome-WES",
               "type": "string"
             }
           ]
@@ -1997,7 +1997,7 @@
       }
     ]
   },
-  "versionId": "60185a0f-da96-4eae-8369-a92a9bf9f959",
+  "versionId": "c6547934-4c0a-443e-bd3a-4370a2a5c521",
   "triggerCount": 0,
   "shared": [
     {
