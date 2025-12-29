@@ -1,0 +1,1193 @@
+{
+  "updatedAt": "2025-12-20T14:52:31.000Z",
+  "createdAt": "2025-12-20T09:02:18.889Z",
+  "id": "WupKCApxLvS6ZXTf",
+  "name": "Sub - DRAGEN QC",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
+              "leftValue": "={{ $json.sample_project }}",
+              "rightValue": ".",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -512
+      ],
+      "id": "960af35f-949c-4b89-86bf-ba4ff6556e7b",
+      "name": "Custom Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -16
+      ],
+      "id": "3005978c-1a85-45d6-b628-943b83155b40",
+      "name": "JSON Parse - CES"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "measurement_reads",
+          "mode": "list",
+          "cachedResultName": "measurement_reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "measurement_concept_ref": "={{ $json.uniqueref }}",
+            "value_as_number": "={{ $json.value }}",
+            "data_operations_ref": "={{ $json.data_op_ref }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "measurement_concept_ref",
+              "displayName": "measurement_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value_as_number",
+              "displayName": "value_as_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_operations_ref",
+              "displayName": "data_operations_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1648,
+        -112
+      ],
+      "id": "fcfc3e95-4ed4-4e7a-a3a4-ed8b780406ec",
+      "name": "Record Measurements - CES",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Log Data Op').item.json.uniqueref }}",
+            "status_concept_ref": 29,
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1872,
+        -112
+      ],
+      "id": "048a7484-562b-47b7-b6c5-7d669ab1d414",
+      "name": "Complete Data Op - CES",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "concept_name",
+              "field2": "parameter"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1408,
+        -112
+      ],
+      "id": "1e069ead-408e-47c8-977b-6c6b992148a9",
+      "name": "Merge Concepts - CES"
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /staging/project/qc_test/output/*"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        32
+      ],
+      "id": "74a35a14-4cca-4b12-950e-17c279e5fb3a",
+      "name": "DRAGEN QC Cleanup",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=# Değişkenler\nOUTPUT_DIR=\"/staging/project/qc_test/output\"\nSAMPLE=\"{{ $('Loop Over Items').item.json.sample_id }}\"\n\n# Önceki input değerlerini al\nLANE=\"{{ $('Loop Over Items').item.json.lane }}\"\nR1=\"{{ $('Add R1 and R2 Read Paths').item.json.r1 }}\"\nR2=\"{{ $('Add R1 and R2 Read Paths').item.json.r2 }}\"\nBATCH_SOURCE=\"{{ $('Loop Over Items').item.json.sample_project }}\"\nRUN_REF=\"{{ $('Get Conversion').item.json.run_ref }}\"\nCONVERSION_REF=\"{{ $('Loop Over Items').item.json.conversion_ref }}\"\nCONVERSION_ID=\"{{ $('Get Conversion').item.json.id_source_value }}\"\n\n# Log Data Op node'undan data_op_ref al\nDATA_OP_REF=\"{{ $('Log Data Op').item.json.uniqueref }}\"\n\n# Dosya yolları\nMAPPING_FILE=\"${OUTPUT_DIR}/${SAMPLE}.mapping_metrics.csv\"\nCOVERAGE_FILE=\"${OUTPUT_DIR}/${SAMPLE}.qc-coverage-region-1_coverage_metrics.csv\"\n\n# Mapping metrics\ntotal_reads=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Total input reads,/ {print int($4/2); exit}' \"$MAPPING_FILE\")\ndup_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Number of duplicate marked reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nmapped_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Mapped reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nq30_bases=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Q30 bases,/ {print $5; exit}' \"$MAPPING_FILE\")\ninsert_length_mean=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Insert length: mean,/ {print $4; exit}' \"$MAPPING_FILE\")\nhq_mapq_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Reads with MAPQ \\[40:inf\\),/ {print $5; exit}' \"$MAPPING_FILE\")\n\n# Coverage metrics\ncoverage_uniformity_20pct=$(awk -F',' '/^COVERAGE SUMMARY,,Uniformity of coverage \\(PCT > 0\\.2\\*mean\\) over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\nmean_coverage=$(awk -F',' '/^COVERAGE SUMMARY,,Average alignment coverage over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_20x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  20x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_50x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  50x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_100x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 100x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_500x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 500x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\n\n# JSON formatında çıktı\ncat <<EOF\n{\n  \"sample_id\": \"$SAMPLE\",\n  \"lane\": ${LANE:-null},\n  \"R1\": \"$R1\",\n  \"R2\": \"$R2\",\n  \"batch_source_value\": \"$BATCH_SOURCE\",\n  \"run_ref\": \"${RUN_REF}\",\n  \"conversion_ref\": \"${CONVERSION_REF}\",\n  \"conversion_id\": \"$CONVERSION_ID\",\n  \"data_op_ref\": \"${DATA_OP_REF}\",\n  \"total_reads\": ${total_reads:-null},\n  \"duplicate_pct\": ${dup_pct:-null},\n  \"mapped_pct\": ${mapped_pct:-null},\n  \"q30_bases_pct\": ${q30_bases:-null},\n  \"insert_length_mean\": ${insert_length_mean:-null},\n  \"hq_mapq_pct\": ${hq_mapq_pct:-null},\n  \"coverage_uniformity_20pct\": ${coverage_uniformity_20pct:-null},\n  \"aligned_bases_qc\": ${aligned_bases_qc:-null},\n  \"aligned_bases_qc_pct\": ${aligned_bases_qc_pct:-null},\n  \"aligned_reads_qc\": ${aligned_reads_qc:-null},\n  \"aligned_reads_qc_pct\": ${aligned_reads_qc_pct:-null},\n  \"mean_coverage\": ${mean_coverage:-null},\n  \"coverage_20x_pct\": ${coverage_20x:-null},\n  \"coverage_50x_pct\": ${coverage_50x:-null},\n  \"coverage_100x_pct\": ${coverage_100x:-null},\n  \"coverage_500x_pct\": ${coverage_500x:-null}\n}\nEOF"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -112
+      ],
+      "id": "47268b2c-2099-4af8-a41b-601f8fd6d134",
+      "name": "Collect Metrics - CES",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_class_id",
+              "value": "Analysis Metric"
+            },
+            {
+              "column": "vocabulary_id",
+              "value": "Illumina"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1168,
+        -208
+      ],
+      "id": "532a4fd4-dca2-48dd-8932-792b682e85c8",
+      "name": "Get Concepts - CES",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "17924299-6daf-4282-9ef4-61b53d0cd3fc",
+              "leftValue": "={{ $json.bed_file_path }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        -112
+      ],
+      "id": "20020e3b-6ec4-4d19-9cce-dc114717fbca",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -512
+      ],
+      "id": "be5afbba-a685-4d9c-9da6-f332f33a94ab",
+      "name": "Check DRAGEN Availability",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dabc8de2-b277-47dc-9ff3-e277c080c4ab",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        -512
+      ],
+      "id": "3fd1a262-7e5a-4c63-a4fe-0bd71d1608bc",
+      "name": "Is DRAGEN Idle"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bb840f57-95b6-4289-87ab-e5849f99d603",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "syntax error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ceeb7c4e-c628-4bd6-b37f-787a45532514",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "ERROR",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "64a60ef3-4626-489b-a7d7-37128b1f66c3",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b72a9419-d6bb-4874-9938-392f32f8f34c",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "fatal error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "dda9df5b-dbad-4cfb-8070-bcc60457be76",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Caught signal Aborted",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "74c70d17-0e0b-4dcb-986e-5e0b881d4dc2",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Please run sosreport",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        -112
+      ],
+      "id": "5dd815eb-80f4-4051-aeb4-f8cb9cbf3b9c",
+      "name": "Is Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84dba272-b44b-46b5-85ae-c572239c8963",
+              "name": "r1",
+              "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R1_')).replace('smb_share', 'koza_alldata') }}",
+              "type": "string"
+            },
+            {
+              "id": "90e2836a-b5ff-4cf8-88b9-fc900b398715",
+              "name": "r2",
+              "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R2_')).replace('smb_share', 'koza_alldata') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -112
+      ],
+      "id": "60d43320-57e4-4789-85ba-eee37781f30c",
+      "name": "Add R1 and R2 Read Paths"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "run_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        -512
+      ],
+      "id": "7a038332-d398-4492-b719-13d944a2319d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "conversion_ref",
+              "value": "={{ $('When Executed by Another Workflow').item.json.conversion_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        -512
+      ],
+      "id": "8dc9fcc5-1e67-44ef-9f38-eabc79a3028e",
+      "name": "Select rows from a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    kit_ref: \"1\",\n    bed_file_path: \"CES_v3_hg38_original_normalized_chr.bed\"\n  },\n  {\n    kit_ref: \"40\",\n    bed_file_path: \"Twist_Exome_hg38_original_normalized_chr.bed\"\n  },\n  {\n    kit_ref: \"2\",\n    bed_file_path: \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\"\n  },\n  {\n    kit_ref: \"73\",\n    bed_file_path: \"HCS_v2_0_1_hg38_target_normalized.bed\"\n  },\n  {\n    kit_ref: \"97\",\n    bed_file_path: \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -656
+      ],
+      "id": "a2a252db-e01a-4ebc-9d4f-2412fcc30afc",
+      "name": "Bed Mapping1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "kit_ref",
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        -512
+      ],
+      "id": "098e4a3b-06b8-47f3-b600-cd91b6f6b737",
+      "name": "Add Bed Path"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -592,
+        -112
+      ],
+      "id": "05e54253-bcf9-46a5-9194-1457a72c2b31",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.uniqueref }}",
+            "recipe_ref": 6,
+            "status_concept_ref": 24,
+            "batch_source_value": "={{ $json.sample_project }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "uniqueref"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -336,
+        -112
+      ],
+      "id": "a2e403c7-9fe4-4e94-84db-2c9c787c7aa1",
+      "name": "Log Data Op",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversions",
+          "mode": "list",
+          "cachedResultName": "conversions"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "uniqueref",
+              "value": "={{ $('When Executed by Another Workflow').item.json.conversion_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -80,
+        -512
+      ],
+      "id": "c76500e2-8248-4ece-94e4-7f8493108058",
+      "name": "Get Conversion",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=fdfind \"{{ $json.id_source_value }}\" /mnt/smb_share/Conversions/ /mnt/illuminastorage/fastq_folder/ /mnt/sapiens_dragen/tmp/ --max-depth 1 | paste -sd ',' "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -512
+      ],
+      "id": "e64b7c28-cb90-484a-bb24-af06c642d7d8",
+      "name": "Find Conversion Path"
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Loop Over Items').item.json.lane == 0 ? \n   `fdfind \"${$('Loop Over Items').item.json.sample_id}_\" ${$('Find Conversion Path').item.json.stdout}` : \n   `fdfind \"${$('Loop Over Items').item.json.sample_id}_.*_L00${$('Loop Over Items').item.json.lane}_\" ${$('Find Conversion Path').item.json.stdout}` \n}}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -112
+      ],
+      "id": "d2b7d747-2956-49af-85c2-11f215bf929d",
+      "name": "Find Fastq Files"
+    },
+    {
+      "parameters": {
+        "command": "=export TERM=xterm\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/project/qc_test/output \\\n--output-file-prefix \"{{ $('Loop Over Items').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Add R1 and R2 Read Paths').item.json.r1 }}\" \\\n-2 \"{{ $('Add R1 and R2 Read Paths').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Over Items').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Over Items').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/project/qc_test/bed_folder/{{ $('Loop Over Items').item.json.bed_file_path }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "943ebdba-38e1-4710-9f56-5ffd6155545b",
+      "name": "DRAGEN QC",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Custom Filter": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parse - CES": {
+      "main": [
+        [
+          {
+            "node": "Merge Concepts - CES",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Record Measurements - CES": {
+      "main": [
+        [
+          {
+            "node": "Complete Data Op - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Data Op - CES": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Concepts - CES": {
+      "main": [
+        [
+          {
+            "node": "Record Measurements - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN QC Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Metrics - CES": {
+      "main": [
+        [
+          {
+            "node": "Get Concepts - CES",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "JSON Parse - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Concepts - CES": {
+      "main": [
+        [
+          {
+            "node": "Merge Concepts - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DRAGEN Availability": {
+      "main": [
+        [
+          {
+            "node": "Is DRAGEN Idle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is DRAGEN Idle": {
+      "main": [
+        [
+          {
+            "node": "Get Conversion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Is Error": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Collect Metrics - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add R1 and R2 Read Paths": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Bed Mapping1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Bed Path",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Bed Mapping1": {
+      "main": [
+        [
+          {
+            "node": "Add Bed Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Bed Path": {
+      "main": [
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Log Data Op",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Data Op": {
+      "main": [
+        [
+          {
+            "node": "Find Fastq Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversion": {
+      "main": [
+        [
+          {
+            "node": "Find Conversion Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Conversion Path": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Fastq Files": {
+      "main": [
+        [
+          {
+            "node": "Add R1 and R2 Read Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN QC": {
+      "main": [
+        [
+          {
+            "node": "Is Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "conversion_ref": 300
+        }
+      }
+    ]
+  },
+  "versionId": "19665d17-c9c4-44cf-82bf-ac031928f7f5",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-20T09:02:18.899Z",
+      "createdAt": "2025-12-20T09:02:18.899Z",
+      "role": "workflow:owner",
+      "workflowId": "WupKCApxLvS6ZXTf",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
