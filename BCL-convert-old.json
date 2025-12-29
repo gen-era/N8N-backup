@@ -1,0 +1,761 @@
+{
+  "updatedAt": "2025-09-01T07:41:08.000Z",
+  "createdAt": "2025-08-06T12:21:18.038Z",
+  "id": "0C4tAXeLAeWlHrgj",
+  "name": "BCL-convert-old",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/home/genera/run_folder",
+        "events": [
+          "add"
+        ],
+        "options": {
+          "awaitWriteFinish": true,
+          "ignored": "^(?!CopyComplete\\.txt$).*$",
+          "depth": 1
+        }
+      },
+      "id": "59b87130-5fe5-43d7-b84d-86f26661221e",
+      "name": "Watch for CopyComplete.txt",
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract run folder from the file path\nconst filePath = $input.first().json.fileName || $input.first().json.path;\nconst runFolder = filePath.substring(0, filePath.lastIndexOf('/CopyComplete.txt'));\nconst runId = runFolder.split('/').pop();\n\n// Add a small delay to ensure all files are written\nawait new Promise(resolve => setTimeout(resolve, 5000));\n\nreturn [{\n  json: {\n    triggerFile: filePath,\n    runFolder: runFolder,\n    runId: runId,\n    timestamp: new Date().toISOString(),\n    event: $input.first().json.event || 'File added'\n  }\n}];"
+      },
+      "id": "c5868f70-8e5e-4efe-8585-a1e7b3b2f288",
+      "name": "Extract Run Information",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"{{$json.runFolder}}/RTAComplete.txt\" && echo \"EXISTS\" || echo \"NOT_FOUND\""
+      },
+      "id": "6e0567bb-e3fe-4c8e-a26b-85eb9006dda0",
+      "name": "Check RTAComplete.txt",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.stdout}}",
+              "operation": "contains",
+              "value2": "EXISTS"
+            }
+          ]
+        }
+      },
+      "id": "564145c6-9a10-435c-bcbf-32a6cefcc05e",
+      "name": "RTAComplete Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the processing status\nconst status = $input.first().json.stdout.trim();\nconst shouldProcess = status.includes('NEW_RUN');\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    processingStatus: status,\n    shouldProcess: shouldProcess\n  }\n}];"
+      },
+      "id": "b93ef6b1-a399-4105-85f7-b7a9d244cecb",
+      "name": "Check If Already Processed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.shouldProcess}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "47407e12-253f-41f5-a851-0a2eaca7a042",
+      "name": "Should Process?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log the skipped run for monitoring\nconst runId = $input.first().json.runId;\nconst reason = $input.first().json.processingStatus;\n\nconsole.log(`Skipping run ${runId}: ${reason}`);\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    skipped: true,\n    skipReason: reason,\n    message: `Run ${runId} was already processed`\n  }\n}];"
+      },
+      "id": "caa4e4bb-c5ba-400d-9610-9a72afea140b",
+      "name": "Log Skipped Run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"{{ $('Extract Run Information').item.json.runFolder }}/SampleSheet.csv\" && echo \"EXISTS\" || echo \"NOT_FOUND\""
+      },
+      "id": "50c7adea-ad3f-4d2f-9add-1303572f10bb",
+      "name": "Check SampleSheet",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.stdout}}",
+              "operation": "contains",
+              "value2": "EXISTS"
+            }
+          ]
+        }
+      },
+      "id": "39757b81-e210-495a-97d4-3ca951427aad",
+      "name": "SampleSheet Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        672,
+        -272
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"{{ $('Extract Run Information').item.json.runId }}/bcl_convert_completed.txt\" && echo \"ALREADY_PROCESSED\" || echo \"NEW_RUN\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -160
+      ],
+      "id": "d7e51a41-f0fa-4410-8a9e-0ef631d08a79",
+      "name": "check if already processed"
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"{{ $('Extract Run Information').item.json.runFolder }}/SampleSheet.xlsx\" && echo \"EXISTS\" || echo \"NOT_FOUND\""
+      },
+      "id": "0e00bf00-49f2-4e00-b894-efd7b6051cef",
+      "name": "Check SampleSheet excel",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.validationSummary.isValid}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "574134c5-544c-49e2-8aea-fd3d858d41ae",
+      "name": "Validation Passed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare BCL-Convert command and paths\nconst runFolder = $('Extract Run Information').first().json.runFolder;\nconst runId = $('Extract Run Information').first().json.runId;\nconst timestamp = new Date().toISOString().replace(/[:.]/g, '-');\n\n// Define paths\nconst outputBase = '/home/genera/fastq_folder'; \nconst outputDir = `${outputBase}/${runId}_${timestamp}`;\nconst logFile = `bcl_convert_${timestamp}.log`;\nconst logPath = `${outputDir}/${logFile}`;\n\n// Build the bcl-convert command\nconst bclConvertCmd = `\n#!/bin/bash\n# BCL-Convert execution for run: ${runId}\n\n# Create output directory\nmkdir -p \"${outputDir}\"\n\n# Set variables\nfull_run_path=\"${runFolder}\"\nfull_output_path=\"${outputDir}\"\nlogFile=\"${logPath}\"\n\n{\n    echo \"=== bcl-convert started at: $(date) ===\"\n    echo \"Input Directory: $full_run_path\"\n    echo \"Output Directory: $full_output_path\"\n    echo \"\"\n    \n    bcl-convert -f \\\\\n        --bcl-sampleproject-subdirectories true \\\\\n        --bcl-input-directory \"$full_run_path\" \\\\\n        --no-lane-splitting false \\\\\n        --output-directory \"$full_output_path\" \\\\\n        --first-tile-only false \\\\\n        --bcl-only-matched-reads true\n    \n    echo \"\"\n    echo \"=== bcl-convert finished at: $(date) ===\"\n} | tee \"$logFile\"\n`.trim();\n\n// Also create a simplified direct command for the Execute node\nconst directCmd = `mkdir -p \"${outputDir}\" && bcl-convert -f --bcl-sampleproject-subdirectories true --bcl-input-directory \"${runFolder}\" --no-lane-splitting false --output-directory \"${outputDir}\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee \"${logPath}\"`;\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    outputDirectory: outputDir,\n    logFile: logFile,\n    logPath: logPath,\n    bclConvertScript: bclConvertCmd,\n    bclConvertCommand: directCmd,\n    startTime: new Date().toISOString(),\n    executionId: `${runId}_${timestamp}`\n  }\n}];"
+      },
+      "id": "c8b6d0e6-4233-43e3-a631-b0d5d8d01046",
+      "name": "Prepare BCL-Convert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{$json.bclConvertCommand}}"
+      },
+      "id": "67317054-bcd9-4e52-a2f6-08836c6ff7aa",
+      "name": "Execute BCL-Convert",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -304
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get process output\nconst inputData = $input.first().json;\nconst stdout = inputData.stdout || '';\nconst stderr = inputData.stderr || '';\n\n// Preserve real exitCode, even if it's 0\nconst rawExitCode = inputData.exitCode;\nconst exitCode = (rawExitCode === undefined || rawExitCode === null) ? 1 : Number(rawExitCode);\n\n// Determine success based on exitCode or known completion messages\nconst success = exitCode === 0 || stdout.includes('bcl-convert finished at:') || stdout.includes('Conversion Complete.');\n\n// Determine errors strictly from stderr or non-zero exit code\nconst hasErrors = stderr.includes('ERROR') || stderr.includes('FATAL') || exitCode !== 0;\n\n// Detect warnings separately — they don't affect success\nconst hasWarnings = stderr.includes('WARNING') || stdout.includes('WARNING');\n\n// Extract processing time\nlet processingTime = 'Unknown';\nconst startMatch = stdout.match(/started at: ([^=]+)/);\nconst endMatch = stdout.match(/finished at: ([^=]+)/);\nif (startMatch && endMatch) {\n  const startTime = new Date(startMatch[1].trim());\n  const endTime = new Date(endMatch[1].trim());\n  if (!isNaN(startTime) && !isNaN(endTime)) {\n    const duration = Math.round((endTime - startTime) / 1000 / 60); // minutes\n    processingTime = `${duration} minutes`;\n  }\n}\n\n// Extract sample count\nlet samplesProcessed = 0;\nconst sampleMatch = stdout.match(/(\\d+) samples? processed/i);\nif (sampleMatch) {\n  samplesProcessed = parseInt(sampleMatch[1], 10);\n}\n\n// Return results\nreturn [{\n  json: {\n    ...inputData,\n    bclConvertResult: {\n      success,\n      hasErrors,\n      hasWarnings,\n      exitCode,\n      processingTime,\n      samplesProcessed,\n      message: success ? 'BCL-Convert completed successfully' : 'BCL-Convert failed',\n      outputPreview: stdout.substring(0, 1000),\n      errorPreview: stderr.substring(0, 1000)\n    }\n  }\n}];\n"
+      },
+      "id": "678d8ea1-0171-4868-a9b1-1a9ca42d812c",
+      "name": "Parse BCL-Convert Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -304
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.bclConvertResult.success}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "3fdad76d-a10e-498b-add7-06cb14541dcb",
+      "name": "BCL-Convert Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        -304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=touch \"{{ $('Extract Run Information').item.json.runFolder }}/bcl_convert_completed.txt\" "
+      },
+      "id": "1929f96c-b015-466f-87b1-4270fb9dbb39",
+      "name": "Mark Run Complete",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2272,
+        -544
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=find \"{{$json.outputDirectory}}\" -name \"*.fastq.gz\" | wc -l"
+      },
+      "id": "16da5a8e-d13c-46af-8fc5-0a1bd28ee4a0",
+      "name": "Count FASTQ Files",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=du -sh \"{{ $('Get Output Folder').item.json.outputDirectory }}\" | cut -f1"
+      },
+      "id": "d358d161-d334-4ef0-a4e9-cf5afcbee606",
+      "name": "Get Output Size",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compile final metrics\nconst fastqCount = parseInt($('Count FASTQ Files').first().json.stdout.trim()) || 0;\nconst outputSize = $input.first().json.stdout.trim() || 'Unknown';\nconst endTime = new Date().toISOString();\nconst startTime = $('Get Output Folder').first().json.startTime;\n\n// Calculate runtime\nconst runtime = Math.round((new Date(endTime) - new Date(startTime)) / 1000 / 60); // in minutes\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    completionMetrics: {\n      runId: $input.first().json.runId,\n      runFolder: $input.first().json.runFolder,\n      outputDirectory: $input.first().json.outputDirectory,\n      logPath: $input.first().json.logPath,\n      startTime: startTime,\n      endTime: endTime,\n      runtime: `${runtime} minutes`,\n      fastqFileCount: fastqCount,\n      outputSize: outputSize,\n      status: 'COMPLETED'\n    }\n  }\n}];"
+      },
+      "id": "99999b9f-fa02-4bad-a9a2-5633f90cb526",
+      "name": "Compile Completion Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3008,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputData = $input.first().json;\nconst stdout = inputData.stdout || '';\n\nlet outputDir = null;\nlet startTime = null;\n\n// Extract output directory path\nconst match = stdout.match(/--output-directory\\s+(\\S+)/);\nif (match) {\n  outputDir = match[1].trim();\n\n  // Extract last part of path (folder name)\n  const folderName = outputDir.split('/').pop();\n\n  // Find timestamp in folder name (YYYY-MM-DDTHH-MM-SS-msZ)\n  const tsMatch = folderName.match(/\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}-\\d+Z/);\n  if (tsMatch) {\n    const tsString = tsMatch[0].replace(/-/g, (m, idx) => (idx < 10 ? '-' : (idx < 13 ? ':' : (idx < 16 ? ':' : m)))); // fix separators for Date\n    // Convert to valid ISO format\n    const isoString = tsMatch[0]\n      .replace(/T(\\d{2})-(\\d{2})-(\\d{2})-(\\d+)Z/, 'T$1:$2:$3.$4Z');\n    const dateObj = new Date(isoString);\n    if (!isNaN(dateObj)) {\n      startTime = dateObj.toISOString();\n    }\n  }\n}\n\nreturn [{\n  json: {\n    ...inputData,\n    outputDirectory: outputDir || '',\n    startTime: startTime || ''\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        -320
+      ],
+      "id": "4844e33d-07d6-49bc-b0cf-488bd26ccfb5",
+      "name": "Get Output Folder"
+    },
+    {
+      "parameters": {
+        "toRecipients": "sinan.erdem@gen-era.com.tr",
+        "subject": "RTA Error",
+        "bodyContent": "=RTAComplete.txt file not found in {{ $('Extract Run Information').item.json.runFolder }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        80
+      ],
+      "id": "0b10bda6-1966-4d62-88aa-6acdf529b3dc",
+      "name": "Send a message",
+      "webhookId": "d9fea3f2-50e4-41aa-b686-6832780e0a11",
+      "executeOnce": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "H8UQaAqG4uOkMeE6",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "RA9lo1Okr9KrJgIp",
+          "mode": "list",
+          "cachedResultName": "My Sub-Workflow 3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "runFolder": "={{ $('Extract Run Information').item.json.runFolder }}",
+            "runId": "={{ $('Extract Run Information').item.json.runId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "runFolder",
+              "displayName": "runFolder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "runId",
+              "displayName": "runId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -288
+      ],
+      "id": "c9c8e53a-1cc9-48a2-9fe5-3c7a76aadcf0",
+      "name": "Validate Samplesheet",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "toRecipients": "sinan.erdem@gen-era.com.tr",
+        "subject": "SampleSheet not valid: ",
+        "bodyContent": "=Samplesheet validation is failed for {{ $('Extract Run Information').item.json.runFolder }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        16
+      ],
+      "id": "c6ee1a47-809b-47e7-aae8-21d9d8be4dbd",
+      "name": "Validation failed",
+      "webhookId": "d9fea3f2-50e4-41aa-b686-6832780e0a11",
+      "executeOnce": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "H8UQaAqG4uOkMeE6",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "sinan.erdem@gen-era.com.tr",
+        "subject": "=Conversion Completed: {{ $('Extract Run Information').item.json.runId }}",
+        "bodyContent": "=Conversion Completed Successfuly with these metrics:\nStart time: {{ $json.completionMetrics.startTime }}\nEnd time: {{ $json.completionMetrics.endTime }}\nRun time: {{ $json.completionMetrics.runtime }}\nTotal Fastq files: {{ $json.completionMetrics.fastqFileCount }}\nTotal Size: {{ $json.completionMetrics.outputSize }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        3248,
+        -320
+      ],
+      "id": "0bdb03ba-b131-4f52-97d0-352b46c4e175",
+      "name": "Conversion Successful",
+      "webhookId": "d9fea3f2-50e4-41aa-b686-6832780e0a11",
+      "executeOnce": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "H8UQaAqG4uOkMeE6",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "sinan.erdem@gen-era.com.tr",
+        "subject": "BCL-Convert Failed: {{ $('Extract Run Information').item.json.runFolder }}",
+        "bodyContent": "=BCL-Convert failed for {{ $('Extract Run Information').item.json.runFolder }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        -48
+      ],
+      "id": "643703f7-b31c-4a96-847b-c2953bd35743",
+      "name": "Conversion Failed",
+      "webhookId": "d9fea3f2-50e4-41aa-b686-6832780e0a11",
+      "executeOnce": false,
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "H8UQaAqG4uOkMeE6",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Watch for CopyComplete.txt": {
+      "main": [
+        [
+          {
+            "node": "Extract Run Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Run Information": {
+      "main": [
+        [
+          {
+            "node": "Check RTAComplete.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check RTAComplete.txt": {
+      "main": [
+        [
+          {
+            "node": "RTAComplete Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RTAComplete Exists?": {
+      "main": [
+        [
+          {
+            "node": "check if already processed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check If Already Processed": {
+      "main": [
+        [
+          {
+            "node": "Should Process?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Process?": {
+      "main": [
+        [
+          {
+            "node": "Check SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Skipped Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "SampleSheet Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Exists?": {
+      "main": [
+        [
+          {
+            "node": "Validate Samplesheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check SampleSheet excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if already processed": {
+      "main": [
+        [
+          {
+            "node": "Check If Already Processed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Passed?": {
+      "main": [
+        [
+          {
+            "node": "Prepare BCL-Convert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validation failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare BCL-Convert": {
+      "main": [
+        [
+          {
+            "node": "Execute BCL-Convert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute BCL-Convert": {
+      "main": [
+        [
+          {
+            "node": "Parse BCL-Convert Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse BCL-Convert Result": {
+      "main": [
+        [
+          {
+            "node": "BCL-Convert Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BCL-Convert Success?": {
+      "main": [
+        [
+          {
+            "node": "Mark Run Complete",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Output Folder",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversion Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Run Complete": {
+      "main": [
+        []
+      ]
+    },
+    "Count FASTQ Files": {
+      "main": [
+        [
+          {
+            "node": "Get Output Size",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Output Size": {
+      "main": [
+        [
+          {
+            "node": "Compile Completion Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Completion Metrics": {
+      "main": [
+        [
+          {
+            "node": "Conversion Successful",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Output Folder": {
+      "main": [
+        [
+          {
+            "node": "Count FASTQ Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Validate Samplesheet": {
+      "main": [
+        [
+          {
+            "node": "Validation Passed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "6377e306-27fd-4194-9024-7677ae7abb18",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-08-06T12:21:18.048Z",
+      "createdAt": "2025-08-06T12:21:18.048Z",
+      "role": "workflow:owner",
+      "workflowId": "0C4tAXeLAeWlHrgj",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
