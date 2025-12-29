@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-29T10:12:38.000Z",
+  "updatedAt": "2025-12-29T10:16:17.000Z",
   "createdAt": "2025-12-25T05:07:31.517Z",
   "id": "x9oIU5qJNi5dzMwV",
   "name": "git backup",
@@ -77,8 +77,9 @@
           "cachedResultName": "N8N-backup",
           "cachedResultUrl": "https://github.com/gen-era/N8N-backup"
         },
-        "filePath": "={{ $('Commit date & file name').item.json.fileName }}.json",
-        "fileContent": "={{ $('To base64').item.json.data }}",
+        "filePath": "={{ $('Commit date & file name').item.json.fileName }}",
+        "binaryData": true,
+        "binaryPropertyName": "={{$('Json file').item.binary.data}}",
         "commitMessage": "=backup-{{ $('Commit date & file name').item.json.commitDate }}"
       },
       "id": "eb299c72-8b7e-4c6a-ab84-78154fb602fe",
@@ -455,7 +456,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "37b2c95a-8523-4ec5-a09f-6eba1c5541a4",
+  "versionId": "2fef5a49-f1da-4d34-a1c2-2762eb0025d5",
   "triggerCount": 0,
   "shared": [
     {
