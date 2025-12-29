@@ -1,0 +1,332 @@
+{
+  "updatedAt": "2025-08-26T07:59:22.000Z",
+  "createdAt": "2025-08-21T08:11:27.874Z",
+  "id": "rargHSRwCYufBJs9",
+  "name": "job submit hook",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "submit-job",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6485f81c-fd69-4b44-9937-79b459e0ac0b",
+      "name": "Webhook",
+      "webhookId": "cbdadd94-c220-4b83-90df-cab92b3ce133"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb4917c3-0c8a-4670-b4f4-850f8a0bfc9a",
+              "name": "job_id",
+              "value": "={{ $now.format('yyyy.MM.dd-HH.mm.ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "667b6ae7-0d27-4e63-b716-3502e366289b",
+              "name": "submitted_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "80d20d9f-5993-4eaa-9e9f-0ca02806f0ba",
+              "name": "status",
+              "value": "PENDING",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "37a2fd56-5651-469f-8909-0e8b0d7eb461",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1fd5201-1398-451d-a888-4f34ba74c275",
+              "leftValue": "={{ $json.body.command }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "77882d23-14a6-485d-b933-af5f9b0d6ed9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a43d5a2c-34c6-46b3-88c1-a858ae96d0eb",
+              "name": "job_id",
+              "value": "={{ $json.job_id }}",
+              "type": "string"
+            },
+            {
+              "id": "60c1e7f1-ce2b-49eb-a226-047ec564c7cd",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "77f33347-8c95-429c-9d6e-f3772dd1a80d",
+              "name": "command",
+              "value": "={{ $json.body.command }}",
+              "type": "string"
+            },
+            {
+              "id": "fb3ffa30-b9c0-43ed-be2b-048a24d3a551",
+              "name": "priority",
+              "value": "={{ $json.body.priority }}",
+              "type": "number"
+            },
+            {
+              "id": "dbfe6909-71a2-4358-be64-1cbb0e2c3893",
+              "name": "submitted_at",
+              "value": "={{ $json.submitted_at }}",
+              "type": "string"
+            },
+            {
+              "id": "12f3bcad-8a83-467b-acec-83d4d825f337",
+              "name": "executor",
+              "value": "={{ $json.body.executor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "f34b03f4-53d5-4bac-9d49-383628534d48",
+      "name": "Edit Fields1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4e9f116d-02ca-40e5-8af2-f76f9229b0b1",
+              "name": "error",
+              "value": "\"Missing required field: command\"",
+              "type": "string"
+            },
+            {
+              "id": "319756d1-1ea6-448b-9994-a2395e40d43f",
+              "name": "status",
+              "value": 400,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        128
+      ],
+      "id": "5d58d150-3f7d-4eab-9e10-903e68307193",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"job_id\": \"{{ $json.job_data.job_id }}\",\n  \"status\": \"submitted\",\n  \"message\": \"Job queued successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1056,
+        -96
+      ],
+      "id": "eeac7b4c-2fe7-4f17-a8a1-e031afac2174",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "tableId": "jobs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "job_id",
+              "fieldValue": "={{ $json.job_id }}"
+            },
+            {
+              "fieldId": "command",
+              "fieldValue": "={{ $json.command }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "submitted_at",
+              "fieldValue": "={{ $json.submitted_at }}"
+            },
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ $json.priority }}"
+            },
+            {
+              "fieldId": "executor",
+              "fieldValue": "={{ $json.executor }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "0c559cc8-2a61-4385-971b-38c9cf96ee94",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b40c5a04-dc1c-4c03-bf15-8e469e1b5370",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-08-21T08:11:27.882Z",
+      "createdAt": "2025-08-21T08:11:27.882Z",
+      "role": "workflow:owner",
+      "workflowId": "rargHSRwCYufBJs9",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
