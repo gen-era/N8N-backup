@@ -1,0 +1,486 @@
+{
+  "updatedAt": "2025-12-22T12:08:33.000Z",
+  "createdAt": "2025-12-10T20:39:39.739Z",
+  "id": "p5v6HfuZ2iO5nnbC",
+  "name": "Sophia Upload",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1568,
+        -240
+      ],
+      "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "~/bin/sg-upload-v2-wrapper login-iam --client-id"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        -608
+      ],
+      "id": "e93a0058-6da2-47e1-9c1a-81250389df51",
+      "name": "Sophia Login",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 26,
+            "recipe_ref": "={{ $json.recipe_ref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -800,
+        -208
+      ],
+      "id": "d0c4d674-98a9-4136-814b-cf99f2ee927d",
+      "name": "Update Data Op as In Progress",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 29,
+            "recipe_ref": "={{ $json.recipe_ref }}",
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -800,
+        144
+      ],
+      "id": "7088e638-df34-4bb6-ad1f-5c98014a96b4",
+      "name": "Update Data Op as Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "sudo rm  -r /tmp/genomize/*"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        -32
+      ],
+      "id": "0c1b4879-5798-4085-a3ac-fb3ae69bccd8",
+      "name": "Cleanup Symlink"
+    },
+    {
+      "parameters": {
+        "command": "=/opt/bin/mc mirror /tmp/genomize/ genomize/{{ $json.account_id }}.static.seq.genomize.com/external/ "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -32
+      ],
+      "id": "95e96ed5-3083-4961-8cc2-0c4560af7bf2",
+      "name": "Upload Genomize"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "={{ $json.command }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -368
+      ],
+      "id": "134ee9d2-0eaf-4e30-bb97-9c90d5f3f2a1",
+      "name": "Create Symlink"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Stdout'daki fastq dosya yollarını al\nconst fastqPaths = $input.item.json.stdout.trim().split('\\n');\n\n// batch_source_value'yu önceki node'dan al\nconst batchSourceValue = $('Get On Hold Sophia Uploads').item.json.batch_source_value;\n\n// /tmp/genomize altında hedef dizini oluştur\nconst symlinkBaseDir = `/tmp/genomize/${batchSourceValue}`;\n\n// Symlink komutlarını oluştur\nconst commands = [];\ncommands.push(`mkdir -p ${symlinkBaseDir}`);\n\nfastqPaths.forEach(sourcePath => {\n  const fileName = sourcePath.split('/').pop();\n  const targetPath = `${symlinkBaseDir}/${fileName}`;\n  commands.push(`ln -sf ${sourcePath} ${targetPath}`);\n});\n\nconst finalCommand = commands.join(' && ');\n\nreturn {\n  json: {\n    command: finalCommand,\n    targetDirectory: symlinkBaseDir,\n    fileCount: fastqPaths.length,\n    batchSourceValue: batchSourceValue\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        -368
+      ],
+      "id": "333030b1-e7fa-4cdb-b556-a9eb68e5246d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=fdfind \"{{ $json.sample_id }}_\"  /mnt/smb_share/Conversions/{{ $json.id_source_value }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -368
+      ],
+      "id": "2942536c-6bca-48db-9b4d-528125a2ac58",
+      "name": "Find Files"
+    },
+    {
+      "parameters": {
+        "command": "/opt/bin/mc alias set genomize https://s3-3.genomize.com.tr gen_era_ngs '5Wk2h5!Qx^)>'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -560
+      ],
+      "id": "f6fabc8b-c365-4360-8216-619c2e8eac2f",
+      "name": "Login Genomize"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1328,
+        -240
+      ],
+      "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
+      "name": "Get On Hold Sophia Uploads",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get On Hold Sophia Uploads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Genomize": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Symlink",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create Symlink",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Files": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get On Hold Sophia Uploads": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2218fee0-fd75-4890-865e-73f274861594",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T20:39:39.752Z",
+      "createdAt": "2025-12-10T20:39:39.752Z",
+      "role": "workflow:owner",
+      "workflowId": "p5v6HfuZ2iO5nnbC",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
