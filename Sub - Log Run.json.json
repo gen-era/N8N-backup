@@ -1,0 +1,3277 @@
+{
+  "updatedAt": "2025-12-25T11:13:19.000Z",
+  "createdAt": "2025-12-19T09:20:34.249Z",
+  "id": "FAYzdm9tCCVfsNlo",
+  "name": "Sub - Log Run",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.instrument_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        -192
+      ],
+      "id": "e4b310f5-ddf7-40d2-afad-f250a5df9cca",
+      "name": "Instrument Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.flowcell_kit_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        -16
+      ],
+      "id": "591183e3-77dd-4fb3-a939-3053961a06db",
+      "name": "Flowcell Check"
+    },
+    {
+      "parameters": {
+        "command": "=grep -oP '(?<=<Instrument>)[^_<]+'  {{ $('Start').item.json.path }}RunInfo.xml"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -192
+      ],
+      "id": "32f2a136-3824-42f3-8ca0-4d50dbb7cad6",
+      "name": "Extract Instrument ID"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "instruments",
+          "mode": "list",
+          "cachedResultName": "instruments"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "serial_number",
+              "value": "={{ $json.stdout }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1472,
+        -192
+      ],
+      "id": "05cc0ea1-a8f6-4510-badc-4dd527e2f23c",
+      "name": "Find Instrument",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "instrument_ref": "={{ $json.uniqueref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "flowcell_concept_ref",
+              "displayName": "flowcell_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        -192
+      ],
+      "id": "71d192f4-eaf3-40b6-9658-77e79b709ee8",
+      "name": "Update Instrument",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kits_mapping",
+          "mode": "list",
+          "cachedResultName": "kits_mapping"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "source_value",
+              "value": "={{ $json.stdout }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1472,
+        -16
+      ],
+      "id": "0880c536-4135-48a1-b018-ed437498e0c2",
+      "name": "Find Flowcell",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.flowcell_lot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        160
+      ],
+      "id": "113afd43-7e0d-45e8-82ba-08158a297c7e",
+      "name": "Flowcell Lot Check"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "flowcell_lot": "={{ $json.stdout }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1472,
+        160
+      ],
+      "id": "fd4709f1-94c8-40fe-9581-eee511247d90",
+      "name": "Update Flowcell Lot",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "flowcell_kit_ref": "={{ $json.kits_ref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        -16
+      ],
+      "id": "11e834ff-ce5e-4532-8a52-0b1f07c70713",
+      "name": "Update Flowcell",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "date": "={{ $json.formattedDate }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1472,
+        -352
+      ],
+      "id": "d4f14f05-18c3-4ec6-99df-9f690983bcc2",
+      "name": "Update Date",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.reads_settings_concept_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        336
+      ],
+      "id": "e2b081d1-ebff-4466-818b-48b9792a547b",
+      "name": "Flowcell Settings Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        -352
+      ],
+      "id": "83674f94-dae0-4ab8-a51d-fcbc59d8fd15",
+      "name": "Date Check"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_name",
+              "value": "={{ $json.stdout }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1472,
+        336
+      ],
+      "id": "f6d39bbc-b42f-4238-878e-54c125d2486a",
+      "name": "Select rows from a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "reads_settings_concept_ref": "={{ $json.uniqueref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        240
+      ],
+      "id": "b07bb81c-f752-45a9-8897-293d731eca32",
+      "name": "Update Settings",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.status_concept_ref}}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "026249c5-a0d4-41ca-be0c-0c4905b7f05c",
+              "leftValue": "={{ $json.status_concept_ref }}",
+              "rightValue": "26",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "717b00d3-55ad-49e3-83ff-889e22a5e28e",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        528
+      ],
+      "id": "b9049fef-c327-4dd9-bb0a-331532dfe06a",
+      "name": "Status Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "75482f15-1802-4fb0-a1e4-b4a7076de149",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        544
+      ],
+      "id": "8e07a89c-d27a-4a28-a728-e03c3253c27a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=test -f \"{{ $('Start').item.json.path }}RTAComplete.txt\" && echo \"true\" || echo \"false\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        512
+      ],
+      "id": "f3c82859-d38f-4dba-8e87-ced2df770e02",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Start').item.json.path }}",
+                    "rightValue": "illuminastorage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "c9dfcfce-a89f-415c-861c-cf9510ac3cf2"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fa8951fe-ae26-4ed1-942a-f445820406e7",
+                    "leftValue": "={{ $('Start').item.json.path }}",
+                    "rightValue": "smb_share",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e9d0f712-5608-43d5-8151-4fba34580214",
+                    "leftValue": "={{ $('Start').item.json.path }}",
+                    "rightValue": "sapiens_dragen",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1264,
+        752
+      ],
+      "id": "17008834-390d-49ff-8f81-e6c5280d059f",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.storage_instrument_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        768
+      ],
+      "id": "af85fcfe-aba4-4982-947b-6131b7f39e29",
+      "name": "Storage Check"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "storage_instrument_ref": 12
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        752
+      ],
+      "id": "c306eb90-201f-4a6e-bd89-0d2f3a51d6c4",
+      "name": "Update Storage Sapiens",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "storage_instrument_ref": 6
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        944
+      ],
+      "id": "64f3b9d4-cd93-41a7-901d-707e3c976483",
+      "name": "Update Storage Koza",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.uniqueref }}",
+            "updated_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2560,
+        -48
+      ],
+      "id": "d959af95-da10-4901-b641-d55e87e240c7",
+      "name": "Update Update Time",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=grep -oP '(?<=<WorkflowType>)[^<]+' {{ $('Start').item.json.path }}RunParameters.xml"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        1040
+      ],
+      "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
+      "name": "Extract Instrument ID5",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.workflow_concept_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        992,
+        1024
+      ],
+      "id": "57ca76bb-b565-451b-ad95-a7fe77eda348",
+      "name": "Workflow Check"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.stdout }}",
+                    "rightValue": "NovaSeqXp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1d95db21-13e4-490e-b148-322005daf056"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0c89eecd-04dc-4df6-9439-1c40df3a0281",
+                    "leftValue": "={{ $json.stdout }}",
+                    "rightValue": "NovaSeqStandard",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1472,
+        1040
+      ],
+      "id": "dae27ba8-5db9-4c37-9434-350774762f13",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "workflow_concept_ref": 18
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        1120
+      ],
+      "id": "5b8a10c3-caaa-493f-bd53-a039dfd7b1d9",
+      "name": "Update Workflow",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "workflow_concept_ref": 19
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        1328
+      ],
+      "id": "669c06dc-fb18-4d49-ac7a-4575cff0dfb0",
+      "name": "Update Workflow1",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "status_concept_ref": 29
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        400
+      ],
+      "id": "c20ceeab-14d3-43a3-8c19-3e92973c66e5",
+      "name": "Update Status Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Start node'undan path parametresini al\nconst path = $('Start').item.json.path;\n\n// Klasör adını çıkart\nconst folderName = path.split('/').filter(x => x).pop();\n\n// Tarih kısmını al\nconst datePart = folderName.split('_')[0];\n\n// Tarihi formatla\nlet formattedDate;\nif (datePart.length === 6) {\n    formattedDate = `20${datePart.substring(0,2)}-${datePart.substring(2,4)}-${datePart.substring(4,6)}`;\n} else if (datePart.length === 8) {\n    formattedDate = `${datePart.substring(0,4)}-${datePart.substring(4,6)}-${datePart.substring(6,8)}`;\n}\n\nreturn [{ json: { formattedDate } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        -352
+      ],
+      "id": "c7b8fe2e-8576-4998-8a9d-99649e9fce31",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "run_id"
+            },
+            {
+              "name": "path"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        272,
+        -16
+      ],
+      "id": "b087ac02-bddd-4f1e-bb2d-668465285a4d",
+      "name": "Start"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (\n  INSERT INTO runs (run_id)\n  VALUES ('{{ $json.run_id }}')\n  ON CONFLICT (run_id) DO NOTHING\n  RETURNING *\n)\nSELECT * FROM inserted\nUNION ALL\nSELECT * FROM runs WHERE run_id = '{{ $json.run_id }}' AND NOT EXISTS (SELECT 1 FROM inserted);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        -16
+      ],
+      "id": "95bcaf99-4ca0-4f57-a887-02458638176d",
+      "name": "Get DB Record",
+      "alwaysOutputData": false,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "command": "=  xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"; lot=$(sed -n 's/.*<FlowCellLotNumber>\\([^<]*\\)<\\/FlowCellLotNumber>.*/\\1/p' \"$xml_file\" 2>/dev/null); [ -z \"$lot\" ] && lot=$(awk '/<ConsumableInfo>/{in_block=1;block=\"\"}in_block{block=block $0 \"\\n\"}/<\\/ConsumableInfo>/{if(block~/<Type>FlowCell<\\/Type>/){match(block,/<LotNumber>([^<]+)<\\/LotNumber>/,arr);print arr[1];exit}in_block=0}' \"$xml_file\" 2>/dev/null); [ -z \"$lot\" ] && lot=$(awk '/<FlowCellRfidTag>/,/<\\/FlowCellRfidTag>/{if(/<LotNumber>/){match($0,/<LotNumber>([^<]+)<\\/LotNumber>/,arr);print arr[1];exit}}' \"$xml_file\" 2>/dev/null); echo \"$lot\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        160
+      ],
+      "id": "32e766d3-ab8d-4401-9353-4054507213e7",
+      "name": "Extract Lot"
+    },
+    {
+      "parameters": {
+        "command": "=  xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"; mode=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1); [ -z \"$mode\" ] && mode=$(awk '/<ConsumableInfo>/{in_block=1;block=\"\"}in_block{block=block $0 \"\\n\"}/<\\/ConsumableInfo>/{if(block~/<Type>Reagent<\\/Type>/){match(block,/<Name>([^<]+)<\\/Name>/,arr);print arr[1];exit}in_block=0}' \"$xml_file\" 2>/dev/null); [ -z \"$mode\" ] && mode=$(sed -n 's/.*<Chemistry>\\([^<]*\\)<\\/Chemistry>.*/\\1/p' \"$xml_file\" 2>/dev/null | head -1); echo \"$mode\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        -16
+      ],
+      "id": "cdd9c4ca-6211-4c2f-95ea-62ba90d18b8b",
+      "name": "Extract Flowcell"
+    },
+    {
+      "parameters": {
+        "command": "=grep -oP '(?<=NumCycles=\")[^\"]*' {{ $('Start').item.json.path }}RunInfo.xml | paste -sd'-'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        336
+      ],
+      "id": "08c7acdf-1f8a-4ffa-b901-785d17dd4dba",
+      "name": "Extract Settings"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "status_concept_ref": 26
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "storage_instrument_concept_ref",
+              "displayName": "storage_instrument_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1680,
+        576
+      ],
+      "id": "e7bda862-ddf7-497f-93b8-6860f981cdbc",
+      "name": "Update Settings In Progress",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "Postgres account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Instrument Check": {
+      "main": [
+        [
+          {
+            "node": "Extract Instrument ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Extract Instrument ID": {
+      "main": [
+        [
+          {
+            "node": "Find Instrument",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Instrument": {
+      "main": [
+        [
+          {
+            "node": "Update Instrument",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flowcell Check": {
+      "main": [
+        [
+          {
+            "node": "Extract Flowcell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Flowcell": {
+      "main": [
+        [
+          {
+            "node": "Update Flowcell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flowcell Lot Check": {
+      "main": [
+        [
+          {
+            "node": "Extract Lot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flowcell Settings Check": {
+      "main": [
+        [
+          {
+            "node": "Extract Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date Check": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Update Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Status Check": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update Status Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Settings In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Update Storage Sapiens",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Storage Koza",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Storage Sapiens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Storage Check": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Instrument": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Flowcell": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Flowcell Lot": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Date": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Settings": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Storage Sapiens": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Storage Koza": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Instrument ID5": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Workflow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Check": {
+      "main": [
+        [
+          {
+            "node": "Extract Instrument ID5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Workflow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Workflow": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Workflow1": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Status Completed": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Get DB Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get DB Record": {
+      "main": [
+        [
+          {
+            "node": "Date Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Instrument Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Flowcell Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Flowcell Lot Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Flowcell Settings Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Status Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Storage Check",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Workflow Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lot": {
+      "main": [
+        [
+          {
+            "node": "Update Flowcell Lot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Flowcell": {
+      "main": [
+        [
+          {
+            "node": "Find Flowcell",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Settings": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Settings In Progress": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Start": [
+      {
+        "json": {
+          "run_id": "251220_A01978_0140_AHHHMLDRX7",
+          "path": "/mnt/smb_share/Runs/251220_A01978_0140_AHHHMLDRX7/"
+        }
+      }
+    ]
+  },
+  "versionId": "f17c9348-4f24-4bb8-8a10-203c6b26b8cb",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-19T09:20:34.261Z",
+      "createdAt": "2025-12-19T09:20:34.261Z",
+      "role": "workflow:owner",
+      "workflowId": "FAYzdm9tCCVfsNlo",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
