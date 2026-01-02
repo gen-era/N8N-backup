@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-29T12:35:40.000Z",
+  "updatedAt": "2025-12-31T10:06:21.000Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        736,
+        1216,
         -480
       ],
       "id": "0c679ca5-7a0f-4002-9f62-32ff30eac723",
@@ -52,7 +52,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
+        2160,
         -480
       ],
       "id": "42959807-1afe-4970-b0bb-f3f4f8a8ce01",
@@ -60,7 +60,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -82,7 +82,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -98,8 +98,8 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Sample_ID}}",
-              "rightValue": "YWES",
+              "leftValue": "={{ $json.Sample_Project}}",
+              "rightValue": "W1787-X|C1397-X|C1405-X|C74-T|C1398-X|W1789-X|W1788-X|W1794|W1805|W1804|W1803|C1407-X|W1791-X|W1790-X",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -209,7 +209,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -345,7 +345,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -519,7 +519,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -530,7 +530,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1440,
+        1280,
         112
       ],
       "id": "08adb513-b8ab-4c7b-ac0d-0ee5eddd4912",
@@ -538,7 +538,7 @@
     },
     {
       "parameters": {
-        "command": "=export TERM=xterm\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/project/qc_test/output \\\n--output-file-prefix \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Is R1R2 Present').item.json.r1 }}\" \\\n-2 \"{{ $('Is R1R2 Present').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-down-sampler true \\\n--down-sampler-reads 33000000 \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/project/qc_test/bed_folder/{{ $('Loop Over CES Samples').item.json.bed_file_path }}"
+        "command": "=export TERM=xterm\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/project/qc_test/output \\\n--output-file-prefix \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Is R1R2 Present').item.json.r1 }}\" \\\n-2 \"{{ $('Is R1R2 Present').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Over CES Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/project/qc_test/bed_folder/{{ $('Loop Over CES Samples').item.json.bed_file_path }}"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -588,7 +588,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1920,
+        1760,
         112
       ],
       "id": "f67b6e27-430d-46b3-bcae-1ae4c0ca0740",
@@ -597,7 +597,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -639,7 +639,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2128,
+        1968,
         112
       ],
       "id": "535d1a82-e38e-4e0b-a8b7-0645b4f7496d",
@@ -775,7 +775,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -788,7 +788,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1696,
+        1536,
         112
       ],
       "id": "cc26f4fc-cc84-4b97-9334-317facfca0bb",
@@ -797,7 +797,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -860,7 +860,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -978,7 +978,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1056,7 +1056,7 @@
             {
               "id": "27a804a1-c32d-4700-9041-c048a08b5676",
               "name": "sample_id",
-              "value": "={{ $json.sample_id }}-Norm",
+              "value": "={{ $json.sample_id }}",
               "type": "string"
             }
           ]
@@ -1067,7 +1067,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        928,
+        768,
         112
       ],
       "id": "4458dee3-65a7-4119-b103-cfa9845419af",
@@ -1080,7 +1080,7 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "251210_A01832R_0232_BHNK5YDSXF",
+              "value": "251226_A01228_0236_BHNMWCDSXF",
               "type": "string"
             }
           ]
@@ -1090,7 +1090,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        1472,
+        1952,
         -480
       ],
       "id": "f4301350-f7b1-4dd4-abb2-1436d14170af",
@@ -1134,7 +1134,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1200,
+        1040,
         112
       ],
       "id": "9b90b9eb-8236-40c6-9c34-88f2bf1f82df",
@@ -1147,7 +1147,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        960,
+        1440,
         -480
       ],
       "id": "07be1af6-f832-45cc-bb47-871ef762a587",
@@ -1187,7 +1187,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1168,
+        1648,
         -480
       ],
       "id": "5837340a-4bee-4b7d-bed9-48bffa06bff6",
@@ -1294,7 +1294,8 @@
         -592
       ],
       "id": "06dd8d7a-8cd2-42ba-8911-c75f4eb1a116",
-      "name": "Edit Fields"
+      "name": "Edit Fields",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1453,64 +1454,6 @@
       ],
       "id": "aca8a43b-e8e0-41b6-b285-c43e078f13ba",
       "name": "Is R1R2 Present"
-    },
-    {
-      "parameters": {
-        "content": "# EDITED",
-        "height": 208
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2528,
-        -672
-      ],
-      "typeVersion": 1,
-      "id": "ecbd5211-6a2e-48ff-b525-0e909dfe7733",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "content": "# EDITED",
-        "height": 384,
-        "width": 624
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2464,
-        48
-      ],
-      "typeVersion": 1,
-      "id": "dee772a4-c193-45aa-bb20-e3b0120696c0",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
-        "content": "# EDITED",
-        "height": 384,
-        "width": 224
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        864,
-        64
-      ],
-      "typeVersion": 1,
-      "id": "6ca4d921-1d53-464a-9788-b9ebf7ba24df",
-      "name": "Sticky Note2"
-    },
-    {
-      "parameters": {
-        "content": "# EDITED",
-        "height": 208
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        3264,
-        48
-      ],
-      "typeVersion": 1,
-      "id": "f2b567d9-1025-4c00-83db-d6ea05519e25",
-      "name": "Sticky Note3"
     }
   ],
   "connections": {
@@ -1548,6 +1491,11 @@
             "node": "Edit Fields",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Add Bed Path",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -1997,7 +1945,7 @@
       }
     ]
   },
-  "versionId": "c6547934-4c0a-443e-bd3a-4370a2a5c521",
+  "versionId": "3c0f90ba-d7bf-4f6e-943c-c13613600afd",
   "triggerCount": 0,
   "shared": [
     {
