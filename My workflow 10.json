@@ -1,0 +1,447 @@
+{
+  "updatedAt": "2025-12-30T13:23:17.000Z",
+  "createdAt": "2025-12-29T14:18:49.525Z",
+  "id": "OaLTopm8qW98Uf6u",
+  "name": "My workflow 10",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "36fa2251-15b4-4a96-b21a-f61f1d3c298a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operation_recipes",
+          "mode": "list",
+          "cachedResultName": "data_operation_recipes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "type_concept_ref",
+              "value": "251"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        0
+      ],
+      "id": "69fb1dd6-ae6c-418c-9f02-d93f1339dbbf",
+      "name": "Find Possible Recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "recipe_ref",
+              "value": "={{ $json.uniqueref }}"
+            },
+            {
+              "column": "status_concept_ref",
+              "value": "24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "dd5272fd-5ec1-4316-9d5c-3dbb167e9f73",
+      "name": "GET On-Hold Archer upload recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "uniqueref",
+              "field2": "read_ref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        208
+      ],
+      "id": "ce2e350f-7d27-4d24-939a-042712ebf009",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "uniqueref",
+              "value": "={{ $json.read_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        0
+      ],
+      "id": "750a1548-f0ff-4ba5-8574-8ff24dea057b",
+      "name": "Select rows from a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Group items by recipe_ref\nconst grouped = {};\n\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  \n  if (!grouped[recipeRef]) {\n    grouped[recipeRef] = [];\n  }\n  grouped[recipeRef].push(item.json);\n}\n\n// Return as array of groups\nreturn Object.entries(grouped).map(([recipeRef, items]) => ({\n  json: {\n    recipe_ref: recipeRef,\n    items: items,\n    count: items.length\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        208
+      ],
+      "id": "fa2d2da6-7c17-4ba0-9422-86cfb6bf6924",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1216,
+        208
+      ],
+      "id": "3cf15288-1174-4bef-a49b-cbbaeaae6699",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        1072
+      ],
+      "id": "ac2e5b0b-12ca-4413-a708-d5073499725b"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "recipe_ref",
+              "field2": "uniqueref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        416,
+        224
+      ],
+      "id": "262617ce-cbdc-48c3-8384-a7f952b691df",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "care_site_credentials",
+          "mode": "list",
+          "cachedResultName": "care_site_credentials"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "care_site_ref",
+              "value": "={{ $json.items[0].requesting_caresite_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1504,
+        544
+      ],
+      "id": "2acfe57d-cc14-4f2d-ba41-aebda59310f3",
+      "name": "GET Credentials",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Birden fazla mail varsa ????",
+        "height": 224,
+        "width": 224,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1440,
+        480
+      ],
+      "typeVersion": 1,
+      "id": "8436b81b-465b-44d6-97c5-18a77eb208cb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        224
+      ],
+      "id": "2ef2ce8c-ba7e-4df4-8b2a-8c586f4bd649",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Possible Recipes": {
+      "main": [
+        [
+          {
+            "node": "GET On-Hold Archer upload recipes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET On-Hold Archer upload recipes": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "GET Credentials",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET Credentials": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "85939934-622c-47fc-8cb1-969537bcaa0d",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-29T14:18:49.531Z",
+      "createdAt": "2025-12-29T14:18:49.531Z",
+      "role": "workflow:owner",
+      "workflowId": "OaLTopm8qW98Uf6u",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "tags": []
+}
