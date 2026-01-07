@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-26T06:58:27.000Z",
+  "updatedAt": "2026-01-02T13:03:33.431Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
@@ -8,12 +8,12 @@
   "nodes": [
     {
       "parameters": {
-        "command": "=docker run --rm -v {{ $('When clicking ‘Execute workflow’').item.json.path }}:/data:ro yserdem/illumina-interop:latest /data > {{ $('When clicking ‘Execute workflow’').item.json.path }}/{{ $('When clicking ‘Execute workflow’').item.json.folder }}-interop.csv"
+        "command": "=docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path }}:/data:ro yserdem/illumina-interop:latest /data > {{ $('When Executed by Another Workflow').item.json.path }}/{{ $('When Executed by Another Workflow').item.json.folder }}-interop.csv"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        208,
+        160,
         0
       ],
       "id": "16723fdc-1a4d-4aad-bd1a-50268f5e67f5",
@@ -21,7 +21,7 @@
     },
     {
       "parameters": {
-        "fileSelector": "={{ $('When clicking ‘Execute workflow’').item.json.path }}/{{ $('When clicking ‘Execute workflow’').item.json.folder }}-interop.csv",
+        "fileSelector": "={{ $('When Executed by Another Workflow').item.json.path }}/{{$('When Executed by Another Workflow').item.json.folder }}-interop.csv",
         "options": {}
       },
       "type": "n8n-nodes-base.readWriteFile",
@@ -45,17 +45,6 @@
       ],
       "id": "15641d6b-5cff-4d29-99c1-c2747fd9d2e7",
       "name": "Extract from File"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -304,
-        0
-      ],
-      "id": "8125c6d8-7800-4a04-a468-ef541641c717",
-      "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
@@ -152,7 +141,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -232,7 +221,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -259,6 +248,31 @@
       ],
       "id": "577a89e3-fb20-4885-a718-b914495ad934",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "folder"
+            },
+            {
+              "name": "path"
+            },
+            {
+              "name": "status"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
+      "name": "When Executed by Another Workflow"
     }
   ],
   "connections": {
@@ -289,17 +303,6 @@
         [
           {
             "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Select rows from a table",
             "type": "main",
             "index": 0
           }
@@ -360,6 +363,17 @@
           }
         ]
       ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -372,17 +386,18 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {
-    "When clicking ‘Execute workflow’": [
+    "When Executed by Another Workflow": [
       {
         "json": {
-          "folder": "240802_MN01801_0026_A000H3YHNH",
-          "path": "/home/genera/run_folder/Runs/240802_MN01801_0026_A000H3YHNH",
+          "folder": "251231_A01978_0142_AHNK2JDSXF",
+          "path": "/mnt/illuminastorage/run_folder/251231_A01978_0142_AHNK2JDSXF",
           "status": "READY_FOR_CONVERSION"
         }
       }
     ]
   },
-  "versionId": "cda20fcb-9cca-4ae0-b57f-0bd45e77f3be",
+  "versionId": "bc73a64b-f1b6-459a-a05d-3f12020469c1",
+  "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
     {
@@ -393,5 +408,8 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "tags": []
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "06-01-2026/22:39",
+  "fileName": "interop.json"
 }
