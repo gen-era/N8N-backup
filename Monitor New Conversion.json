@@ -1,0 +1,232 @@
+{
+  "updatedAt": "2026-01-06T05:38:59.737Z",
+  "createdAt": "2026-01-05T18:30:29.197Z",
+  "id": "qhCyLQ4Zy1dpZNB9",
+  "name": "Monitor New Conversion",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "command": "=fdfind \"^(25|26|2026|2025).*-\" /mnt/smb_share/Conversions/ /mnt/illuminastorage/fastq_folder/ /mnt/sapiens_dragen/tmp/ --max-depth 1 --exclude \".lnk\" | paste -sd ','"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        272
+      ],
+      "id": "153a46aa-08e3-4416-92eb-62305edb4c5b",
+      "name": "Find Runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const paths = $input.item.json.stdout.trim().split(',').filter(p => p.length > 0);\nreturn paths.map(path => {\n  const trimmedPath = path.trim();\n  // Path'in son dizin adını al (trailing slash'i kaldırarak)\n  const dirName = trimmedPath.replace(/\\/$/, '').split('/').pop();\n  // Run ID'yi çıkar (ilk tire karakterine kadar olan kısım)\n  const runId = dirName.split('-')[0];\n  // Conversion ID tüm dizin adı (trailing slash olmadan)\n  const conversionId = dirName;\n  \n  return { \n    json: { \n      path: trimmedPath,\n      run_id: runId,\n      conversion_id: conversionId\n    } \n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1136,
+        272
+      ],
+      "id": "3f377d72-9e96-4395-8b5f-3d20bec64045",
+      "name": "Split Runs"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref, run_id \nFROM runs \nWHERE run_id IN ({{ $input.first().json.run_ids.map(id => `'${id}'`).join(',') }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -720,
+        272
+      ],
+      "id": "69af6a4b-8e0c-46be-9cf8-7260fb819286",
+      "name": "Supabase Execute SQL Query",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const runIds = $input.all().map(item => item.json.run_id);\n\nreturn [{\n  json: {\n    run_ids: runIds\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -928,
+        272
+      ],
+      "id": "f9582196-4f8d-41c0-965f-d6732df1b9be",
+      "name": "Prepare IDs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Supabase sonuçlarını map'e çevir (her row bir item olarak geliyor)\nconst runsMap = {};\n$input.all().forEach(item => {\n  runsMap[item.json.run_id] = item.json.uniqueref;\n});\n\n// Bir önceki node'dan gelen orijinal item'ları al ve run_ref ekle\nconst originalNode = $('Split Runs');\nreturn originalNode.all().map(item => ({\n  json: {\n    path: item.json.path,\n    run_id: item.json.run_id,\n    conversion_id: item.json.conversion_id,\n    run_ref: runsMap[item.json.run_id] || null\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        272
+      ],
+      "id": "d8b92126-82b4-49c8-9bf9-d07e863ca49b",
+      "name": "Get Run Refs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        272
+      ],
+      "id": "0071c493-d5c0-47de-aee4-9bdd7add1e88",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref, id_source_value \nFROM conversions \nWHERE id_source_value IN ({{ $input.all().map(item => `'${item.json.conversion_id}'`).join(',') }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        272
+      ],
+      "id": "b9dce0ad-ed83-477b-9896-c7b5caca8bb9",
+      "name": "Supabase Execute SQL Query Conversions",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Conversions sonuçlarını map'e çevir\nconst conversionsMap = {};\n$input.all().forEach(item => {\n  conversionsMap[item.json.id_source_value] = item.json.uniqueref;\n});\n\n// Get Run Refs node'undan gelen item'ları al\nconst previousNode = $('Get Run Refs');\nreturn previousNode.all().map(item => ({\n  json: {\n    path: item.json.path,\n    run_id: item.json.run_id,\n    conversion_id: item.json.conversion_id,\n    run_ref: item.json.run_ref,\n    conversion_ref: conversionsMap[item.json.conversion_id] || null\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        272
+      ],
+      "id": "52aa8335-81d8-4d2b-bfed-f3b28478393c",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "Find Runs": {
+      "main": [
+        [
+          {
+            "node": "Split Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Runs": {
+      "main": [
+        [
+          {
+            "node": "Prepare IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare IDs": {
+      "main": [
+        [
+          {
+            "node": "Supabase Execute SQL Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Execute SQL Query": {
+      "main": [
+        [
+          {
+            "node": "Get Run Refs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Find Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run Refs": {
+      "main": [
+        [
+          {
+            "node": "Supabase Execute SQL Query Conversions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Execute SQL Query Conversions": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "c6f6224e-a11b-46aa-bba0-f355e8449d71",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-05T18:30:29.209Z",
+      "createdAt": "2026-01-05T18:30:29.209Z",
+      "role": "workflow:owner",
+      "workflowId": "qhCyLQ4Zy1dpZNB9",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "06-01-2026/21:41",
+  "fileName": "Monitor New Conversion.json"
+}
