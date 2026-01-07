@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-20T12:11:56.000Z",
+  "updatedAt": "2026-01-05T08:59:19.353Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=251212_A01832R_0233_BHJ23JDRX7",
+              "value": "=251226_A01832R_0234_BHJJFLDRX7",
               "type": "string"
             }
           ]
@@ -23,8 +23,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -272,
-        -320
+        144,
+        -592
       ],
       "id": "10c2d4f6-7a39-4927-bf5f-a5278122b4ff",
       "name": "Edit Fields"
@@ -175,8 +175,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -464,
-        -320
+        -48,
+        -592
       ],
       "id": "c41b00f0-86c7-40e0-97cc-21f1d1cbacb8",
       "name": "When clicking ‘Execute workflow’"
@@ -236,7 +236,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -258,7 +258,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -380,7 +380,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -401,7 +401,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -433,15 +433,15 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -64,
-        -320
+        352,
+        -592
       ],
       "id": "57ed4b27-b70e-4213-83c0-494b87fe529b",
       "name": "Get Run Ref",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -761,7 +761,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "840dd887-9d82-4dec-8418-8d0627080f89",
+  "versionId": "7c75d37c-9260-4634-811b-4862616fb333",
+  "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
     {
@@ -772,5 +773,8 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "tags": []
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "06-01-2026/22:39",
+  "fileName": "DRAGEN Conversion.json"
 }
