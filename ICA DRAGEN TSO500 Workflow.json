@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-25T04:01:31.000Z",
+  "updatedAt": "2026-01-06T08:51:52.740Z",
   "createdAt": "2025-11-13T06:18:41.364Z",
   "id": "zOeHTAG3W7pparqn",
   "name": "ICA DRAGEN TSO500 Workflow",
@@ -13,7 +13,19 @@
             {
               "id": "project_id",
               "name": "PROJECT_ID",
-              "value": "=d29155ad-9965-46ae-9a53-8a7a61b70758",
+              "value": "=9958d737-8c52-4f51-b1ea-89d4e6908db4",
+              "type": "string"
+            },
+            {
+              "id": "1b6357a1-18b6-4ae3-b006-1f34ec775b10",
+              "name": "FOLDER",
+              "value": "251231_A01978_0142_AHNK2JDSXF-Fastq/SG-TSO500-FFPE-RUN25",
+              "type": "string"
+            },
+            {
+              "id": "28bd7140-7700-48d7-94b4-63432cb68b40",
+              "name": "SAMPLE_ID",
+              "value": "PRJ25-3-270172844",
               "type": "string"
             }
           ]
@@ -25,69 +37,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.3,
       "position": [
-        -288,
-        352
-      ]
-    },
-    {
-      "parameters": {
-        "command": "=icav2 projectdata get \"/output_folder/\" --project-id {{ $('Set Project ID').item.json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}'"
-      },
-      "id": "1f16f452-2406-4225-800b-ad8ae599f122",
-      "name": "Validate Output Folder",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        144,
-        352
-      ]
-    },
-    {
-      "parameters": {
-        "command": "=icav2 projectdata list / --project-id {{ $('Set Project ID').item.json.PROJECT_ID }} --data-type FILE 2>/dev/null | grep \"fastq\" | wc -l | tr -d ' ' "
-      },
-      "id": "9411aa27-31ed-4a56-8c7e-d9edac2a5b50",
-      "name": "Check FASTQ Files in Root",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        368,
-        352
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 1
-          },
-          "conditions": [
-            {
-              "id": "12424ff2-58ff-4dbb-aa2b-ed071b5a871c",
-              "leftValue": "={{ $json.stdout }}",
-              "rightValue": 0,
-              "operator": {
-                "type": "number",
-                "operation": "gt"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {
-          "looseTypeValidation": true
-        }
-      },
-      "id": "4276c470-436a-406e-a302-cc2f76e74cde",
-      "name": "Has FASTQ Files?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        608,
-        352
+        -1168,
+        576
       ]
     },
     {
@@ -95,20 +46,20 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -544,
-        352
+        -1408,
+        576
       ],
       "id": "74bdf2d6-db55-47b8-9d23-658c25bd5612",
       "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
-        "jsCode": "  const stdout = $input.item.json.stdout;\n\n  // Eğer stdout boşsa, boş array döndür\n  if (!stdout || stdout.trim() === '') {\n    return [];\n  }\n\n  // \\n ile böl ve boş satırları filtrele\n  const filenames = stdout.trim().split('\\n').filter(line => line.length > 0);\n\n  // PROJECT_ID'yi workflow başlangıcından al\n  const projectId = $('Set Project ID').first().json.PROJECT_ID;\n\n  // Her dosya adını işle ve ayrı item olarak döndür\n  return filenames.map(filename => {\n    // Tırnak işaretlerini temizle\n    const cleanFilename = filename.trim().replace(/^\"|\"$/g, '');\n\n    // _S'den önceki kısmı al\n    const beforeS = cleanFilename.split('_S')[0];\n\n    // -D veya -R var mı kontrol et\n    let sampleId;\n    let analysisType;\n\n    if (beforeS.endsWith('-D') || beforeS.endsWith('-R')) {\n      // -D veya -R varsa, onu çıkar\n      sampleId = beforeS.slice(0, -2);\n      analysisType = 'TSO500_HT';\n    } else {\n      // -D veya -R yoksa, tüm kısmı kullan\n      sampleId = beforeS;\n      analysisType = 'TSO500_ctDNA';\n    }\n\n    return {\n      json: {\n        filename: cleanFilename,\n        sample_id: sampleId,\n        analysis_type: analysisType,\n        PROJECT_ID: projectId\n      }\n    };\n  });"
+        "jsCode": "const stdout = $input.item.json.stdout;\n\nif (!stdout || stdout.trim() === '') {\n  return [];\n}\n\n// Literal \\n'leri gerçek newline'a çevir ve satırlara böl\nconst lines = stdout.replace(/\\\\n/g, '\\n').split('\\n');\n\n// Sadece FILE satırlarını al (başlık ve özet satırlarını atla)\nconst fileLines = lines.filter(line => \n  line.includes('\\tFILE\\t') && line.includes('.fastq.gz')\n);\n\nconst projectId = $('Set Project ID').first().json.PROJECT_ID;\n\nreturn fileLines.map(line => {\n  // Tab ile böl ve ilk kolonu (filename) al\n  const filename = line.split('\\t')[0];\n  \n  const beforeS = filename.split('_S')[0];\n  let sampleId, analysisType;\n  \n  if (beforeS.endsWith('-D') || beforeS.endsWith('-R')) {\n    sampleId = beforeS.slice(0, -2);\n    analysisType = 'TSO500_HT';\n  } else {\n    sampleId = beforeS;\n    analysisType = 'TSO500_ctDNA';\n  }\n  \n  return {\n    json: {\n      filename: filename,\n      sample_id: sampleId,\n      analysis_type: analysisType,\n      PROJECT_ID: projectId\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -416,
+        -432,
         848
       ],
       "id": "3ad97c65-caa8-4a51-b660-65fbca2bd53f",
@@ -228,25 +179,12 @@
     },
     {
       "parameters": {
-        "command": "=PROJECT_ID='{{ $(\"Set Project ID\").first().json.PROJECT_ID }}'\n\ncurl -s -X GET \"https://ica.illumina.com/ica/rest/api/projects/${PROJECT_ID}/data?filePath=/input_folder/&type=FILE&pageSize=1000\" \\\n    -H 'Accept: application/vnd.illumina.v3+json' \\\n    -H 'X-API-Key: RBsYkBubZxrPXkR3AvjLXUlYFGJJ8FOM' | \\\n  jq -r '.items[] | select(.data.details.name | endswith(\".fastq.gz\")) | select(.data.details.tags.userTags // [] | contains([\"on_hold\"])) | .data.details.name'"
-      },
-      "id": "0b7fe440-cdf5-45fa-b605-7ad321fd7a0c",
-      "name": "List Waiting Samples",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        2144,
-        368
-      ]
-    },
-    {
-      "parameters": {
         "command": "=  icav2 projectpipelines start nextflow \"142fb3af-f0aa-41f2-b043-f2913671e0b4\" \\\n    --project-id {{ $('Prepare Pipeline Launch').item.json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch').item.json.sample_id }}-analysis\" 2>&1 | grep \"^id\" | awk '{print $2}'\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1744,
+        1568,
         624
       ],
       "id": "4904a969-41f7-460f-950c-db9fb5e65886",
@@ -259,11 +197,12 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1952,
+        1792,
         624
       ],
       "id": "c0fba6e9-f0d2-4b89-bf0e-fdb0e887465e",
-      "name": "Update File Tags"
+      "name": "Update File Tags",
+      "disabled": true
     },
     {
       "parameters": {
@@ -301,19 +240,6 @@
     },
     {
       "parameters": {
-        "command": "=icav2 projects enter {{ $json.PROJECT_ID }}"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -80,
-        352
-      ],
-      "id": "7d12d22b-5058-47e6-9c30-48d0b92fef23",
-      "name": "Execute Command"
-    },
-    {
-      "parameters": {
         "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
       },
       "type": "n8n-nodes-base.code",
@@ -332,11 +258,12 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1952,
+        1856,
         1168
       ],
       "id": "55170abe-842a-4a7d-9c87-7dcadd90242f",
-      "name": "Update File Tags1"
+      "name": "Update File Tags1",
+      "disabled": true
     },
     {
       "parameters": {
@@ -411,7 +338,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1744,
+        1568,
         1168
       ],
       "id": "80051fba-0f8b-4310-860f-fc774b60d03c",
@@ -429,59 +356,6 @@
       ],
       "id": "9126cd98-13ea-49d1-9f76-ba0f43c24bdf",
       "name": "Parse Folder IDs ctDNA"
-    },
-    {
-      "parameters": {
-        "command": "=icav2 projectdata get \"/input_folder/\" --project-id  {{ $('Set Project ID').item.json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}'"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        896,
-        192
-      ],
-      "id": "234279e9-4b9e-492a-beee-105244118202",
-      "name": "Get Input Folder ID"
-    },
-    {
-      "parameters": {
-        "command": "=icav2 projectdata list / --project-id {{ $('Set Project ID').item.json.PROJECT_ID }} --data-type FILE --file-name .fastq.gz --match-mode FUZZY -o json 2>/dev/null "
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        1120,
-        192
-      ],
-      "id": "7914784f-b29a-4c17-a5ad-792c535ccb45",
-      "name": "List Root FastQ Files"
-    },
-    {
-      "parameters": {
-        "jsCode": "const stdout = $input.item.json.stdout;\nconst inputFolderId = $('Get Input Folder ID').item.json.stdout.trim();\nconst projectId = $('Set Project ID').first().json.PROJECT_ID;\n\ntry {\n  const fileList = JSON.parse(stdout);\n  \n  if (!fileList.items || fileList.items.length === 0) {\n    return [];\n  }\n  \n  return fileList.items.map(file => ({\n    json: {\n      file_id: file.id,\n      file_name: file.details.name,\n      input_folder_id: inputFolderId,\n      PROJECT_ID: projectId\n    }\n  }));\n} catch (error) {\n  console.error('Error parsing file list:', error);\n  return [];\n}"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1344,
-        192
-      ],
-      "id": "ab4f8225-e19e-41f3-8b85-72c5d4967fbc",
-      "name": "Parse File IDs"
-    },
-    {
-      "parameters": {
-        "executeOnce": false,
-        "command": "=SAMPLE_ID='{{ $json.sample_id }}'\nPROJECT_ID='{{ $json.PROJECT_ID }}'\nFILES='{{ JSON.stringify($json.files) }}'\n\necho \"=== İşleniyor: $SAMPLE_ID ===\"\n\n# Klasör ID'sini list komutundan al (daha güvenilir)\nSAMPLE_FOLDER_ID=$(icav2 projectdata list \\\n  --project-id \"$PROJECT_ID\" \\\n  --parent-folder \"/input_folder/\" \\\n  2>&1 | grep \"^${SAMPLE_ID} \" | awk '{print $4}')\n\necho \"Klasör ID: $SAMPLE_FOLDER_ID\"\n\nif [ -z \"$SAMPLE_FOLDER_ID\" ]; then\n  echo \"HATA: Klasör bulunamadı, oluşturuluyor...\"\n  icav2 projectdata create \"$SAMPLE_ID\" \\\n    --data-type FOLDER \\\n    --folder-path \"/input_folder/\" \\\n    --project-id \"$PROJECT_ID\"\n  \n  # Tekrar dene\n  SAMPLE_FOLDER_ID=$(icav2 projectdata list \\\n    --project-id \"$PROJECT_ID\" \\\n    --parent-folder \"/input_folder/\" \\\n    2>&1 | grep \"^${SAMPLE_ID} \" | awk '{print $4}')\nfi\n\nif [ -z \"$SAMPLE_FOLDER_ID\" ]; then\n  echo \"HATA: Klasör ID alınamadı!\"\n  exit 1\nfi\n\n# Dosyaları taşı\necho \"$FILES\" | jq -r '.[] | .file_id' | while read FILE_ID; do\n  echo \"Taşınıyor: $FILE_ID\"\n  icav2 projectdata move \"$FILE_ID\" \\\n    --destination-folder \"$SAMPLE_FOLDER_ID\" \\\n    --project-id \"$PROJECT_ID\" 2>&1 || echo \"Taşıma hatası (belki zaten orada)\"\ndone\n\n# Dosyaları etiketle\necho \"$FILES\" | jq -r '.[] | .file_id' | while read FILE_ID; do\n  echo \"Etiketleniyor: $FILE_ID\"\n  icav2 projectdata update \"$FILE_ID\" \\\n    --add-user-tag on_hold \\\n    --project-id \"$PROJECT_ID\"\ndone\n\necho \"✓ Tamamlandı: $SAMPLE_ID ($(echo $FILES | jq '. | length') dosya)\""
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        1776,
-        192
-      ],
-      "id": "3bb83148-9bb6-4202-bf48-a717263a36f5",
-      "name": "Move Files to Input Folder"
     },
     {
       "parameters": {
@@ -580,7 +454,8 @@
         896
       ],
       "id": "21f3bfc3-e6c3-43da-b12a-a19b14dfae6b",
-      "name": "Update File Tags HRD"
+      "name": "Update File Tags HRD",
+      "disabled": true
     },
     {
       "parameters": {
@@ -611,19 +486,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst projectId = items[0].json.PROJECT_ID;\nconst inputFolderId = items[0].json.input_folder_id;\n\n// Sample'lara göre grupla\nconst sampleGroups = {};\n\nfor (const item of items) {\n  const sampleId = item.json.file_name.split('_')[0];\n  \n  if (!sampleGroups[sampleId]) {\n    sampleGroups[sampleId] = {\n      sample_id: sampleId,\n      files: []\n    };\n  }\n  \n  sampleGroups[sampleId].files.push({\n    file_id: item.json.file_id,\n    file_name: item.json.file_name\n  });\n}\n\n// Her sample için output oluştur\nreturn Object.values(sampleGroups).map(group => ({\n  json: {\n    sample_id: group.sample_id,\n    files: group.files,\n    PROJECT_ID: projectId,\n    input_folder_id: inputFolderId\n  }\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1552,
-        192
-      ],
-      "id": "ba6b28d6-5680-4b17-bbea-8eeece01e619",
-      "name": "Group by Sample"
-    },
-    {
-      "parameters": {
         "mode": "runOnceForEachItem",
         "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
       },
@@ -635,6 +497,89 @@
         496,
         624
       ]
+    },
+    {
+      "parameters": {
+        "command": "=/usr/local/bin/icav2 projects enter {{ $json.PROJECT_ID }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        272
+      ],
+      "id": "7d49dd3b-79fd-4529-817f-e39bd7743672",
+      "name": " ICA Login from Remote",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cd /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }} && /usr/local/bin/fd {{ $json.SAMPLE_ID }} . -e fastq.gz -x realpath --relative-to=/volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }} {}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        464
+      ],
+      "id": "c4abe0cc-7ab2-4125-abd9-5aa04fd92bac",
+      "name": "Find Fastq Files",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cd /volume1/illuminastorage/fastq_folder/{{ $('Set Project ID').item.json.FOLDER }} && /usr/local/bin/icav2 projectdata upload \"{{ $json.filepath }}\" /input_folder/{{ $('Set Project ID').item.json.SAMPLE_ID }}/ --project-id {{ $('Set Project ID').item.json.PROJECT_ID }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        464
+      ],
+      "id": "aedc8b98-64c8-4382-9d52-e3fc4e28e6d0",
+      "name": "Upload Sample Folder",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=icav2 projectdata list \\\n  --project-id \"{{ $json.PROJECT_ID }}\" \\\n  --parent-folder \"/input_folder/{{ $json.SAMPLE_ID }}/\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        848
+      ],
+      "id": "ae0fd2f5-9007-4a70-be30-a975ed50d2d5",
+      "name": "List Files"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lines = $input.item.json.stdout.trim().split('\\n');\nreturn lines.map(line => ({\n  json: {\n    filepath: line\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -656,
+        464
+      ],
+      "id": "4c70999f-50f3-4ba7-9472-013068f2e233",
+      "name": "Code in JavaScript1"
     }
   ],
   "connections": {
@@ -642,47 +587,17 @@
       "main": [
         [
           {
-            "node": "Execute Command",
+            "node": " ICA Login from Remote",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Validate Output Folder": {
-      "main": [
-        [
+          },
           {
-            "node": "Check FASTQ Files in Root",
+            "node": "Find Fastq Files",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Check FASTQ Files in Root": {
-      "main": [
-        [
+          },
           {
-            "node": "Has FASTQ Files?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Has FASTQ Files?": {
-      "main": [
-        [
-          {
-            "node": "Get Input Folder ID",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "List Waiting Samples",
+            "node": "List Files",
             "type": "main",
             "index": 0
           }
@@ -799,22 +714,16 @@
         ]
       ]
     },
-    "List Waiting Samples": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Launch Analysis": {
       "main": [
         [
           {
             "node": "Update File Tags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -837,17 +746,6 @@
         [
           {
             "node": "Group ctDNA Samples",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Command": {
-      "main": [
-        [
-          {
-            "node": "Validate Output Folder",
             "type": "main",
             "index": 0
           }
@@ -939,6 +837,11 @@
             "node": "Update File Tags1",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Loop Over Items ctDNA",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -948,50 +851,6 @@
         [
           {
             "node": "Launch ctDNA Analysis",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Input Folder ID": {
-      "main": [
-        [
-          {
-            "node": "List Root FastQ Files",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "List Root FastQ Files": {
-      "main": [
-        [
-          {
-            "node": "Parse File IDs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parse File IDs": {
-      "main": [
-        [
-          {
-            "node": "Group by Sample",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Move Files to Input Folder": {
-      "main": [
-        [
-          {
-            "node": "List Waiting Samples",
             "type": "main",
             "index": 0
           }
@@ -1050,6 +909,11 @@
             "node": "Update File Tags HRD",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Loop Over Items HRD",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1087,22 +951,49 @@
         ]
       ]
     },
-    "Group by Sample": {
+    "Generate Sample Sheet": {
       "main": [
         [
           {
-            "node": "Move Files to Input Folder",
+            "node": "SampleSheet Upload",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Generate Sample Sheet": {
+    " ICA Login from Remote": {
+      "main": [
+        []
+      ]
+    },
+    "Find Fastq Files": {
       "main": [
         [
           {
-            "node": "SampleSheet Upload",
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Files": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Upload Sample Folder",
             "type": "main",
             "index": 0
           }
@@ -1114,9 +1005,12 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "311c6c28-033f-4115-925c-5c9280b1907c",
+  "versionId": "a650d484-1f83-44a5-9afc-991fda362055",
+  "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
     {
@@ -1127,5 +1021,8 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "tags": []
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "06-01-2026/22:39",
+  "fileName": "ICA DRAGEN TSO500 Workflow.json"
 }
