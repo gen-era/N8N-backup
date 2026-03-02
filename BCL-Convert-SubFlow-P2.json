@@ -1,0 +1,33 @@
+{
+  "updatedAt": "2026-01-29T02:30:27.545Z",
+  "createdAt": "2026-01-29T02:30:27.545Z",
+  "id": "orJiAPKndOWoqbQT",
+  "name": "BCL-Convert-SubFlow-P2",
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "c2934665-2504-4bac-8f1c-3ec00cb6dde3",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-29T02:30:27.552Z",
+      "createdAt": "2026-01-29T02:30:27.552Z",
+      "role": "workflow:owner",
+      "workflowId": "orJiAPKndOWoqbQT",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "BCL-Convert-SubFlow-P2.json"
+}
