@@ -1,0 +1,509 @@
+{
+  "updatedAt": "2026-02-25T08:58:48.386Z",
+  "createdAt": "2026-01-10T08:42:17.222Z",
+  "id": "ySPVdNQoeGpVZmNi",
+  "name": "ICA DRAGEN TSO500",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -16
+      ],
+      "id": "2df2c1b4-3e10-47ba-be7d-6a8cfb0b1024",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        -32
+      ],
+      "id": "68bf338f-9adf-4a54-b9fa-0951eb03100d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "command": "=find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' 2>/dev/null | wc -l"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -480
+      ],
+      "id": "e0b8a9b0-4f6d-4898-ba1e-46903bf53542",
+      "name": "Count Local Files",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' -printf '%p\\n' 2>/dev/null\n"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -304
+      ],
+      "id": "26533a34-4401-4e20-8a07-5ac8cb4ef727",
+      "name": "List Local Files",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a164a66-9009-4355-979f-b1ac2d7029f6",
+              "name": "LOCAL_FILE_COUNT",
+              "value": "={{ $json.stdout }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -480
+      ],
+      "id": "91b613a1-2937-45ef-9ea3-a2aeadf69951",
+      "name": "Edit Counts"
+    },
+    {
+      "parameters": {
+        "command": "=/usr/local/bin/icav2 projectdata list /input_folder/{{ $json.SAMPLE_ID }}/ --project-id {{ $json.PROJECT_ID }} --data-type FILE --parent-folder -o json | jq -r '.items[]? | select(.details.name != null) | .details.name'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -112
+      ],
+      "id": "f08dc7da-f8f7-4021-8cfd-92737f0cc09f",
+      "name": "List Remote Files",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20ae3da9-d0a2-4357-9dcb-80d1dfa88963",
+              "name": "REMOTE_FILES",
+              "value": "={{ $json.stdout }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -112
+      ],
+      "id": "f3eb5453-d238-4806-b814-1bdf943e5e13",
+      "name": "Edit Remote Files"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "142a4b02-27b1-43af-88b2-dbf2e9708aff",
+              "name": "LOCAL_FILES",
+              "value": "={{ $json.stdout }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -304
+      ],
+      "id": "6961efce-807b-45bb-81e0-e35439069514",
+      "name": "Edit Local Files"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cb8d5c5e-46f1-4922-b6ee-1bd7049426f8",
+              "leftValue": "={{ $json.REMOTE_FILES }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        864,
+        0
+      ],
+      "id": "eb8b0c55-eed4-4f03-995f-166872e8995a",
+      "name": "Filter Files Present on Remote"
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.command }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        0
+      ],
+      "id": "851524dd-7cfc-44cc-bbea-926233a1c8a3",
+      "name": "Send Script",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\n\nconst commands = items.map((item, index) => {\n  const files = item.LOCAL_FILES.split('\\n').filter(f => f.trim());\n  \n  const firstFile = files[0].trim();\n  const parentDir = firstFile.substring(0, firstFile.lastIndexOf('/'));\n  \n  const uploadCommands = files.map(file => {\n    const fileName = file.trim().substring(file.trim().lastIndexOf('/') + 1);\n    // cd sonrası sadece fileName kullan\n    const uploadCmd = `/usr/local/bin/icav2 projectdata upload \"${fileName}\" /input_folder/${item.SAMPLE_ID}/${fileName} --project-id ${item.PROJECT_ID} --num-workers 4`;\n    \n    return `(${uploadCmd} || (echo \"Retry 1/3 for ${fileName}\" && sleep 5 && ${uploadCmd}) || (echo \"Retry 2/3 for ${fileName}\" && sleep 10 && ${uploadCmd}) || (echo \"Retry 3/3 for ${fileName}\" && sleep 15 && ${uploadCmd}))`;\n  });\n  \n  // parentDir tırnak içinde - DÜZEN gibi Türkçe karakter koruması\n  const uploadCommand = `cd \"${parentDir}\" && ${uploadCommands.join(' && ')}`;\n  \n  const itemJson = JSON.stringify(item);\n  const encodedJson = Buffer.from(itemJson).toString('base64');\n  \n  return `${uploadCommand} && sleep 60 && echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Sending webhook for ${item.SAMPLE_ID}\" && echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`;\n}).join(' && ');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\n\nreturn [{\n  json: {\n    command: `(${commands}) > ${logFile} 2>&1 &`,\n    logFile: logFile,\n    totalItems: items.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "6e7237e1-c23d-483b-b819-c8f8a51d0981",
+      "name": "Prepare Upload Script"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        16,
+        288
+      ],
+      "id": "192be365-959d-43de-abe1-5b750e248d3c",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "command": "=/usr/local/bin/icav2 projectdata list /input_folder/{{ $json.SAMPLE_ID }}/ --project-id {{ $json.PROJECT_ID }} --data-type FILE --parent-folder -o json | jq -r '.items[]? | select(.details.name != null) | .details.name'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        432,
+        288
+      ],
+      "id": "ee3f1711-0624-4c53-9002-eff30135b316",
+      "name": "List Remote Files1",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        288
+      ],
+      "id": "b18d80c6-8809-4423-adb1-c10032b2d771",
+      "name": "Wait",
+      "webhookId": "f715d0ae-07f1-461e-8cfc-e7a051656b4a"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app7zuDMPnrkW6fKx",
+          "mode": "list",
+          "cachedResultName": "ICA Upload",
+          "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblZHb0ztwV1UVUZh",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx/tblZHb0ztwV1UVUZh"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -576,
+        -16
+      ],
+      "id": "eed6da88-e598-467b-8293-146d4cf5a35c",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter Files Present on Remote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Local Files": {
+      "main": [
+        [
+          {
+            "node": "Edit Counts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Local Files": {
+      "main": [
+        [
+          {
+            "node": "Edit Local Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Counts": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Remote Files": {
+      "main": [
+        [
+          {
+            "node": "Edit Remote Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Local Files": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Remote Files": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Filter Files Present on Remote": {
+      "main": [
+        [
+          {
+            "node": "Prepare Upload Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Upload Script": {
+      "main": [
+        [
+          {
+            "node": "Send Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Script": {
+      "main": [
+        []
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "List Remote Files1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Count Local Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Local Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "List Remote Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "fe32a567-d1bf-460c-ac26-90313afedfa7",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-10T08:42:17.237Z",
+      "createdAt": "2026-01-10T08:42:17.237Z",
+      "role": "workflow:owner",
+      "workflowId": "ySPVdNQoeGpVZmNi",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2026-02-25T08:58:40.172Z",
+      "createdAt": "2026-02-25T08:58:40.172Z",
+      "id": "haVpXFpEUMjyquhf",
+      "name": "Production"
+    }
+  ],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "ICA DRAGEN TSO500.json"
+}
