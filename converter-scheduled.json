@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-04T23:20:41.432Z",
+  "updatedAt": "2026-02-27T11:36:47.739Z",
   "createdAt": "2025-08-29T07:09:31.570Z",
   "id": "u3Gwkokw9EhG5M3O",
   "name": "converter-scheduled",
@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "command": "find /mnt/illuminastorage/run_folder -mindepth 1 -maxdepth 1 -type d -regextype posix-extended -regex '.*/[0-9]{6,8}_[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+' | sort"
+        "command": "find /mnt/illuminastorage/run_folder /mnt/usb /mnt/usb2 -mindepth 1 -maxdepth 2 -type d -regextype posix-extended -regex '.*/[0-9]{6,8}_[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+' | sort"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -125,7 +125,7 @@
     {
       "parameters": {
         "executeOnce": false,
-        "command": "=FOLDER_PATH=\"{{ $json.folder_path }}\"\nFOLDER_NAME=\"{{ $json.folder_name }}\"\n\n# Check all conditions\nCOPY_COMPLETE=\"false\"\nRTA_COMPLETE=\"false\"\nHAS_PROCESSING=\"false\"\nHAS_CONVERTED=\"false\"\nHAS_CONVERSION_ERROR=\"false\"\nHAS_SAMPLESHEET_ERROR=\"false\"\n\n# Check for completion files\nif [ -f \"$FOLDER_PATH/CopyComplete.txt\" ] || [ -f \"$FOLDER_PATH/SequenceComplete.txt\" ]; then\n    COPY_COMPLETE=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/RTAComplete.txt\" ]; then\n    RTA_COMPLETE=\"true\"\nfi\n\n# Check for Processing folder (conversion in progress)\nif [ -f \"$FOLDER_PATH/Processing.txt\" ]; then\n    HAS_PROCESSING=\"true\"\nfi\n\n# Check for Converted folder (conversion completed)\nif [ -f \"$FOLDER_PATH/Converted.txt\" ]; then\n    HAS_CONVERTED=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/BCLConvertError.txt.\" ]; then\n    HAS_CONVERSION_ERROR=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/SampleSheetError.txt\" ]; then\n    HAS_SAMPLESHEET_ERROR=\"true\"\nfi\n\n# Determine overall status\nif [ \"$HAS_PROCESSING\" = \"true\" ]; then\n    STATUS=\"CONVERSION_IN_PROGRESS\"\nelif [ \"$HAS_CONVERTED\" = \"true\" ]; then\n    STATUS=\"CONVERSION_COMPLETED\"\nelif [ \"$COPY_COMPLETE\" = \"true\" ] && [ \"$RTA_COMPLETE\" = \"true\" ]; then\n    STATUS=\"READY_FOR_CONVERSION\"\nelse\n    STATUS=\"INCOMPLETE\"\nfi\n\n# Output proper JSON\ncat << EOF\n{\n  \"folder\": \"$FOLDER_NAME\",\n  \"path\": \"$FOLDER_PATH\",\n  \"status\": \"$STATUS\",\n  \"copy_complete\": $COPY_COMPLETE,\n  \"rta_complete\": $RTA_COMPLETE,\n  \"has_processing\": $HAS_PROCESSING,\n  \"has_converted\": $HAS_CONVERTED,\n  \"has_conversion_error\":$HAS_CONVERSION_ERROR,\n  \"has_samplesheet_error\":$HAS_SAMPLESHEET_ERROR\n}\nEOF"
+        "command": "=FOLDER_PATH=\"{{ $json.folder_path }}\"\nFOLDER_NAME=\"{{ $json.folder_name }}\"\n\n# Check all conditions\nCOPY_COMPLETE=\"false\"\nRTA_COMPLETE=\"false\"\nHAS_PROCESSING=\"false\"\nHAS_CONVERTED=\"false\"\nHAS_CONVERSION_ERROR=\"false\"\nHAS_SAMPLESHEET_ERROR=\"false\"\n\n# Check for completion files\nif [ -f \"$FOLDER_PATH/CopyComplete.txt\" ] || [ -f \"$FOLDER_PATH/SequenceComplete.txt\" ]; then\n    COPY_COMPLETE=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/RTAComplete.txt\" ]; then\n    RTA_COMPLETE=\"true\"\nfi\n\n# Check for Processing folder (conversion in progress)\nif [ -f \"$FOLDER_PATH/Processing.txt\" ]; then\n    HAS_PROCESSING=\"true\"\nfi\n\n# Check for Converted folder (conversion completed)\nif [ -f \"$FOLDER_PATH/Converted.txt\" ]; then\n    HAS_CONVERTED=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/BCLConvertError.txt\" ]; then\n    HAS_CONVERSION_ERROR=\"true\"\nfi\n\nif [ -f \"$FOLDER_PATH/SampleSheetError.txt\" ]; then\n    HAS_SAMPLESHEET_ERROR=\"true\"\nfi\n\n# Determine overall status\nif [ \"$HAS_PROCESSING\" = \"true\" ]; then\n    STATUS=\"CONVERSION_IN_PROGRESS\"\nelif [ \"$HAS_CONVERTED\" = \"true\" ]; then\n    STATUS=\"CONVERSION_COMPLETED\"\nelif [ \"$COPY_COMPLETE\" = \"true\" ] && [ \"$RTA_COMPLETE\" = \"true\" ]; then\n    STATUS=\"READY_FOR_CONVERSION\"\nelse\n    STATUS=\"INCOMPLETE\"\nfi\n\n# Output proper JSON\ncat << EOF\n{\n  \"folder\": \"$FOLDER_NAME\",\n  \"path\": \"$FOLDER_PATH\",\n  \"status\": \"$STATUS\",\n  \"copy_complete\": $COPY_COMPLETE,\n  \"rta_complete\": $RTA_COMPLETE,\n  \"has_processing\": $HAS_PROCESSING,\n  \"has_converted\": $HAS_CONVERTED,\n  \"has_conversion_error\":$HAS_CONVERSION_ERROR,\n  \"has_samplesheet_error\":$HAS_SAMPLESHEET_ERROR\n}\nEOF"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -169,17 +169,17 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "O8YHNZzNyW1ZWOlt",
+          "value": "3lb4DGgQtGBre5YC",
           "mode": "list",
-          "cachedResultUrl": "/workflow/O8YHNZzNyW1ZWOlt",
-          "cachedResultName": "BCL-convert subflow"
+          "cachedResultUrl": "/workflow/3lb4DGgQtGBre5YC",
+          "cachedResultName": "BCL Convert - 01 Orchestrator"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "run_id": "={{ $('Limit').item.json.folder }}",
+            "is_xp": "={{ $('update run info').item.json.workflow_concept_ref == 18 }}",
             "path": "={{ $('Limit').item.json.path }}",
-            "is_xp": "={{ $('update run info').item.json.workflow_concept_ref == 18 }}"
+            "run_id": "={{ $('Limit').item.json.folder }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -190,8 +190,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "path",
@@ -200,8 +199,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
+              "type": "string"
             },
             {
               "id": "is_xp",
@@ -210,8 +208,7 @@
               "defaultMatch": false,
               "display": true,
               "canBeUsedToMatch": true,
-              "type": "boolean",
-              "removed": false
+              "type": "boolean"
             }
           ],
           "attemptToConvertTypes": false,
@@ -1038,8 +1035,8 @@
           "value": {
             "run_id": "={{ $json.folder }}",
             "updated_at": "2025-10-24T10:36:33",
-            "storage_instrument_concept_ref": 6,
-            "status_concept_ref": 26
+            "status_concept_ref": 26,
+            "storage_instrument_ref": 12
           },
           "matchingColumns": [
             "run_id"
@@ -1072,17 +1069,17 @@
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
-              "id": "flowcell_concept_ref",
-              "displayName": "flowcell_concept_ref",
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
@@ -1092,7 +1089,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
@@ -1102,7 +1099,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "dateTime",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
@@ -1112,7 +1109,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
@@ -1122,27 +1119,36 @@
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": false
             },
             {
-              "id": "storage_instrument_concept_ref",
-              "displayName": "storage_instrument_concept_ref",
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": false
             },
             {
-              "id": "operator_ref",
-              "displayName": "operator_ref",
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             },
             {
@@ -1152,26 +1158,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "dateTime",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "updated_at",
-              "displayName": "updated_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": false
-            },
-            {
-              "id": "workflow_concept_ref",
-              "displayName": "workflow_concept_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
+              "canBeUsedToMatch": true,
               "removed": true
             }
           ],
@@ -1394,7 +1381,38 @@
           "mappingMode": "defineBelow",
           "value": {},
           "matchingColumns": [],
-          "schema": [],
+          "schema": [
+            {
+              "id": "folder",
+              "displayName": "folder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
@@ -1406,8 +1424,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2896,
-        -240
+        2864,
+        -320
       ],
       "id": "2bf75dc0-c928-41aa-909c-e044811f751a",
       "name": "Call 'interop'",
@@ -2265,7 +2283,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1d59adfb-e781-49ea-8923-45356970a452",
+  "versionId": "6d512bce-b157-46cc-9d16-9d3e3fa8cafd",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -2279,6 +2297,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "converter-scheduled.json"
 }
