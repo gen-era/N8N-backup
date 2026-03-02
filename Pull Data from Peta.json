@@ -1,0 +1,147 @@
+{
+  "updatedAt": "2026-01-09T08:17:12.521Z",
+  "createdAt": "2026-01-09T06:58:29.917Z",
+  "id": "Csa0MYN1XBpSpJuc",
+  "name": "Pull Data from Peta",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -32
+      ],
+      "id": "9554f7ee-6ced-403f-9daa-e5a66aaf9f66",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51f907b5-8dbf-4ec3-ab5b-caabf7e6c15f",
+              "name": "sample_id",
+              "value": "M25-YCES-3476",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        -32
+      ],
+      "id": "24faaa3d-d609-4f27-a06f-9f8b6d1ff412",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "=grep \"{{$json.sample_id}}\" $(ls -t /pool0/kozapeta/Data_Consolidation/consolidated/index/*.csv | head -1) | grep -oP 'P:\\\\consolidated[^,]+' | sed 's|P:\\\\|/pool0/kozapeta/Data_Consolidation/|g; s|\\\\|/|g' | xargs -I {} sh -c 'ls -1 {}/*.fastq.gz 2>/dev/null || echo \"No fastq.gz files in {}\"'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -32
+      ],
+      "id": "1d088774-afc6-4f3e-818b-f8ccae67647a",
+      "name": "Find Files by Index",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=echo '{{$json.stdout}}' | parallel -j 4 scp -O -i ~/.ssh/alldata_key -P 3422 {} can.holyavkin@10.20.0.10:/volume1/ALLDATA/File_Exchange/can/"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -32
+      ],
+      "id": "0ca62eb6-287b-435f-b89b-bc046aee98ba",
+      "name": "Copy Files to AllData",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Find Files by Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Files by Index": {
+      "main": [
+        [
+          {
+            "node": "Copy Files to AllData",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Files to AllData": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "76ae6cf5-13c1-4820-b49f-e53a0101dbd3",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-09T06:58:29.922Z",
+      "createdAt": "2026-01-09T06:58:29.922Z",
+      "role": "workflow:owner",
+      "workflowId": "Csa0MYN1XBpSpJuc",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "Pull Data from Peta.json"
+}
