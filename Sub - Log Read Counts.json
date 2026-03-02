@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-05T11:10:11.025Z",
+  "updatedAt": "2026-01-21T10:41:53.027Z",
   "createdAt": "2025-12-20T08:27:11.829Z",
   "id": "ZCR88Eupzp3GBpO3",
   "name": "Sub - Log Read Counts",
@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1776,
+        1712,
         -32
       ],
       "id": "5624fc4c-ba85-46e5-bf07-d3539127e7f5",
@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
+        1888,
         -32
       ],
       "id": "4c2d49e8-ee76-4de5-913f-411d45fe8664",
@@ -34,7 +34,7 @@
     },
     {
       "parameters": {
-        "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/SampleSheet.csv"
+        "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/SampleSheet-Consolidation.csv"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -66,7 +66,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2272,
+        2576,
         -48
       ],
       "id": "9cc81eb2-2a55-4663-9bab-c78b0fc3111e",
@@ -298,6 +298,26 @@
               "type": "string",
               "canBeUsedToMatch": false,
               "removed": true
+            },
+            {
+              "id": "r1_path",
+              "displayName": "r1_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "r2_path",
+              "displayName": "r2_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -308,8 +328,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2480,
-        -48
+        4224,
+        -848
       ],
       "id": "d5a62dc4-f488-44a6-8b0e-51b9dec251f9",
       "name": "Insert or update rows in a table",
@@ -343,50 +363,6 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "indices",
-          "mode": "list",
-          "cachedResultName": "indices"
-        },
-        "returnAll": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        2832,
-        -368
-      ],
-      "id": "d37cc42c-7c5f-4c59-8c96-7dffdf49a349",
-      "name": "Pull Indices DB",
-      "executeOnce": true,
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        3552,
-        -96
-      ],
-      "id": "ed666368-7ffe-4408-a98e-ed198f75ba61",
-      "name": "Add Index Ref"
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
@@ -415,8 +391,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3184,
-        -128
+        4736,
+        -1248
       ],
       "id": "758baa95-c80c-477b-a193-72090c0a2d9e",
       "name": "Add Conversion Ref"
@@ -430,8 +406,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4720,
-        -96
+        4224,
+        -64
       ],
       "id": "92cbdd61-5cb9-49b7-94d2-2a3471a1dbbd",
       "name": "Merge Care Sites"
@@ -456,8 +432,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        4336,
-        -320
+        3808,
+        -288
       ],
       "id": "2e8a9007-6e29-4218-ae45-c4a65628235b",
       "name": "Pull Care Sites",
@@ -468,30 +444,6 @@
           "name": "PG-ALB-1.5"
         }
       }
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "advanced": true,
-        "mergeByFields": {
-          "values": [
-            {
-              "field1": "source_value",
-              "field2": "Library_Prep_Kit"
-            }
-          ]
-        },
-        "joinMode": "enrichInput2",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        4144,
-        -96
-      ],
-      "id": "7c579429-be53-4b35-9997-16eebb01f3ea",
-      "name": "Merge"
     },
     {
       "parameters": {
@@ -521,8 +473,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        3760,
-        -320
+        3280,
+        -288
       ],
       "id": "1c784126-bc4d-4875-98a9-5e7f85483e0b",
       "name": "Pull Kits Mapping",
@@ -623,16 +575,6 @@
                 "operation": "empty",
                 "singleValue": true
               }
-            },
-            {
-              "id": "a0f75890-f05b-4872-bf23-da071aab118e",
-              "leftValue": "={{ $json.conversion_ref }}",
-              "rightValue": "",
-              "operator": {
-                "type": "number",
-                "operation": "empty",
-                "singleValue": true
-              }
             }
           ],
           "combinator": "or"
@@ -643,8 +585,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        4992,
-        -96
+        4496,
+        -64
       ],
       "id": "72b57bf0-3aae-445f-9673-7703b727fd4d",
       "name": "Unvalidated Samples?"
@@ -676,8 +618,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        5248,
-        -96
+        4752,
+        -64
       ],
       "id": "38eb6f3b-572d-4652-ac81-ac60c4b5098c",
       "name": "If"
@@ -840,8 +782,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        5520,
-        -96
+        5024,
+        -64
       ],
       "id": "73348689-7a5b-4e01-a8c9-d24fa95968b1",
       "name": "Update Reads",
@@ -858,31 +800,6 @@
           "key": [
             {
               "currentKey": "uniqueref",
-              "newKey": "index_ref"
-            },
-            {
-              "currentKey": "kit_ref",
-              "newKey": "index_kit_ref"
-            }
-          ]
-        },
-        "additionalOptions": {}
-      },
-      "type": "n8n-nodes-base.renameKeys",
-      "typeVersion": 1,
-      "position": [
-        3152,
-        -368
-      ],
-      "id": "84f6a553-ffa0-4534-b8be-5b50853a3f24",
-      "name": "Rename Keys"
-    },
-    {
-      "parameters": {
-        "keys": {
-          "key": [
-            {
-              "currentKey": "uniqueref",
               "newKey": "kit_ref"
             }
           ]
@@ -892,8 +809,8 @@
       "type": "n8n-nodes-base.renameKeys",
       "typeVersion": 1,
       "position": [
-        3968,
-        -320
+        3504,
+        -288
       ],
       "id": "56b832cc-f8c3-4ca9-8df3-14f9da53ed06",
       "name": "Rename Keys1"
@@ -913,69 +830,11 @@
       "type": "n8n-nodes-base.renameKeys",
       "typeVersion": 1,
       "position": [
-        4528,
-        -320
+        4064,
+        -288
       ],
       "id": "889f1354-2d24-4405-b9ff-89d02e0cba29",
       "name": "Rename Keys2"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "b06200da-561f-40fb-b822-4d2d22d55a73",
-              "name": "i7_sequence",
-              "value": "={{ $('Pull Indices DB').item.json.i7_sequence.slice(0, 8) }}",
-              "type": "string"
-            },
-            {
-              "id": "d11f63bf-2806-4c37-98b7-d33b3adb962e",
-              "name": "i5_sequence",
-              "value": "={{ $('Pull Indices DB').item.json.i5_sequence.slice(0, 8) }}",
-              "type": "string"
-            }
-          ]
-        },
-        "includeOtherFields": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        2976,
-        -368
-      ],
-      "id": "5a021f01-b5d2-43d5-8f10-b54edfcec517",
-      "name": "Trim Indices"
-    },
-    {
-      "parameters": {
-        "mode": "combine",
-        "advanced": true,
-        "mergeByFields": {
-          "values": [
-            {
-              "field1": "i7_sequence",
-              "field2": "index"
-            },
-            {
-              "field1": "i5_sequence",
-              "field2": "index2"
-            }
-          ]
-        },
-        "joinMode": "enrichInput2",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        3328,
-        -240
-      ],
-      "id": "cd2d394d-9205-42ad-93a0-fcce32a4abce",
-      "name": "Add 8bp Index Ref"
     },
     {
       "parameters": {
@@ -1005,8 +864,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        3056,
-        96
+        4608,
+        -1024
       ],
       "id": "af5ea870-222e-4d7f-8131-48cee3fdf188",
       "name": "Is i7 Index 8 bp"
@@ -1026,8 +885,8 @@
       "type": "n8n-nodes-base.renameKeys",
       "typeVersion": 1,
       "position": [
-        3248,
-        304
+        4800,
+        -816
       ],
       "id": "71958dd2-e764-4c72-a3ca-3743952ed878",
       "name": "Rename Keys3",
@@ -1061,12 +920,178 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        3168,
-        -144
+        4720,
+        -1264
       ],
       "id": "ea079937-181d-4afc-bde0-936de889f962",
       "name": "Filter",
       "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "Index",
+              "newKey": "Index_set"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        2080,
+        -32
+      ],
+      "id": "46558182-5a0d-4f3b-8a26-899a40f35211",
+      "name": "Rename Keys4"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "index_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        -288
+      ],
+      "id": "af5d07d8-bd74-4458-a136-d2fb16f3a160",
+      "name": "Rename Keys5"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "i7_sequence",
+              "field2": "Index"
+            },
+            {
+              "field1": "i5_sequence",
+              "field2": "Index2"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3120,
+        -48
+      ],
+      "id": "cd2d394d-9205-42ad-93a0-fcce32a4abce",
+      "name": "Add Index Ref"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "source_value",
+              "field2": "Library_Prep_Kit"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3648,
+        -48
+      ],
+      "id": "7c579429-be53-4b35-9997-16eebb01f3ea",
+      "name": "Add Kit Ref"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "indices",
+          "mode": "list",
+          "cachedResultName": "indices"
+        },
+        "returnAll": true,
+        "options": {
+          "outputColumns": [
+            "uniqueref",
+            "i7_sequence",
+            "i5_sequence"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2736,
+        -288
+      ],
+      "id": "d37cc42c-7c5f-4c59-8c96-7dffdf49a349",
+      "name": "Pull Indices",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a53facb7-e03b-4a1f-8e49-4b0523f46a51",
+              "leftValue": "={{ $json.SampleID }}",
+              "rightValue": "Undetermined",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2288,
+        -32
+      ],
+      "id": "0f860f0c-8c7e-4b34-a05c-d758223876b0",
+      "name": "Filter1"
     }
   ],
   "connections": {
@@ -1085,9 +1110,9 @@
       "main": [
         [
           {
-            "node": "Merge Demux and SampleSheet",
+            "node": "Rename Keys4",
             "type": "main",
-            "index": 1
+            "index": 0
           }
         ]
       ]
@@ -1118,9 +1143,14 @@
       "main": [
         [
           {
-            "node": "Insert or update rows in a table",
+            "node": "Pull Indices",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Add Index Ref",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -1174,17 +1204,6 @@
         ]
       ]
     },
-    "Pull Indices DB": {
-      "main": [
-        [
-          {
-            "node": "Trim Indices",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Add Conversion Ref": {
       "main": [
         [
@@ -1196,43 +1215,11 @@
         ]
       ]
     },
-    "Add Index Ref": {
-      "main": [
-        [
-          {
-            "node": "Merge",
-            "type": "main",
-            "index": 1
-          },
-          {
-            "node": "Pull Kits Mapping",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Pull Care Sites": {
       "main": [
         [
           {
             "node": "Rename Keys2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge": {
-      "main": [
-        [
-          {
-            "node": "Merge Care Sites",
-            "type": "main",
-            "index": 1
-          },
-          {
-            "node": "Pull Care Sites",
             "type": "main",
             "index": 0
           }
@@ -1284,22 +1271,11 @@
         ]
       ]
     },
-    "Rename Keys": {
-      "main": [
-        [
-          {
-            "node": "Add 8bp Index Ref",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Rename Keys1": {
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Add Kit Ref",
             "type": "main",
             "index": 0
           }
@@ -1317,48 +1293,10 @@
         ]
       ]
     },
-    "Trim Indices": {
-      "main": [
-        [
-          {
-            "node": "Rename Keys",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Add 8bp Index Ref": {
-      "main": [
-        [
-          {
-            "node": "Add Index Ref",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Is i7 Index 8 bp": {
       "main": [
+        [],
         [
-          {
-            "node": "Pull Indices DB",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Add 8bp Index Ref",
-            "type": "main",
-            "index": 1
-          }
-        ],
-        [
-          {
-            "node": "Add Index Ref",
-            "type": "main",
-            "index": 1
-          },
           {
             "node": "Filter",
             "type": "main",
@@ -1380,11 +1318,81 @@
     },
     "Filter": {
       "main": [
+        []
+      ]
+    },
+    "Rename Keys4": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Keys5": {
+      "main": [
         [
           {
             "node": "Add Index Ref",
             "type": "main",
             "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Index Ref": {
+      "main": [
+        [
+          {
+            "node": "Pull Kits Mapping",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Merge Care Sites",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Pull Care Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Indices": {
+      "main": [
+        [
+          {
+            "node": "Rename Keys5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge Demux and SampleSheet",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -1401,12 +1409,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": "405"
+          "conversion_ref": "430"
         }
       }
     ]
   },
-  "versionId": "7cb67eed-19ce-4131-b3d6-edc795e19e02",
+  "versionId": "1dc5170a-1fc7-4501-8782-45c11cddc2bb",
   "activeVersionId": "8598eacf-2f8f-41b3-ae59-544530291ce3",
   "triggerCount": 0,
   "shared": [
@@ -2814,6 +2822,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "Sub - Log Read Counts.json"
 }
