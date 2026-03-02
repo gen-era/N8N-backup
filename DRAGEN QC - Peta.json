@@ -1,0 +1,2159 @@
+{
+  "updatedAt": "2026-02-26T07:24:07.838Z",
+  "createdAt": "2026-02-16T13:47:22.400Z",
+  "id": "hLntEJRF7ouZFNAs",
+  "name": "DRAGEN QC - Peta",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -512
+      ],
+      "id": "a3f10f3f-591d-42c1-834e-57a6f7fb8e23",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (\n  INSERT INTO runs (run_id) \n  VALUES ('{{ $json['Run ID'] }}') \n  ON CONFLICT (run_id) DO UPDATE SET run_id = EXCLUDED.run_id\n  RETURNING uniqueref\n)\nSELECT \n  '{{ $json['Run ID'] }}' as run_id,\n  inserted.uniqueref as run_ref\nFROM inserted;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5856,
+        -416
+      ],
+      "id": "5944eae6-729e-4bff-a1fa-5fcf8630a9c4",
+      "name": "Check and Update Run Record",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4848,
+        176
+      ],
+      "id": "7809f945-5e48-45cb-9c19-e4d4dd675b32",
+      "name": "JSON Parse - CES"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "measurement_reads",
+          "mode": "list",
+          "cachedResultName": "measurement_reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "measurement_concept_ref": "={{ $json.uniqueref }}",
+            "value_as_number": "={{ $json.value }}",
+            "data_operations_ref": "={{ $json.data_op_ref }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "measurement_concept_ref",
+              "displayName": "measurement_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value_as_number",
+              "displayName": "value_as_number",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_operations_ref",
+              "displayName": "data_operations_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5328,
+        160
+      ],
+      "id": "2441b103-19d7-40ea-993b-382f44cb03bf",
+      "name": "Record Measurements - CES",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Log Data Op - CES').item.json.uniqueref }}",
+            "status_concept_ref": 29,
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5536,
+        160
+      ],
+      "id": "d489f815-a6bb-4582-b74e-cf74c58327ba",
+      "name": "Complete Data Op - CES",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "concept_name",
+              "field2": "parameter"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5104,
+        160
+      ],
+      "id": "4df7db91-75bc-4c07-81a0-6f1763478738",
+      "name": "Merge Concepts - CES"
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /staging/bios/qc_test/output/*"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        5952,
+        352
+      ],
+      "id": "c8c9697f-6e61-4e41-99e4-f42749541212",
+      "name": "DRAGEN QC Cleanup",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status_concept_ref": 27,
+            "uniqueref": "={{ $('Log Data Op - CES').item.json.uniqueref }}",
+            "performed_at": "={{ $now.toISO() }}",
+            "error_text": "={{ $('DRAGEN QC').item.json.stderr }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4592,
+        352
+      ],
+      "id": "9fdfc6de-52db-40d1-b8fe-dd6164733ff1",
+      "name": "Error Data OP - CES",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "read_ref",
+              "value": "={{ $json.read_ref }}"
+            },
+            {
+              "column": "recipe_ref",
+              "value": "6"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3328,
+        -144
+      ],
+      "id": "f41a6351-bf09-4315-8dbb-10a151f71160",
+      "name": "Check OP Record - CES",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "da02eb1e-670c-4d52-9563-6dd34ffe1d69",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e2f0adb4-2674-4739-957c-960dc8fd20cf",
+              "leftValue": "={{ $json.status_concept_ref }}",
+              "rightValue": "27",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3600,
+        -192
+      ],
+      "id": "d3c2a38d-0366-4452-bec2-c6fa79411ecf",
+      "name": "Is Data OP new?"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $('Insert or Get Existing Read Record - CES').item.json.read_ref }}",
+            "recipe_ref": 6,
+            "status_concept_ref": 24,
+            "batch_source_value": "={{ $('Insert or Get Existing Read Record - CES').item.json.batch_source_value }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "connectionTimeout": 30,
+          "delayClosingIdleConnection": 60,
+          "outputColumns": [
+            "uniqueref"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3888,
+        -48
+      ],
+      "id": "362ace29-1822-4dab-b727-84db94ca3262",
+      "name": "Log Data Op - CES",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "maxTries": 5,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (\n  INSERT INTO reads (sample_id, lane, conversion_ref, sample_project, kit_ref) \n  VALUES (\n    '{{ $json.sample_id }}', \n    {{ $json.lane }}, \n    {{ $('Check and Update Conversion Record').item.json.conversion_ref }},\n    '{{ $json.batch_source_value }}',\n    {{ $json.kit_ref }}\n  ) \n  ON CONFLICT (sample_id, lane, conversion_ref) \n  DO UPDATE SET \n    kit_ref = COALESCE(EXCLUDED.kit_ref, reads.kit_ref),\n    sample_project = COALESCE(EXCLUDED.sample_project, reads.sample_project)\n  RETURNING uniqueref\n)\nSELECT \n  '{{ $json.sample_id }}' as sample_id,\n  {{ $json.lane }} as lane,\n  '{{ $json.batch_source_value }}' as batch_source_value,\n  COALESCE(\n    (SELECT uniqueref FROM inserted),\n    (SELECT uniqueref FROM reads \n     WHERE sample_id = '{{ $json.sample_id }}' \n       AND lane = {{ $json.lane }} \n       AND conversion_ref = {{ $('Check and Update Conversion Record').item.json.conversion_ref }})\n  ) as read_ref\nFROM (SELECT 1) dummy;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3056,
+        -144
+      ],
+      "id": "640347b0-81f0-4d85-891f-55f9a4792200",
+      "name": "Insert or Get Existing Read Record - CES",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=# Değişkenler\nOUTPUT_DIR=\"/staging/bios/qc_test/output\"\nSAMPLE=\"{{ $('Extract Parameters').item.json.sample_id }}\"\n\n# Önceki input değerlerini al\nLANE=\"{{ $('Extract Parameters').item.json.lane }}\"\nBATCH_SOURCE=\"{{ $('Extract Parameters').item.json.batch_source_value }}\"\nRUN_REF=\"{{ $('Extract Parameters').item.json.run_ref }}\"\nCONVERSION_REF=\"{{ $('Extract Parameters').item.json.conversion_ref }}\"\nRUN_ID=\"{{ $('Extract Parameters').item.json.run_id }}\"\nCONVERSION_ID=\"{{ $('Extract Parameters').item.json.conversion_id }}\"\n\n# Log Data Op node'undan data_op_ref al\nDATA_OP_REF=\"{{ $('Log Data Op - CES').item.json.uniqueref }}\"\n\n# Dosya yolları\nMAPPING_FILE=\"${OUTPUT_DIR}/${SAMPLE}.mapping_metrics.csv\"\nCOVERAGE_FILE=\"${OUTPUT_DIR}/${SAMPLE}.qc-coverage-region-1_coverage_metrics.csv\"\n\n# Mapping metrics\ntotal_reads=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Total input reads,/ {print int($4/2); exit}' \"$MAPPING_FILE\")\ndup_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Number of duplicate marked reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nmapped_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Mapped reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nq30_bases=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Q30 bases,/ {print $5; exit}' \"$MAPPING_FILE\")\ninsert_length_mean=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Insert length: mean,/ {print $4; exit}' \"$MAPPING_FILE\")\nhq_mapq_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Reads with MAPQ \\[40:inf\\),/ {print $5; exit}' \"$MAPPING_FILE\")\n\n# Coverage metrics\ncoverage_uniformity_20pct=$(awk -F',' '/^COVERAGE SUMMARY,,Uniformity of coverage \\(PCT > 0\\.2\\*mean\\) over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\nmean_coverage=$(awk -F',' '/^COVERAGE SUMMARY,,Average alignment coverage over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_20x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  20x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_50x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  50x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_100x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 100x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_500x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 500x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\n\n# JSON formatında çıktı\ncat <<EOF\n{\n  \"sample_id\": \"$SAMPLE\",\n  \"lane\": ${LANE:-null},\n  \"batch_source_value\": \"$BATCH_SOURCE\",\n  \"run_ref\": \"${RUN_REF}\",\n  \"conversion_ref\": \"${CONVERSION_REF}\",\n  \"run_id\": \"$RUN_ID\",\n  \"conversion_id\": \"$CONVERSION_ID\",\n  \"data_op_ref\": \"${DATA_OP_REF}\",\n  \"total_reads\": ${total_reads:-null},\n  \"duplicate_pct\": ${dup_pct:-null},\n  \"mapped_pct\": ${mapped_pct:-null},\n  \"q30_bases_pct\": ${q30_bases:-null},\n  \"insert_length_mean\": ${insert_length_mean:-null},\n  \"hq_mapq_pct\": ${hq_mapq_pct:-null},\n  \"coverage_uniformity_20pct\": ${coverage_uniformity_20pct:-null},\n  \"aligned_bases_qc\": ${aligned_bases_qc:-null},\n  \"aligned_bases_qc_pct\": ${aligned_bases_qc_pct:-null},\n  \"aligned_reads_qc\": ${aligned_reads_qc:-null},\n  \"aligned_reads_qc_pct\": ${aligned_reads_qc_pct:-null},\n  \"mean_coverage\": ${mean_coverage:-null},\n  \"coverage_20x_pct\": ${coverage_20x:-null},\n  \"coverage_50x_pct\": ${coverage_50x:-null},\n  \"coverage_100x_pct\": ${coverage_100x:-null},\n  \"coverage_500x_pct\": ${coverage_500x:-null}\n}\nEOF"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        4592,
+        144
+      ],
+      "id": "4e988b70-6d9b-4c49-95a1-c0aa70c32e2b",
+      "name": "Collect Metrics - CES",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_class_id",
+              "value": "Analysis Metric"
+            },
+            {
+              "column": "vocabulary_id",
+              "value": "Illumina"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4848,
+        16
+      ],
+      "id": "cc8e6a78-5992-473d-b709-f4c83e23d589",
+      "name": "Get Concepts - CES",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dc3592ad-817a-43ae-acf8-3560c474af19",
+              "name": "sample_id",
+              "value": "={{ $('Add Bed Path2').item.json[\"SAMPLE ID\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a29277e6-5834-4f17-9ad8-0648af878ba1",
+              "name": "lane",
+              "value": "={{ JSON.parse($json.stdout).lanes }}",
+              "type": "string"
+            },
+            {
+              "id": "b36d3acb-0382-4dbf-9723-db5aecbda049",
+              "name": "batch_source_value",
+              "value": "={{ JSON.parse($json.stdout).project_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e620a421-db11-421e-9c3c-ab99644e4b54",
+              "name": "run_ref",
+              "value": "={{ $('Check and Update Run Record').first().json.run_ref }}",
+              "type": "number"
+            },
+            {
+              "id": "98ef1b3a-c095-49f1-8684-43199e91ef96",
+              "name": "conversion_ref",
+              "value": "={{ $('Check and Update Run Record').first().json.run_ref }}",
+              "type": "number"
+            },
+            {
+              "id": "dd800450-eed9-4124-aeda-fc1dea8937e8",
+              "name": "run_id",
+              "value": "={{ $('Check and Update Conversion Record').item.json.conversion_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "684d8684-5c9e-441f-939a-6947b06b89f1",
+              "name": "conversion_id",
+              "value": "={{ $('Check and Update Conversion Record').item.json.conversion_id }}",
+              "type": "string"
+            },
+            {
+              "id": "fc35de54-1128-4e11-898a-3d08d4eaf751",
+              "name": "bed_file_path",
+              "value": "={{ $('Add Bed Path2').item.json.bed_file_path }}",
+              "type": "string"
+            },
+            {
+              "id": "50b0dc27-131f-4c34-b36a-573cad4fe9de",
+              "name": "kit_ref",
+              "value": "={{ $('Add Bed Path2').item.json.kits_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "08257e82-a9ea-4470-bd48-7f79b82b7d21",
+              "name": "reads_target",
+              "value": "={{ JSON.parse($json.stdout).required_reads }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2800,
+        -144
+      ],
+      "id": "30e7c24e-461b-4e9e-8fd6-435973f908e2",
+      "name": "Extract Parameters"
+    },
+    {
+      "parameters": {
+        "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -512
+      ],
+      "id": "abd40d90-b739-4428-ad60-5b4a6eb363ba",
+      "name": "Check DRAGEN Availability",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dabc8de2-b277-47dc-9ff3-e277c080c4ab",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        -512
+      ],
+      "id": "fdce19c1-fd7c-479d-9cd6-c8684640f58a",
+      "name": "Is DRAGEN Idle"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bb840f57-95b6-4289-87ab-e5849f99d603",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "syntax error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ceeb7c4e-c628-4bd6-b37f-787a45532514",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "ERROR",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "64a60ef3-4626-489b-a7d7-37128b1f66c3",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b72a9419-d6bb-4874-9938-392f32f8f34c",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "fatal error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "dda9df5b-dbad-4cfb-8070-bcc60457be76",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Caught signal Aborted",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "74c70d17-0e0b-4dcb-986e-5e0b881d4dc2",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Please run sosreport",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3920,
+        288
+      ],
+      "id": "5915ab23-442c-484f-80c3-073fb9dcb300",
+      "name": "Is Error"
+    },
+    {
+      "parameters": {
+        "command": "=SEARCH_DIR=\"{{ $('Add Bed Path2').item.json.PATH.replace('P:', '/pool0/kozapeta/Data_Consolidation').replace(/\\\\/g, '/') }}\"\nSAMPLE_ID=\"{{ $('Insert or Get Existing Read Record - CES').item.json.sample_id }}\"\n\nR1=$(rclone lsf \"peta_sftp:${SEARCH_DIR}\" --recursive --include \"*${SAMPLE_ID}*_R1_*.fastq.gz\" | head -1 | tr -d '\\r\\n')\nR2=$(rclone lsf \"peta_sftp:${SEARCH_DIR}\" --recursive --include \"*${SAMPLE_ID}*_R2_*.fastq.gz\" | head -1 | tr -d '\\r\\n')\n\nrclone copy \"peta_sftp:${SEARCH_DIR}\" \"/staging/bios/qc_test/output/\" --include \"$R1\" --include \"$R2\" --transfers 2 --no-traverse --buffer-size 256M --multi-thread-streams 16 --multi-thread-cutoff 50M --ignore-checksum --ignore-times --no-check-dest --checkers 1"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        288
+      ],
+      "id": "7c063daa-65a3-4704-8644-092ed8bad452",
+      "name": "Copy Files to DRAGEN",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /staging/bios/qc_test/output/*"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        -512
+      ],
+      "id": "b6be13e4-065a-47f4-aca5-cfe6a5790974",
+      "name": "DRAGEN QC Pre-Cleanup",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appnIcG4fWZcY18JK",
+          "mode": "list",
+          "cachedResultName": "QC",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl20DP246JvqUdqI",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK/tbl20DP246JvqUdqI"
+        },
+        "filterByFormula": "({Status} = 'Todo')",
+        "options": {
+          "fields": [
+            "Run ID",
+            "Sample_ID",
+            "Sample_Project",
+            "Status",
+            "Kit"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1376,
+        -512
+      ],
+      "id": "14b0cbef-5378-4551-9e2b-a03fec4414d1",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const [dateRun, deviceId, order, id] = item.json[\"Run ID\"].split(\"_\");\n  item.json.DATE_RUN = dateRun;\n  item.json.DEVICE_ID = deviceId;\n  item.json.ORDER = order;\n  item.json.ID = id;\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        -512
+      ],
+      "id": "39b8b14f-0884-4c2f-b2e6-1d13703398af",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2960,
+        -448
+      ],
+      "id": "10f0e493-6576-4952-8b91-8a69e208818d",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "const dateRunRaw = items[0].json.DATE_RUN;\nconst dateRun = dateRunRaw.length === 6 ? \"20\" + dateRunRaw : dateRunRaw;\nconst deviceId = items[0].json.DEVICE_ID;\nconst order = items[0].json.ORDER;\nconst sampleId = items[0].json.Sample_ID;\nconst cmd = `awk -F',' -v date=\"${dateRun}\" -v device=\"${deviceId}\" -v order=\"${order}\" -v sample=\"${sampleId}\" 'NR>1 && $6==date && $7==device && $8==order && $1==sample {print $0}' /pool0/kozapeta/Data_Consolidation/consolidated/index/20260211_SAMPLEINDEX.csv`;\nreturn [{ json: { command: cmd } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3232,
+        -560
+      ],
+      "id": "8658fc35-a7f9-4325-bcc9-54e909bc3f92",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.command }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3504,
+        -560
+      ],
+      "id": "4b037aee-35f4-48b5-bf60-539669a06211",
+      "name": "Find Peta Record",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const header = \"SAMPLE ID,TYPE ID,TYPE,DATE CREATED,DATE ADMITTED,DATE RUN,DEVICE ID,ORDER,RUN ID,PANEL ID,PANEL,KIT,MASTER KIT,PROJECT ID,INSTITUTION ID,INSTITUTION,LAB ID,LAB,ANALYSIS PLATFORM,DATE ANALYZED,SPECIALIST ID,SPECIALIST,CONDITION ID,CONDITION,AGE,GENDER,RAW SEQUENCE,CLINICAL DATA,SUMMARY,SECONDARY,PATH,ERRONEOUS\";\n\nconst keys = header.split(\",\");\nconst values = items[0].json.stdout.trim().split(\",\");\n\nconst result = {};\nkeys.forEach((key, i) => {\n  result[key.trim()] = values[i] || \"\";\n});\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3712,
+        -560
+      ],
+      "id": "f11827a0-5da1-4231-9ec3-65f9b9cd3269",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "ORDER",
+              "field2": "ORDER"
+            },
+            {
+              "field1": "SAMPLE ID",
+              "field2": "Sample_ID"
+            },
+            {
+              "field1": "DEVICE ID",
+              "field2": "DEVICE_ID"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3936,
+        -400
+      ],
+      "id": "1ce925f4-62b4-440f-a508-2f3524674b29",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH inserted AS (\n  INSERT INTO conversions (id_source_value, run_ref) \n  VALUES (\n    '{{ $node[\"Check and Update Run Record\"].json.run_id }}-{{ $node[\"Merge1\"].json[\"RUN ID\"].split(\"-\").slice(1).join(\"-\") }}',\n    '{{ $node[\"Check and Update Run Record\"].json.run_ref }}'\n  ) \n  ON CONFLICT (id_source_value) DO UPDATE SET run_ref = EXCLUDED.run_ref\n  RETURNING uniqueref, id_source_value as conversion_id\n)\nSELECT \n  inserted.conversion_id,\n  '{{ $node[\"Check and Update Run Record\"].json.run_ref }}' as run_ref,\n  inserted.uniqueref as conversion_ref\nFROM inserted;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        6112,
+        -416
+      ],
+      "id": "ac175050-6320-4b31-8e43-ef5a1aea6240",
+      "name": "Check and Update Conversion Record",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "source_value",
+              "field2": "KIT"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4752,
+        -400
+      ],
+      "id": "436628ab-9594-4885-a818-d913ec24d54e",
+      "name": "Add Kit Ref1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Library_Prep_Kit",
+              "field2": "KIT"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5440,
+        -416
+      ],
+      "id": "f529e353-3481-4d55-a866-f2f7acc34304",
+      "name": "Add Bed Path2"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    Library_Prep_Kit: \"Sophia-CES-v3\",\n    bed_file_path: \"CES_v3_hg38_original_normalized_chr.bed\"\n  },\n  {\n    Library_Prep_Kit: \"SOPHIA-CES-V3\",\n    bed_file_path: \"CES_v3_hg38_original_normalized_chr.bed\"\n  },\n  {\n    Library_Prep_Kit: \"Twist-Human-Core-Exome-WES\",\n    bed_file_path: \"Twist_Exome_hg38_original_normalized_chr.bed\"\n  },\n  {\n    Library_Prep_Kit: \"Sophia-Solution-Hereditary-Cancer-59-genes\",\n    bed_file_path: \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\"\n  },\n  {\n    Library_Prep_Kit: \"Sophia-HCS-v2\",\n    bed_file_path: \"HCS_v2_0_1_hg38_target_normalized.bed\"\n  },\n  {\n    Library_Prep_Kit: \"Twist-Human-Core-Exome-WES-mtDNA\",\n    bed_file_path: \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n  },\n  {\n    Library_Prep_Kit: \"Twist-Human-Core-Exome-WES+mtDNA\",\n    bed_file_path: \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5168,
+        -560
+      ],
+      "id": "a664f769-380d-4214-9c53-87de4ff250e5",
+      "name": "Bed Mapping1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kits_mapping",
+          "mode": "list",
+          "cachedResultName": "kits_mapping"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "112"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4496,
+        -560
+      ],
+      "id": "500d2cb5-8178-4a7f-b863-9fcf41b7217c",
+      "name": "Kits Mapping1",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=DIR=$(echo '{{ $('Add Bed Path2').item.json.PATH }}' | sed 's|^P:||' | tr '\\\\' '/' | sed 's|^|/pool0/kozapeta/Data_Consolidation|')\nFILE=$(find \"$DIR\" -maxdepth 1 -name \"*.txt\" | head -1)\nCONTENT=$(cat \"$FILE\" | tr -d '\\0')\nLANES=$(echo \"$CONTENT\" | grep -oP '\"lanes\"\\s*:\\s*\"\\K[^\"]*')\nREADS=$(echo \"$CONTENT\" | grep -oP '\"required_reads\"\\s*:\\s*\\K[0-9]+')\nPROJECT=$(echo \"$CONTENT\" | grep -oP '\"project_id\"\\s*:\\s*\"\\K[^\"]*' | head -1)\n# 1;2;3;4 veya 1;2 ise => 0 yap\nif [ \"$LANES\" = \"1;2;3;4\" ] || [ \"$LANES\" = \"1;2\" ]; then\n  LANES=\"0\"\nfi\necho \"{\\\"lanes\\\":\\\"${LANES}\\\",\\\"required_reads\\\":${READS},\\\"project_id\\\":\\\"${PROJECT}\\\"}\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        6352,
+        -416
+      ],
+      "id": "f8b8b912-5f85-41a6-b792-6db076c63dfa",
+      "name": "Extract Lane",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=fdfind \"{{ $('Insert or Get Existing Read Record - CES').item.json.sample_id }}.*\\.fastq\\.gz$\" {{ $('Add Bed Path2').item.json.PATH.replace('P:', '/pool0/kozapeta/Data_Consolidation').replace(/\\\\/g, '/') }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3104,
+        288
+      ],
+      "id": "3ee068dc-0659-4750-83a1-c1b956a84e41",
+      "name": "Find Files on Peta",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=export TERM=xterm\n\nSAMPLE_ID=\"{{ $('Extract Parameters').item.json.sample_id }}\"\nR1=$(ls /staging/bios/qc_test/output/*${SAMPLE_ID}*_R1_*.fastq.gz | head -1)\nR2=$(ls /staging/bios/qc_test/output/*${SAMPLE_ID}*_R2_*.fastq.gz | head -1)\n\n/opt/dragen/4.3.13/bin/dragen \\\n-r /staging/human/reference/hg38_3 \\\n--output-directory /staging/bios/qc_test/output \\\n--output-file-prefix \"${SAMPLE_ID}\" \\\n--enable-duplicate-marking=true \\\n-1 \"$R1\" \\\n-2 \"$R2\" \\\n--RGSM \"${SAMPLE_ID}\" \\\n--RGID \"${SAMPLE_ID}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/bios/qc_test/bed_folder/{{ $('Extract Parameters').item.json.bed_file_path }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3632,
+        288
+      ],
+      "id": "f0df3067-bdb9-4341-b71a-befd44e55806",
+      "name": "DRAGEN QC",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2592,
+        -448
+      ],
+      "id": "84526e1e-e4e7-4fcd-9c76-36417cda2e40",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appnIcG4fWZcY18JK",
+          "mode": "list",
+          "cachedResultName": "QC",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl20DP246JvqUdqI",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK/tbl20DP246JvqUdqI"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "Status": "Done"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Run ID",
+              "displayName": "Run ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Sample_ID",
+              "displayName": "Sample_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Sample_Project",
+              "displayName": "Sample_Project",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        5744,
+        160
+      ],
+      "id": "395e19dd-fc22-4913-bf70-967d7f8f6f27",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bf8cdd3c-76b5-45d4-8413-4fc2fcd95ee9",
+              "name": "KIT",
+              "value": "={{ ($json.KIT || $json.Kit).replace(/ /g, \"-\") }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4144,
+        -400
+      ],
+      "id": "6796c1aa-3c6d-43de-9818-74fd7b4a73de",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appnIcG4fWZcY18JK",
+          "mode": "list",
+          "cachedResultName": "QC",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl20DP246JvqUdqI",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK/tbl20DP246JvqUdqI"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "Status": "Done"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Run ID",
+              "displayName": "Run ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Sample_ID",
+              "displayName": "Sample_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Sample_Project",
+              "displayName": "Sample_Project",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2800,
+        80
+      ],
+      "id": "0aabdd40-d6b0-4beb-ab7a-a867e8101a0e",
+      "name": "Update record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=  SEARCH_KEY=\"{{ $json.ID }}-{{ $json.Sample_Project }}\"   INDEX_FILE=$(ls -t /pool0/kozapeta/Data_Consolidation/consolidated/index/*_SAMPLEINDEX.csv | head -1)   grep \"${SEARCH_KEY}\" \"${INDEX_FILE}\" | awk -F',' '{printf \"{\\\"sample_id\\\":\\\"%s\\\",\\\"run_id\\\":\\\"%s\\\",\\\"panel\\\":\\\"%s\\\",\\\"institution\\\":\\\"%s\\\",\\\"institution_id\\\":\\\"%s\\\",\\\"path\\\":\\\"%s\\\"}\\n\",$1,$9,$11,$16,$15,$31}'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1872,
+        -736
+      ],
+      "id": "4e0ddc73-5ba8-4573-9a42-1e545ab866db",
+      "name": "Pull Samples from Peta Index",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "  return items.map(item => {\n    const input = item.json;\n    const lines = (input.stdout || '').trim().split('\\n').filter(l => l.startsWith('{'));\n\n    if (lines.length === 0) {\n      return { json: { ...input, peta_results: [], peta_found: false } };\n    }\n\n    const peta_results = lines.map(l => JSON.parse(l));\n\n    return {\n      json: {\n        ...input,\n        peta_found: true,\n        peta_results\n      }\n    };\n  });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        -736
+      ],
+      "id": "f7244e94-be60-4681-8bfc-a86f3c38f935",
+      "name": "Code in JavaScript3",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check and Update Run Record": {
+      "main": [
+        [
+          {
+            "node": "Check and Update Conversion Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parse - CES": {
+      "main": [
+        [
+          {
+            "node": "Merge Concepts - CES",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Record Measurements - CES": {
+      "main": [
+        [
+          {
+            "node": "Complete Data Op - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Data Op - CES": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Concepts - CES": {
+      "main": [
+        [
+          {
+            "node": "Record Measurements - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN QC Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Data OP - CES": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check OP Record - CES": {
+      "main": [
+        [
+          {
+            "node": "Is Data OP new?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Data OP new?": {
+      "main": [
+        [
+          {
+            "node": "Log Data Op - CES",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Data Op - CES": {
+      "main": [
+        [
+          {
+            "node": "Find Files on Peta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert or Get Existing Read Record - CES": {
+      "main": [
+        [
+          {
+            "node": "Check OP Record - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Metrics - CES": {
+      "main": [
+        [
+          {
+            "node": "Get Concepts - CES",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "JSON Parse - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Concepts - CES": {
+      "main": [
+        [
+          {
+            "node": "Merge Concepts - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Parameters": {
+      "main": [
+        [
+          {
+            "node": "Insert or Get Existing Read Record - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DRAGEN Availability": {
+      "main": [
+        [
+          {
+            "node": "Is DRAGEN Idle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is DRAGEN Idle": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC Pre-Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Is Error": {
+      "main": [
+        [
+          {
+            "node": "Error Data OP - CES",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Collect Metrics - CES",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copy Files to DRAGEN": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN QC Pre-Cleanup": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Pull Samples from Peta Index",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Find Peta Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Peta Record": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check and Update Conversion Record": {
+      "main": [
+        [
+          {
+            "node": "Extract Lane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Kit Ref1": {
+      "main": [
+        [
+          {
+            "node": "Bed Mapping1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Bed Path2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Bed Mapping1": {
+      "main": [
+        [
+          {
+            "node": "Add Bed Path2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kits Mapping1": {
+      "main": [
+        [
+          {
+            "node": "Add Kit Ref1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Bed Path2": {
+      "main": [
+        [
+          {
+            "node": "Check and Update Run Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lane": {
+      "main": [
+        [
+          {
+            "node": "Extract Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Files on Peta": {
+      "main": [
+        [
+          {
+            "node": "Copy Files to DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN QC": {
+      "main": [
+        [
+          {
+            "node": "Is Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN QC Cleanup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Add Kit Ref1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Kits Mapping1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Samples from Peta Index": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "versionId": "0a4cf4f3-fba8-435b-ae24-69c4f354a6a0",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-16T13:47:22.409Z",
+      "createdAt": "2026-02-16T13:47:22.409Z",
+      "role": "workflow:owner",
+      "workflowId": "hLntEJRF7ouZFNAs",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "DRAGEN QC - Peta.json"
+}
