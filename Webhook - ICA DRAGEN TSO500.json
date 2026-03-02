@@ -1,0 +1,1633 @@
+{
+  "updatedAt": "2026-02-25T08:59:04.876Z",
+  "createdAt": "2026-01-22T18:50:57.405Z",
+  "id": "qQAtjqOqS8h7N0Mx",
+  "name": "Webhook - ICA DRAGEN TSO500",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.item.json.stdout;\n\nif (!stdout || stdout.trim() === '') {\n  return [];\n}\n\n// Literal \\n'leri gerçek newline'a çevir ve satırlara böl\nconst lines = stdout.replace(/\\\\n/g, '\\n').split('\\n');\n\n// Sadece FILE satırlarını al (başlık ve özet satırlarını atla)\nconst fileLines = lines.filter(line => \n  line.includes('\\tFILE\\t') && line.includes('.fastq.gz')\n);\n\nconst projectId = $('Webhook').first().json.PROJECT_ID;\n\nreturn fileLines.map(line => {\n  // Tab ile böl ve ilk kolonu (filename) al\n  const filename = line.split('\\t')[0];\n  \n  const beforeS = filename.split('_S')[0];\n  let sampleId, analysisType;\n  \n  if (beforeS.endsWith('-D') || beforeS.endsWith('-R')) {\n    sampleId = beforeS.slice(0, -2);\n    analysisType = 'TSO500_HT';\n  } else {\n    sampleId = beforeS;\n    analysisType = 'TSO500_ctDNA';\n  }\n  \n  return {\n    json: {\n      filename: filename,\n      sample_id: sampleId,\n      analysis_type: analysisType,\n      PROJECT_ID: projectId\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        848
+      ],
+      "id": "baf9cd74-c73b-4465-9062-52cbd0d7d23f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+              "leftValue": "={{ $json.analysis_type }}",
+              "rightValue": "TSO500_HT",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        624
+      ],
+      "id": "3591b387-c980-47cb-b04f-1311bf380497",
+      "name": "TSO500_HT"
+    },
+    {
+      "parameters": {
+        "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        624
+      ],
+      "id": "f46a481d-eba3-4b54-bfd3-534664b8085b",
+      "name": "Group Samples"
+    },
+    {
+      "parameters": {
+        "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        624
+      ],
+      "id": "369787f4-d9f4-46c2-9bd1-2516609e998e",
+      "name": "Parse Folder IDs"
+    },
+    {
+      "parameters": {
+        "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        624
+      ],
+      "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
+      "name": "Get Folder ID"
+    },
+    {
+      "parameters": {
+        "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        624
+      ],
+      "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
+      "name": "SampleSheet Upload"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sampleId = $('Generate Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate Sample Sheet').item.json.files;  // <-- files'ı al\n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files  // <-- files'ı ekle\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        624
+      ],
+      "id": "9e3fca6c-5acc-4e28-8e94-d802c558e3dc",
+      "name": "Prepare Pipeline Launch"
+    },
+    {
+      "parameters": {
+        "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch').item.json.sample_id }}-analysis\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        624
+      ],
+      "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
+      "name": "Launch Analysis",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+              "leftValue": "={{ $json.analysis_type }}",
+              "rightValue": "TSO500_ctDNA",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        1168
+      ],
+      "id": "06052ff4-a582-40b6-961d-715f1a819a32",
+      "name": "TSO500_ctDNA"
+    },
+    {
+      "parameters": {
+        "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        1168
+      ],
+      "id": "d966b2ff-716b-4f82-9523-864701b6d90b",
+      "name": "Group ctDNA Samples"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,,,,,\nIEMFileVersion,4,,,,,,,,,,\nInvestigator Name,Can Holyavkin,,,,,,,,,,\nExperiment Name,TSO500_ctDNA,,,,,,,,,,\nDate,${new Date().toLocaleDateString('en-US')},,,,,,,,,,\nWorkflow Version,Acadia 500 Liquid Workflow v0.0.1,,,,,,,,,,\nFlowcell ID,,,,,,,,,,,\nFileFormatVersion,2,,,,,,,,,,\n[Reads],,,,,,,,,,,\nRead1Cycles,151,,,,,,,,,,\nRead2Cycles,151,,,,,,,,,,\nIndex1Cycles,8,,,,,,,,,,\nIndex2Cycles,8,,,,,,,,,,\n[BCLConvert_Settings],,,,,,,,,,,\nSoftwareVersion,3.6.3,,,,,,,,,,\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,,,,,,,,,,\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,,,\nAdapterBehavior,trim,,,,,,,,,,\nMinimumTrimmedReadLength,35,,,,,,,,,,\nMaskShortReads,35,,,,,,,,,,\n[BCLConvert_Data],,,,,,,,,,,\nSample_ID,index,index2,OverrideCycles,,,,,,,,\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143,,,,,,,,\n\n[TSO500L_Settings],,,,,,,,,,,\n[TSO500L_Data],,,,,,,,,,,\nSample_ID,Index_ID,index,index2,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,I5_Index_ID,Project,Sample_Description,Sample_Type\n${sampleId},UP05,AGCGATAG,TTATTCGT,${sampleId},,,D712,D513,,${sampleId},DNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_ctDNA.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+      },
+      "id": "9030e18c-45a1-4ac3-ad02-c9ed8e1f48b4",
+      "name": "Generate ctDNA Sample Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        1168
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        1168
+      ],
+      "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
+      "name": "SampleSheet Upload ctDNA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sampleId = $('Generate ctDNA Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate ctDNA Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate ctDNA Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        1168
+      ],
+      "id": "982813fa-7441-43a0-90f6-4b88da62daae",
+      "name": "Prepare Pipeline Launch ctDNA"
+    },
+    {
+      "parameters": {
+        "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        1168
+      ],
+      "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
+      "name": "Get Folder ID ctDNA"
+    },
+    {
+      "parameters": {
+        "command": "=  icav2 projectpipelines start nextflow \"850b4fe6-2a2f-4a85-ae57-cf082dfbefd4\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        1168
+      ],
+      "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
+      "name": "Launch ctDNA Analysis",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1744,
+        1168
+      ],
+      "id": "a75a57b1-0564-4649-a5de-c37e04b4cad2",
+      "name": "Parse Folder IDs ctDNA"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+              "leftValue": "={{ $json.analysis_type }}",
+              "rightValue": "TSO500_HRD",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        896
+      ],
+      "id": "82af8ade-2f10-4920-8a1d-79f170b883d0",
+      "name": "TSO500_HRD"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sampleId = $('Generate HRD Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate HRD Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate HRD Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        896
+      ],
+      "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
+      "name": "Prepare Pipeline Launch HRD"
+    },
+    {
+      "parameters": {
+        "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{\n  $json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        896
+      ],
+      "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
+      "name": "SampleSheet Upload HRD"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        912,
+        896
+      ],
+      "id": "e991e081-6797-4020-96c3-254206f5e1da",
+      "name": "Loop Over Items HRD"
+    },
+    {
+      "parameters": {
+        "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Prepare Pipeline Launch HRD').item.json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $('Loop Over Items HRD').item.json.output_folder_id }} \\\n    --input \"run_folder:{{ $('Loop Over Items HRD').item.json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch HRD').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch HRD').item.json.sample_id }}-analysis\" 2>&1 | grep \"^id\" | awk '{print $2}'\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        896
+      ],
+      "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
+      "name": "Launch HRD Analysis"
+    },
+    {
+      "parameters": {
+        "command": "=  echo '{{ JSON.stringify($(\"Prepare Pipeline Launch HRD\").item.json.files) }}' | jq -r '.[]' | while read filename; do\n    FILE_ID=$(curl -s -X GET 'https://ica.illumina.com/ica/rest/api/projects/{{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }}/data?filePath=/input_folder/&type=FILE&pageSize=1000' \\\n      -H 'Accept: application/vnd.illumina.v3+json' \\\n      -H 'X-API-Key: RBsYkBubZxrPXkR3AvjLXUlYFGJJ8FOM' | \\\n      jq -r \".items[] | select(.data.details.name == \\\"$filename\\\") | .data.id\")\n\n    if [ ! -z \"$FILE_ID\" ]; then\n      icav2 projectdata update \"$FILE_ID\" --project-id {{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }} --remove-user-tag \"on_hold\" --add-user-tag \"analysis_completed\" 2>&1\n      echo \"Updated: $filename ($FILE_ID)\"\n    fi\n  done"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        896
+      ],
+      "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
+      "name": "Update File Tags HRD",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tüm önceki item'ları al\nconst items = $input.all();\n\n// sample_id'ye göre grupla\nconst sampleGroups = {};\n\nfor (const item of items) {\n  const sampleId = item.json.sample_id;\n  \n  if (!sampleGroups[sampleId]) {\n    sampleGroups[sampleId] = {\n      sample_id: sampleId,\n      files: [],\n      PROJECT_ID: item.json.PROJECT_ID,\n      input_folder_id: item.json.input_folder_id,\n      samplesheet_folder_id: item.json.samplesheet_folder_id,\n      output_folder_id: item.json.output_folder_id\n    };\n  }\n  \n  sampleGroups[sampleId].files.push(item.json.filename);\n}\n\n// Her sample için ayrı item oluştur\nreturn Object.values(sampleGroups).map(group => ({\n  json: {\n    sample_id: group.sample_id,\n    file_count: group.files.length,\n    files: group.files,\n    PROJECT_ID: group.PROJECT_ID,\n    input_folder_id: group.input_folder_id,\n    samplesheet_folder_id: group.samplesheet_folder_id,\n    output_folder_id: group.output_folder_id\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        896
+      ],
+      "id": "50a389a6-84b1-4cb0-b056-178852da6075",
+      "name": "Group Samples HRD"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${new Date().toLocaleDateString('en-US', { month: '1-digit', day: '1-digit', year: 'numeric' })}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+      },
+      "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
+      "name": "Generate HRD Sample Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+      },
+      "id": "7c520c20-992e-4331-bd91-2c3130c68b31",
+      "name": "Generate Sample Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=icav2 projectdata list --project-id \"{{ $json.PROJECT_ID }}\" --parent-folder \"/input_folder/{{ $json.SAMPLE_ID }}/\" "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        0,
+        848
+      ],
+      "id": "639e0461-776b-4ec4-8eef-e82798383bd3",
+      "name": "List Files"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "3883600a-ff60-4431-bcef-16e71ff99971",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -656,
+        848
+      ],
+      "id": "067e5443-c402-4355-8b49-a737841d7071",
+      "name": "Webhook",
+      "webhookId": "3883600a-ff60-4431-bcef-16e71ff99971"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  json: $json.body\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        848
+      ],
+      "id": "4fb0a197-9201-4bc4-83d3-23d38fb22b1f",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "amount": 120
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -448,
+        848
+      ],
+      "id": "7711de67-95cf-4da5-87c2-f44933e09453",
+      "name": "Wait",
+      "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
+    }
+  ],
+  "connections": {
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "TSO500_HT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TSO500_ctDNA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TSO500_HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TSO500_HT": {
+      "main": [
+        [
+          {
+            "node": "Group Samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group Samples": {
+      "main": [
+        [
+          {
+            "node": "Generate Sample Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Folder IDs": {
+      "main": [
+        [
+          {
+            "node": "Launch Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Folder ID": {
+      "main": [
+        [
+          {
+            "node": "Parse Folder IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Upload": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pipeline Launch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pipeline Launch": {
+      "main": [
+        [
+          {
+            "node": "Get Folder ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch Analysis": {
+      "main": [
+        []
+      ]
+    },
+    "TSO500_ctDNA": {
+      "main": [
+        [
+          {
+            "node": "Group ctDNA Samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group ctDNA Samples": {
+      "main": [
+        [
+          {
+            "node": "Generate ctDNA Sample Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate ctDNA Sample Sheet": {
+      "main": [
+        [
+          {
+            "node": "SampleSheet Upload ctDNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Upload ctDNA": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pipeline Launch ctDNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pipeline Launch ctDNA": {
+      "main": [
+        [
+          {
+            "node": "Get Folder ID ctDNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Folder ID ctDNA": {
+      "main": [
+        [
+          {
+            "node": "Parse Folder IDs ctDNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch ctDNA Analysis": {
+      "main": [
+        []
+      ]
+    },
+    "Parse Folder IDs ctDNA": {
+      "main": [
+        [
+          {
+            "node": "Launch ctDNA Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TSO500_HRD": {
+      "main": [
+        [
+          {
+            "node": "Group Samples HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pipeline Launch HRD": {
+      "main": [
+        [
+          {
+            "node": "Launch HRD Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Upload HRD": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pipeline Launch HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items HRD": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Generate HRD Sample Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch HRD Analysis": {
+      "main": [
+        [
+          {
+            "node": "Update File Tags HRD",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update File Tags HRD": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group Samples HRD": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate HRD Sample Sheet": {
+      "main": [
+        [
+          {
+            "node": "SampleSheet Upload HRD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Sample Sheet": {
+      "main": [
+        [
+          {
+            "node": "SampleSheet Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Files": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "List Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "10.20.0.30:5678",
+            "user-agent": "curl/7.86.0",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "content-length": "425"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "LOCAL_FILE_COUNT": "",
+            "LOCAL_FILES": "",
+            "REMOTE_FILES": "",
+            "PROJECT_ID": "5a2ca97b-25dd-4a0f-8841-79347677d8a3",
+            "FOLDER": "",
+            "SAMPLE_ID": "SG2022-848-XPlus"
+          },
+          "webhookUrl": "http://localhost:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "3c5a4f14-acab-4298-abc2-c8fdf69fc10c",
+  "activeVersionId": "3c5a4f14-acab-4298-abc2-c8fdf69fc10c",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-22T18:50:57.416Z",
+      "createdAt": "2026-01-22T18:50:57.416Z",
+      "role": "workflow:owner",
+      "workflowId": "qQAtjqOqS8h7N0Mx",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-12T07:55:21.000Z",
+    "createdAt": "2026-02-12T07:55:20.165Z",
+    "versionId": "3c5a4f14-acab-4298-abc2-c8fdf69fc10c",
+    "workflowId": "qQAtjqOqS8h7N0Mx",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const stdout = $input.item.json.stdout;\n\nif (!stdout || stdout.trim() === '') {\n  return [];\n}\n\n// Literal \\n'leri gerçek newline'a çevir ve satırlara böl\nconst lines = stdout.replace(/\\\\n/g, '\\n').split('\\n');\n\n// Sadece FILE satırlarını al (başlık ve özet satırlarını atla)\nconst fileLines = lines.filter(line => \n  line.includes('\\tFILE\\t') && line.includes('.fastq.gz')\n);\n\nconst projectId = $('Webhook').first().json.PROJECT_ID;\n\nreturn fileLines.map(line => {\n  // Tab ile böl ve ilk kolonu (filename) al\n  const filename = line.split('\\t')[0];\n  \n  const beforeS = filename.split('_S')[0];\n  let sampleId, analysisType;\n  \n  if (beforeS.endsWith('-D') || beforeS.endsWith('-R')) {\n    sampleId = beforeS.slice(0, -2);\n    analysisType = 'TSO500_HT';\n  } else {\n    sampleId = beforeS;\n    analysisType = 'TSO500_ctDNA';\n  }\n  \n  return {\n    json: {\n      filename: filename,\n      sample_id: sampleId,\n      analysis_type: analysisType,\n      PROJECT_ID: projectId\n    }\n  };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          192,
+          848
+        ],
+        "id": "baf9cd74-c73b-4465-9062-52cbd0d7d23f",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+                "leftValue": "={{ $json.analysis_type }}",
+                "rightValue": "TSO500_HT",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          416,
+          624
+        ],
+        "id": "3591b387-c980-47cb-b04f-1311bf380497",
+        "name": "TSO500_HT"
+      },
+      {
+        "parameters": {
+          "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          624
+        ],
+        "id": "f46a481d-eba3-4b54-bfd3-534664b8085b",
+        "name": "Group Samples"
+      },
+      {
+        "parameters": {
+          "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          624
+        ],
+        "id": "369787f4-d9f4-46c2-9bd1-2516609e998e",
+        "name": "Parse Folder IDs"
+      },
+      {
+        "parameters": {
+          "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1552,
+          624
+        ],
+        "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
+        "name": "Get Folder ID"
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          624
+        ],
+        "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
+        "name": "SampleSheet Upload"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sampleId = $('Generate Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate Sample Sheet').item.json.files;  // <-- files'ı al\n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files  // <-- files'ı ekle\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          624
+        ],
+        "id": "9e3fca6c-5acc-4e28-8e94-d802c558e3dc",
+        "name": "Prepare Pipeline Launch"
+      },
+      {
+        "parameters": {
+          "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch').item.json.sample_id }}-analysis\"\n"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1984,
+          624
+        ],
+        "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
+        "name": "Launch Analysis",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+                "leftValue": "={{ $json.analysis_type }}",
+                "rightValue": "TSO500_ctDNA",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          416,
+          1168
+        ],
+        "id": "06052ff4-a582-40b6-961d-715f1a819a32",
+        "name": "TSO500_ctDNA"
+      },
+      {
+        "parameters": {
+          "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          1168
+        ],
+        "id": "d966b2ff-716b-4f82-9523-864701b6d90b",
+        "name": "Group ctDNA Samples"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,,,,,\nIEMFileVersion,4,,,,,,,,,,\nInvestigator Name,Can Holyavkin,,,,,,,,,,\nExperiment Name,TSO500_ctDNA,,,,,,,,,,\nDate,${new Date().toLocaleDateString('en-US')},,,,,,,,,,\nWorkflow Version,Acadia 500 Liquid Workflow v0.0.1,,,,,,,,,,\nFlowcell ID,,,,,,,,,,,\nFileFormatVersion,2,,,,,,,,,,\n[Reads],,,,,,,,,,,\nRead1Cycles,151,,,,,,,,,,\nRead2Cycles,151,,,,,,,,,,\nIndex1Cycles,8,,,,,,,,,,\nIndex2Cycles,8,,,,,,,,,,\n[BCLConvert_Settings],,,,,,,,,,,\nSoftwareVersion,3.6.3,,,,,,,,,,\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA,,,,,,,,,,\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT,,,,,,,,,,\nAdapterBehavior,trim,,,,,,,,,,\nMinimumTrimmedReadLength,35,,,,,,,,,,\nMaskShortReads,35,,,,,,,,,,\n[BCLConvert_Data],,,,,,,,,,,\nSample_ID,index,index2,OverrideCycles,,,,,,,,\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143,,,,,,,,\n\n[TSO500L_Settings],,,,,,,,,,,\n[TSO500L_Data],,,,,,,,,,,\nSample_ID,Index_ID,index,index2,Sample_Name,Sample_Plate,Sample_Well,I7_Index_ID,I5_Index_ID,Project,Sample_Description,Sample_Type\n${sampleId},UP05,AGCGATAG,TTATTCGT,${sampleId},,,D712,D513,,${sampleId},DNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_ctDNA.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+        },
+        "id": "9030e18c-45a1-4ac3-ad02-c9ed8e1f48b4",
+        "name": "Generate ctDNA Sample Sheet",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          880,
+          1168
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1136,
+          1168
+        ],
+        "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
+        "name": "SampleSheet Upload ctDNA"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sampleId = $('Generate ctDNA Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate ctDNA Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate ctDNA Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1360,
+          1168
+        ],
+        "id": "982813fa-7441-43a0-90f6-4b88da62daae",
+        "name": "Prepare Pipeline Launch ctDNA"
+      },
+      {
+        "parameters": {
+          "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1552,
+          1168
+        ],
+        "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
+        "name": "Get Folder ID ctDNA"
+      },
+      {
+        "parameters": {
+          "command": "=  icav2 projectpipelines start nextflow \"850b4fe6-2a2f-4a85-ae57-cf082dfbefd4\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1984,
+          1168
+        ],
+        "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
+        "name": "Launch ctDNA Analysis",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1744,
+          1168
+        ],
+        "id": "a75a57b1-0564-4649-a5de-c37e04b4cad2",
+        "name": "Parse Folder IDs ctDNA"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+                "leftValue": "={{ $json.analysis_type }}",
+                "rightValue": "TSO500_HRD",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          416,
+          896
+        ],
+        "id": "82af8ade-2f10-4920-8a1d-79f170b883d0",
+        "name": "TSO500_HRD"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sampleId = $('Generate HRD Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate HRD Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate HRD Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1552,
+          896
+        ],
+        "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
+        "name": "Prepare Pipeline Launch HRD"
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{\n  $json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1328,
+          896
+        ],
+        "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
+        "name": "SampleSheet Upload HRD"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          912,
+          896
+        ],
+        "id": "e991e081-6797-4020-96c3-254206f5e1da",
+        "name": "Loop Over Items HRD"
+      },
+      {
+        "parameters": {
+          "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Prepare Pipeline Launch HRD').item.json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $('Loop Over Items HRD').item.json.output_folder_id }} \\\n    --input \"run_folder:{{ $('Loop Over Items HRD').item.json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch HRD').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch HRD').item.json.sample_id }}-analysis\" 2>&1 | grep \"^id\" | awk '{print $2}'\n"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1760,
+          896
+        ],
+        "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
+        "name": "Launch HRD Analysis"
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ JSON.stringify($(\"Prepare Pipeline Launch HRD\").item.json.files) }}' | jq -r '.[]' | while read filename; do\n    FILE_ID=$(curl -s -X GET 'https://ica.illumina.com/ica/rest/api/projects/{{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }}/data?filePath=/input_folder/&type=FILE&pageSize=1000' \\\n      -H 'Accept: application/vnd.illumina.v3+json' \\\n      -H 'X-API-Key: RBsYkBubZxrPXkR3AvjLXUlYFGJJ8FOM' | \\\n      jq -r \".items[] | select(.data.details.name == \\\"$filename\\\") | .data.id\")\n\n    if [ ! -z \"$FILE_ID\" ]; then\n      icav2 projectdata update \"$FILE_ID\" --project-id {{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }} --remove-user-tag \"on_hold\" --add-user-tag \"analysis_completed\" 2>&1\n      echo \"Updated: $filename ($FILE_ID)\"\n    fi\n  done"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1984,
+          896
+        ],
+        "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
+        "name": "Update File Tags HRD",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// Tüm önceki item'ları al\nconst items = $input.all();\n\n// sample_id'ye göre grupla\nconst sampleGroups = {};\n\nfor (const item of items) {\n  const sampleId = item.json.sample_id;\n  \n  if (!sampleGroups[sampleId]) {\n    sampleGroups[sampleId] = {\n      sample_id: sampleId,\n      files: [],\n      PROJECT_ID: item.json.PROJECT_ID,\n      input_folder_id: item.json.input_folder_id,\n      samplesheet_folder_id: item.json.samplesheet_folder_id,\n      output_folder_id: item.json.output_folder_id\n    };\n  }\n  \n  sampleGroups[sampleId].files.push(item.json.filename);\n}\n\n// Her sample için ayrı item oluştur\nreturn Object.values(sampleGroups).map(group => ({\n  json: {\n    sample_id: group.sample_id,\n    file_count: group.files.length,\n    files: group.files,\n    PROJECT_ID: group.PROJECT_ID,\n    input_folder_id: group.input_folder_id,\n    samplesheet_folder_id: group.samplesheet_folder_id,\n    output_folder_id: group.output_folder_id\n  }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          896
+        ],
+        "id": "50a389a6-84b1-4cb0-b056-178852da6075",
+        "name": "Group Samples HRD"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${new Date().toLocaleDateString('en-US', { month: '1-digit', day: '1-digit', year: 'numeric' })}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+        },
+        "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
+        "name": "Generate HRD Sample Sheet",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          896
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+        },
+        "id": "7c520c20-992e-4331-bd91-2c3130c68b31",
+        "name": "Generate Sample Sheet",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          912,
+          624
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=icav2 projectdata list --project-id \"{{ $json.PROJECT_ID }}\" --parent-folder \"/input_folder/{{ $json.SAMPLE_ID }}/\" "
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          0,
+          848
+        ],
+        "id": "639e0461-776b-4ec4-8eef-e82798383bd3",
+        "name": "List Files"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "3883600a-ff60-4431-bcef-16e71ff99971",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -656,
+          848
+        ],
+        "id": "067e5443-c402-4355-8b49-a737841d7071",
+        "name": "Webhook",
+        "webhookId": "3883600a-ff60-4431-bcef-16e71ff99971"
+      },
+      {
+        "parameters": {
+          "jsCode": "return {\n  json: $json.body\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -224,
+          848
+        ],
+        "id": "4fb0a197-9201-4bc4-83d3-23d38fb22b1f",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "amount": 120
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -448,
+          848
+        ],
+        "id": "7711de67-95cf-4da5-87c2-f44933e09453",
+        "name": "Wait",
+        "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
+      }
+    ],
+    "connections": {
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "TSO500_HT",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TSO500_ctDNA",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TSO500_HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TSO500_HT": {
+        "main": [
+          [
+            {
+              "node": "Group Samples",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Group Samples": {
+        "main": [
+          [
+            {
+              "node": "Generate Sample Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Folder IDs": {
+        "main": [
+          [
+            {
+              "node": "Launch Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Folder ID": {
+        "main": [
+          [
+            {
+              "node": "Parse Folder IDs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SampleSheet Upload": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Launch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Launch": {
+        "main": [
+          [
+            {
+              "node": "Get Folder ID",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch Analysis": {
+        "main": [
+          []
+        ]
+      },
+      "TSO500_ctDNA": {
+        "main": [
+          [
+            {
+              "node": "Group ctDNA Samples",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Group ctDNA Samples": {
+        "main": [
+          [
+            {
+              "node": "Generate ctDNA Sample Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate ctDNA Sample Sheet": {
+        "main": [
+          [
+            {
+              "node": "SampleSheet Upload ctDNA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SampleSheet Upload ctDNA": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Launch ctDNA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Launch ctDNA": {
+        "main": [
+          [
+            {
+              "node": "Get Folder ID ctDNA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Folder ID ctDNA": {
+        "main": [
+          [
+            {
+              "node": "Parse Folder IDs ctDNA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch ctDNA Analysis": {
+        "main": [
+          []
+        ]
+      },
+      "Parse Folder IDs ctDNA": {
+        "main": [
+          [
+            {
+              "node": "Launch ctDNA Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TSO500_HRD": {
+        "main": [
+          [
+            {
+              "node": "Group Samples HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Launch HRD": {
+        "main": [
+          [
+            {
+              "node": "Launch HRD Analysis",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SampleSheet Upload HRD": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Launch HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items HRD": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Generate HRD Sample Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch HRD Analysis": {
+        "main": [
+          [
+            {
+              "node": "Update File Tags HRD",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Loop Over Items HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update File Tags HRD": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Group Samples HRD": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate HRD Sample Sheet": {
+        "main": [
+          [
+            {
+              "node": "SampleSheet Upload HRD",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Sample Sheet": {
+        "main": [
+          [
+            {
+              "node": "SampleSheet Upload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "List Files": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "List Files",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 3c5a4f14",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-02-25T08:58:40.172Z",
+      "createdAt": "2026-02-25T08:58:40.172Z",
+      "id": "haVpXFpEUMjyquhf",
+      "name": "Production"
+    }
+  ],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "Webhook - ICA DRAGEN TSO500.json"
+}
