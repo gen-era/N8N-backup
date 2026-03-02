@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-06T05:38:59.737Z",
+  "updatedAt": "2026-02-11T08:58:38.188Z",
   "createdAt": "2026-01-05T18:30:29.197Z",
   "id": "qhCyLQ4Zy1dpZNB9",
   "name": "Monitor New Conversion",
@@ -13,8 +13,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1328,
-        272
+        -1776,
+        416
       ],
       "id": "153a46aa-08e3-4416-92eb-62305edb4c5b",
       "name": "Find Runs"
@@ -26,26 +26,92 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1136,
-        272
+        -1584,
+        416
       ],
       "id": "3f377d72-9e96-4395-8b5f-3d20bec64045",
       "name": "Split Runs"
     },
     {
       "parameters": {
+        "jsCode": "const runIds = $input.all().map(item => item.json.run_id);\n\nreturn [{\n  json: {\n    run_ids: runIds\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1376,
+        416
+      ],
+      "id": "f9582196-4f8d-41c0-965f-d6732df1b9be",
+      "name": "Prepare IDs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1968,
+        416
+      ],
+      "id": "0071c493-d5c0-47de-aee4-9bdd7add1e88",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "22287263-621b-42ea-823e-341c39d99fc5",
+              "leftValue": "={{ $json.run_id }}",
+              "rightValue": "260206_A01228_0248_BHW25VDSXF",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "9525efa0-a6de-4d5e-9f8f-42e6a7a03ece",
+              "leftValue": "={{ $json.path }}",
+              "rightValue": "illuminastorage",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -1328,
+        672
+      ],
+      "id": "db577b47-6a81-4454-aa84-e42c3039dd98",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT uniqueref, run_id \nFROM runs \nWHERE run_id IN ({{ $input.first().json.run_ids.map(id => `'${id}'`).join(',') }})",
+        "query": "SELECT \n  r.uniqueref, \n  r.run_id, \n  r.workflow_concept_ref, \n  wc.concept_name AS workflow_concept_name,\n  i.instrument_id,\n  ic.concept_name AS instrument_concept_name\nFROM runs r\nLEFT JOIN concepts wc ON r.workflow_concept_ref = wc.uniqueref\nLEFT JOIN instruments i ON r.instrument_ref = i.uniqueref\nLEFT JOIN concepts ic ON i.instrument_concept_ref = ic.uniqueref\nWHERE r.run_id IN ({{ $input.first().json.run_ids.map(id => `'${id}'`).join(',') }})",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -720,
-        272
+        -1168,
+        416
       ],
       "id": "69af6a4b-8e0c-46be-9cf8-7260fb819286",
-      "name": "Supabase Execute SQL Query",
+      "name": "Get Run Ref",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -55,40 +121,16 @@
     },
     {
       "parameters": {
-        "jsCode": "const runIds = $input.all().map(item => item.json.run_id);\n\nreturn [{\n  json: {\n    run_ids: runIds\n  }\n}];"
+        "jsCode": "// Supabase sonuçlarını map'e çevir - tüm bilgileri taşı\nconst runsMap = {};\n$input.all().forEach(item => {\n  runsMap[item.json.run_id] = {\n    uniqueref: item.json.uniqueref,\n    workflow_concept_name: item.json.workflow_concept_name,\n    instrument_id: item.json.instrument_id,\n    instrument_concept_name: item.json.instrument_concept_name\n  };\n});\n\n// Orijinal item'ları al ve tüm bilgileri ekle\nconst originalNode = $('Split Runs');\nreturn originalNode.all().map(item => {\n  const runData = runsMap[item.json.run_id] || {};\n  return {\n    json: {\n      path: item.json.path,\n      run_id: item.json.run_id,\n      conversion_id: item.json.conversion_id,\n      run_ref: runData.uniqueref || null,\n      workflow_concept_name: runData.workflow_concept_name || null,\n      instrument_id: runData.instrument_id || null,\n      instrument_concept_name: runData.instrument_concept_name || null\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -928,
-        272
-      ],
-      "id": "f9582196-4f8d-41c0-965f-d6732df1b9be",
-      "name": "Prepare IDs"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Supabase sonuçlarını map'e çevir (her row bir item olarak geliyor)\nconst runsMap = {};\n$input.all().forEach(item => {\n  runsMap[item.json.run_id] = item.json.uniqueref;\n});\n\n// Bir önceki node'dan gelen orijinal item'ları al ve run_ref ekle\nconst originalNode = $('Split Runs');\nreturn originalNode.all().map(item => ({\n  json: {\n    path: item.json.path,\n    run_id: item.json.run_id,\n    conversion_id: item.json.conversion_id,\n    run_ref: runsMap[item.json.run_id] || null\n  }\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -496,
-        272
+        -944,
+        416
       ],
       "id": "d8b92126-82b4-49c8-9bf9-d07e863ca49b",
-      "name": "Get Run Refs"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1520,
-        272
-      ],
-      "id": "0071c493-d5c0-47de-aee4-9bdd7add1e88",
-      "name": "When clicking ‘Execute workflow’"
+      "name": "Tidy Run Refs"
     },
     {
       "parameters": {
@@ -99,11 +141,12 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -288,
-        272
+        -736,
+        416
       ],
       "id": "b9dce0ad-ed83-477b-9896-c7b5caca8bb9",
-      "name": "Supabase Execute SQL Query Conversions",
+      "name": "Get Conversion Ref",
+      "executeOnce": true,
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -113,16 +156,888 @@
     },
     {
       "parameters": {
-        "jsCode": "// Conversions sonuçlarını map'e çevir\nconst conversionsMap = {};\n$input.all().forEach(item => {\n  conversionsMap[item.json.id_source_value] = item.json.uniqueref;\n});\n\n// Get Run Refs node'undan gelen item'ları al\nconst previousNode = $('Get Run Refs');\nreturn previousNode.all().map(item => ({\n  json: {\n    path: item.json.path,\n    run_id: item.json.run_id,\n    conversion_id: item.json.conversion_id,\n    run_ref: item.json.run_ref,\n    conversion_ref: conversionsMap[item.json.conversion_id] || null\n  }\n}));"
+        "jsCode": "const conversionsMap = {};\n$input.all().forEach(item => {\n  conversionsMap[item.json.id_source_value] = item.json.uniqueref;\n});\n\nconst previousNode = $('Tidy Run Refs');\nreturn previousNode.all().map(item => ({\n  json: {\n    path: item.json.path,\n    run_id: item.json.run_id,\n    conversion_id: item.json.conversion_id,\n    run_ref: item.json.run_ref,\n    conversion_ref: conversionsMap[item.json.conversion_id] || null,\n    workflow_concept_name: item.json.workflow_concept_name,\n    instrument_id: item.json.instrument_id,\n    instrument_concept_name: item.json.instrument_concept_name\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        272
+        -528,
+        416
       ],
       "id": "52aa8335-81d8-4d2b-bfed-f3b28478393c",
-      "name": "Code in JavaScript"
+      "name": "Tidy Conversion Ref"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = $json.stdout;\nif (!inputText || typeof inputText !== 'string') {\n  throw new Error('stdout bulunamadı veya string değil');\n}\n\n// Cihaz bilgisini Filter node'undan al\nconst instrumentName = $('Filter').first().json.instrument_concept_name;\nconst isNextSeq2000 = instrumentName === 'Illumina NextSeq 2000';\n\nconst dataSectionMatch = inputText.split('Data]');\nif (dataSectionMatch.length < 2) {\n  throw new Error('Sample sheet içinde [Data] section bulunamadı');\n}\nconst dataSection = dataSectionMatch[dataSectionMatch.length - 1];\nconst lines = dataSection.trim().split('\\n').filter(line => line.trim());\nif (lines.length < 2) {\n  throw new Error('[Data] section\\'da yeterli satır yok');\n}\n\nconst headers = lines[0].split(',');\nconst hasLaneColumn = headers.includes('Lane');\n\nfunction reverseComplement(seq) {\n  if (!seq) return '';\n  const complement = { 'A': 'T', 'T': 'A', 'C': 'G', 'G': 'C',\n                        'a': 't', 't': 'a', 'c': 'g', 'g': 'c' };\n  return seq.split('').reverse().map(base => complement[base] || base).join('');\n}\n\nconst samples = [];\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',');\n  const sample = {};\n  headers.forEach((header, index) => {\n    sample[header] = values[index] || '';\n  });\n\n  if (!hasLaneColumn) {\n    sample['Lane'] = '0';\n  }\n\n  if (isNextSeq2000 && sample['Index2']) {\n    sample['Index2'] = reverseComplement(sample['Index2']);\n  }\n\n  samples.push(sample);\n}\n\nreturn samples.map(sample => ({ json: sample }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        640
+      ],
+      "id": "36cfce6c-9497-41f7-b328-53b3085ffdef",
+      "name": "Tidy SampleSheet"
+    },
+    {
+      "parameters": {
+        "command": "=cat  {{ $json.path }}/Reports/SampleSheet-Consolidation.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        640
+      ],
+      "id": "7b43235c-0ba4-43ee-9a6e-c33e7b3b037a",
+      "name": "Read SampleSheet"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b9b0227-7d3e-4769-af04-52706380f38e",
+              "leftValue": "={{ $json.conversion_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1120,
+        672
+      ],
+      "id": "bfc7a07c-55a3-4f1a-9240-3fc7ce6385b3",
+      "name": "Is Conversion New "
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversions",
+          "mode": "list",
+          "cachedResultName": "conversions"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_ref": "={{ $json.run_ref }}",
+            "id_source_value": "={{ $json.conversion_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "run_ref",
+              "displayName": "run_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "conversion_time",
+              "displayName": "conversion_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "tool_concept_ref",
+              "displayName": "tool_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "id_source_value",
+              "displayName": "id_source_value",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -880,
+        992
+      ],
+      "id": "4d2e8064-b922-4133-9dbb-275bb6571d87",
+      "name": "Log Conversion",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kits_mapping",
+          "mode": "list",
+          "cachedResultName": "kits_mapping"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "112"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        320,
+        576
+      ],
+      "id": "86c05963-83b4-45d8-b8ea-8003f534036d",
+      "name": "Pull Kits Mapping",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "source_value",
+              "field2": "Library_Prep_Kit"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        688
+      ],
+      "id": "7a08fddf-b581-4b12-b1cc-5f9858ac2680",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "kit_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        528,
+        576
+      ],
+      "id": "dda2de5a-97a0-4ee9-bc26-da3a35e9ae6e",
+      "name": "Rename Kit Ref"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ce1943fe-d8cb-47bc-9fee-d9b807e2420e",
+              "leftValue": "={{ $json.kits_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        992,
+        688
+      ],
+      "id": "f16a8135-5a32-4825-9356-b720677fc3f1",
+      "name": "Complete Kit Ref"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "care_site_mapping",
+          "mode": "list",
+          "cachedResultName": "care_site_mapping"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1184,
+        528
+      ],
+      "id": "a05ced8e-3832-4de2-8fc4-ec6257285a66",
+      "name": "Pull Care Sites",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "indices",
+          "mode": "list",
+          "cachedResultName": "indices"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1184,
+        896
+      ],
+      "id": "fe116c29-94ef-4c0c-a873-675dae228528",
+      "name": "Pull Indices DB",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "index_ref"
+            },
+            {
+              "currentKey": "kit_ref",
+              "newKey": "index_kit_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        896
+      ],
+      "id": "af69e3db-87a1-4d08-bc6f-a389df91bff9",
+      "name": "Rename Index Ref"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "caresite_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        528
+      ],
+      "id": "31167380-9f7d-4e5f-bb17-d3fff1962d59",
+      "name": "Rename Caresite Ref"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "i7_sequence",
+              "field2": "Index"
+            },
+            {
+              "field1": "i5_sequence",
+              "field2": "Index2"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1584,
+        1040
+      ],
+      "id": "33c973f0-eb83-46d6-aed1-d4c9050445bf",
+      "name": "Merge Indices"
+    },
+    {
+      "parameters": {
+        "command": "=cat {{ $json.path }}Reports/Demultiplex_stats.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        816
+      ],
+      "id": "33424ec7-e1a3-400a-814d-5207f7e4e017",
+      "name": "Extract Demux"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Workflow kontrolü\nconst workflowType = $('Filter').first().json.workflow_concept_name;\n\nconst csvData = $input.item.json.stdout;\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',');\n\n// CSV'yi objelere parse et\nconst parsedData = lines.slice(1).map(line => {\n  const values = line.split(',');\n  const obj = {};\n  headers.forEach((header, index) => {\n    obj[header.trim()] = values[index]?.trim() || '';\n  });\n  return obj;\n});\n\nlet result;\n\nif (workflowType === \"Standard Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item.SampleID;\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // Normal workflow - olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        816
+      ],
+      "id": "761e843c-28fb-4a74-9378-976efb582ec5",
+      "name": "Tidy Demux"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Sample_ID",
+              "field2": "SampleID"
+            },
+            {
+              "field1": "Lane",
+              "field2": "Lane"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        672
+      ],
+      "id": "75af52ae-0d9f-4910-90fd-8bbba2d6b1ed",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversion_ref": "={{ $('Filter').item.json.conversion_ref }}",
+            "index_ref": "={{ $json.index_ref }}",
+            "lane": "={{ $json.Lane }}",
+            "reads_target": "={{ $json.SE_Reads }}",
+            "kit_ref": "={{ $json.kits_ref }}",
+            "requesting_caresite_ref": "={{ $json.requesting_caresite_ref }}",
+            "performing_caresite_ref": "={{ $json.performing_care_site_ref }}",
+            "reads": "={{ $json['# Reads'] }}",
+            "sample_id": "={{ $json.Sample_ID }}",
+            "bdsnumber": "={{ $json.BDS_Number }}",
+            "sample_project": "={{ $json.Sample_Project }}"
+          },
+          "matchingColumns": [
+            "conversion_ref",
+            "sample_id",
+            "lane"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conversion_ref",
+              "displayName": "conversion_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sample_id",
+              "displayName": "sample_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "index_ref",
+              "displayName": "index_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "lane",
+              "displayName": "lane",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reads_target",
+              "displayName": "reads_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "bdsnumber",
+              "displayName": "bdsnumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kit_ref",
+              "displayName": "kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "requesting_caresite_ref",
+              "displayName": "requesting_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "performing_caresite_ref",
+              "displayName": "performing_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reads",
+              "displayName": "reads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "sample_project",
+              "displayName": "sample_project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "r1_path",
+              "displayName": "r1_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "r2_path",
+              "displayName": "r2_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1808,
+        1152
+      ],
+      "id": "55dbe6b5-6694-4a53-99cc-3d2a842f2c5d",
+      "name": "Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "aa518772-763a-4e26-84f4-1ed375e092df",
+              "leftValue": "={{ $json.SampleID }}",
+              "rightValue": "Undetermined",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -400,
+        816
+      ],
+      "id": "f4e0a28e-a765-46b5-ae14-fec909028815",
+      "name": "Remove Undetermined"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "Index",
+              "newKey": "Index_Combination"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        816
+      ],
+      "id": "b232be35-7fb1-4792-a647-5d3969e817c6",
+      "name": "Rename Index Column"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c51ee91c-8537-443b-8d54-0def0b0e80f9",
+              "leftValue": "={{ $json.index_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        896
+      ],
+      "id": "a61190a3-e251-47e4-babb-858ec9dfb2cd",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a254f73-3995-46bb-a9cb-f2cdeab427ad",
+              "leftValue": "={{ $json.kit_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        992,
+        448
+      ],
+      "id": "b154166d-f643-4cca-b842-8e93e1aa7430",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3da57fe1-9736-416c-b682-3326168401bc",
+              "leftValue": "={{ $json.performing_care_site_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "488642c1-700f-42b8-9585-7713799d0ad7",
+              "leftValue": "={{ $json.requesting_caresite_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1008,
+        1040
+      ],
+      "id": "ac4ce610-49d5-4ab8-a47d-7938ed7e0f6d",
+      "name": "Complete CareSite Ref"
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "query": "SELECT \n    input2.*,\n    prepared_map.care_site_ref AS performing_care_site_ref,\n    requested_map.care_site_ref AS requesting_caresite_ref\nFROM input2\nLEFT JOIN input1 AS prepared_map\n    ON input2.Prepared_By = prepared_map.care_site_source_value\nLEFT JOIN input1 AS requested_map\n    ON input2.Requested_By = requested_map.care_site_source_value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1552,
+        672
+      ],
+      "id": "20e11736-3bb9-480d-b7d2-87cd511367d5",
+      "name": "Merge CareSites"
     }
   ],
   "connections": {
@@ -152,18 +1067,7 @@
       "main": [
         [
           {
-            "node": "Supabase Execute SQL Query",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase Execute SQL Query": {
-      "main": [
-        [
-          {
-            "node": "Get Run Refs",
+            "node": "Get Run Ref",
             "type": "main",
             "index": 0
           }
@@ -181,22 +1085,306 @@
         ]
       ]
     },
-    "Get Run Refs": {
+    "Get Run Ref": {
       "main": [
         [
           {
-            "node": "Supabase Execute SQL Query Conversions",
+            "node": "Tidy Run Refs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Supabase Execute SQL Query Conversions": {
+    "Tidy Run Refs": {
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Get Conversion Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversion Ref": {
+      "main": [
+        [
+          {
+            "node": "Tidy Conversion Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Conversion Ref": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Is Conversion New ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Tidy SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Conversion New ": {
+      "main": [
+        [
+          {
+            "node": "Log Conversion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read SampleSheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract Demux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Kits Mapping": {
+      "main": [
+        [
+          {
+            "node": "Rename Kit Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Complete Kit Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Complete Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Merge CareSites",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Pull Care Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Care Sites": {
+      "main": [
+        [
+          {
+            "node": "Rename Caresite Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Indices DB": {
+      "main": [
+        [
+          {
+            "node": "Rename Index Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Caresite Ref": {
+      "main": [
+        [
+          {
+            "node": "Merge CareSites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Index Ref": {
+      "main": [
+        [
+          {
+            "node": "Merge Indices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Indices": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Demux": {
+      "main": [
+        [
+          {
+            "node": "Tidy Demux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Demux": {
+      "main": [
+        [
+          {
+            "node": "Remove Undetermined",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Pull Kits Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Undetermined": {
+      "main": [
+        [
+          {
+            "node": "Rename Index Column",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Index Column": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        []
+      ]
+    },
+    "Complete CareSite Ref": {
+      "main": [
+        [
+          {
+            "node": "Pull Indices DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Indices",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge CareSites": {
+      "main": [
+        [
+          {
+            "node": "Complete CareSite Ref",
             "type": "main",
             "index": 0
           }
@@ -213,7 +1401,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c6f6224e-a11b-46aa-bba0-f355e8449d71",
+  "versionId": "3161e6c8-ecf4-4f4d-ae3a-dbb8f1e42941",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -227,6 +1415,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "Monitor New Conversion.json"
 }
