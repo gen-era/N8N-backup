@@ -1,0 +1,548 @@
+{
+  "updatedAt": "2026-02-11T06:19:55.205Z",
+  "createdAt": "2026-02-11T05:25:28.954Z",
+  "id": "zBBbRZ8DHy5JU7iB",
+  "name": "BCL Convert - 05 Error Handler",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bcl-error",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        128
+      ],
+      "id": "85f24f0a-bcf7-42a7-9b41-3b1dabd5ef78",
+      "name": "Error Webhook",
+      "webhookId": "bcl-error"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract error details from webhook\nconst rawInput = $input.first().json;\n\n// The data could be directly in json (if testing) or in json.body (from actual webhook)\nconst input = rawInput.body || rawInput;\n\nconst errorInfo = {\n  run_id: input.run_id || 'unknown',\n  error_stage: input.error_stage || 'unknown',\n  exit_code: input.exit_code || -1,\n  error_message: input.error_message || 'Unknown error',\n  timestamp: new Date().toISOString(),\n  path: input.path || '',\n  scriptDir: input.scriptDir || '/staging/n8n_tmp',\n  full_payload: input\n};\n\nconsole.error('BCL Convert Error:', JSON.stringify(errorInfo, null, 2));\n\nreturn [{ json: errorInfo }];"
+      },
+      "id": "fdf1ad67-9750-4d44-b405-1ddf1cf052df",
+      "name": "Parse Error Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=# Remove Processing.txt and create BCLConvertError.txt\nrm -f \"{{ $json.path }}/Processing.txt\" 2>/dev/null || true\n\n# Create error marker file with details\nERROR_FILE=\"{{ $json.path }}/BCLConvertError.txt\"\necho \"========================================\" > \"$ERROR_FILE\"\necho \"BCL Convert Pipeline Error\" >> \"$ERROR_FILE\"\necho \"========================================\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"Run ID: {{ $json.run_id }}\" >> \"$ERROR_FILE\"\necho \"Error Stage: {{ $json.error_stage }}\" >> \"$ERROR_FILE\"\necho \"Exit Code: {{ $json.exit_code }}\" >> \"$ERROR_FILE\"\necho \"Error Message: {{ $json.error_message }}\" >> \"$ERROR_FILE\"\necho \"Timestamp: {{ $json.timestamp }}\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"Log files location:\" >> \"$ERROR_FILE\"\necho \"{{ $json.scriptDir }}/{{ $json.run_id }}_stage*.log\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"========================================\" >> \"$ERROR_FILE\"\n\necho \"Created error file: $ERROR_FILE\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        336,
+        128
+      ],
+      "id": "d64832a0-2837-4283-9125-26b92c4e7ce5",
+      "name": "Create BCLConvertError.txt",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversions",
+          "mode": "list",
+          "cachedResultName": "conversions"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id_source_value": "={{ $('Parse Error Details').first().json.run_id }}-Fastq",
+            "conversion_time": "={{ $now }}",
+            "tool_concept_ref": 112,
+            "status_concept_ref": 27,
+            "storage_instrument_ref": 12
+          },
+          "matchingColumns": [
+            "id_source_value"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "run_ref",
+              "displayName": "run_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conversion_time",
+              "displayName": "conversion_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tool_concept_ref",
+              "displayName": "tool_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "id_source_value",
+              "displayName": "id_source_value",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        560,
+        128
+      ],
+      "id": "ff669982-b922-4a4b-a1ba-24b68ba9e7ff",
+      "name": "Update Conversion Status - Error",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=# Kill any running tmux sessions for this run\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_staging\" 2>/dev/null || true\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_bclconvert\" 2>/dev/null || true\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_copy\" 2>/dev/null || true\n\necho \"Cleaned up tmux sessions for {{ $('Parse Error Details').first().json.run_id }}\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        768,
+        128
+      ],
+      "id": "7bc8408d-7be5-4bc2-912d-436e2d86d55e",
+      "name": "Cleanup Tmux Sessions",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Error Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Error Details": {
+      "main": [
+        [
+          {
+            "node": "Create BCLConvertError.txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create BCLConvertError.txt": {
+      "main": [
+        [
+          {
+            "node": "Update Conversion Status - Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Conversion Status - Error": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Tmux Sessions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup Tmux Sessions": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "043302ad-dae2-4d33-a044-a96120602d4d",
+  "activeVersionId": "043302ad-dae2-4d33-a044-a96120602d4d",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-02-11T05:25:28.968Z",
+      "createdAt": "2026-02-11T05:25:28.968Z",
+      "role": "workflow:owner",
+      "workflowId": "zBBbRZ8DHy5JU7iB",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-16T11:29:00.000Z",
+    "createdAt": "2026-02-11T06:19:55.207Z",
+    "versionId": "043302ad-dae2-4d33-a044-a96120602d4d",
+    "workflowId": "zBBbRZ8DHy5JU7iB",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "bcl-error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -112,
+          128
+        ],
+        "id": "85f24f0a-bcf7-42a7-9b41-3b1dabd5ef78",
+        "name": "Error Webhook",
+        "webhookId": "bcl-error"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Extract error details from webhook\nconst rawInput = $input.first().json;\n\n// The data could be directly in json (if testing) or in json.body (from actual webhook)\nconst input = rawInput.body || rawInput;\n\nconst errorInfo = {\n  run_id: input.run_id || 'unknown',\n  error_stage: input.error_stage || 'unknown',\n  exit_code: input.exit_code || -1,\n  error_message: input.error_message || 'Unknown error',\n  timestamp: new Date().toISOString(),\n  path: input.path || '',\n  scriptDir: input.scriptDir || '/staging/n8n_tmp',\n  full_payload: input\n};\n\nconsole.error('BCL Convert Error:', JSON.stringify(errorInfo, null, 2));\n\nreturn [{ json: errorInfo }];"
+        },
+        "id": "fdf1ad67-9750-4d44-b405-1ddf1cf052df",
+        "name": "Parse Error Details",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          112,
+          128
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=# Remove Processing.txt and create BCLConvertError.txt\nrm -f \"{{ $json.path }}/Processing.txt\" 2>/dev/null || true\n\n# Create error marker file with details\nERROR_FILE=\"{{ $json.path }}/BCLConvertError.txt\"\necho \"========================================\" > \"$ERROR_FILE\"\necho \"BCL Convert Pipeline Error\" >> \"$ERROR_FILE\"\necho \"========================================\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"Run ID: {{ $json.run_id }}\" >> \"$ERROR_FILE\"\necho \"Error Stage: {{ $json.error_stage }}\" >> \"$ERROR_FILE\"\necho \"Exit Code: {{ $json.exit_code }}\" >> \"$ERROR_FILE\"\necho \"Error Message: {{ $json.error_message }}\" >> \"$ERROR_FILE\"\necho \"Timestamp: {{ $json.timestamp }}\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"Log files location:\" >> \"$ERROR_FILE\"\necho \"{{ $json.scriptDir }}/{{ $json.run_id }}_stage*.log\" >> \"$ERROR_FILE\"\necho \"\" >> \"$ERROR_FILE\"\necho \"========================================\" >> \"$ERROR_FILE\"\n\necho \"Created error file: $ERROR_FILE\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          336,
+          128
+        ],
+        "id": "d64832a0-2837-4283-9125-26b92c4e7ce5",
+        "name": "Create BCLConvertError.txt",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "conversions",
+            "mode": "list",
+            "cachedResultName": "conversions"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "id_source_value": "={{ $('Parse Error Details').first().json.run_id }}-Fastq",
+              "conversion_time": "={{ $now }}",
+              "tool_concept_ref": 112,
+              "status_concept_ref": 27,
+              "storage_instrument_ref": 12
+            },
+            "matchingColumns": [
+              "id_source_value"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "run_ref",
+                "displayName": "run_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "conversion_time",
+                "displayName": "conversion_time",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "tool_concept_ref",
+                "displayName": "tool_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "id_source_value",
+                "displayName": "id_source_value",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "storage_instrument_ref",
+                "displayName": "storage_instrument_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          560,
+          128
+        ],
+        "id": "ff669982-b922-4a4b-a1ba-24b68ba9e7ff",
+        "name": "Update Conversion Status - Error",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=# Kill any running tmux sessions for this run\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_staging\" 2>/dev/null || true\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_bclconvert\" 2>/dev/null || true\ntmux kill-session -t \"bcl_{{ $('Parse Error Details').first().json.run_id }}_copy\" 2>/dev/null || true\n\necho \"Cleaned up tmux sessions for {{ $('Parse Error Details').first().json.run_id }}\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          768,
+          128
+        ],
+        "id": "7bc8408d-7be5-4bc2-912d-436e2d86d55e",
+        "name": "Cleanup Tmux Sessions",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Error Webhook": {
+        "main": [
+          [
+            {
+              "node": "Parse Error Details",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Error Details": {
+        "main": [
+          [
+            {
+              "node": "Create BCLConvertError.txt",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create BCLConvertError.txt": {
+        "main": [
+          [
+            {
+              "node": "Update Conversion Status - Error",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Conversion Status - Error": {
+        "main": [
+          [
+            {
+              "node": "Cleanup Tmux Sessions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cleanup Tmux Sessions": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 043302ad",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "BCL Convert - 05 Error Handler.json"
+}
