@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-02T05:34:57.000Z",
+  "updatedAt": "2026-02-25T09:26:41.051Z",
   "createdAt": "2025-12-24T08:09:58.767Z",
   "id": "CuWJaHlFoyXcmolp",
   "name": "Sophia VCF Downloader",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -960,
-        160
+        256,
+        -272
       ],
       "id": "9eb09f28-7a2d-4000-bdae-aa920749c193",
       "name": "When clicking ‘Execute workflow’"
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -64,
-        160
+        1152,
+        -272
       ],
       "id": "164214f1-71e5-4712-9a96-5cfc111b47bc",
       "name": "Account Login",
@@ -42,8 +42,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -736,
-        160
+        480,
+        -272
       ],
       "id": "cdb6cb61-c6a9-4c1a-a0a6-44db92c65a99",
       "name": "Get All Accounts",
@@ -61,8 +61,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        192,
-        160
+        1408,
+        -272
       ],
       "id": "a79cf41c-91ed-48bf-ab83-f3770a51e0a0",
       "name": "Get Batches",
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
-        160
+        1616,
+        -272
       ],
       "id": "d1072f37-2971-4dea-a9aa-47d0ec86e0a2",
       "name": "Tidy Batches",
@@ -111,7 +111,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        656,
+        160,
         160
       ],
       "id": "f2c674b4-774d-43ea-b31f-0d5896b2eeb8",
@@ -124,7 +124,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1120,
+        1328,
         160
       ],
       "id": "9674a5ba-fece-4e8d-948f-6f1355d0a3f9",
@@ -139,7 +139,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1376,
+        1584,
         160
       ],
       "id": "14fdbf51-4831-4b1a-9182-6cb1713dccca",
@@ -172,7 +172,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1584,
+        1792,
         160
       ],
       "id": "c4d15478-f5e3-4f61-aca9-5988f9ada3b6",
@@ -185,8 +185,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -288,
-        160
+        928,
+        -272
       ],
       "id": "ac5f309d-e816-4852-b3ea-24f9fb32ed2e",
       "name": "Loop Over Accounts"
@@ -196,8 +196,8 @@
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        -528,
-        160
+        688,
+        -272
       ],
       "id": "2517e838-f885-46fa-b597-2879e8cf5dbb",
       "name": "Limit"
@@ -209,7 +209,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        880,
+        1088,
         160
       ],
       "id": "83350962-afcb-43e4-ae6d-afdb5e17c555",
@@ -222,7 +222,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1792,
+        2000,
         160
       ],
       "id": "5a029c92-2cfe-4f06-8149-278ee0c36440",
@@ -235,11 +235,54 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2000,
+        2208,
         160
       ],
       "id": "17980def-eaaf-4e49-981e-a7b8695d6c9a",
       "name": "Download All VCFs"
+    },
+    {
+      "parameters": {
+        "command": "=ls \"/mnt/smb_peta/Data_Consolidation/external/sophia/{{ $('Loop Over Accounts').item.json.care_site_id }} - {{ $('Loop Over Accounts').item.json.care_site_name }}/\" "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -16
+      ],
+      "id": "5ab77b64-8f42-4499-ac21-a37fea89f367",
+      "name": "Get Downloaded Batches"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.stdout;\n\nconst batchIds = output\n  .split('\\n')\n  .filter(line => line.trim() !== '')\n  .map(line => line.replace('Batch ', '').trim());\n\nreturn batchIds.map(id => ({ json: { id: Number(id) } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "10763af9-af2e-4fad-8a03-e2c0c3251bd9",
+      "name": "Tidy Downloaded Batches"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "id",
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        800,
+        160
+      ],
+      "id": "5fcdf366-f697-4eed-b6d5-459ced3723e4",
+      "name": "Merge"
     }
   ],
   "connections": {
@@ -302,9 +345,14 @@
       "main": [
         [
           {
-            "node": "Loop Over Batches",
+            "node": "Get Downloaded Batches",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
           }
         ]
       ]
@@ -398,6 +446,39 @@
           }
         ]
       ]
+    },
+    "Get Downloaded Batches": {
+      "main": [
+        [
+          {
+            "node": "Tidy Downloaded Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tidy Downloaded Batches": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -408,7 +489,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7d92b111-88d4-4d18-a1a9-1447612ffd88",
+  "versionId": "455f0b5f-ec2d-4293-b9ae-58a8552561cb",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -422,6 +503,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "Sophia VCF Downloader.json"
 }
