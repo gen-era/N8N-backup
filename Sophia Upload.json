@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-22T12:08:33.000Z",
+  "updatedAt": "2026-02-21T16:11:28.086Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1568,
+        -1920,
         -240
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -24,8 +24,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1696,
-        -608
+        -1760,
+        -688
       ],
       "id": "e93a0058-6da2-47e1-9c1a-81250389df51",
       "name": "Sophia Login",
@@ -160,15 +160,15 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -800,
-        -208
+        -1008,
+        -240
       ],
       "id": "d0c4d674-98a9-4136-814b-cf99f2ee927d",
       "name": "Update Data Op as In Progress",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -297,15 +297,15 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -800,
-        144
+        -1008,
+        160
       ],
       "id": "7088e638-df34-4bb6-ad1f-5c98014a96b4",
       "name": "Update Data Op as Completed",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -316,8 +316,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -592,
-        -32
+        -800,
+        -16
       ],
       "id": "0c1b4879-5798-4085-a3ac-fb3ae69bccd8",
       "name": "Cleanup Symlink"
@@ -329,8 +329,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -800,
-        -32
+        -1008,
+        -16
       ],
       "id": "95e96ed5-3083-4961-8cc2-0c4560af7bf2",
       "name": "Upload Genomize"
@@ -343,22 +343,21 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -368,
-        -368
+        -768,
+        -448
       ],
       "id": "134ee9d2-0eaf-4e30-bb97-9c90d5f3f2a1",
       "name": "Create Symlink"
     },
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "// Stdout'daki fastq dosya yollarını al\nconst fastqPaths = $input.item.json.stdout.trim().split('\\n');\n\n// batch_source_value'yu önceki node'dan al\nconst batchSourceValue = $('Get On Hold Sophia Uploads').item.json.batch_source_value;\n\n// /tmp/genomize altında hedef dizini oluştur\nconst symlinkBaseDir = `/tmp/genomize/${batchSourceValue}`;\n\n// Symlink komutlarını oluştur\nconst commands = [];\ncommands.push(`mkdir -p ${symlinkBaseDir}`);\n\nfastqPaths.forEach(sourcePath => {\n  const fileName = sourcePath.split('/').pop();\n  const targetPath = `${symlinkBaseDir}/${fileName}`;\n  commands.push(`ln -sf ${sourcePath} ${targetPath}`);\n});\n\nconst finalCommand = commands.join(' && ');\n\nreturn {\n  json: {\n    command: finalCommand,\n    targetDirectory: symlinkBaseDir,\n    fileCount: fastqPaths.length,\n    batchSourceValue: batchSourceValue\n  }\n};"
+        "jsCode": "const items = $input.all();\n\n// recipe_ref'e göre grupla\nconst groups = {};\n\nitems.forEach(item => {\n  const json = item.json;\n  const recipeRef = json.recipe_ref;\n  const stdout = json.stdout || '';\n  \n  if (!groups[recipeRef]) {\n    groups[recipeRef] = {\n      recipe_ref: recipeRef,\n      target_dir: `/tmp/sophia/recipe_${recipeRef}`,\n      commands: [`mkdir -p /tmp/sophia/recipe_${recipeRef}`],\n      // Sonraki node için lazım olabilecek metadata\n      account_id: json.account_id,\n      pipeline_id: json.pipeline_id,\n    };\n  }\n  \n  // Bu item'ın fastq dosyalarını ekle\n  const fastqPaths = stdout.trim().split('\\n').filter(p => p.length > 0);\n  fastqPaths.forEach(sourcePath => {\n    const fileName = sourcePath.split('/').pop();\n    const targetPath = `/tmp/sophia/recipe_${recipeRef}/${fileName}`;\n    groups[recipeRef].commands.push(`ln -sf \"${sourcePath}\" \"${targetPath}\"`);\n  });\n});\n\n// Her recipe_ref için bir item döndür\nreturn Object.values(groups).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    target_dir: group.target_dir,\n    account_id: group.account_id,\n    pipeline_id: group.pipeline_id,\n    command: group.commands.join(' && '),\n    file_count: group.commands.length - 1 // mkdir hariç\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -592,
-        -368
+        -1008,
+        -448
       ],
       "id": "333030b1-e7fa-4cdb-b556-a9eb68e5246d",
       "name": "Code in JavaScript"
@@ -366,13 +365,13 @@
     {
       "parameters": {
         "executeOnce": false,
-        "command": "=fdfind \"{{ $json.sample_id }}_\"  /mnt/smb_share/Conversions/{{ $json.id_source_value }}"
+        "command": "=fdfind --fixed-strings \"{{ $json.sample_id }}_\"  /mnt/illuminastorage/fastq_folder/{{ $json.id_source_value }}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -800,
-        -368
+        -1456,
+        -384
       ],
       "id": "2942536c-6bca-48db-9b4d-528125a2ac58",
       "name": "Find Files"
@@ -384,8 +383,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -864,
-        -560
+        -1488,
+        -688
       ],
       "id": "f6fabc8b-c365-4360-8216-619c2e8eac2f",
       "name": "Login Genomize"
@@ -399,7 +398,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1328,
+        -1680,
         -240
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
@@ -407,9 +406,24 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1232,
+        -256
+      ],
+      "id": "4f65c0b4-22c2-4098-9bc9-8cbdc18d4230",
+      "name": "Merge"
     }
   ],
   "connections": {
@@ -450,7 +464,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -459,7 +473,34 @@
     },
     "Get On Hold Sophia Uploads": {
       "main": [
-        []
+        [
+          {
+            "node": "Find Files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Data Op as In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -471,7 +512,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2218fee0-fd75-4890-865e-73f274861594",
+  "versionId": "163ac300-0fe1-40b0-aad7-9bc324463cd9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -485,6 +526,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "Sophia Upload.json"
 }
