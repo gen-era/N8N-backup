@@ -1,0 +1,586 @@
+{
+  "updatedAt": "2026-02-16T11:40:27.456Z",
+  "createdAt": "2026-01-29T05:21:14.498Z",
+  "id": "3lb4DGgQtGBre5YC",
+  "name": "BCL Convert - 01 Orchestrator",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "run_id"
+            },
+            {
+              "name": "path"
+            },
+            {
+              "name": "is_xp",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1408,
+        -384
+      ],
+      "id": "7724f982-ef44-4ffb-8367-21f4d34f1c86",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        -416
+      ],
+      "id": "e02f9aa1-08be-40d4-b7aa-d33c0fcb287b",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        -416
+      ],
+      "id": "dfc8d28f-3da4-49e6-be99-3230daba6358",
+      "name": "Parse XML"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare all data needed for the entire pipeline\n\nconst runFolder = $('When Executed by Another Workflow').first().json.path;\nconst runId = $('When Executed by Another Workflow').first().json.run_id;\nconst timestamp = new Date().toISOString().replace(/[:.]/g, '-');\nconst xmlData = $input.first().json;\nconst workflowTypeIsXp = $('When Executed by Another Workflow').first().json.is_xp || false;\n\n// Define paths\nconst outputBase = '/staging/tmp';\nconst outputDir = `${outputBase}/${runId}-Fastq`;\nconst logFile = `bcl_convert_${timestamp}.log`;\nconst logPath = `${outputDir}/${logFile}`;\nconst fullRunPath = `/staging/tmp/${runId}`;\nconst scriptDir = '/staging/n8n_tmp';\n\n// BCL-Convert command\nconst bclConvertCommand = `mkdir -p \"${outputDir}\" && dragen -f --bcl-conversion-only true --bcl-sampleproject-subdirectories true --bcl-input-directory \"${fullRunPath}\" --no-lane-splitting ${!workflowTypeIsXp} --output-directory \"${outputDir}\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee \"${logPath}\"`;\n\n// Webhook URLs\nconst webhookBase = 'http://10.20.0.30:5678/webhook';\n\nreturn [{\n  json: {\n    // Original inputs\n    path: runFolder,\n    run_id: runId,\n    is_xp: workflowTypeIsXp,\n    \n    // Parsed XML data\n    xmlData: xmlData,\n    \n    // Computed paths\n    outputDirectory: outputDir,\n    logFile: logFile,\n    logPath: logPath,\n    fullRunPath: fullRunPath,\n    scriptDir: scriptDir,\n    \n    // Commands\n    bclConvertCommand: bclConvertCommand,\n    \n    // Metadata\n    startTime: new Date().toISOString(),\n    executionId: `${runId}_${timestamp}`,\n    workflowType: workflowTypeIsXp ? 'XP' : 'Standard',\n    noLaneSplitting: !workflowTypeIsXp,\n    \n    // Webhook URLs for callbacks\n    webhooks: {\n      postStaging: `${webhookBase}/post-staging`,\n      postBclConvert: `${webhookBase}/post-bclconvert`,\n      postCopy: `${webhookBase}/post-copy`,\n      errorHandler: `${webhookBase}/bcl-error`\n    }\n  }\n}];"
+      },
+      "id": "65ee2aed-bde8-46a0-9b55-b735e069dd45",
+      "name": "Prepare Pipeline Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2384,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=mkdir -p {{ $json.scriptDir }}",
+        "cwd": "/staging"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        -416
+      ],
+      "id": "5e79f24e-8643-4a9a-8ae8-7972fcd15fae",
+      "name": "Create Script Directory",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate the staging script content\nconst data = $('Prepare Pipeline Data').first().json;\n\n// Get the source path from the other node\nconst sourcePath = $('When Executed by Another Workflow').first().json.path;\n\n// Store payload as base64 to avoid all quoting issues\nconst payloadJson = JSON.stringify(data);\nconst payloadBase64 = Buffer.from(payloadJson).toString('base64');\n\nconst scriptContent = `#!/bin/bash\n# Stage 1: Copy run folder to staging\n# Run ID: ${data.run_id}\n# Generated: ${data.startTime}\nset -o pipefail\nRUN_ID=\"${data.run_id}\"\nSOURCE_PATH=\"${sourcePath}\"\nDEST_PATH=\"/staging/tmp/${data.run_id}\"\nLOG_FILE=\"${data.scriptDir}/${data.run_id}_stage1_staging.log\"\nWEBHOOK_SUCCESS=\"${data.webhooks.postStaging}\"\nWEBHOOK_ERROR=\"${data.webhooks.errorHandler}\"\n\n# Payload stored as base64 to avoid quoting issues\nPAYLOAD_BASE64=\"${payloadBase64}\"\n\n# Decode payload\nPAYLOAD_BASE=$(echo \"$PAYLOAD_BASE64\" | base64 -d)\n\necho \"=== Staging Script Started at $(date) ===\" | tee \"$LOG_FILE\"\necho \"Source: $SOURCE_PATH\" | tee -a \"$LOG_FILE\"\necho \"Destination: $DEST_PATH\" | tee -a \"$LOG_FILE\"\n\n# Run rsync\nrsync -avh \"$SOURCE_PATH/\" \"$DEST_PATH/\" 2>&1 | tee -a \"$LOG_FILE\"\nEXIT_CODE=$?\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"=== Staging Script Finished at $(date) with exit code $EXIT_CODE ===\" | tee -a \"$LOG_FILE\"\n\n# Prepare callback payload\nif [ $EXIT_CODE -eq 0 ]; then\n  echo \"Calling success webhook...\" | tee -a \"$LOG_FILE\"\n  curl -s -X POST \"$WEBHOOK_SUCCESS\" \\\\\n    -H \"Content-Type: application/json\" \\\\\n    -d \"$PAYLOAD_BASE\" | tee -a \"$LOG_FILE\"\nelse\n  echo \"Calling error webhook...\" | tee -a \"$LOG_FILE\"\n  ERROR_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq --arg ec \"$EXIT_CODE\" --arg stage \"staging\" '. + {error_stage: $stage, exit_code: ($ec|tonumber), error_message: \"rsync to staging failed\"}')\n  curl -s -X POST \"$WEBHOOK_ERROR\" \\\\\n    -H \"Content-Type: application/json\" \\\\\n    -d \"$ERROR_PAYLOAD\" | tee -a \"$LOG_FILE\"\nfi\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"Webhook called, script complete.\" | tee -a \"$LOG_FILE\"\n`;\n\n// Also encode the entire script as base64 for safe transfer\nconst scriptBase64 = Buffer.from(scriptContent).toString('base64');\n\nreturn [{\n  json: {\n    ...data,\n    stagingScript: scriptContent,\n    stagingScriptBase64: scriptBase64,\n    stagingScriptPath: `${data.scriptDir}/${data.run_id}_stage1_staging.sh`\n  }\n}];"
+      },
+      "id": "492d715f-439c-41d1-8002-7a7674f4d6f0",
+      "name": "Generate Staging Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2832,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=echo '{{ $json.stagingScriptBase64 }}' | base64 -d > {{ $json.stagingScriptPath }} && chmod +x {{ $json.stagingScriptPath }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3056,
+        -416
+      ],
+      "id": "462a74d0-6ef6-4830-bb33-add5224b7af6",
+      "name": "Write Staging Script",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=tmux new-session -d -s \"bcl_{{ $('Generate Staging Script').first().json.run_id }}_staging\" \"bash {{ $('Generate Staging Script').first().json.stagingScriptPath }}\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        -416
+      ],
+      "id": "7997dfff-8d6f-4284-b0bf-8c3528315276",
+      "name": "Launch Staging in Tmux",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return confirmation that staging job was launched\nconst data = $('Generate Staging Script').first().json;\n\nreturn [{\n  json: {\n    status: 'staging_launched',\n    run_id: data.run_id,\n    tmux_session: `bcl_${data.run_id}_staging`,\n    script_path: data.stagingScriptPath,\n    message: 'Staging rsync launched in tmux. Webhook will be called on completion.',\n    launched_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "665f963f-d47d-40f1-8553-8961ff7b75c6",
+      "name": "Return Launch Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3488,
+        -416
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.path }}/RunParameters.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        -416
+      ],
+      "id": "16c7fcd7-f938-4f15-815f-73861bf9d0cb",
+      "name": "Read RunParameters1"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Read RunParameters1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Parse XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse XML": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pipeline Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pipeline Data": {
+      "main": [
+        [
+          {
+            "node": "Create Script Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Script Directory": {
+      "main": [
+        [
+          {
+            "node": "Generate Staging Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Staging Script": {
+      "main": [
+        [
+          {
+            "node": "Write Staging Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Staging Script": {
+      "main": [
+        [
+          {
+            "node": "Launch Staging in Tmux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch Staging in Tmux": {
+      "main": [
+        [
+          {
+            "node": "Return Launch Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read RunParameters1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "run_id": "260204_VH01138_13_AACYFMTHV",
+          "path": "/mnt/illuminastorage/run_folder/nextseq2000/260204_VH01138_13_AACYFMTHV",
+          "is_xp": false
+        }
+      }
+    ]
+  },
+  "versionId": "4eb48a92-4d29-4389-875a-2ecc128477c6",
+  "activeVersionId": "4eb48a92-4d29-4389-875a-2ecc128477c6",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-29T05:21:14.507Z",
+      "createdAt": "2026-01-29T05:21:14.507Z",
+      "role": "workflow:owner",
+      "workflowId": "3lb4DGgQtGBre5YC",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-16T12:00:37.000Z",
+    "createdAt": "2026-02-16T11:40:27.458Z",
+    "versionId": "4eb48a92-4d29-4389-875a-2ecc128477c6",
+    "workflowId": "3lb4DGgQtGBre5YC",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "run_id"
+              },
+              {
+                "name": "path"
+              },
+              {
+                "name": "is_xp",
+                "type": "boolean"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          1408,
+          -384
+        ],
+        "id": "7724f982-ef44-4ffb-8367-21f4d34f1c86",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "operation": "xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1,
+        "position": [
+          1952,
+          -416
+        ],
+        "id": "e02f9aa1-08be-40d4-b7aa-d33c0fcb287b",
+        "name": "Extract from File"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.xml",
+        "typeVersion": 1,
+        "position": [
+          2176,
+          -416
+        ],
+        "id": "dfc8d28f-3da4-49e6-be99-3230daba6358",
+        "name": "Parse XML"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Prepare all data needed for the entire pipeline\n\nconst runFolder = $('When Executed by Another Workflow').first().json.path;\nconst runId = $('When Executed by Another Workflow').first().json.run_id;\nconst timestamp = new Date().toISOString().replace(/[:.]/g, '-');\nconst xmlData = $input.first().json;\nconst workflowTypeIsXp = $('When Executed by Another Workflow').first().json.is_xp || false;\n\n// Define paths\nconst outputBase = '/staging/tmp';\nconst outputDir = `${outputBase}/${runId}-Fastq`;\nconst logFile = `bcl_convert_${timestamp}.log`;\nconst logPath = `${outputDir}/${logFile}`;\nconst fullRunPath = `/staging/tmp/${runId}`;\nconst scriptDir = '/staging/n8n_tmp';\n\n// BCL-Convert command\nconst bclConvertCommand = `mkdir -p \"${outputDir}\" && dragen -f --bcl-conversion-only true --bcl-sampleproject-subdirectories true --bcl-input-directory \"${fullRunPath}\" --no-lane-splitting ${!workflowTypeIsXp} --output-directory \"${outputDir}\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee \"${logPath}\"`;\n\n// Webhook URLs\nconst webhookBase = 'http://10.20.0.30:5678/webhook';\n\nreturn [{\n  json: {\n    // Original inputs\n    path: runFolder,\n    run_id: runId,\n    is_xp: workflowTypeIsXp,\n    \n    // Parsed XML data\n    xmlData: xmlData,\n    \n    // Computed paths\n    outputDirectory: outputDir,\n    logFile: logFile,\n    logPath: logPath,\n    fullRunPath: fullRunPath,\n    scriptDir: scriptDir,\n    \n    // Commands\n    bclConvertCommand: bclConvertCommand,\n    \n    // Metadata\n    startTime: new Date().toISOString(),\n    executionId: `${runId}_${timestamp}`,\n    workflowType: workflowTypeIsXp ? 'XP' : 'Standard',\n    noLaneSplitting: !workflowTypeIsXp,\n    \n    // Webhook URLs for callbacks\n    webhooks: {\n      postStaging: `${webhookBase}/post-staging`,\n      postBclConvert: `${webhookBase}/post-bclconvert`,\n      postCopy: `${webhookBase}/post-copy`,\n      errorHandler: `${webhookBase}/bcl-error`\n    }\n  }\n}];"
+        },
+        "id": "65ee2aed-bde8-46a0-9b55-b735e069dd45",
+        "name": "Prepare Pipeline Data",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2384,
+          -416
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=mkdir -p {{ $json.scriptDir }}",
+          "cwd": "/staging"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          2608,
+          -416
+        ],
+        "id": "5e79f24e-8643-4a9a-8ae8-7972fcd15fae",
+        "name": "Create Script Directory",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Generate the staging script content\nconst data = $('Prepare Pipeline Data').first().json;\n\n// Get the source path from the other node\nconst sourcePath = $('When Executed by Another Workflow').first().json.path;\n\n// Store payload as base64 to avoid all quoting issues\nconst payloadJson = JSON.stringify(data);\nconst payloadBase64 = Buffer.from(payloadJson).toString('base64');\n\nconst scriptContent = `#!/bin/bash\n# Stage 1: Copy run folder to staging\n# Run ID: ${data.run_id}\n# Generated: ${data.startTime}\nset -o pipefail\nRUN_ID=\"${data.run_id}\"\nSOURCE_PATH=\"${sourcePath}\"\nDEST_PATH=\"/staging/tmp/${data.run_id}\"\nLOG_FILE=\"${data.scriptDir}/${data.run_id}_stage1_staging.log\"\nWEBHOOK_SUCCESS=\"${data.webhooks.postStaging}\"\nWEBHOOK_ERROR=\"${data.webhooks.errorHandler}\"\n\n# Payload stored as base64 to avoid quoting issues\nPAYLOAD_BASE64=\"${payloadBase64}\"\n\n# Decode payload\nPAYLOAD_BASE=$(echo \"$PAYLOAD_BASE64\" | base64 -d)\n\necho \"=== Staging Script Started at $(date) ===\" | tee \"$LOG_FILE\"\necho \"Source: $SOURCE_PATH\" | tee -a \"$LOG_FILE\"\necho \"Destination: $DEST_PATH\" | tee -a \"$LOG_FILE\"\n\n# Run rsync\nrsync -avh \"$SOURCE_PATH/\" \"$DEST_PATH/\" 2>&1 | tee -a \"$LOG_FILE\"\nEXIT_CODE=$?\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"=== Staging Script Finished at $(date) with exit code $EXIT_CODE ===\" | tee -a \"$LOG_FILE\"\n\n# Prepare callback payload\nif [ $EXIT_CODE -eq 0 ]; then\n  echo \"Calling success webhook...\" | tee -a \"$LOG_FILE\"\n  curl -s -X POST \"$WEBHOOK_SUCCESS\" \\\\\n    -H \"Content-Type: application/json\" \\\\\n    -d \"$PAYLOAD_BASE\" | tee -a \"$LOG_FILE\"\nelse\n  echo \"Calling error webhook...\" | tee -a \"$LOG_FILE\"\n  ERROR_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq --arg ec \"$EXIT_CODE\" --arg stage \"staging\" '. + {error_stage: $stage, exit_code: ($ec|tonumber), error_message: \"rsync to staging failed\"}')\n  curl -s -X POST \"$WEBHOOK_ERROR\" \\\\\n    -H \"Content-Type: application/json\" \\\\\n    -d \"$ERROR_PAYLOAD\" | tee -a \"$LOG_FILE\"\nfi\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"Webhook called, script complete.\" | tee -a \"$LOG_FILE\"\n`;\n\n// Also encode the entire script as base64 for safe transfer\nconst scriptBase64 = Buffer.from(scriptContent).toString('base64');\n\nreturn [{\n  json: {\n    ...data,\n    stagingScript: scriptContent,\n    stagingScriptBase64: scriptBase64,\n    stagingScriptPath: `${data.scriptDir}/${data.run_id}_stage1_staging.sh`\n  }\n}];"
+        },
+        "id": "492d715f-439c-41d1-8002-7a7674f4d6f0",
+        "name": "Generate Staging Script",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2832,
+          -416
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=echo '{{ $json.stagingScriptBase64 }}' | base64 -d > {{ $json.stagingScriptPath }} && chmod +x {{ $json.stagingScriptPath }}"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          3056,
+          -416
+        ],
+        "id": "462a74d0-6ef6-4830-bb33-add5224b7af6",
+        "name": "Write Staging Script",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=tmux new-session -d -s \"bcl_{{ $('Generate Staging Script').first().json.run_id }}_staging\" \"bash {{ $('Generate Staging Script').first().json.stagingScriptPath }}\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          3264,
+          -416
+        ],
+        "id": "7997dfff-8d6f-4284-b0bf-8c3528315276",
+        "name": "Launch Staging in Tmux",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Return confirmation that staging job was launched\nconst data = $('Generate Staging Script').first().json;\n\nreturn [{\n  json: {\n    status: 'staging_launched',\n    run_id: data.run_id,\n    tmux_session: `bcl_${data.run_id}_staging`,\n    script_path: data.stagingScriptPath,\n    message: 'Staging rsync launched in tmux. Webhook will be called on completion.',\n    launched_at: new Date().toISOString()\n  }\n}];"
+        },
+        "id": "665f963f-d47d-40f1-8553-8961ff7b75c6",
+        "name": "Return Launch Status",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3488,
+          -416
+        ]
+      },
+      {
+        "parameters": {
+          "fileSelector": "={{ $json.path }}/RunParameters.xml",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1,
+        "position": [
+          1728,
+          -416
+        ],
+        "id": "16c7fcd7-f938-4f15-815f-73861bf9d0cb",
+        "name": "Read RunParameters1"
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Read RunParameters1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract from File": {
+        "main": [
+          [
+            {
+              "node": "Parse XML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse XML": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Data": {
+        "main": [
+          [
+            {
+              "node": "Create Script Directory",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create Script Directory": {
+        "main": [
+          [
+            {
+              "node": "Generate Staging Script",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Staging Script": {
+        "main": [
+          [
+            {
+              "node": "Write Staging Script",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Write Staging Script": {
+        "main": [
+          [
+            {
+              "node": "Launch Staging in Tmux",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch Staging in Tmux": {
+        "main": [
+          [
+            {
+              "node": "Return Launch Status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read RunParameters1": {
+        "main": [
+          [
+            {
+              "node": "Extract from File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 4eb48a92",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "BCL Convert - 01 Orchestrator.json"
+}
