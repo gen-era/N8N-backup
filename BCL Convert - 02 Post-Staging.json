@@ -1,0 +1,520 @@
+{
+  "updatedAt": "2026-02-11T05:22:26.079Z",
+  "createdAt": "2026-01-29T05:36:34.115Z",
+  "id": "oSvs2w9QmCDFez2N",
+  "name": "BCL Convert - 02 Post-Staging",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "post-staging",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1792,
+        432
+      ],
+      "id": "3c41f7ae-c1ed-42ab-a8d5-ac8b066c8e9c",
+      "name": "Post-Staging Webhook",
+      "webhookId": "post-staging"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract and validate incoming data from webhook\n// Webhook data comes in $input.first().json.body for POST requests\nconst rawInput = $input.first().json;\n\n// The data could be directly in json (if testing) or in json.body (from actual webhook)\nconst data = rawInput.body || rawInput;\n\n// Debug: log what we received\nconsole.log('Raw input keys:', Object.keys(rawInput));\nconsole.log('Data keys:', Object.keys(data));\nconsole.log('run_id:', data.run_id);\nconsole.log('webhooks:', data.webhooks);\n\n// Validate required fields\nif (!data.run_id) {\n  throw new Error('Missing run_id in webhook payload');\n}\nif (!data.webhooks) {\n  throw new Error('Missing webhooks object in payload. Keys received: ' + Object.keys(data).join(', '));\n}\n\nreturn [{ json: data }];"
+      },
+      "id": "776bf44a-9718-44ad-859b-d3328e4e1dbb",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1568,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1360,
+        432
+      ],
+      "id": "e4af92df-a400-4902-9a33-fa3c756908fa",
+      "name": "Check DRAGEN Availability",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dragen-check",
+              "leftValue": "={{ $json.stdout.trim() }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1136,
+        432
+      ],
+      "id": "b016fdfb-ca32-4901-a7fa-26968e14b889",
+      "name": "DRAGEN Available?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate the BCL-Convert script\nconst data = $('Validate Input').first().json;\n\n// Store payload as base64 to avoid quoting issues\nconst payloadJson = JSON.stringify(data);\nconst payloadBase64 = Buffer.from(payloadJson).toString('base64');\n\nconst scriptContent = `#!/bin/bash\n# Stage 2: BCL-Convert with DRAGEN\n# Run ID: ${data.run_id}\n# Generated: ${new Date().toISOString()}\n\nset -o pipefail\n\nRUN_ID=\"${data.run_id}\"\nINPUT_DIR=\"${data.fullRunPath}\"\nOUTPUT_DIR=\"${data.outputDirectory}\"\nLOG_FILE=\"${data.scriptDir}/${data.run_id}_stage2_bclconvert.log\"\nWEBHOOK_SUCCESS=\"${data.webhooks.postBclConvert}\"\nWEBHOOK_ERROR=\"${data.webhooks.errorHandler}\"\nDEMUX_STATS_FILE=\"${data.outputDirectory}/Reports/Demultiplex_Stats.csv\"\n\n# Payload stored as base64 to avoid quoting issues\nPAYLOAD_BASE64=\"${payloadBase64}\"\n\n# Decode payload\nPAYLOAD_BASE=$(echo \"$PAYLOAD_BASE64\" | base64 -d)\n\necho \"=== BCL-Convert Script Started at $(date) ===\" | tee \"$LOG_FILE\"\necho \"Input: $INPUT_DIR\" | tee -a \"$LOG_FILE\"\necho \"Output: $OUTPUT_DIR\" | tee -a \"$LOG_FILE\"\necho \"No Lane Splitting: ${data.noLaneSplitting}\" | tee -a \"$LOG_FILE\"\necho \"\" | tee -a \"$LOG_FILE\"\n\n# Create output directory\nmkdir -p \"$OUTPUT_DIR\"\n\n# Run DRAGEN BCL-Convert (single line command to avoid escaping issues)\ndragen -f --bcl-conversion-only true --bcl-sampleproject-subdirectories true --bcl-input-directory \"$INPUT_DIR\" --no-lane-splitting ${data.noLaneSplitting} --output-directory \"$OUTPUT_DIR\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee -a \"$LOG_FILE\"\n\n# Capture exit code from dragen (first command in pipe) using PIPESTATUS\nEXIT_CODE=\\${PIPESTATUS[0]}\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"=== BCL-Convert Script Finished at $(date) with exit code $EXIT_CODE ===\" | tee -a \"$LOG_FILE\"\n\n# Check if Demultiplex_Stats.csv was generated\nif [ -f \"$DEMUX_STATS_FILE\" ]; then\n    echo \"Demultiplex_Stats.csv found at: $DEMUX_STATS_FILE\" | tee -a \"$LOG_FILE\"\n    echo \"BCL-Convert completed successfully, calling success webhook...\" | tee -a \"$LOG_FILE\"\n    SUCCESS_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq '. + {dragen_success: true}')\n    curl -s -X POST \"$WEBHOOK_SUCCESS\" -H \"Content-Type: application/json\" -d \"$SUCCESS_PAYLOAD\" | tee -a \"$LOG_FILE\"\n    echo \"\" | tee -a \"$LOG_FILE\"\nelse\n    echo \"Demultiplex_Stats.csv NOT found at: $DEMUX_STATS_FILE\" | tee -a \"$LOG_FILE\"\n    echo \"BCL-Convert failed, calling error webhook...\" | tee -a \"$LOG_FILE\"\n    ERROR_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq --arg ec \"$EXIT_CODE\" --arg stage \"bclconvert\" '. + {error_stage: $stage, exit_code: ($ec|tonumber), error_message: \"BCL-Convert failed - Demultiplex_Stats.csv not generated\", dragen_success: false}')\n    curl -s -X POST \"$WEBHOOK_ERROR\" -H \"Content-Type: application/json\" -d \"$ERROR_PAYLOAD\" | tee -a \"$LOG_FILE\"\n    echo \"\" | tee -a \"$LOG_FILE\"\nfi\n\necho \"Webhook called, script complete.\" | tee -a \"$LOG_FILE\"\n`;\n\n// Encode the entire script as base64 for safe transfer\nconst scriptBase64 = Buffer.from(scriptContent).toString('base64');\n\nreturn [{\n  json: {\n    ...data,\n    bclConvertScript: scriptContent,\n    bclConvertScriptBase64: scriptBase64,\n    bclConvertScriptPath: `${data.scriptDir}/${data.run_id}_stage2_bclconvert.sh`\n  }\n}];"
+      },
+      "id": "2bfeda4d-424c-4e77-ae6b-028af310d4a9",
+      "name": "Generate BCL-Convert Script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -912,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=echo '{{ $json.bclConvertScriptBase64 }}' | base64 -d > {{ $json.bclConvertScriptPath }} && chmod +x {{ $json.bclConvertScriptPath }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        304
+      ],
+      "id": "83d6a6d0-4418-49b4-8d9c-2e69423fa13c",
+      "name": "Write BCL-Convert Script",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=tmux new-session -d -s \"bcl_{{ $('Generate BCL-Convert Script').first().json.run_id }}_bclconvert\" \"bash {{ $('Generate BCL-Convert Script').first().json.bclConvertScriptPath }}\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        304
+      ],
+      "id": "187b1744-a676-4890-8735-5d18741d1eb8",
+      "name": "Launch BCL-Convert in Tmux",
+      "credentials": {
+        "sshPassword": {
+          "id": "Ex5dXx403TmRsifR",
+          "name": "Sapiens DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -912,
+        544
+      ],
+      "id": "db98df7a-0523-4748-945b-587d182b572e",
+      "name": "Wait 1 Minute1",
+      "webhookId": "wait-dragen-check"
+    }
+  ],
+  "connections": {
+    "Post-Staging Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check DRAGEN Availability": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN Available?": {
+      "main": [
+        [
+          {
+            "node": "Generate BCL-Convert Script",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 1 Minute1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate BCL-Convert Script": {
+      "main": [
+        [
+          {
+            "node": "Write BCL-Convert Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write BCL-Convert Script": {
+      "main": [
+        [
+          {
+            "node": "Launch BCL-Convert in Tmux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch BCL-Convert in Tmux": {
+      "main": [
+        []
+      ]
+    },
+    "Wait 1 Minute1": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "f88475dc-cd45-48de-97ed-28937dc546d1",
+  "activeVersionId": "f88475dc-cd45-48de-97ed-28937dc546d1",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-01-29T05:36:34.125Z",
+      "createdAt": "2026-01-29T05:36:34.125Z",
+      "role": "workflow:owner",
+      "workflowId": "oSvs2w9QmCDFez2N",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-16T12:00:48.000Z",
+    "createdAt": "2026-02-11T05:22:26.081Z",
+    "versionId": "f88475dc-cd45-48de-97ed-28937dc546d1",
+    "workflowId": "oSvs2w9QmCDFez2N",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "post-staging",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -1792,
+          432
+        ],
+        "id": "3c41f7ae-c1ed-42ab-a8d5-ac8b066c8e9c",
+        "name": "Post-Staging Webhook",
+        "webhookId": "post-staging"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Extract and validate incoming data from webhook\n// Webhook data comes in $input.first().json.body for POST requests\nconst rawInput = $input.first().json;\n\n// The data could be directly in json (if testing) or in json.body (from actual webhook)\nconst data = rawInput.body || rawInput;\n\n// Debug: log what we received\nconsole.log('Raw input keys:', Object.keys(rawInput));\nconsole.log('Data keys:', Object.keys(data));\nconsole.log('run_id:', data.run_id);\nconsole.log('webhooks:', data.webhooks);\n\n// Validate required fields\nif (!data.run_id) {\n  throw new Error('Missing run_id in webhook payload');\n}\nif (!data.webhooks) {\n  throw new Error('Missing webhooks object in payload. Keys received: ' + Object.keys(data).join(', '));\n}\n\nreturn [{ json: data }];"
+        },
+        "id": "776bf44a-9718-44ad-859b-d3328e4e1dbb",
+        "name": "Validate Input",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1568,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -1360,
+          432
+        ],
+        "id": "e4af92df-a400-4902-9a33-fa3c756908fa",
+        "name": "Check DRAGEN Availability",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "dragen-check",
+                "leftValue": "={{ $json.stdout.trim() }}",
+                "rightValue": "0",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -1136,
+          432
+        ],
+        "id": "b016fdfb-ca32-4901-a7fa-26968e14b889",
+        "name": "DRAGEN Available?"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Generate the BCL-Convert script\nconst data = $('Validate Input').first().json;\n\n// Store payload as base64 to avoid quoting issues\nconst payloadJson = JSON.stringify(data);\nconst payloadBase64 = Buffer.from(payloadJson).toString('base64');\n\nconst scriptContent = `#!/bin/bash\n# Stage 2: BCL-Convert with DRAGEN\n# Run ID: ${data.run_id}\n# Generated: ${new Date().toISOString()}\n\nset -o pipefail\n\nRUN_ID=\"${data.run_id}\"\nINPUT_DIR=\"${data.fullRunPath}\"\nOUTPUT_DIR=\"${data.outputDirectory}\"\nLOG_FILE=\"${data.scriptDir}/${data.run_id}_stage2_bclconvert.log\"\nWEBHOOK_SUCCESS=\"${data.webhooks.postBclConvert}\"\nWEBHOOK_ERROR=\"${data.webhooks.errorHandler}\"\nDEMUX_STATS_FILE=\"${data.outputDirectory}/Reports/Demultiplex_Stats.csv\"\n\n# Payload stored as base64 to avoid quoting issues\nPAYLOAD_BASE64=\"${payloadBase64}\"\n\n# Decode payload\nPAYLOAD_BASE=$(echo \"$PAYLOAD_BASE64\" | base64 -d)\n\necho \"=== BCL-Convert Script Started at $(date) ===\" | tee \"$LOG_FILE\"\necho \"Input: $INPUT_DIR\" | tee -a \"$LOG_FILE\"\necho \"Output: $OUTPUT_DIR\" | tee -a \"$LOG_FILE\"\necho \"No Lane Splitting: ${data.noLaneSplitting}\" | tee -a \"$LOG_FILE\"\necho \"\" | tee -a \"$LOG_FILE\"\n\n# Create output directory\nmkdir -p \"$OUTPUT_DIR\"\n\n# Run DRAGEN BCL-Convert (single line command to avoid escaping issues)\ndragen -f --bcl-conversion-only true --bcl-sampleproject-subdirectories true --bcl-input-directory \"$INPUT_DIR\" --no-lane-splitting ${data.noLaneSplitting} --output-directory \"$OUTPUT_DIR\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee -a \"$LOG_FILE\"\n\n# Capture exit code from dragen (first command in pipe) using PIPESTATUS\nEXIT_CODE=\\${PIPESTATUS[0]}\n\necho \"\" | tee -a \"$LOG_FILE\"\necho \"=== BCL-Convert Script Finished at $(date) with exit code $EXIT_CODE ===\" | tee -a \"$LOG_FILE\"\n\n# Check if Demultiplex_Stats.csv was generated\nif [ -f \"$DEMUX_STATS_FILE\" ]; then\n    echo \"Demultiplex_Stats.csv found at: $DEMUX_STATS_FILE\" | tee -a \"$LOG_FILE\"\n    echo \"BCL-Convert completed successfully, calling success webhook...\" | tee -a \"$LOG_FILE\"\n    SUCCESS_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq '. + {dragen_success: true}')\n    curl -s -X POST \"$WEBHOOK_SUCCESS\" -H \"Content-Type: application/json\" -d \"$SUCCESS_PAYLOAD\" | tee -a \"$LOG_FILE\"\n    echo \"\" | tee -a \"$LOG_FILE\"\nelse\n    echo \"Demultiplex_Stats.csv NOT found at: $DEMUX_STATS_FILE\" | tee -a \"$LOG_FILE\"\n    echo \"BCL-Convert failed, calling error webhook...\" | tee -a \"$LOG_FILE\"\n    ERROR_PAYLOAD=$(echo \"$PAYLOAD_BASE\" | jq --arg ec \"$EXIT_CODE\" --arg stage \"bclconvert\" '. + {error_stage: $stage, exit_code: ($ec|tonumber), error_message: \"BCL-Convert failed - Demultiplex_Stats.csv not generated\", dragen_success: false}')\n    curl -s -X POST \"$WEBHOOK_ERROR\" -H \"Content-Type: application/json\" -d \"$ERROR_PAYLOAD\" | tee -a \"$LOG_FILE\"\n    echo \"\" | tee -a \"$LOG_FILE\"\nfi\n\necho \"Webhook called, script complete.\" | tee -a \"$LOG_FILE\"\n`;\n\n// Encode the entire script as base64 for safe transfer\nconst scriptBase64 = Buffer.from(scriptContent).toString('base64');\n\nreturn [{\n  json: {\n    ...data,\n    bclConvertScript: scriptContent,\n    bclConvertScriptBase64: scriptBase64,\n    bclConvertScriptPath: `${data.scriptDir}/${data.run_id}_stage2_bclconvert.sh`\n  }\n}];"
+        },
+        "id": "2bfeda4d-424c-4e77-ae6b-028af310d4a9",
+        "name": "Generate BCL-Convert Script",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -912,
+          304
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=echo '{{ $json.bclConvertScriptBase64 }}' | base64 -d > {{ $json.bclConvertScriptPath }} && chmod +x {{ $json.bclConvertScriptPath }}"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -688,
+          304
+        ],
+        "id": "83d6a6d0-4418-49b4-8d9c-2e69423fa13c",
+        "name": "Write BCL-Convert Script",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=tmux new-session -d -s \"bcl_{{ $('Generate BCL-Convert Script').first().json.run_id }}_bclconvert\" \"bash {{ $('Generate BCL-Convert Script').first().json.bclConvertScriptPath }}\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -480,
+          304
+        ],
+        "id": "187b1744-a676-4890-8735-5d18741d1eb8",
+        "name": "Launch BCL-Convert in Tmux",
+        "credentials": {
+          "sshPassword": {
+            "id": "Ex5dXx403TmRsifR",
+            "name": "Sapiens DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "unit": "minutes"
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -912,
+          544
+        ],
+        "id": "db98df7a-0523-4748-945b-587d182b572e",
+        "name": "Wait 1 Minute1",
+        "webhookId": "wait-dragen-check"
+      }
+    ],
+    "connections": {
+      "Post-Staging Webhook": {
+        "main": [
+          [
+            {
+              "node": "Validate Input",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Input": {
+        "main": [
+          [
+            {
+              "node": "Check DRAGEN Availability",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check DRAGEN Availability": {
+        "main": [
+          [
+            {
+              "node": "DRAGEN Available?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DRAGEN Available?": {
+        "main": [
+          [
+            {
+              "node": "Generate BCL-Convert Script",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Wait 1 Minute1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate BCL-Convert Script": {
+        "main": [
+          [
+            {
+              "node": "Write BCL-Convert Script",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Write BCL-Convert Script": {
+        "main": [
+          [
+            {
+              "node": "Launch BCL-Convert in Tmux",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch BCL-Convert in Tmux": {
+        "main": [
+          []
+        ]
+      },
+      "Wait 1 Minute1": {
+        "main": [
+          [
+            {
+              "node": "Check DRAGEN Availability",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version f88475dc",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "BCL Convert - 02 Post-Staging.json"
+}
