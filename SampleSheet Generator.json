@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-26T09:24:17.000Z",
+  "updatedAt": "2026-02-17T09:02:41.207Z",
   "createdAt": "2025-09-16T12:36:15.747Z",
   "id": "ZHgMRKYDgvkEHsu0",
   "name": "SampleSheet Generator",
@@ -315,7 +315,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track duplicate counts\nconst duplicateCounts = {};\n\n// Process each item and rename duplicates\nconst processedItems = items.map(item => {\n  const sampleId = item.json.Sample_ID;\n  \n  if (duplicateCounts[sampleId]) {\n    // Increment counter for this sample ID\n    duplicateCounts[sampleId] += 1;\n    // Add suffix to make it unique\n    item.json.Sample_ID = `${sampleId}-${duplicateCounts[sampleId]}`;\n  } else {\n    // First occurrence, just track it\n    duplicateCounts[sampleId] = 1;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
+        "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track occurrences of each sample ID\nconst sampleIdCounts = {};\n\n// First pass: count occurrences (trimming whitespace)\nitems.forEach(item => {\n  const sampleId = String(item.json.Sample_ID || '').trim();\n  if (sampleId) {  // Only count if not empty\n    sampleIdCounts[sampleId] = (sampleIdCounts[sampleId] || 0) + 1;\n  }\n});\n\n// Track which occurrence we're on for each ID\nconst currentOccurrence = {};\n\n// Second pass: rename duplicates\nconst processedItems = items.map(item => {\n  const rawSampleId = item.json.Sample_ID;\n  \n  // Handle null, undefined, or non-string values\n  if (rawSampleId == null) {\n    return item;  // Skip items without Sample_ID\n  }\n  \n  const sampleId = String(rawSampleId).trim();\n  \n  if (!sampleId) {\n    return item;  // Skip empty Sample_IDs\n  }\n  \n  // Initialize counter if first time seeing this ID\n  if (!currentOccurrence[sampleId]) {\n    currentOccurrence[sampleId] = 1;\n  }\n  \n  // If this ID appears more than once\n  if (sampleIdCounts[sampleId] > 1) {\n    // First occurrence: no suffix\n    if (currentOccurrence[sampleId] === 1) {\n      item.json.Sample_ID = sampleId;\n    } else {\n      // Second and beyond: add suffix\n      item.json.Sample_ID = `${sampleId}-${currentOccurrence[sampleId]}`;\n    }\n    currentOccurrence[sampleId] += 1;\n  } else {\n    // Only one occurrence, clean up whitespace\n    item.json.Sample_ID = sampleId;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1490,14 +1490,17 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "run_id": "20251222_LH00897_0041_B237Y2NLT3",
-          "path": "/mnt/smb_share/Runs/20251222_LH00897_0041_B237Y2NLT3"
+          "path": "/mnt/usb/260213_A01228_0250_AHVNFKDSXF",
+          "run_id": "260213_A01228_0250_AHVNFKDSXF"
+        },
+        "pairedItem": {
+          "item": 0
         }
       }
     ]
   },
-  "versionId": "71546839-b40c-4820-ad3a-2644e8c53f9b",
-  "activeVersionId": "71546839-b40c-4820-ad3a-2644e8c53f9b",
+  "versionId": "dd476660-e5d1-419c-ad0f-33f9fc461ede",
+  "activeVersionId": "dd476660-e5d1-419c-ad0f-33f9fc461ede",
   "triggerCount": 0,
   "shared": [
     {
@@ -1509,9 +1512,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-02T11:24:06.878Z",
-    "createdAt": "2026-01-02T11:24:06.878Z",
-    "versionId": "71546839-b40c-4820-ad3a-2644e8c53f9b",
+    "updatedAt": "2026-02-16T16:21:14.000Z",
+    "createdAt": "2026-02-16T16:21:11.552Z",
+    "versionId": "dd476660-e5d1-419c-ad0f-33f9fc461ede",
     "workflowId": "ZHgMRKYDgvkEHsu0",
     "nodes": [
       {
@@ -1823,7 +1826,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track duplicate counts\nconst duplicateCounts = {};\n\n// Process each item and rename duplicates\nconst processedItems = items.map(item => {\n  const sampleId = item.json.Sample_ID;\n  \n  if (duplicateCounts[sampleId]) {\n    // Increment counter for this sample ID\n    duplicateCounts[sampleId] += 1;\n    // Add suffix to make it unique\n    item.json.Sample_ID = `${sampleId}-${duplicateCounts[sampleId]}`;\n  } else {\n    // First occurrence, just track it\n    duplicateCounts[sampleId] = 1;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
+          "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track occurrences of each sample ID\nconst sampleIdCounts = {};\n\n// First pass: count occurrences (trimming whitespace)\nitems.forEach(item => {\n  const sampleId = String(item.json.Sample_ID || '').trim();\n  if (sampleId) {  // Only count if not empty\n    sampleIdCounts[sampleId] = (sampleIdCounts[sampleId] || 0) + 1;\n  }\n});\n\n// Track which occurrence we're on for each ID\nconst currentOccurrence = {};\n\n// Second pass: rename duplicates\nconst processedItems = items.map(item => {\n  const rawSampleId = item.json.Sample_ID;\n  \n  // Handle null, undefined, or non-string values\n  if (rawSampleId == null) {\n    return item;  // Skip items without Sample_ID\n  }\n  \n  const sampleId = String(rawSampleId).trim();\n  \n  if (!sampleId) {\n    return item;  // Skip empty Sample_IDs\n  }\n  \n  // Initialize counter if first time seeing this ID\n  if (!currentOccurrence[sampleId]) {\n    currentOccurrence[sampleId] = 1;\n  }\n  \n  // If this ID appears more than once\n  if (sampleIdCounts[sampleId] > 1) {\n    // First occurrence: no suffix\n    if (currentOccurrence[sampleId] === 1) {\n      item.json.Sample_ID = sampleId;\n    } else {\n      // Second and beyond: add suffix\n      item.json.Sample_ID = `${sampleId}-${currentOccurrence[sampleId]}`;\n    }\n    currentOccurrence[sampleId] += 1;\n  } else {\n    // Only one occurrence, clean up whitespace\n    item.json.Sample_ID = sampleId;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -2987,12 +2990,12 @@
         ]
       }
     },
-    "authors": "system migration",
-    "name": null,
-    "description": null,
+    "authors": "Bio Solutions",
+    "name": "Version dd476660",
+    "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "SampleSheet Generator.json"
 }
