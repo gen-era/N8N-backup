@@ -1,0 +1,2324 @@
+{
+  "updatedAt": "2026-02-21T13:26:21.853Z",
+  "createdAt": "2026-02-21T12:45:50.801Z",
+  "id": "NdJI7DDLHO194xrO",
+  "name": "Sub - Reads DB",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Workflow kontrolü\nconst workflowType = $('Select Conversion Ref').first().json.workflowType;\nconst csvData = $input.first().json.stdout;  // ← .item yerine .first() kullan\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',');\n\n// CSV'yi objelere parse et\nconst parsedData = lines.slice(1).map(line => {\n  const values = line.split(',');\n  const obj = {};\n  headers.forEach((header, index) => {\n    const key = header.trim();\n    obj[key] = values[index]?.trim() || '';\n  });\n  return obj;\n});\n\nlet result;\n\nif (workflowType === \"Standard Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item['SampleID'];\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // Normal workflow - olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        -736
+      ],
+      "id": "f7c8599d-fd2f-4f44-bae8-af092c2c113e",
+      "name": "Parse Demux"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Sample_ID",
+              "field2": "SampleID"
+            },
+            {
+              "field1": "Lane",
+              "field2": "Lane"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2928,
+        -816
+      ],
+      "id": "ef2ee077-ea74-491d-a941-d39e8030ca6c",
+      "name": "Merge Demux and SampleSheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "// cat komutundan gelen stdout'u al\nconst inputText = $json.stdout;\n\n// Input kontrolü\nif (!inputText || typeof inputText !== 'string') {\n  throw new Error('stdout bulunamadı veya string değil');\n}\n\n// [Data] bölümünü bul ve parse et\nconst dataSectionMatch = inputText.split('Data]');\nif (dataSectionMatch.length < 2) {\n  throw new Error('Sample sheet içinde [Data] section bulunamadı');\n}\n\nconst dataSection = dataSectionMatch[1];\n\n// Satırlara böl ve boş satırları temizle\nconst lines = dataSection.trim().split('\\n').filter(line => line.trim());\nif (lines.length < 2) {\n  throw new Error('[Data] section\\'da yeterli satır yok');\n}\n\n// İlk satır header\nconst headers = lines[0].split(',');\n\n// Lane sütunu var mı kontrol et\nconst hasLaneColumn = headers.includes('Lane');\n\n// Geri kalan satırlar sample verileri\nconst samples = [];\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',');\n  \n  // Her satırı objeye çevir\n  const sample = {};\n  headers.forEach((header, index) => {\n    sample[header] = values[index] || '';\n  });\n  \n  // Lane sütunu yoksa ekle ve 0 değeri ata\n  if (!hasLaneColumn) {\n    sample['Lane'] = '0';\n  }\n  \n  samples.push(sample);\n}\n\n// Output olarak döndür - her sample ayrı item\nreturn samples.map(sample => ({ json: sample }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        -928
+      ],
+      "id": "6a49b145-46d7-4114-a5ba-dc866b2036a4",
+      "name": "Parse SampleSheet"
+    },
+    {
+      "parameters": {
+        "command": "=fdfind \"{{ $json.id_source_value }}$\" /mnt/smb_share/Conversions/ /mnt/illuminastorage/fastq_folder/ --max-depth 2"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        -832
+      ],
+      "id": "843389b6-9803-45c9-8478-f6ad58fffb8d",
+      "name": "Find Conversions"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a132b128-8698-42e4-bfdc-3528a7c7158c",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1856,
+        -832
+      ],
+      "id": "19265de6-469e-4ca5-8ad5-d25dc6482b86",
+      "name": "Conversion Check"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "conversion_ref"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        -832
+      ],
+      "id": "fe018ccc-147b-4131-8a93-abe89a1ee818",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    conv.*,\n    c_workflow.concept_name AS \"workflowType\",\n    i.instrument_id        AS \"instrumentId\",\n    i.instrument_source_value AS \"instrumentSourceValue\",\n    c_instrument.concept_name AS \"instrumentModel\"\nFROM conversions conv\nINNER JOIN runs r            ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i     ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1392,
+        -832
+      ],
+      "id": "efb43c57-daf7-4f8b-9f56-78637fbaf5c5",
+      "name": "Select Conversion Ref",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "care_site_mapping",
+          "mode": "list",
+          "cachedResultName": "care_site_mapping"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4496,
+        -928
+      ],
+      "id": "8dca6a46-6f74-4e38-9e19-ec50e63324eb",
+      "name": "Pull Care Sites",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "kits_mapping",
+          "mode": "list",
+          "cachedResultName": "kits_mapping"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "112"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3792,
+        -928
+      ],
+      "id": "f2000655-7f6e-419a-add3-c5aa7bb6c2d5",
+      "name": "Pull Kits Mapping",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3dd7bc67-998a-4ca0-9182-ee69946963cc",
+              "leftValue": "={{ $json.requesting_caresite_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e4f1ac79-6562-4c57-ad56-d8f0fcb80273",
+              "leftValue": "={{ $json.kits_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1f072c34-f888-4868-84f6-af70df219b7f",
+              "leftValue": "={{ $json.index_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "07d1a8a2-1348-4d84-8d87-eb5d7ff23964",
+              "leftValue": "={{ $json.Sample_ID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b09c6ef5-1a61-49f4-a7ca-d36501bda117",
+              "leftValue": "={{ $json.performing_care_site_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "80c8950f-5d78-4b15-b252-b12922cecce3",
+              "leftValue": "={{ $json.Sample_Project }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5dd70cd5-b29f-404c-b8e1-5723163b1350",
+              "leftValue": "={{ $json.Lane }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "756c1db3-d2db-47ab-b261-2753274611e7",
+              "leftValue": "={{ $json['# Reads'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5232,
+        -800
+      ],
+      "id": "1ff9d5bc-9922-4670-9aa4-f412995918cc",
+      "name": "Unvalidated Samples?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "10b1b3ff-9e94-401a-a165-f39211952796",
+              "leftValue": "={{ $input.all().length }}",
+              "rightValue": "={{ $('Add CareSite Ref').all().length }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5488,
+        -800
+      ],
+      "id": "630b0ef6-9e23-43a8-8adb-217e2c67d521",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversion_ref": "={{ $('Select Conversion Ref').item.json.uniqueref }}",
+            "index_ref": "={{ $json.index_ref }}",
+            "reads_target": "={{ Number($json.SE_Reads) }}",
+            "requesting_caresite_ref": "={{ $json.requesting_caresite_ref }}",
+            "performing_caresite_ref": "={{ $json.performing_care_site_ref}}",
+            "reads": "={{ $json[\"# Reads\"] }}",
+            "lane": "={{ isNaN(Number($json.lane)) ? (isNaN(Number($json.Lane)) ? null : Number($json.Lane)) : Number($json.lane) }}",
+            "sample_id": "={{ $json.Sample_ID }}",
+            "bdsnumber": "={{ $json.BDS_Number }}",
+            "kit_ref": "={{ $json.kits_ref }}",
+            "sample_project": "={{ $json.Sample_Project }}"
+          },
+          "matchingColumns": [
+            "sample_id",
+            "conversion_ref",
+            "lane"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conversion_ref",
+              "displayName": "conversion_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sample_id",
+              "displayName": "sample_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "index_ref",
+              "displayName": "index_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "lane",
+              "displayName": "lane",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reads_target",
+              "displayName": "reads_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "bdsnumber",
+              "displayName": "bdsnumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kit_ref",
+              "displayName": "kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "requesting_caresite_ref",
+              "displayName": "requesting_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "performing_caresite_ref",
+              "displayName": "performing_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reads",
+              "displayName": "reads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "sample_project",
+              "displayName": "sample_project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "replaceEmptyStrings": true
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5760,
+        -800
+      ],
+      "id": "e35f2b6d-9a9d-4e51-b6c5-795e44d4ecea",
+      "name": "Update Reads",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "i7_sequence",
+              "field2": "Index"
+            },
+            {
+              "field1": "i5_sequence",
+              "field2": "Index2"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3568,
+        -800
+      ],
+      "id": "e3d0a56f-4ad2-4086-86dc-ee980bd9146c",
+      "name": "Add Index Ref"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "source_value",
+              "field2": "Library_Prep_Kit"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        4256,
+        -800
+      ],
+      "id": "a02e3f12-0bdf-400b-968d-7436e06d6325",
+      "name": "Add Kit Ref"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "indices",
+          "mode": "list",
+          "cachedResultName": "indices"
+        },
+        "returnAll": true,
+        "options": {
+          "outputColumns": [
+            "uniqueref",
+            "i7_sequence",
+            "i5_sequence"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3136,
+        -928
+      ],
+      "id": "730c48ae-5828-494a-996c-3158a7ca74cd",
+      "name": "Pull Indices",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/SampleSheet-Consolidation.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        -928
+      ],
+      "id": "94e6a11c-4e9c-4ece-bbe1-0a9f78d66d4e",
+      "name": "Read SampleSheet"
+    },
+    {
+      "parameters": {
+        "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/Demultiplex_stats.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2128,
+        -736
+      ],
+      "id": "e6c550a7-3884-47f3-9f69-ebd154e68d4f",
+      "name": "Read Demux"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "Index",
+              "newKey": "Index_set"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        -736
+      ],
+      "id": "a6ed133d-1741-4c5b-8a96-a68a68ba66a3",
+      "name": "Rename Index Column"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a53facb7-e03b-4a1f-8e49-4b0523f46a51",
+              "leftValue": "={{ $json.SampleID }}",
+              "rightValue": "Undetermined",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2704,
+        -736
+      ],
+      "id": "781462fa-e170-4aad-9129-a7e61397ebda",
+      "name": "Remove Undetermined"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "index_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        3360,
+        -928
+      ],
+      "id": "44174297-94e7-4eb5-a750-4a6fc3549405",
+      "name": "Rename Index Ref"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "kit_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        4016,
+        -928
+      ],
+      "id": "2c7354e8-d355-42dd-adf3-7dea6c4de7eb",
+      "name": "Rename Kit Ref"
+    },
+    {
+      "parameters": {
+        "keys": {
+          "key": [
+            {
+              "currentKey": "uniqueref",
+              "newKey": "caresite_ref"
+            }
+          ]
+        },
+        "additionalOptions": {}
+      },
+      "type": "n8n-nodes-base.renameKeys",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        -928
+      ],
+      "id": "a582d987-6712-477c-8242-0f96cf783c94",
+      "name": "Rename CareSite Ref"
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "query": "SELECT \n    input2.*,\n    prepared_map.care_site_ref AS performing_care_site_ref,\n    requested_map.care_site_ref AS requesting_caresite_ref\nFROM input2\nLEFT JOIN input1 AS prepared_map\n    ON input2.Prepared_By = prepared_map.care_site_source_value\nLEFT JOIN input1 AS requested_map\n    ON input2.Requested_By = requested_map.care_site_source_value",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5008,
+        -800
+      ],
+      "id": "5b1bc817-4626-4473-b13f-d9db418f69c0",
+      "name": "Add CareSite Ref"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reverse complement helper\nfunction reverseComplement(seq) {\n  const complement = { A: 'T', T: 'A', C: 'G', G: 'C' };\n  return seq\n    .toUpperCase()\n    .split('')\n    .reverse()\n    .map(base => complement[base] || base)\n    .join('');\n}\n\n// Hangi cihazda çalıştığını önceki node'dan al\nconst instrumentModel = $('Select Conversion Ref').first().json.instrumentModel || '';\n\nconst needsRC = \n  instrumentModel.includes('NextSeq 2000') || \n  instrumentModel.includes('NovaSeq X');\n\nconst items = $input.all();\n\nreturn items.map(item => {\n  const data = { ...item.json };\n\n  if (needsRC && data.Index2) {\n    const originalIndex2 = data.Index2;\n    const rcIndex2 = reverseComplement(originalIndex2);\n\n    data.Index2 = rcIndex2;\n\n    // Index_set alanını da güncelle (varsa)\n    if (data.Index_set && data.Index_set.includes('-')) {\n      const parts = data.Index_set.split('-');\n      // Index_set'teki i2 kısmı zaten RC halinde yazılmış olabilir,\n      // burada Index'i sabit tutup Index2'nin RC'sini yazıyoruz\n      data.Index_set = `${parts[0]}-${rcIndex2}`;\n    }\n  }\n\n  return { json: data };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        -736
+      ],
+      "id": "275e9402-aece-4eaa-832c-d8991bd62d30",
+      "name": "Reverse Complement"
+    },
+    {
+      "parameters": {
+        "content": "#### Read SampleSheet and Demultiplex Stats",
+        "height": 400,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2064,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "1b794130-f3ad-463b-9c8f-9541ec22e07d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "#### RevComp If Needed and Find Index Ref",
+        "height": 400,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3072,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "c3ac5c69-e720-46e4-a5f7-cc336ec0e123",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "#### Find Kit Ref",
+        "height": 400,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3776,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "330c968a-c434-408f-8ccb-9f5235c592a1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "#### Find Both CareSite Refs",
+        "height": 400,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4448,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "04653213-18b5-4103-b5ff-df24ed23ae15",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "#### Check Any Missing UniqueRef",
+        "height": 400,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5200,
+        -976
+      ],
+      "typeVersion": 1,
+      "id": "f059c1b2-114a-48e2-b1ec-ee5e8244d742",
+      "name": "Sticky Note4"
+    }
+  ],
+  "connections": {
+    "Parse Demux": {
+      "main": [
+        [
+          {
+            "node": "Rename Index Column",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Merge Demux and SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Demux and SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Pull Indices",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reverse Complement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Conversions": {
+      "main": [
+        [
+          {
+            "node": "Conversion Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversion Check": {
+      "main": [
+        [
+          {
+            "node": "Read Demux",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Select Conversion Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Conversion Ref": {
+      "main": [
+        [
+          {
+            "node": "Find Conversions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Care Sites": {
+      "main": [
+        [
+          {
+            "node": "Rename CareSite Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Kits Mapping": {
+      "main": [
+        [
+          {
+            "node": "Rename Kit Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unvalidated Samples?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update Reads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Index Ref": {
+      "main": [
+        [
+          {
+            "node": "Pull Kits Mapping",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Add CareSite Ref",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Pull Care Sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull Indices": {
+      "main": [
+        [
+          {
+            "node": "Rename Index Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read SampleSheet": {
+      "main": [
+        [
+          {
+            "node": "Parse SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Demux": {
+      "main": [
+        [
+          {
+            "node": "Parse Demux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Index Column": {
+      "main": [
+        [
+          {
+            "node": "Remove Undetermined",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Undetermined": {
+      "main": [
+        [
+          {
+            "node": "Merge Demux and SampleSheet",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Rename Index Ref": {
+      "main": [
+        [
+          {
+            "node": "Add Index Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Kit Ref": {
+      "main": [
+        [
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename CareSite Ref": {
+      "main": [
+        [
+          {
+            "node": "Add CareSite Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add CareSite Ref": {
+      "main": [
+        [
+          {
+            "node": "Unvalidated Samples?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reverse Complement": {
+      "main": [
+        [
+          {
+            "node": "Add Index Ref",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "conversion_ref": "513"
+        }
+      }
+    ]
+  },
+  "versionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
+  "activeVersionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-21T12:45:50.812Z",
+      "createdAt": "2026-02-21T12:45:50.812Z",
+      "role": "workflow:owner",
+      "workflowId": "NdJI7DDLHO194xrO",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-02-24T13:34:32.000Z",
+    "createdAt": "2026-02-21T13:26:21.855Z",
+    "versionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
+    "workflowId": "NdJI7DDLHO194xrO",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "// Workflow kontrolü\nconst workflowType = $('Select Conversion Ref').first().json.workflowType;\nconst csvData = $input.first().json.stdout;  // ← .item yerine .first() kullan\nconst lines = csvData.trim().split('\\n');\nconst headers = lines[0].split(',');\n\n// CSV'yi objelere parse et\nconst parsedData = lines.slice(1).map(line => {\n  const values = line.split(',');\n  const obj = {};\n  headers.forEach((header, index) => {\n    const key = header.trim();\n    obj[key] = values[index]?.trim() || '';\n  });\n  return obj;\n});\n\nlet result;\n\nif (workflowType === \"Standard Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item['SampleID'];\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // Normal workflow - olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2320,
+          -736
+        ],
+        "id": "f7c8599d-fd2f-4f44-bae8-af092c2c113e",
+        "name": "Parse Demux"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "Sample_ID",
+                "field2": "SampleID"
+              },
+              {
+                "field1": "Lane",
+                "field2": "Lane"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          2928,
+          -816
+        ],
+        "id": "ef2ee077-ea74-491d-a941-d39e8030ca6c",
+        "name": "Merge Demux and SampleSheet"
+      },
+      {
+        "parameters": {
+          "jsCode": "// cat komutundan gelen stdout'u al\nconst inputText = $json.stdout;\n\n// Input kontrolü\nif (!inputText || typeof inputText !== 'string') {\n  throw new Error('stdout bulunamadı veya string değil');\n}\n\n// [Data] bölümünü bul ve parse et\nconst dataSectionMatch = inputText.split('Data]');\nif (dataSectionMatch.length < 2) {\n  throw new Error('Sample sheet içinde [Data] section bulunamadı');\n}\n\nconst dataSection = dataSectionMatch[1];\n\n// Satırlara böl ve boş satırları temizle\nconst lines = dataSection.trim().split('\\n').filter(line => line.trim());\nif (lines.length < 2) {\n  throw new Error('[Data] section\\'da yeterli satır yok');\n}\n\n// İlk satır header\nconst headers = lines[0].split(',');\n\n// Lane sütunu var mı kontrol et\nconst hasLaneColumn = headers.includes('Lane');\n\n// Geri kalan satırlar sample verileri\nconst samples = [];\nfor (let i = 1; i < lines.length; i++) {\n  const values = lines[i].split(',');\n  \n  // Her satırı objeye çevir\n  const sample = {};\n  headers.forEach((header, index) => {\n    sample[header] = values[index] || '';\n  });\n  \n  // Lane sütunu yoksa ekle ve 0 değeri ata\n  if (!hasLaneColumn) {\n    sample['Lane'] = '0';\n  }\n  \n  samples.push(sample);\n}\n\n// Output olarak döndür - her sample ayrı item\nreturn samples.map(sample => ({ json: sample }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2704,
+          -928
+        ],
+        "id": "6a49b145-46d7-4114-a5ba-dc866b2036a4",
+        "name": "Parse SampleSheet"
+      },
+      {
+        "parameters": {
+          "command": "=fdfind \"{{ $json.id_source_value }}$\" /mnt/smb_share/Conversions/ /mnt/illuminastorage/fastq_folder/ --max-depth 2"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1616,
+          -832
+        ],
+        "id": "843389b6-9803-45c9-8478-f6ad58fffb8d",
+        "name": "Find Conversions"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a132b128-8698-42e4-bfdc-3528a7c7158c",
+                "leftValue": "={{ $json.stdout }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1856,
+          -832
+        ],
+        "id": "19265de6-469e-4ca5-8ad5-d25dc6482b86",
+        "name": "Conversion Check"
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "conversion_ref"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          1168,
+          -832
+        ],
+        "id": "fe018ccc-147b-4131-8a93-abe89a1ee818",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    conv.*,\n    c_workflow.concept_name AS \"workflowType\",\n    i.instrument_id        AS \"instrumentId\",\n    i.instrument_source_value AS \"instrumentSourceValue\",\n    c_instrument.concept_name AS \"instrumentModel\"\nFROM conversions conv\nINNER JOIN runs r            ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i     ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1392,
+          -832
+        ],
+        "id": "efb43c57-daf7-4f8b-9f56-78637fbaf5c5",
+        "name": "Select Conversion Ref",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "care_site_mapping",
+            "mode": "list",
+            "cachedResultName": "care_site_mapping"
+          },
+          "returnAll": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          4496,
+          -928
+        ],
+        "id": "8dca6a46-6f74-4e38-9e19-ec50e63324eb",
+        "name": "Pull Care Sites",
+        "executeOnce": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "kits_mapping",
+            "mode": "list",
+            "cachedResultName": "kits_mapping"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "platform_concept_ref",
+                "value": "112"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          3792,
+          -928
+        ],
+        "id": "f2000655-7f6e-419a-add3-c5aa7bb6c2d5",
+        "name": "Pull Kits Mapping",
+        "executeOnce": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "3dd7bc67-998a-4ca0-9182-ee69946963cc",
+                "leftValue": "={{ $json.requesting_caresite_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "e4f1ac79-6562-4c57-ad56-d8f0fcb80273",
+                "leftValue": "={{ $json.kits_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "1f072c34-f888-4868-84f6-af70df219b7f",
+                "leftValue": "={{ $json.index_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "07d1a8a2-1348-4d84-8d87-eb5d7ff23964",
+                "leftValue": "={{ $json.Sample_ID }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "b09c6ef5-1a61-49f4-a7ca-d36501bda117",
+                "leftValue": "={{ $json.performing_care_site_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "80c8950f-5d78-4b15-b252-b12922cecce3",
+                "leftValue": "={{ $json.Sample_Project }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "5dd70cd5-b29f-404c-b8e1-5723163b1350",
+                "leftValue": "={{ $json.Lane }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "756c1db3-d2db-47ab-b261-2753274611e7",
+                "leftValue": "={{ $json['# Reads'] }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          5232,
+          -800
+        ],
+        "id": "1ff9d5bc-9922-4670-9aa4-f412995918cc",
+        "name": "Unvalidated Samples?"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "10b1b3ff-9e94-401a-a165-f39211952796",
+                "leftValue": "={{ $input.all().length }}",
+                "rightValue": "={{ $('Add CareSite Ref').all().length }}",
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          5488,
+          -800
+        ],
+        "id": "630b0ef6-9e23-43a8-8adb-217e2c67d521",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "reads",
+            "mode": "list",
+            "cachedResultName": "reads"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "conversion_ref": "={{ $('Select Conversion Ref').item.json.uniqueref }}",
+              "index_ref": "={{ $json.index_ref }}",
+              "reads_target": "={{ Number($json.SE_Reads) }}",
+              "requesting_caresite_ref": "={{ $json.requesting_caresite_ref }}",
+              "performing_caresite_ref": "={{ $json.performing_care_site_ref}}",
+              "reads": "={{ $json[\"# Reads\"] }}",
+              "lane": "={{ isNaN(Number($json.lane)) ? (isNaN(Number($json.Lane)) ? null : Number($json.Lane)) : Number($json.lane) }}",
+              "sample_id": "={{ $json.Sample_ID }}",
+              "bdsnumber": "={{ $json.BDS_Number }}",
+              "kit_ref": "={{ $json.kits_ref }}",
+              "sample_project": "={{ $json.Sample_Project }}"
+            },
+            "matchingColumns": [
+              "sample_id",
+              "conversion_ref",
+              "lane"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "conversion_ref",
+                "displayName": "conversion_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "sample_id",
+                "displayName": "sample_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "index_ref",
+                "displayName": "index_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "lane",
+                "displayName": "lane",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "reads_target",
+                "displayName": "reads_target",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "bdsnumber",
+                "displayName": "bdsnumber",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "kit_ref",
+                "displayName": "kit_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "requesting_caresite_ref",
+                "displayName": "requesting_caresite_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "performing_caresite_ref",
+                "displayName": "performing_caresite_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "reads",
+                "displayName": "reads",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "sample_project",
+                "displayName": "sample_project",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "replaceEmptyStrings": true
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          5760,
+          -800
+        ],
+        "id": "e35f2b6d-9a9d-4e51-b6c5-795e44d4ecea",
+        "name": "Update Reads",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "i7_sequence",
+                "field2": "Index"
+              },
+              {
+                "field1": "i5_sequence",
+                "field2": "Index2"
+              }
+            ]
+          },
+          "joinMode": "enrichInput2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          3568,
+          -800
+        ],
+        "id": "e3d0a56f-4ad2-4086-86dc-ee980bd9146c",
+        "name": "Add Index Ref"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "source_value",
+                "field2": "Library_Prep_Kit"
+              }
+            ]
+          },
+          "joinMode": "enrichInput2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          4256,
+          -800
+        ],
+        "id": "a02e3f12-0bdf-400b-968d-7436e06d6325",
+        "name": "Add Kit Ref"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "indices",
+            "mode": "list",
+            "cachedResultName": "indices"
+          },
+          "returnAll": true,
+          "options": {
+            "outputColumns": [
+              "uniqueref",
+              "i7_sequence",
+              "i5_sequence"
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          3136,
+          -928
+        ],
+        "id": "730c48ae-5828-494a-996c-3158a7ca74cd",
+        "name": "Pull Indices",
+        "executeOnce": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/SampleSheet-Consolidation.csv"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          2128,
+          -928
+        ],
+        "id": "94e6a11c-4e9c-4ece-bbe1-0a9f78d66d4e",
+        "name": "Read SampleSheet"
+      },
+      {
+        "parameters": {
+          "command": "=cat {{ $('Find Conversions').item.json.stdout }}Reports/Demultiplex_stats.csv"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          2128,
+          -736
+        ],
+        "id": "e6c550a7-3884-47f3-9f69-ebd154e68d4f",
+        "name": "Read Demux"
+      },
+      {
+        "parameters": {
+          "keys": {
+            "key": [
+              {
+                "currentKey": "Index",
+                "newKey": "Index_set"
+              }
+            ]
+          },
+          "additionalOptions": {}
+        },
+        "type": "n8n-nodes-base.renameKeys",
+        "typeVersion": 1,
+        "position": [
+          2512,
+          -736
+        ],
+        "id": "a6ed133d-1741-4c5b-8a96-a68a68ba66a3",
+        "name": "Rename Index Column"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "a53facb7-e03b-4a1f-8e49-4b0523f46a51",
+                "leftValue": "={{ $json.SampleID }}",
+                "rightValue": "Undetermined",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          2704,
+          -736
+        ],
+        "id": "781462fa-e170-4aad-9129-a7e61397ebda",
+        "name": "Remove Undetermined"
+      },
+      {
+        "parameters": {
+          "keys": {
+            "key": [
+              {
+                "currentKey": "uniqueref",
+                "newKey": "index_ref"
+              }
+            ]
+          },
+          "additionalOptions": {}
+        },
+        "type": "n8n-nodes-base.renameKeys",
+        "typeVersion": 1,
+        "position": [
+          3360,
+          -928
+        ],
+        "id": "44174297-94e7-4eb5-a750-4a6fc3549405",
+        "name": "Rename Index Ref"
+      },
+      {
+        "parameters": {
+          "keys": {
+            "key": [
+              {
+                "currentKey": "uniqueref",
+                "newKey": "kit_ref"
+              }
+            ]
+          },
+          "additionalOptions": {}
+        },
+        "type": "n8n-nodes-base.renameKeys",
+        "typeVersion": 1,
+        "position": [
+          4016,
+          -928
+        ],
+        "id": "2c7354e8-d355-42dd-adf3-7dea6c4de7eb",
+        "name": "Rename Kit Ref"
+      },
+      {
+        "parameters": {
+          "keys": {
+            "key": [
+              {
+                "currentKey": "uniqueref",
+                "newKey": "caresite_ref"
+              }
+            ]
+          },
+          "additionalOptions": {}
+        },
+        "type": "n8n-nodes-base.renameKeys",
+        "typeVersion": 1,
+        "position": [
+          4736,
+          -928
+        ],
+        "id": "a582d987-6712-477c-8242-0f96cf783c94",
+        "name": "Rename CareSite Ref"
+      },
+      {
+        "parameters": {
+          "mode": "combineBySql",
+          "query": "SELECT \n    input2.*,\n    prepared_map.care_site_ref AS performing_care_site_ref,\n    requested_map.care_site_ref AS requesting_caresite_ref\nFROM input2\nLEFT JOIN input1 AS prepared_map\n    ON input2.Prepared_By = prepared_map.care_site_source_value\nLEFT JOIN input1 AS requested_map\n    ON input2.Requested_By = requested_map.care_site_source_value",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          5008,
+          -800
+        ],
+        "id": "5b1bc817-4626-4473-b13f-d9db418f69c0",
+        "name": "Add CareSite Ref"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Reverse complement helper\nfunction reverseComplement(seq) {\n  const complement = { A: 'T', T: 'A', C: 'G', G: 'C' };\n  return seq\n    .toUpperCase()\n    .split('')\n    .reverse()\n    .map(base => complement[base] || base)\n    .join('');\n}\n\n// Hangi cihazda çalıştığını önceki node'dan al\nconst instrumentModel = $('Select Conversion Ref').first().json.instrumentModel || '';\n\nconst needsRC = \n  instrumentModel.includes('NextSeq 2000') || \n  instrumentModel.includes('NovaSeq X');\n\nconst items = $input.all();\n\nreturn items.map(item => {\n  const data = { ...item.json };\n\n  if (needsRC && data.Index2) {\n    const originalIndex2 = data.Index2;\n    const rcIndex2 = reverseComplement(originalIndex2);\n\n    data.Index2 = rcIndex2;\n\n    // Index_set alanını da güncelle (varsa)\n    if (data.Index_set && data.Index_set.includes('-')) {\n      const parts = data.Index_set.split('-');\n      // Index_set'teki i2 kısmı zaten RC halinde yazılmış olabilir,\n      // burada Index'i sabit tutup Index2'nin RC'sini yazıyoruz\n      data.Index_set = `${parts[0]}-${rcIndex2}`;\n    }\n  }\n\n  return { json: data };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3136,
+          -736
+        ],
+        "id": "275e9402-aece-4eaa-832c-d8991bd62d30",
+        "name": "Reverse Complement"
+      },
+      {
+        "parameters": {
+          "content": "#### Read SampleSheet and Demultiplex Stats",
+          "height": 400,
+          "width": 800
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          2064,
+          -976
+        ],
+        "typeVersion": 1,
+        "id": "1b794130-f3ad-463b-9c8f-9541ec22e07d",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "#### RevComp If Needed and Find Index Ref",
+          "height": 400,
+          "width": 432
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          3072,
+          -976
+        ],
+        "typeVersion": 1,
+        "id": "c3ac5c69-e720-46e4-a5f7-cc336ec0e123",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "#### Find Kit Ref",
+          "height": 400,
+          "width": 432
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          3776,
+          -976
+        ],
+        "typeVersion": 1,
+        "id": "330c968a-c434-408f-8ccb-9f5235c592a1",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "content": "#### Find Both CareSite Refs",
+          "height": 400,
+          "width": 432
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          4448,
+          -976
+        ],
+        "typeVersion": 1,
+        "id": "04653213-18b5-4103-b5ff-df24ed23ae15",
+        "name": "Sticky Note3"
+      },
+      {
+        "parameters": {
+          "content": "#### Check Any Missing UniqueRef",
+          "height": 400,
+          "width": 432
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          5200,
+          -976
+        ],
+        "typeVersion": 1,
+        "id": "f059c1b2-114a-48e2-b1ec-ee5e8244d742",
+        "name": "Sticky Note4"
+      }
+    ],
+    "connections": {
+      "Parse Demux": {
+        "main": [
+          [
+            {
+              "node": "Rename Index Column",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse SampleSheet": {
+        "main": [
+          [
+            {
+              "node": "Merge Demux and SampleSheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Demux and SampleSheet": {
+        "main": [
+          [
+            {
+              "node": "Pull Indices",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Reverse Complement",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Conversions": {
+        "main": [
+          [
+            {
+              "node": "Conversion Check",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Conversion Check": {
+        "main": [
+          [
+            {
+              "node": "Read Demux",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Read SampleSheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Select Conversion Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select Conversion Ref": {
+        "main": [
+          [
+            {
+              "node": "Find Conversions",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pull Care Sites": {
+        "main": [
+          [
+            {
+              "node": "Rename CareSite Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pull Kits Mapping": {
+        "main": [
+          [
+            {
+              "node": "Rename Kit Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Unvalidated Samples?": {
+        "main": [
+          [],
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Update Reads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Add Index Ref": {
+        "main": [
+          [
+            {
+              "node": "Pull Kits Mapping",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Add Kit Ref",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Add Kit Ref": {
+        "main": [
+          [
+            {
+              "node": "Add CareSite Ref",
+              "type": "main",
+              "index": 1
+            },
+            {
+              "node": "Pull Care Sites",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pull Indices": {
+        "main": [
+          [
+            {
+              "node": "Rename Index Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read SampleSheet": {
+        "main": [
+          [
+            {
+              "node": "Parse SampleSheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Demux": {
+        "main": [
+          [
+            {
+              "node": "Parse Demux",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Rename Index Column": {
+        "main": [
+          [
+            {
+              "node": "Remove Undetermined",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Remove Undetermined": {
+        "main": [
+          [
+            {
+              "node": "Merge Demux and SampleSheet",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Rename Index Ref": {
+        "main": [
+          [
+            {
+              "node": "Add Index Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Rename Kit Ref": {
+        "main": [
+          [
+            {
+              "node": "Add Kit Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Rename CareSite Ref": {
+        "main": [
+          [
+            {
+              "node": "Add CareSite Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Add CareSite Ref": {
+        "main": [
+          [
+            {
+              "node": "Unvalidated Samples?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Reverse Complement": {
+        "main": [
+          [
+            {
+              "node": "Add Index Ref",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 1e8f61b9",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "02-03-2026/3:24",
+  "fileName": "Sub - Reads DB.json"
+}
