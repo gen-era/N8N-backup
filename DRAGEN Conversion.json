@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-05T08:59:19.353Z",
+  "updatedAt": "2026-02-17T11:03:11.171Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=251226_A01832R_0234_BHJJFLDRX7",
+              "value": "=260211_A01832R_0236_BHJF3FDRX7",
               "type": "string"
             }
           ]
@@ -23,8 +23,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        144,
-        -592
+        -864,
+        -320
       ],
       "id": "10c2d4f6-7a39-4927-bf5f-a5278122b4ff",
       "name": "Edit Fields"
@@ -36,8 +36,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2320,
-        -16
+        592,
+        416
       ],
       "id": "79ce44dc-d457-4a80-a809-dcca4887976c",
       "name": "Convert Run",
@@ -55,8 +55,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2768,
-        -16
+        1040,
+        416
       ],
       "id": "86e8c7ed-fbcc-46d2-a573-d22e1fdc4c39",
       "name": "Push Conversion to AllData",
@@ -66,18 +66,6 @@
           "name": "Koza DRAGEN - Root User"
         }
       }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
-      "position": [
-        2976,
-        160
-      ],
-      "id": "8fe40d3d-8dce-40a2-b3b1-73675735c754",
-      "name": "Dummy | Cleanup DRAGEN",
-      "disabled": true
     },
     {
       "parameters": {
@@ -175,8 +163,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -48,
-        -592
+        -1104,
+        -320
       ],
       "id": "c41b00f0-86c7-40e0-97cc-21f1d1cbacb8",
       "name": "When clicking ‘Execute workflow’"
@@ -214,8 +202,8 @@
       "name": "Check SampleSheet",
       "credentials": {
         "sshPassword": {
-          "id": "2KgBkvNiNUPxE0oC",
-          "name": "SSH Password account"
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
         }
       }
     },
@@ -357,7 +345,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        368,
+        160,
         144
       ],
       "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
@@ -366,14 +354,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE conversions\nSET status_concept_ref = 26\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND conversions.status_concept_ref = 24\nRETURNING conversions.uniqueref;",
+        "query": "UPDATE conversions\nSET status_concept_ref = 26\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n  AND conversions.status_concept_ref = 24\nRETURNING conversions.uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
         1648,
-        144
+        160
       ],
       "id": "76f73dd9-0682-446e-a29a-f81f4f49a2b8",
       "name": "Update Conversion to In Progress",
@@ -393,8 +381,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2544,
-        -16
+        816,
+        416
       ],
       "id": "3c7ed7ab-feec-4f6e-ad02-5dbcc0338b40",
       "name": "Update Conversion to In Completed",
@@ -407,34 +395,15 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "runs",
-          "mode": "list",
-          "cachedResultName": "runs"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "run_id",
-              "value": "={{ $json.run_id }}"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "SELECT \n  r.*,\n  c.concept_name as workflow_type\nFROM runs r\nLEFT JOIN concepts c ON r.workflow_concept_ref = c.uniqueref\nWHERE r.run_id = '{{ $json.run_id }}';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        352,
-        -592
+        -608,
+        -320
       ],
       "id": "57ed4b27-b70e-4213-83c0-494b87fe529b",
       "name": "Get Run Ref",
@@ -447,13 +416,13 @@
     },
     {
       "parameters": {
-        "command": "=ls /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq"
+        "command": "=ls /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1872,
-        144
+        144,
+        576
       ],
       "id": "3eb3aea9-43eb-4a87-9fd7-0d904ba2db14",
       "name": "Check Destination Folder",
@@ -492,11 +461,285 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2096,
-        144
+        368,
+        576
       ],
       "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
       "name": "Is Destination Folder Absent"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CSV string'i al\nconst csvData = $input.first().json.stdout;\n\n// Satırlara ayır\nconst lines = csvData.trim().split('\\n');\n\n// Header'ı parse et\nconst headers = lines[0].split(',');\n\n// Data satırlarını parse et ve objelere dönüştür\nconst tableData = lines.slice(1).map(line => {\n  const values = line.split(',');\n  const row = {};\n  \n  headers.forEach((header, index) => {\n    row[header] = values[index];\n  });\n  \n  return row;\n});\n\n// Sonucu döndür\nreturn tableData.map(row => ({ json: row }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        0
+      ],
+      "id": "0620d715-0659-43e1-9acb-0166e1751d62",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Workflow kontrolü\nconst workflowType = $('Get Run Ref').first().json.workflow_type;\n\n\n// Gelen JSON verisini al (artık CSV parse etmiyoruz)\nconst parsedData = $input.all().map(item => item.json);\n\nlet result;\n\nif (workflowType === \"Standard Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item['SampleID'];\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // Normal workflow - olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        0
+      ],
+      "id": "6cc1789d-2993-4d94-b5e3-364603d27ebb",
+      "name": "Parse Demux"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.uniqueref as conversion_ref,\n       c.id_source_value,\n       c.conversion_time,\n       r.run_id\nFROM conversions c\nJOIN runs r ON c.run_ref = r.uniqueref\nWHERE r.run_id = '{{ $('Edit Fields').first().json.run_id }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1088,
+        0
+      ],
+      "id": "35b85927-2d3a-497f-94db-6e37a3ad1498",
+      "name": "Get Conversion Ref",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=cat /volume1/ALLDATA/Conversions/{{ $('Get Run Ref').item.json.run_id }}-Fastq/Reports/Demultiplex_Stats.csv "
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        0
+      ],
+      "id": "6792c8e0-a42a-456d-8ed9-638f4728cba5",
+      "name": "Read Demux",
+      "executeOnce": true,
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=rm -rf /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        576
+      ],
+      "id": "a0289a63-6934-45ee-bcd4-3e4f4f9959f0",
+      "name": "Cleanup DRAGEN",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversion_ref": "={{ $('Get Conversion Ref').first().json.conversion_ref }}",
+            "lane": "={{ $json.Lane }}",
+            "reads": "={{ $json[\"# Reads\"] }}",
+            "sample_id": "={{ $json.SampleID }}"
+          },
+          "matchingColumns": [
+            "sample_id",
+            "conversion_ref",
+            "lane"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "conversion_ref",
+              "displayName": "conversion_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sample_id",
+              "displayName": "sample_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "index_ref",
+              "displayName": "index_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lane",
+              "displayName": "lane",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reads_target",
+              "displayName": "reads_target",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "bdsnumber",
+              "displayName": "bdsnumber",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kit_ref",
+              "displayName": "kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "requesting_caresite_ref",
+              "displayName": "requesting_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "performing_caresite_ref",
+              "displayName": "performing_caresite_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads",
+              "displayName": "reads",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sample_project",
+              "displayName": "sample_project",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "r1_path",
+              "displayName": "r1_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "r2_path",
+              "displayName": "r2_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "ac6449e5-80fc-4ca6-8f32-29b52cb684d4",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -705,6 +948,11 @@
       "main": [
         [
           {
+            "node": "Get Conversion Ref",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Check Run in DRAGEN ",
             "type": "main",
             "index": 0
@@ -734,7 +982,7 @@
         ],
         [
           {
-            "node": "Dummy | Cleanup DRAGEN",
+            "node": "Cleanup DRAGEN",
             "type": "main",
             "index": 0
           }
@@ -745,7 +993,51 @@
       "main": [
         [
           {
-            "node": "Dummy | Cleanup DRAGEN",
+            "node": "Cleanup DRAGEN",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Demux": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Parse Demux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Conversion Ref": {
+      "main": [
+        [
+          {
+            "node": "Read Demux",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Demux": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -761,7 +1053,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7c75d37c-9260-4634-811b-4862616fb333",
+  "versionId": "594df317-1824-4a76-91c0-1a4b95705a9b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -775,6 +1067,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "DRAGEN Conversion.json"
 }
