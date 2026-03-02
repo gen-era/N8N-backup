@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-26T00:59:37.000Z",
+  "updatedAt": "2026-01-29T06:28:22.236Z",
   "createdAt": "2025-08-13T07:05:22.977Z",
   "id": "O8YHNZzNyW1ZWOlt",
   "name": "BCL-convert subflow",
@@ -243,21 +243,6 @@
     },
     {
       "parameters": {
-        "content": "Alan kontrolü eklenecek",
-        "height": 256,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        2224,
-        -384
-      ],
-      "typeVersion": 1,
-      "id": "7eacaac4-2c97-4ac1-a480-f1455d402f68",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
         "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
       },
       "type": "n8n-nodes-base.ssh",
@@ -418,7 +403,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -585,7 +570,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     }
@@ -799,7 +784,7 @@
       }
     ]
   },
-  "versionId": "50b998c4-281d-4db4-804a-0151e65ee282",
+  "versionId": "04f95405-4b95-4a03-9512-1ccac1d82db7",
   "activeVersionId": "50b998c4-281d-4db4-804a-0151e65ee282",
   "triggerCount": 0,
   "shared": [
@@ -1598,6 +1583,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "commitDate": "02-03-2026/3:24",
   "fileName": "BCL-convert subflow.json"
 }
