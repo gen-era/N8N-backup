@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-22T16:08:40.000Z",
+  "updatedAt": "2026-02-25T08:58:56.089Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -57,7 +57,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -207,7 +207,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/sapiens_dragen/tmp/ --max-depth 1 --exclude \"*-*\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -443,7 +443,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        20
+        0
       ]
     }
   },
@@ -451,8 +451,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "054334b4-d6b9-47b2-a0de-701b2e0121e9",
-  "activeVersionId": "054334b4-d6b9-47b2-a0de-701b2e0121e9",
+  "versionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
+  "activeVersionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
   "triggerCount": 1,
   "shared": [
     {
@@ -464,9 +464,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-02T11:24:06.878Z",
-    "createdAt": "2026-01-02T11:24:06.878Z",
-    "versionId": "054334b4-d6b9-47b2-a0de-701b2e0121e9",
+    "updatedAt": "2026-02-19T06:46:26.000Z",
+    "createdAt": "2026-02-19T06:46:24.627Z",
+    "versionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -520,7 +520,7 @@
         "credentials": {
           "postgres": {
             "id": "vvzB2Z8ymgMiekHW",
-            "name": "Postgres account 2"
+            "name": "PG-ALB-1.5"
           }
         }
       },
@@ -670,7 +670,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/sapiens_dragen/tmp/ --max-depth 1 --exclude \"*-*\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -900,12 +900,19 @@
         ]
       }
     },
-    "authors": "system migration",
-    "name": null,
-    "description": null,
+    "authors": "Bio Solutions",
+    "name": "Version fd71017c",
+    "description": "",
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "06-01-2026/22:39",
+  "tags": [
+    {
+      "updatedAt": "2026-02-25T08:58:40.172Z",
+      "createdAt": "2026-02-25T08:58:40.172Z",
+      "id": "haVpXFpEUMjyquhf",
+      "name": "Production"
+    }
+  ],
+  "commitDate": "02-03-2026/3:24",
   "fileName": "Monitor New Runs.json"
 }
