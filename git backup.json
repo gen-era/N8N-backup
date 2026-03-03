@@ -526,7 +526,7 @@
     ]
   },
   "versionId": "b1bbe8ad-0fd6-42a4-8f2f-ba593900a5cd",
-  "activeVersionId": "472b7bdd-dafb-4d94-b3ff-4d53b228aeaf",
+  "activeVersionId": "b1bbe8ad-0fd6-42a4-8f2f-ba593900a5cd",
   "triggerCount": 1,
   "shared": [
     {
@@ -538,9 +538,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-02T06:26:57.358Z",
-    "createdAt": "2026-01-02T06:26:57.358Z",
-    "versionId": "472b7bdd-dafb-4d94-b3ff-4d53b228aeaf",
+    "updatedAt": "2026-03-02T08:26:30.000Z",
+    "createdAt": "2026-01-07T03:59:07.908Z",
+    "versionId": "b1bbe8ad-0fd6-42a4-8f2f-ba593900a5cd",
     "workflowId": "x9oIU5qJNi5dzMwV",
     "nodes": [
       {
@@ -615,15 +615,14 @@
             "cachedResultUrl": "https://github.com/gen-era/N8N-backup"
           },
           "filePath": "={{ $json.fileName }}",
-          "binaryData": true,
-          "binaryPropertyName": "={{$('Merge').item.binary.data}}",
+          "fileContent": "={{ JSON.stringify($('Check if file exists').item.json, null, 2) }}",
           "commitMessage": "=backup-{{ $json.commitDate }}"
         },
         "id": "eb299c72-8b7e-4c6a-ab84-78154fb602fe",
         "name": "Update file",
         "type": "n8n-nodes-base.github",
         "position": [
-          5856,
+          5248,
           816
         ],
         "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
@@ -633,7 +632,8 @@
             "id": "qFmHSnQVYm45zXjE",
             "name": "GitHub account"
           }
-        }
+        },
+        "onError": "continueErrorOutput"
       },
       {
         "parameters": {
@@ -651,15 +651,14 @@
             "cachedResultUrl": "https://github.com/gen-era/N8N-backup"
           },
           "filePath": "={{ $json.fileName }}",
-          "binaryData": true,
-          "binaryPropertyName": "={{$('Json file').item.binary.data}}",
+          "fileContent": "={{ JSON.stringify($('Check if file exists').item.json, null, 2) }}",
           "commitMessage": "=backup-{{ $node['Commit date & file name'].json.commitDate }}"
         },
         "id": "e3a7b929-eab3-4e56-b5f1-c876d4d0959c",
         "name": "Upload file",
         "type": "n8n-nodes-base.github",
         "position": [
-          5168,
+          5232,
           608
         ],
         "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
@@ -689,28 +688,10 @@
         "name": "Check if file exists",
         "type": "n8n-nodes-base.if",
         "position": [
-          4752,
+          4800,
           784
         ],
         "typeVersion": 1
-      },
-      {
-        "parameters": {
-          "operation": "toJson",
-          "mode": "each",
-          "options": {
-            "format": true,
-            "fileName": "={{ $json.name }}.json"
-          }
-        },
-        "id": "ea1a9f03-0e2f-44b2-8f42-6e3c9048118d",
-        "name": "Json file",
-        "type": "n8n-nodes-base.convertToFile",
-        "position": [
-          4320,
-          784
-        ],
-        "typeVersion": 1.1
       },
       {
         "parameters": {
@@ -731,7 +712,9 @@
             ]
           },
           "includeOtherFields": true,
-          "options": {}
+          "options": {
+            "stripBinary": true
+          }
         },
         "id": "157eb386-a999-4688-afb1-09014afa83fa",
         "name": "Commit date & file name",
@@ -880,90 +863,6 @@
       },
       {
         "parameters": {
-          "jsCode": "const results = [];\n\n// Get all items as arrays\nconst jsonFileItems = $('Json file').all();\nconst githubItems = $('Get a file').all();\n\n// Create a map of GitHub files by filename\nconst githubMap = new Map();\nfor (const item of githubItems) {\n  const fileName = item.binary?.data?.fileName;\n  if (fileName) {\n    githubMap.set(fileName, item);\n  }\n}\n\n// Compare each local file with its GitHub counterpart\nfor (const localItem of jsonFileItems) {\n  const fileName = localItem.binary?.data?.fileName;\n  const githubItem = githubMap.get(fileName);\n  \n  try {\n    // Parse local file\n    const newBuffer = Buffer.from(localItem.binary.data.data, 'base64');\n    const newContent = JSON.parse(newBuffer.toString('utf8'));\n    \n    // Parse GitHub file\n    let existingContent = null;\n    if (githubItem?.binary?.data?.data) {\n      const existingBuffer = Buffer.from(githubItem.binary.data.data, 'base64');\n      existingContent = JSON.parse(existingBuffer.toString('utf8'));\n    }\n    \n    // Compare\n    const needsUpdate = JSON.stringify(newContent) !== JSON.stringify(existingContent);\n    \n    results.push({\n      json: { fileName, needsUpdate },\n      binary: localItem.binary\n    });\n    \n  } catch (e) {\n    results.push({\n      json: { fileName, needsUpdate: true, error: e.message },\n      binary: localItem.binary\n    });\n  }\n}\n\nreturn results;"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          5232,
-          864
-        ],
-        "id": "5bc712df-4177-4fc9-88a4-58b1aafed83b",
-        "name": "Code in JavaScript"
-      },
-      {
-        "parameters": {
-          "resource": "file",
-          "operation": "get",
-          "owner": {
-            "__rl": true,
-            "value": "gen-era",
-            "mode": "list",
-            "cachedResultName": "gen-era",
-            "cachedResultUrl": "https://github.com/gen-era"
-          },
-          "repository": {
-            "__rl": true,
-            "value": "N8N-backup",
-            "mode": "list",
-            "cachedResultName": "N8N-backup",
-            "cachedResultUrl": "https://github.com/gen-era/N8N-backup"
-          },
-          "filePath": "={{ $json.fileName }}",
-          "additionalParameters": {}
-        },
-        "type": "n8n-nodes-base.github",
-        "typeVersion": 1.1,
-        "position": [
-          4944,
-          864
-        ],
-        "id": "19eb3238-aac3-4c41-82c5-f2a827f4b1bf",
-        "name": "Get a file",
-        "webhookId": "9284fe27-c953-4209-864c-45eeae125af9",
-        "credentials": {
-          "githubApi": {
-            "id": "qFmHSnQVYm45zXjE",
-            "name": "GitHub account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "strict",
-              "version": 2
-            },
-            "conditions": [
-              {
-                "id": "7e6b47a9-5f1a-4b56-aea4-1c7c05e369d1",
-                "leftValue": "={{ $json.needsUpdate }}",
-                "rightValue": "",
-                "operator": {
-                  "type": "boolean",
-                  "operation": "true",
-                  "singleValue": true
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          5440,
-          864
-        ],
-        "id": "3446b7f1-c597-4142-8acf-e930dacea72c",
-        "name": "If"
-      },
-      {
-        "parameters": {
           "toRecipients": "sinan.erdem@gen-era.com.tr",
           "subject": "n8n-backup-fail",
           "bodyContent": "check WF",
@@ -972,7 +871,7 @@
         "type": "n8n-nodes-base.microsoftOutlook",
         "typeVersion": 2,
         "position": [
-          5472,
+          5536,
           624
         ],
         "id": "7f9f9be5-4e51-4a1d-8799-28c3eb19ee51",
@@ -987,26 +886,26 @@
       },
       {
         "parameters": {
-          "mode": "combine",
-          "advanced": true,
-          "mergeByFields": {
-            "values": [
-              {
-                "field1": "fileName",
-                "field2": "fileName"
-              }
-            ]
-          },
-          "options": {}
+          "toRecipients": "sinan.erdem@gen-era.com.tr",
+          "subject": "n8n-backup-fail",
+          "bodyContent": "check WF update",
+          "additionalFields": {}
         },
-        "type": "n8n-nodes-base.merge",
-        "typeVersion": 3.2,
+        "type": "n8n-nodes-base.microsoftOutlook",
+        "typeVersion": 2,
         "position": [
-          5648,
-          752
+          5536,
+          832
         ],
-        "id": "68ae9b7b-d548-481a-bbde-cf2ea23da682",
-        "name": "Merge"
+        "id": "706880b7-fd26-4aaa-a218-f3bf1abef389",
+        "name": "Send a message1",
+        "webhookId": "1ebfff08-2a53-405b-8bbc-be9be246c321",
+        "credentials": {
+          "microsoftOutlookOAuth2Api": {
+            "id": "H8UQaAqG4uOkMeE6",
+            "name": "Microsoft Outlook account"
+          }
+        }
       }
     ],
     "connections": {
@@ -1021,22 +920,11 @@
           ]
         ]
       },
-      "Json file": {
-        "main": [
-          [
-            {
-              "node": "Commit date & file name",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Check if file exists": {
         "main": [
           [
             {
-              "node": "Get a file",
+              "node": "Update file",
               "type": "main",
               "index": 0
             }
@@ -1066,11 +954,6 @@
           [
             {
               "node": "Check if file exists",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Merge",
               "type": "main",
               "index": 0
             }
@@ -1114,42 +997,9 @@
         "main": [
           [
             {
-              "node": "Json file",
+              "node": "Commit date & file name",
               "type": "main",
               "index": 0
-            }
-          ]
-        ]
-      },
-      "Code in JavaScript": {
-        "main": [
-          [
-            {
-              "node": "If",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get a file": {
-        "main": [
-          [
-            {
-              "node": "Code in JavaScript",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "If": {
-        "main": [
-          [
-            {
-              "node": "Merge",
-              "type": "main",
-              "index": 1
             }
           ]
         ]
@@ -1166,11 +1016,12 @@
           ]
         ]
       },
-      "Merge": {
+      "Update file": {
         "main": [
+          [],
           [
             {
-              "node": "Update file",
+              "node": "Send a message1",
               "type": "main",
               "index": 0
             }
@@ -1179,11 +1030,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": null,
-    "description": null,
+    "name": "Version b1bbe8ad",
+    "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "02-03-2026/3:24",
+  "commitDate": "03-03-2026/0:00",
   "fileName": "git backup.json"
 }
