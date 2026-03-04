@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-17T09:02:41.207Z",
+  "updatedAt": "2026-03-03T07:31:28.926Z",
   "createdAt": "2025-09-16T12:36:15.747Z",
   "id": "ZHgMRKYDgvkEHsu0",
   "name": "SampleSheet Generator",
@@ -1490,11 +1490,8 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "path": "/mnt/usb/260213_A01228_0250_AHVNFKDSXF",
-          "run_id": "260213_A01228_0250_AHVNFKDSXF"
-        },
-        "pairedItem": {
-          "item": 0
+          "path": "/mnt/smb_share/Runs/20260302_LH00267_0133_B2327KGLT4",
+          "run_id": "20260302_LH00267_0133_B2327KGLT4"
         }
       }
     ]
@@ -2996,6 +2993,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "03-03-2026/0:00",
+  "commitDate": "04-03-2026/0:00",
   "fileName": "SampleSheet Generator.json"
 }
