@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-07T04:47:09.249Z",
+  "updatedAt": "2026-03-03T07:31:19.166Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
@@ -379,8 +379,8 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "folder": "251231_A01978_0142_AHNK2JDSXF",
-          "path": "/mnt/illuminastorage/run_folder/251231_A01978_0142_AHNK2JDSXF",
+          "folder": "260221_A01978_0147_BHWC27DSXF",
+          "path": "/mnt/illuminastorage/run_folder/260221_A01978_0147_BHWC27DSXF",
           "status": "READY_FOR_CONVERSION"
         }
       }
@@ -770,6 +770,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "03-03-2026/0:00",
+  "commitDate": "04-03-2026/0:00",
   "fileName": "interop.json"
 }
