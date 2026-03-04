@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-25T09:26:41.051Z",
+  "updatedAt": "2026-03-03T09:20:32.942Z",
   "createdAt": "2025-12-24T08:09:58.767Z",
   "id": "CuWJaHlFoyXcmolp",
   "name": "Sophia VCF Downloader",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        256,
-        -272
+        -368,
+        -256
       ],
       "id": "9eb09f28-7a2d-4000-bdae-aa920749c193",
       "name": "When clicking ‘Execute workflow’"
@@ -25,8 +25,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1152,
-        -272
+        528,
+        -256
       ],
       "id": "164214f1-71e5-4712-9a96-5cfc111b47bc",
       "name": "Account Login",
@@ -42,8 +42,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        480,
-        -272
+        -144,
+        -256
       ],
       "id": "cdb6cb61-c6a9-4c1a-a0a6-44db92c65a99",
       "name": "Get All Accounts",
@@ -61,8 +61,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1408,
-        -272
+        1200,
+        -336
       ],
       "id": "a79cf41c-91ed-48bf-ab83-f3770a51e0a0",
       "name": "Get Batches",
@@ -76,8 +76,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1616,
-        -272
+        1424,
+        -336
       ],
       "id": "d1072f37-2971-4dea-a9aa-47d0ec86e0a2",
       "name": "Tidy Batches",
@@ -111,8 +111,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        160,
-        160
+        1648,
+        -336
       ],
       "id": "f2c674b4-774d-43ea-b31f-0d5896b2eeb8",
       "name": "Filter Finished"
@@ -124,8 +124,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1328,
-        160
+        2976,
+        -336
       ],
       "id": "9674a5ba-fece-4e8d-948f-6f1355d0a3f9",
       "name": "Get Samples from the Batch",
@@ -139,8 +139,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1584,
-        160
+        3200,
+        -336
       ],
       "id": "14fdbf51-4831-4b1a-9182-6cb1713dccca",
       "name": "Code in JavaScript"
@@ -172,8 +172,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1792,
-        160
+        3424,
+        -336
       ],
       "id": "c4d15478-f5e3-4f61-aca9-5988f9ada3b6",
       "name": "Filter"
@@ -185,22 +185,11 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        928,
-        -272
+        304,
+        -256
       ],
       "id": "ac5f309d-e816-4852-b3ea-24f9fb32ed2e",
       "name": "Loop Over Accounts"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.limit",
-      "typeVersion": 1,
-      "position": [
-        688,
-        -272
-      ],
-      "id": "2517e838-f885-46fa-b597-2879e8cf5dbb",
-      "name": "Limit"
     },
     {
       "parameters": {
@@ -209,8 +198,8 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1088,
-        160
+        2752,
+        -256
       ],
       "id": "83350962-afcb-43e4-ae6d-afdb5e17c555",
       "name": "Loop Over Batches"
@@ -222,8 +211,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
-        160
+        3648,
+        -336
       ],
       "id": "5a029c92-2cfe-4f06-8149-278ee0c36440",
       "name": "Prepare Batch Download"
@@ -235,21 +224,21 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2208,
-        160
+        3872,
+        -256
       ],
       "id": "17980def-eaaf-4e49-981e-a7b8695d6c9a",
       "name": "Download All VCFs"
     },
     {
       "parameters": {
-        "command": "=ls \"/mnt/smb_peta/Data_Consolidation/external/sophia/{{ $('Loop Over Accounts').item.json.care_site_id }} - {{ $('Loop Over Accounts').item.json.care_site_name }}/\" "
+        "command": "=mkdir -p \"/mnt/smb_peta/Data_Consolidation/external/sophia/{{ $('Loop Over Accounts').item.json.care_site_id }} - {{ $('Loop Over Accounts').item.json.care_site_name }}\" && ls \"/mnt/smb_peta/Data_Consolidation/external/sophia/{{ $('Loop Over Accounts').item.json.care_site_id }} - {{ $('Loop Over Accounts').item.json.care_site_name }}\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        384,
-        -16
+        1872,
+        -400
       ],
       "id": "5ab77b64-8f42-4499-ac21-a37fea89f367",
       "name": "Get Downloaded Batches"
@@ -261,8 +250,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        592,
-        -16
+        2096,
+        -400
       ],
       "id": "10763af9-af2e-4fad-8a03-e2c0c3251bd9",
       "name": "Tidy Downloaded Batches"
@@ -278,11 +267,127 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        800,
-        160
+        2320,
+        -336
       ],
       "id": "5fcdf366-f697-4eed-b6d5-459ced3723e4",
-      "name": "Merge"
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout;\n\nconst match = stdout.match(/client id:\\s*(\\d+)/);\nconst clientId = match ? parseInt(match[1]) : null;\n\nreturn [{ json: { clientId } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        -336
+      ],
+      "id": "47af1a59-85d3-40ba-8c86-3540f6a2d06f",
+      "name": "Logged Client ID"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c222918e-37b7-4b10-b742-c4b44c92dd66",
+              "leftValue": "={{ $('Loop Over Accounts').item.json.platform_site_meta }}",
+              "rightValue": "={{ $json.clientId }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        -336
+      ],
+      "id": "c7ceeb0a-0b02-44f0-8776-10512a5add76",
+      "name": "Login Validation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "83d6400e-4afb-4545-88f1-79a19f09122e",
+              "leftValue": "={{$json}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2512,
+        -288
+      ],
+      "id": "a46d2775-584c-4aa5-90e7-19fb909cf563",
+      "name": "Is there a new batch"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "05e037bb-b97b-4c6c-8e79-5f07a9653ffa",
+              "leftValue": "={{ $json.care_site_ref }}",
+              "rightValue": 110,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        -256
+      ],
+      "id": "6d1be78f-fea2-4328-bd38-e7267aa008fb",
+      "name": "Filter1"
     }
   ],
   "connections": {
@@ -301,7 +406,7 @@
       "main": [
         [
           {
-            "node": "Get Batches",
+            "node": "Logged Client ID",
             "type": "main",
             "index": 0
           }
@@ -312,7 +417,7 @@
       "main": [
         [
           {
-            "node": "Limit",
+            "node": "Filter1",
             "type": "main",
             "index": 0
           }
@@ -402,7 +507,7 @@
         ]
       ]
     },
-    "Limit": {
+    "Loop Over Batches": {
       "main": [
         [
           {
@@ -410,12 +515,7 @@
             "type": "main",
             "index": 0
           }
-        ]
-      ]
-    },
-    "Loop Over Batches": {
-      "main": [
-        [],
+        ],
         [
           {
             "node": "Get Samples from the Batch",
@@ -473,7 +573,58 @@
       "main": [
         [
           {
+            "node": "Is there a new batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logged Client ID": {
+      "main": [
+        [
+          {
+            "node": "Login Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login Validation": {
+      "main": [
+        [
+          {
+            "node": "Get Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is there a new batch": {
+      "main": [
+        [
+          {
             "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Accounts",
             "type": "main",
             "index": 0
           }
@@ -489,7 +640,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "455f0b5f-ec2d-4293-b9ae-58a8552561cb",
+  "versionId": "37a4ac4b-897e-491d-b4c3-a0b8b435d81f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -503,6 +654,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "03-03-2026/0:00",
+  "commitDate": "04-03-2026/0:00",
   "fileName": "Sophia VCF Downloader.json"
 }
