@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-03T09:20:32.942Z",
+  "updatedAt": "2026-03-04T06:15:40.888Z",
   "createdAt": "2025-12-24T08:09:58.767Z",
   "id": "CuWJaHlFoyXcmolp",
   "name": "Sophia VCF Downloader",
@@ -176,7 +176,8 @@
         -336
       ],
       "id": "c4d15478-f5e3-4f61-aca9-5988f9ada3b6",
-      "name": "Filter"
+      "name": "Filter",
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -211,7 +212,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3648,
+        4144,
         -336
       ],
       "id": "5a029c92-2cfe-4f06-8149-278ee0c36440",
@@ -224,8 +225,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        3872,
-        -256
+        4368,
+        -176
       ],
       "id": "17980def-eaaf-4e49-981e-a7b8695d6c9a",
       "name": "Download All VCFs"
@@ -238,7 +239,7 @@
       "typeVersion": 1,
       "position": [
         1872,
-        -400
+        -528
       ],
       "id": "5ab77b64-8f42-4499-ac21-a37fea89f367",
       "name": "Get Downloaded Batches"
@@ -251,7 +252,7 @@
       "typeVersion": 2,
       "position": [
         2096,
-        -400
+        -528
       ],
       "id": "10763af9-af2e-4fad-8a03-e2c0c3251bd9",
       "name": "Tidy Downloaded Batches"
@@ -388,6 +389,40 @@
       ],
       "id": "6d1be78f-fea2-4328-bd38-e7267aa008fb",
       "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9e5f791-ee1c-4677-941c-362565c5a79b",
+              "leftValue": "={{$json}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3632,
+        -224
+      ],
+      "id": "edfb68d2-79be-45f3-83ad-daf0169c5677",
+      "name": "If"
     }
   ],
   "connections": {
@@ -488,7 +523,7 @@
       "main": [
         [
           {
-            "node": "Prepare Batch Download",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -630,6 +665,24 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Prepare Batch Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -640,7 +693,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "37a4ac4b-897e-491d-b4c3-a0b8b435d81f",
+  "versionId": "b78a083c-c098-4b39-809e-fdda7d412cfb",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -654,6 +707,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "04-03-2026/0:00",
+  "commitDate": "05-03-2026/0:00",
   "fileName": "Sophia VCF Downloader.json"
 }
