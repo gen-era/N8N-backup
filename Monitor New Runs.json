@@ -443,7 +443,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        20
+        0
       ]
     }
   },
@@ -913,6 +913,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "04-03-2026/0:00",
+  "commitDate": "05-03-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
