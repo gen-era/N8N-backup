@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-04T07:56:38.017Z",
+  "updatedAt": "2026-03-05T12:57:27.731Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        1280,
-        -560
+        1264,
+        -752
       ],
       "id": "0c679ca5-7a0f-4002-9f62-32ff30eac723",
       "name": "When clicking ‘Execute workflow’"
@@ -1002,7 +1002,7 @@
     },
     {
       "parameters": {
-        "command": "=result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\nif [ -z \"$result\" ]; then\n  # Alternatif 1: smb_share\n  smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n  \n  if [ -n \"$smb_path\" ]; then\n    echo \"${smb_path}\"\n  else\n    # Alternatif 2: usb1\n    alt_path=$(fdfind \"{{ $json.run_id }}\" /mnt/illuminastorage_usb1/ --max-depth 2 | head -n 1)\n    \n    if [ -n \"$alt_path\" ]; then\n      echo \"${alt_path}Analysis/1/Data/BCLConvert/fastq/\"\n    else\n      # Alternatif 3: usb2\n      usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n      if [ -d \"$usb2_path\" ]; then\n        echo \"${usb2_path}/\"\n      else\n        echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n        exit 1\n      fi\n    fi\n  fi\nelse\n  echo \"$result\"\nfi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1044,13 +1044,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260227_A01228_0255_AHW7WWDSXF",
+              "value": "20260302_LH00267_0156_B23C335LT3",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "M26-YBRCA-554\tM26-YBRCA-555\tM26-YBRCA-556\t\t\t\t\t\t AD-56203336064\tAD-56215335628\tAD-65692019716\t\t\t\t\t\t AD-17606119708\tAD-25445196668\tAD-29798859943\t\t\t\t\t\t 26-1065\t26-1072\t26-1073\t\t\t\t\t\t M-25-YCES-3841-A\tM-25-YCES-3842-B\tM-25-YCES-3843-C\t\t\t\t\t\t M-25-YCES-3841-A\tM-25-YCES-3842-B\tM-25-YCES-3843-C\t\t\t\t\t\t M-25-YCES-3841-A\tM-25-YCES-3842-B\tM-25-YCES-3843-C\t\t\t\t\t\t SE26-YCES-2103\tO26-YCES-2321\tZK26-YCES-4884\tKS26-YCES-1107\tKS26-YCES-1108\tKS26-YCES-1109\tM26-YCES-4216\tM26-YCES-4217\tM26-YCES-4218 MG26-3902\tMG26-3904\tMG26-3908",
+              "value": "H26-YCES-1364\tH26-YCES-1365\tH26-YCES-1366\tU26-YCES-7585\tU26-YCES-7586\tU26-YCES-7587\tB26-YCES-972\tB26-YCES-973\tB26-YCES-974 U26-YCES-7577\tU26-YCES-7578\tU26-YCES-7579\tGU26-YCES-7102\tGU26-YCES-7104\tB26-YCES-979\tZK26-YCES-5032\tZK26-YCES-5033\tZK26-YCES-5034 M26-YCES-4208\tM26-YCES-4209\tM26-YCES-4210\t\t\t\t\t\t GU26-YCES-7085\tGU26-YCES-7086\tGU26-YCES-7087\tO26-YCES-2413\tO26-YCES-2414\tO26-YCES-2415\tZK26-YCES-5028\tZK26-YCES-5029\tU26-YCES-7423 26-1351\t26-1367\t26-1388\t\t\t\t\t\t SG2025-22429\tSG2023-23450\tSG2026-04041\t\t\t\t\t\t B26-YWES-63\tGU26-YWES-397\tGU26-YWES-398\t\t\t\t\t\t SG2026-04137- ECE26-227-CBA\tSG2026-04138- ECE26-228-CE\tSG2026-04142- ECE26-229-HD\t\t\t\t\t\t SG2026-04129-ECE26-219-MÖ\tSG2026-04130- ECE26-220-SO\tSG2026-04131-ECE26-221-AC\t\t\t\t\t\t AMG-0216-26\tT26-170\tT26-169\t\t\t\t\t\t SG2024-9458\tSG2026-03955 \tSG2026-01478\t\t\t\t\t\t 26-1163\t26-1181\t26-1253\t\t\t\t\t\t SG2026-03585\tSG2026-03586\tSG2026-04100\t\t\t\t\t\t SG2026-04157- ECE26-243-ED\tSG2026-04158- ECE26-244-HD\tSG2025-7887\t\t\t\t\t\t SG2026-04149- ECE26-235-HÖ\tSG2026-04150- ECE26-236-TB\tSG2026-04151- ECE26-237-NU\t\t\t\t\t\t WES-9 MER DEM 5325583\tWES-10 İSA BAB 5326281\tWES-11 NAR MİR YIL 5326155\t\t\t\t\t\t WES-1 ÇİY KUR 5323528\tWES-2 MİR VAN 5323631\tWES-3 ŞAH ENÜ 5323530\t\t\t\t\t\t WES-26 AVŞ YAL 5330231\tWES-27 AYŞ DİL 5330561\tWES-28 MİR GÖK 5252706\t\t\t\t\t\t WES-17 MUH HÜS DEM 5326102\tWES-18 BES ALA 5326382\tWES-19 MEH TAH ERD 5263071\t\t\t\t\t\t 26-1287\t26-1288\t26-1305\t\t\t\t\t\t T26-217\tT26-218\tT26-219\t\t\t\t\t\t T26-194\tT26-202\tT26-203\t\t\t\t\t\t IE26-YHCS-2522\tIE26-YHCS-2523\tIE26-YHCS-2524\tM26-YHCS-1117\tM26-YHCS-1118\tM26-YHCS-1119\t\t\t O26-YHCS-2829\tO26-YHCS-2830\tO26-YHCS-2831\tO26-YHCS-2853\tO26-YHCS-2854\tO26-YHCS-2855\t\t\t SG2026-04520\tSG2026-04495\tSG2026-04492\t\t\t\t\t\t MG26-2554\tMG26-2558\tMG26-2559\t\t\t\t\t\t MG26-3150\tMG26-3151\tMG26-3169",
               "type": "string"
             }
           ]
@@ -1117,8 +1117,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1520,
-        -560
+        1504,
+        -752
       ],
       "id": "07be1af6-f832-45cc-bb47-871ef762a587",
       "name": "Check DRAGEN Availability",
@@ -1157,8 +1157,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1728,
-        -560
+        1712,
+        -752
       ],
       "id": "5837340a-4bee-4b7d-bed9-48bffa06bff6",
       "name": "Is DRAGEN Idle"
@@ -1407,8 +1407,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1968,
-        -560
+        1952,
+        -752
       ],
       "id": "a0df3323-d5f3-4e91-9178-9bbd77663c63",
       "name": "DRAGEN QC Pre-Cleanup",
@@ -2160,7 +2160,7 @@
       }
     ]
   },
-  "versionId": "6647a23c-c872-4522-b231-bfb3d293e005",
+  "versionId": "b1e0ecca-4591-40c5-8bb8-600a8f1b4886",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2174,6 +2174,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "05-03-2026/0:00",
+  "commitDate": "06-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
