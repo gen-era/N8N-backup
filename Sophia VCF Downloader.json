@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-04T06:15:40.888Z",
+  "updatedAt": "2026-03-06T13:26:32.966Z",
   "createdAt": "2025-12-24T08:09:58.767Z",
   "id": "CuWJaHlFoyXcmolp",
   "name": "Sophia VCF Downloader",
@@ -212,7 +212,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4144,
+        3968,
         -336
       ],
       "id": "5a029c92-2cfe-4f06-8149-278ee0c36440",
@@ -225,7 +225,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        4368,
+        4256,
         -176
       ],
       "id": "17980def-eaaf-4e49-981e-a7b8695d6c9a",
@@ -423,6 +423,19 @@
       ],
       "id": "edfb68d2-79be-45f3-83ad-daf0169c5677",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "=BASE_PATH=\"/mnt/smb_peta/Data_Consolidation/external/sophia/{{ $('Loop Over Accounts').item.json.care_site_id }} - {{ $('Loop Over Accounts').item.json.care_site_name }}/Batch {{ $('Loop Over Batches').item.json.id }}\"\nmkdir -p \"$BASE_PATH\" "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        3872,
+        64
+      ],
+      "id": "1afdd5b5-87fb-4798-88bd-59c36cc57f5b",
+      "name": "Execute Command"
     }
   ],
   "connections": {
@@ -677,6 +690,17 @@
         ],
         [
           {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
             "node": "Loop Over Batches",
             "type": "main",
             "index": 0
@@ -693,7 +717,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b78a083c-c098-4b39-809e-fdda7d412cfb",
+  "versionId": "7287095d-fddc-4a03-a7cc-31a1dcd40e28",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -707,6 +731,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-03-2026/0:00",
+  "commitDate": "07-03-2026/0:00",
   "fileName": "Sophia VCF Downloader.json"
 }
