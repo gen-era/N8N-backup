@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-07T09:18:16.647Z",
+  "updatedAt": "2026-03-08T12:27:15.441Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -131,7 +131,8 @@
         160
       ],
       "id": "7b46f976-10be-4f98-9f43-1d484cd48415",
-      "name": "JSON Parse - CES"
+      "name": "JSON Parse - CES",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -230,7 +231,7 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "uniqueref": "={{ $('Log Data Op - CES').item.json.uniqueref }}",
+            "uniqueref": "={{ $json.data_operations_ref }}",
             "status_concept_ref": 29,
             "performed_at": "={{ $now.toISO() }}"
           },
@@ -511,7 +512,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        4608,
+        5040,
         336
       ],
       "id": "2197b7c2-892d-47ee-8231-e331587456bb",
@@ -620,16 +621,6 @@
                 "operation": "empty",
                 "singleValue": true
               }
-            },
-            {
-              "id": "e2f0adb4-2674-4739-957c-960dc8fd20cf",
-              "leftValue": "={{ $json.status_concept_ref }}",
-              "rightValue": "27",
-              "operator": {
-                "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
-              }
             }
           ],
           "combinator": "or"
@@ -643,7 +634,8 @@
         112
       ],
       "id": "535d1a82-e38e-4e0b-a8b7-0645b4f7496d",
-      "name": "Is Data OP new?"
+      "name": "Is Data OP new?",
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -1674,6 +1666,13 @@
             "type": "main",
             "index": 1
           }
+        ],
+        [
+          {
+            "node": "Error Data OP - CES",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -2160,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "cae6a4ca-32c0-4be2-b71c-7e6cecca5524",
+  "versionId": "aa386b8f-2828-4ce1-9454-1f94b2e9ea4b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2174,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "08-03-2026/0:00",
+  "commitDate": "09-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
