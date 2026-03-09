@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-06T13:26:32.966Z",
+  "updatedAt": "2026-03-08T12:03:52.472Z",
   "createdAt": "2025-12-24T08:09:58.767Z",
   "id": "CuWJaHlFoyXcmolp",
   "name": "Sophia VCF Downloader",
@@ -369,10 +369,10 @@
             {
               "id": "05e037bb-b97b-4c6c-8e79-5f07a9653ffa",
               "leftValue": "={{ $json.care_site_ref }}",
-              "rightValue": 110,
+              "rightValue": "118|212|110|113",
               "operator": {
-                "type": "number",
-                "operation": "equals"
+                "type": "string",
+                "operation": "regex"
               }
             }
           ],
@@ -717,7 +717,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7287095d-fddc-4a03-a7cc-31a1dcd40e28",
+  "versionId": "fb9d26dc-6897-46d7-be44-5cd8bff669e9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -731,6 +731,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "08-03-2026/0:00",
+  "commitDate": "09-03-2026/0:00",
   "fileName": "Sophia VCF Downloader.json"
 }
