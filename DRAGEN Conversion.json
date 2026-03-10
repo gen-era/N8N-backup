@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-17T11:03:11.171Z",
+  "updatedAt": "2026-03-09T21:13:11.612Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260211_A01832R_0236_BHJF3FDRX7",
+              "value": "=260303_A01832R_0237_BHKN52DRX7",
               "type": "string"
             }
           ]
@@ -31,7 +31,7 @@
     },
     {
       "parameters": {
-        "command": "=/opt/dragen/4.3.13/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').item.json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
+        "command": "=/opt/dragen/4.3.13/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').first().json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -141,7 +141,7 @@
     },
     {
       "parameters": {
-        "command": "= rclone copy /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
+        "command": "=rclone copy /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -551,7 +551,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1053,7 +1054,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "594df317-1824-4a76-91c0-1a4b95705a9b",
+  "versionId": "9c9a9fe3-9ed6-4bab-9024-bd5a9e3d1461",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1067,6 +1068,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "09-03-2026/0:00",
+  "commitDate": "10-03-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
