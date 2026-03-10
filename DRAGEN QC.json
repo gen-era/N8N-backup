@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-08T12:27:15.441Z",
+  "updatedAt": "2026-03-09T21:15:35.232Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260302_LH00267_0156_B23C335LT3",
+              "value": "260303_A01832R_0237_BHKN52DRX7",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "H26-YCES-1364\tH26-YCES-1365\tH26-YCES-1366\tU26-YCES-7585\tU26-YCES-7586\tU26-YCES-7587\tB26-YCES-972\tB26-YCES-973\tB26-YCES-974 U26-YCES-7577\tU26-YCES-7578\tU26-YCES-7579\tGU26-YCES-7102\tGU26-YCES-7104\tB26-YCES-979\tZK26-YCES-5032\tZK26-YCES-5033\tZK26-YCES-5034 M26-YCES-4208\tM26-YCES-4209\tM26-YCES-4210\t\t\t\t\t\t GU26-YCES-7085\tGU26-YCES-7086\tGU26-YCES-7087\tO26-YCES-2413\tO26-YCES-2414\tO26-YCES-2415\tZK26-YCES-5028\tZK26-YCES-5029\tU26-YCES-7423 26-1351\t26-1367\t26-1388\t\t\t\t\t\t SG2025-22429\tSG2023-23450\tSG2026-04041\t\t\t\t\t\t B26-YWES-63\tGU26-YWES-397\tGU26-YWES-398\t\t\t\t\t\t SG2026-04137- ECE26-227-CBA\tSG2026-04138- ECE26-228-CE\tSG2026-04142- ECE26-229-HD\t\t\t\t\t\t SG2026-04129-ECE26-219-MÖ\tSG2026-04130- ECE26-220-SO\tSG2026-04131-ECE26-221-AC\t\t\t\t\t\t AMG-0216-26\tT26-170\tT26-169\t\t\t\t\t\t SG2024-9458\tSG2026-03955 \tSG2026-01478\t\t\t\t\t\t 26-1163\t26-1181\t26-1253\t\t\t\t\t\t SG2026-03585\tSG2026-03586\tSG2026-04100\t\t\t\t\t\t SG2026-04157- ECE26-243-ED\tSG2026-04158- ECE26-244-HD\tSG2025-7887\t\t\t\t\t\t SG2026-04149- ECE26-235-HÖ\tSG2026-04150- ECE26-236-TB\tSG2026-04151- ECE26-237-NU\t\t\t\t\t\t WES-9 MER DEM 5325583\tWES-10 İSA BAB 5326281\tWES-11 NAR MİR YIL 5326155\t\t\t\t\t\t WES-1 ÇİY KUR 5323528\tWES-2 MİR VAN 5323631\tWES-3 ŞAH ENÜ 5323530\t\t\t\t\t\t WES-26 AVŞ YAL 5330231\tWES-27 AYŞ DİL 5330561\tWES-28 MİR GÖK 5252706\t\t\t\t\t\t WES-17 MUH HÜS DEM 5326102\tWES-18 BES ALA 5326382\tWES-19 MEH TAH ERD 5263071\t\t\t\t\t\t 26-1287\t26-1288\t26-1305\t\t\t\t\t\t T26-217\tT26-218\tT26-219\t\t\t\t\t\t T26-194\tT26-202\tT26-203\t\t\t\t\t\t IE26-YHCS-2522\tIE26-YHCS-2523\tIE26-YHCS-2524\tM26-YHCS-1117\tM26-YHCS-1118\tM26-YHCS-1119\t\t\t O26-YHCS-2829\tO26-YHCS-2830\tO26-YHCS-2831\tO26-YHCS-2853\tO26-YHCS-2854\tO26-YHCS-2855\t\t\t SG2026-04520\tSG2026-04495\tSG2026-04492\t\t\t\t\t\t MG26-2554\tMG26-2558\tMG26-2559\t\t\t\t\t\t MG26-3150\tMG26-3151\tMG26-3169",
+              "value": " ",
               "type": "string"
             }
           ]
@@ -1862,13 +1862,7 @@
     },
     "Add Bed Path": {
       "main": [
-        [
-          {
-            "node": "Custom Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Bed Mapping": {
@@ -2092,7 +2086,13 @@
     },
     "Add Bed Path1": {
       "main": [
-        []
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Execute Command1": {
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "aa386b8f-2828-4ce1-9454-1f94b2e9ea4b",
+  "versionId": "9cbdf77a-d657-429a-9e2f-b365a0599a18",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "09-03-2026/0:00",
+  "commitDate": "10-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
