@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-09T21:15:35.232Z",
+  "updatedAt": "2026-03-10T10:11:55.426Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,8 +98,8 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Sample_ID}}",
-              "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
+              "leftValue": "={{ $json.Requested_By}}",
+              "rightValue": "=Gelisim",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260303_A01832R_0237_BHKN52DRX7",
+              "value": "260304_A01228_0256_BHWC2GDSXF",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": " ",
+              "value": " Gelisim",
               "type": "string"
             }
           ]
@@ -1862,7 +1862,13 @@
     },
     "Add Bed Path": {
       "main": [
-        []
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Bed Mapping": {
@@ -2086,13 +2092,7 @@
     },
     "Add Bed Path1": {
       "main": [
-        [
-          {
-            "node": "Custom Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Execute Command1": {
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "9cbdf77a-d657-429a-9e2f-b365a0599a18",
+  "versionId": "162521e5-ac2a-410e-b4fe-1506985080d9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "10-03-2026/0:00",
+  "commitDate": "11-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
