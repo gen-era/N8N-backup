@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-18T06:21:26.012Z",
+  "updatedAt": "2026-03-10T10:48:17.934Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -374,7 +374,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 26\n    AND data_operation_recipes.platform_concept_ref = 109\n    AND data_operation_recipes.type_concept_ref = 251;",
+        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 109\n    AND data_operation_recipes.type_concept_ref = 251;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -478,7 +478,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "bfcbacd5-383f-4e39-8cb8-af82d535210f",
+  "versionId": "9b84fc12-d485-440d-8f4d-5e7a6fc1be90",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -492,6 +492,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "10-03-2026/0:00",
+  "commitDate": "11-03-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
