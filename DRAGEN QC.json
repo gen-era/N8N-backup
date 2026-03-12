@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-10T10:11:55.426Z",
+  "updatedAt": "2026-03-11T07:07:16.561Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,8 +98,8 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Requested_By}}",
-              "rightValue": "=Gelisim",
+              "leftValue": "={{ $json.Sample_ID}}",
+              "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260304_A01228_0256_BHWC2GDSXF",
+              "value": "260306_A01228_0257_AHW7G2DSXF",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": " Gelisim",
+              "value": "26-1131 26-1115 26-1070 26-1069 26-992 26-1275 26-1270 26-1520 26-1513",
               "type": "string"
             }
           ]
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "162521e5-ac2a-410e-b4fe-1506985080d9",
+  "versionId": "225693cf-d733-41ef-871a-29d51df62018",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "11-03-2026/0:00",
+  "commitDate": "12-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
