@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-06T09:30:25.716Z",
+  "updatedAt": "2026-03-11T12:31:34.934Z",
   "createdAt": "2026-02-21T12:45:50.801Z",
   "id": "NdJI7DDLHO194xrO",
   "name": "Sub - Reads DB",
@@ -128,7 +128,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n    conv.*,\n    c_workflow.concept_name      AS \"workflowType\",\n    i.instrument_id              AS \"instrumentId\",\n    i.instrument_source_value    AS \"instrumentSourceValue\",\n    c_instrument.concept_name    AS \"instrumentModel\",\n    c_reads.concept_name         AS \"readsSettings\"   -- ← yeni\nFROM conversions conv\nINNER JOIN runs r               ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow  ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i        ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nLEFT JOIN concepts c_reads      ON r.reads_settings_concept_ref = c_reads.uniqueref  -- ← yeni\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
+        "query": "SELECT \n    conv.*,\n    c_workflow.concept_name      AS \"workflowType\",\n    i.instrument_id              AS \"instrumentId\",\n    i.instrument_source_value    AS \"instrumentSourceValue\",\n    c_instrument.concept_name    AS \"instrumentModel\",\n    c_reads.concept_name         AS \"readsSettings\"\nFROM conversions conv\nINNER JOIN runs r               ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow  ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i        ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nLEFT JOIN concepts c_reads      ON r.reads_settings_concept_ref = c_reads.uniqueref\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -1178,12 +1178,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": "719"
+          "conversion_ref": "756"
         }
       }
     ]
   },
-  "versionId": "3d71f5c4-1e70-4f90-9216-157a569444ce",
+  "versionId": "58c86571-6f0d-4320-a630-fcf6ebbc4b00",
   "activeVersionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
   "triggerCount": 0,
   "shared": [
@@ -2343,6 +2343,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "11-03-2026/0:00",
+  "commitDate": "12-03-2026/0:00",
   "fileName": "Sub - Reads DB.json"
 }
