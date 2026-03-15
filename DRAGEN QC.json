@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-11T07:07:16.561Z",
+  "updatedAt": "2026-03-14T12:51:10.287Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,7 +98,7 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Sample_ID}}",
+              "leftValue": "={{ $json.Requested_By}}",
               "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
               "operator": {
                 "type": "string",
@@ -994,7 +994,7 @@
     },
     {
       "parameters": {
-        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq-Tekrar$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260306_A01228_0257_AHW7G2DSXF",
+              "value": "20260309_LH00267_0157_A23C2JJLT3",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "26-1131 26-1115 26-1070 26-1069 26-992 26-1275 26-1270 26-1520 26-1513",
+              "value": "Gelisim Nesiller Duzen Istinye",
               "type": "string"
             }
           ]
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "225693cf-d733-41ef-871a-29d51df62018",
+  "versionId": "8f1e5b06-8e39-4381-92c0-e4ac1a279dd0",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "14-03-2026/0:00",
+  "commitDate": "15-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
