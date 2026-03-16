@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-14T12:51:10.287Z",
+  "updatedAt": "2026-03-15T05:35:53.056Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,7 +98,7 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Requested_By}}",
+              "leftValue": "={{ $json.Sample_ID}}",
               "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
               "operator": {
                 "type": "string",
@@ -1042,7 +1042,7 @@
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "Gelisim Nesiller Duzen Istinye",
+              "value": "T26-222 T26-209 T26-201 T26-195 T25-1778 T26-249 T26-239 T26-234 T26-233 CO26-BR6220 CO26-BR6219 CO26-BR6217 CO26-BR6218 CO26-BR6216 CO26-BR6215 CO26-BR6214 CO26-BR6213 CO26-BR6212 CO26-BR6211 M-217-26  M-325-2026  1031001105 1031001099 1031001100 1031001107 CO26-BR6229 CO26-BR6228 CO26-BR6227 CO26-BR6226 CO26-BR6225 CO26-BR6224 CO26-BR6223 CO26-BR6222 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 26-1131 26-1115 26-1070 26-1069 26-992 26-1275 26-1270 26-1520 26-1513",
               "type": "string"
             }
           ]
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "8f1e5b06-8e39-4381-92c0-e4ac1a279dd0",
+  "versionId": "07e2e71a-ca0a-49ab-b226-ab4cb6c86ef9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "15-03-2026/0:00",
+  "commitDate": "16-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
