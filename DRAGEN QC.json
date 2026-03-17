@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-15T05:35:53.056Z",
+  "updatedAt": "2026-03-16T20:01:44.777Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -994,7 +994,7 @@
     },
     {
       "parameters": {
-        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq-Tekrar$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260309_LH00267_0157_A23C2JJLT3",
+              "value": "260306_A01228_0257_AHW7G2DSXF",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "T26-222 T26-209 T26-201 T26-195 T25-1778 T26-249 T26-239 T26-234 T26-233 CO26-BR6220 CO26-BR6219 CO26-BR6217 CO26-BR6218 CO26-BR6216 CO26-BR6215 CO26-BR6214 CO26-BR6213 CO26-BR6212 CO26-BR6211 M-217-26  M-325-2026  1031001105 1031001099 1031001100 1031001107 CO26-BR6229 CO26-BR6228 CO26-BR6227 CO26-BR6226 CO26-BR6225 CO26-BR6224 CO26-BR6223 CO26-BR6222 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 M-25-YCES-3841-A M-25-YCES-3842-B M-25-YCES-3843-C M-25-YCES-3841 M-25-YCES-3842 M-25-YCES-3843 M-325-2026 26-1131 26-1115 26-1070 26-1069 26-992 26-1275 26-1270 26-1520 26-1513",
+              "value": "WES-19 MEH TAH ERD 5263071\tWES-20 REB KAP 5326697\tWES-21 HAL İBR ALĞ 5281234\t\t\t\t\t\t 26-1305\t26-1310\t26-1311\t\t\t\t\t\t RP26-031-GB-WES-152\tRP26-031-GB-WES-156\tRP26-031-GB-WES-179\t\t\t\t\t\t SG2026-04151- ECE26-237-NU\tSG2026-04152- ECE26-238-AOİ\tSG2026-04153-ECE26-239-EÖ\t\t\t\t\t\t ST26-YCES-665\tST26-YCES-666\tST26-YCES-667\tSE26-YCES-2317\tSE26-YCES-2318\tSE26-YCES-2319\tU26-YCES-7700\tU26-YCES-7701\tU26-YCES-7702 O26-YCES-2428\tSE26-YCES-2310\tSE26-YCES-2312\tU26-YCES-7690\tU26-YCES-7691\tU26-YCES-7692\tGU26-YCES-7155\tGU26-YCES-7156\tGU26-YCES-7157 ST26-YCES-665\tST26-YCES-666\tST26-YCES-667\tSE26-YCES-2317\tSE26-YCES-2318\tSE26-YCES-2319\tU26-YCES-7700\tU26-YCES-7701\tU26-YCES-7702 O26-YCES-2428\tSE26-YCES-2310\tSE26-YCES-2312\tU26-YCES-7690\tU26-YCES-7691\tU26-YCES-7692\tGU26-YCES-7155\tGU26-YCES-7156\tGU26-YCES-7157 SG2026-04583\tSG2026-04592\tSG2026-04593\t\t\t\t\t\t SG2026-04478\tSG2026-04480\tSG2026-04481\t\t\t\t\t\t SG2026-04338\tSG2026-04342\tSG2026-04345\t\t\t\t\t\t 26-1270\tSG2026-04624\t26-1520\t\t\t\t\t\t SG2025-23052\tSG2026-04443\tSG2026-04441",
               "type": "string"
             }
           ]
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "07e2e71a-ca0a-49ab-b226-ab4cb6c86ef9",
+  "versionId": "75809dad-417b-40a1-8c20-cabd76b89bf2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "16-03-2026/0:00",
+  "commitDate": "17-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
