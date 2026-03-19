@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-17T11:57:53.738Z",
+  "updatedAt": "2026-03-18T14:34:02.538Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -994,7 +994,7 @@
     },
     {
       "parameters": {
-        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq-Tekrar$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260313_A01228_0259_AHW7WVDSXF",
+              "value": "20260309_LH00267_0157_A23C2JJLT3",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "WES-45 YAĞ ARS 5332320 WES-98 ASM GÜR 5252115 WES-165 AYŞ AKS 5180891 WES-167 EFE PAŞ ELÇ 5300857 WES-168 AYC TAN 5300878 WES-182 MEL ALK 5305508 WES-187 LEY SAL 5284596 WES-188 ZÜM BER 5308364 WES-189 ASA ÖZA 5309271 WES-190 MAL ESA ABB 5185745 WES-191 MİR YEG 5260578 WES-192 YUN EMR TUN 5309829 WES-193 BEB LEY YEŞ 5311120 WES-194 ÖZK SİN 5104701 WES-197 HAR ÇAK 5310977 WES-198 YUS KAT 5200864 WES-201 ŞEH KUL 4252105 WES-202 CU DİL KAY 5312700 WES-203 MİR ART 5314419 WES-205 NİS KES 5252168 WES-208 HİR AYD 5187373 WES-209 ASA TUN 5315509 WES-210 HİR KOZ 5315899 WES-211 ALP TON 5267905 WES-213 MUS KOÇ 5316997 WES-218 MUH ÖME NOĞ 5318615 WES-222 İSK KEL 5318220 WES-225 ROJ DUM 5318877 WES-226 FER ÖZT 5319271 WES-231 AYA TAR 5229742 WES-232 AMİ KUT 5319410 WES-233 SİM BAR 5319841 WES-195 MUH HEJ AKK 5310819 WES-236 ÖMÜ MAS GEN 5321339 WES-238 MED AKB 5320529 WES-243 BAT ALP ASL 5258941 WES-245 MUS EFE BAŞ 5187669 WES-247 YÜS BİL 532227 WES-248 KAD SOL 3643488 WES-249 MAR AQB 5352208 WES-250 ŞER ERO 5352292 WES-251 MEH EMİ ÜÇP 5329652 WES-252 TAL ATA 5349159 WES-253 BOT SAĞ 5252915 WES-254 ABD AKB 5349233 WES-255 YİĞ EMİ ATE 5349162 WES-256 HAF ÇAL 5349308 WES-257 YAS DAĞ 5349429 WES-258 RON DEM 5247536 WES-261 GÜL AKK 5350785 WES-262 İLH AKK 5350786 WES-263 ARG AÇK 5350901 WES-264 MUH YAS YAL 5342781 WES-265 MAŞ KAY 5351365 WES-266 YUS ALİ POL 5351359 WES-267 BEY DÜZ 5352018 WES-268 ASL ÇEL 5352843 WES-271 MUS TAH ASL 5355431 WES-272 BAR VEY KON 5342731 WES-273 KAH BER GÜN 5352717 WES-274 MİR ASA ETİ 5238875 WES-275 MEH ŞAK BEK 5352870 WES-276 MİR YIL 5353078 WES-277 ÖME ASA YIL 5353657 WES-278 KAS CAN 5349670 WES-279 BEN MUT 5353172 WES-280 ERV ÖYK 5352965 WES-281 RON GÜN 5300247 WES-282 İBR ŞEN 5355528 WES-283 ROJ IŞI 5354801 WES-284 BÜL AYD 5298938 AMG-0315-26",
+              "value": "U26-YWES-1722\tU26-YWES-1723\tU26-YWES-1724\tGU26-YWES-405\tM26-YWES-293\tZK26-YWES-101\t\t\t T26-270\tT26-271\tT26-272\t\t\t\t\t\t T26-261\tT26-262\tT26-263\t\t\t\t\t\t T26-238\tT26-240\tT26-241\t\t\t\t\t\t WES-116 ZEY ELM 5340939\tWES-117 YAS GÖZ 5341485\tWES-118 ÇET SÖK 5342328\t\t\t\t\t\t WES-109 NİS KAY 5187767\tWES-110 ERE EGE 5339514\tWES-111 MEL YÜC 5339963\t\t\t\t\t\t SG2026-04631\tSG2026-04700\tSG2026-02848\t\t\t\t\t\t SG2025-10556\tSG2025-23084\tSG2026-02348\t\t\t\t\t\t H26-YHCS-1144\tH26-YHCS-1145\tH26-YHCS-1146\tO26-YHCS-2916\tO26-YHCS-2917\tO26-YHCS-2918\t\t\t WES-144 SEM KUŞ 5243312\tWES-145 ASE TÜR 5187352\tWES-146 BUR AK 5345715\t\t\t\t\t\t WES-139 MEL TAY 5345191\tWES-140 MİR KAH 5345777\tWES-141 FIR KIZ 5344748\t\t\t\t\t\t WES-133 SAN ZEN ÖZT 5343904\tWES-134 ŞEK BAY 5187515\tWES-135 MUS ÇAR 5344048\t\t\t\t\t\t WES-123 GÜL HIR 5343236\tWES-124 FAT PAŞ 5282164\tWES-125 SÜL BAT 5340944\t\t\t\t\t\t K26-YBRCA-429\tK26-YBRCA-430\tK26-YBRCA-431\t\t\t\t\t\t T26-244\tT26-245\tT26-246\t\t\t\t\t\t 26-1568\t26-1569\t26-1570\t\t\t\t\t\t 26-1494\t26-1505\t26-1506\t\t\t\t\t\t WES-163 ECR NEH GÜL 5185761\tWES-164 BUR YUS KOT 5344863\t26-894\t\t\t\t\t\t WES-137 AVZ TAŞ 5343875\tWES-154 EZE TOĞ 5347219\tWES-155 YAS ÇAP 5347487\t\t\t\t\t\t SG2026-04648\tSG2026-04654\tSG2026-04670\t\t\t\t\t\t 26-1589\t26-1590\tAMG-0255-26\t\t\t\t\t\t SG2026-03554\tSG2026-03126\tSG2025-12879\t\t\t\t\t\t N150-MH\tN151-FH\tN152-ZA\t\t\t\t\t\t 36198\t36199\t36231\t\t\t\t\t\t T26-233\tSG2026-04709\tSG2025-21991\t\t\t\t\t\t 1031001099\tCO26-BR6227\tSG2026-05150\t\t\t\t\t\t SG2026-04186\tSG2026-04199\tSG2026-04201\t\t\t\t\t\t M-325-2026\tSG2026-04174\tSG2026-04176\t\t\t\t\t\t M-25-YCES-3843\tM-325-2026\tSG2026-04174\t\t\t\t\t\t WES-3 ŞAH ENÜ 5323530\tWES-4 SAL ABA 5326694\tWES-5 HAS KUT 5255422\t\t\t\t\t\t SG2026-04618\tSG2026-04619\tSG2026-04620\t\t\t\t\t\t SG2026-04461\tSG2026-04463\tSG2026-04470\t\t\t\t\t\t AMG-0216-26 \tT26-161 \tSG2026-03287 \t\t\t\t\t\t 26-1069\t26-992\t26-1275\t\t\t\t\t\t SG2025-23052\tSG2026-04443\tSG2026-04441\t\t\t\t\t\t SG2026-02475\tSG2026-04240\tSG2026-04250\t\t\t\t\t\t ZK26-YCES-5066\tZK26-YCES-5067\tH26-YCES-1377\tM26-YCES-4268\tZK26-YCES-5068\tZK26-YCES-5069\tU26-YCES-7627\tU26-YCES-7628\tU26-YCES-7629 U26-YCES-7649\tU26-YCES-7650\tU26-YCES-7651\tU26-YCES-7669\tU26-YCES-7670\tU26-YCES-7671\tGU26-YCES-7143\tGU26-YCES-7144\tGU26-YCES-7145",
               "type": "string"
             }
           ]
@@ -2159,7 +2159,7 @@
       }
     ]
   },
-  "versionId": "a0cce9f7-b688-458a-9e47-94d09c475bc4",
+  "versionId": "7c1a515c-3a37-459f-8c2f-329c771489d9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2173,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "18-03-2026/0:00",
+  "commitDate": "19-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
