@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-18T06:37:05.370Z",
+  "updatedAt": "2026-03-21T04:48:13.371Z",
   "createdAt": "2025-09-16T12:36:15.747Z",
   "id": "ZHgMRKYDgvkEHsu0",
   "name": "SampleSheet Generator",
@@ -1490,8 +1490,8 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "path": "/mnt/usb2/260313_A01228_0259_AHW7WVDSXF",
-          "run_id": "260313_A01228_0259_AHW7WVDSXF"
+          "path": "/mnt/illuminastorage_usb2/20260316_LH00267_0158_A237YCWLT3",
+          "run_id": "20260316_LH00267_0158_A237YCWLT3"
         }
       }
     ]
@@ -2993,6 +2993,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "21-03-2026/0:00",
+  "commitDate": "22-03-2026/0:00",
   "fileName": "SampleSheet Generator.json"
 }
