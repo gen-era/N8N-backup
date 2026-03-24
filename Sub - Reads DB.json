@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-14T13:15:57.082Z",
+  "updatedAt": "2026-03-23T19:06:39.908Z",
   "createdAt": "2026-02-21T12:45:50.801Z",
   "id": "NdJI7DDLHO194xrO",
   "name": "Sub - Reads DB",
@@ -1009,6 +1009,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Update Reads",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1178,13 +1185,13 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": "756"
+          "conversion_ref": "792"
         }
       }
     ]
   },
-  "versionId": "dc520296-9a40-4568-9eb4-e51bfe75cf96",
-  "activeVersionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
+  "versionId": "a32bf8d4-5c0e-4844-818b-7e974644576c",
+  "activeVersionId": "a32bf8d4-5c0e-4844-818b-7e974644576c",
   "triggerCount": 0,
   "shared": [
     {
@@ -1196,9 +1203,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-24T13:34:32.000Z",
-    "createdAt": "2026-02-21T13:26:21.855Z",
-    "versionId": "1e8f61b9-9904-4886-9cfa-0b96c95ed983",
+    "updatedAt": "2026-03-23T19:06:42.000Z",
+    "createdAt": "2026-03-23T19:06:39.911Z",
+    "versionId": "a32bf8d4-5c0e-4844-818b-7e974644576c",
     "workflowId": "NdJI7DDLHO194xrO",
     "nodes": [
       {
@@ -1323,7 +1330,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT \n    conv.*,\n    c_workflow.concept_name AS \"workflowType\",\n    i.instrument_id        AS \"instrumentId\",\n    i.instrument_source_value AS \"instrumentSourceValue\",\n    c_instrument.concept_name AS \"instrumentModel\"\nFROM conversions conv\nINNER JOIN runs r            ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i     ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
+          "query": "SELECT \n    conv.*,\n    c_workflow.concept_name      AS \"workflowType\",\n    i.instrument_id              AS \"instrumentId\",\n    i.instrument_source_value    AS \"instrumentSourceValue\",\n    c_instrument.concept_name    AS \"instrumentModel\",\n    c_reads.concept_name         AS \"readsSettings\"\nFROM conversions conv\nINNER JOIN runs r               ON conv.run_ref = r.uniqueref\nINNER JOIN concepts c_workflow  ON r.workflow_concept_ref = c_workflow.uniqueref\nINNER JOIN instruments i        ON r.instrument_ref = i.uniqueref\nINNER JOIN concepts c_instrument ON i.instrument_concept_ref = c_instrument.uniqueref\nLEFT JOIN concepts c_reads      ON r.reads_settings_concept_ref = c_reads.uniqueref\nWHERE conv.uniqueref = {{ $json.conversion_ref }}",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1361,7 +1368,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          4496,
+          4704,
           -928
         ],
         "id": "8dca6a46-6f74-4e38-9e19-ec50e63324eb",
@@ -1402,7 +1409,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          3792,
+          4000,
           -928
         ],
         "id": "f2000655-7f6e-419a-add3-c5aa7bb6c2d5",
@@ -1514,7 +1521,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          5232,
+          5440,
           -800
         ],
         "id": "1ff9d5bc-9922-4670-9aa4-f412995918cc",
@@ -1547,7 +1554,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          5488,
+          5696,
           -800
         ],
         "id": "630b0ef6-9e23-43a8-8adb-217e2c67d521",
@@ -1711,7 +1718,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          5760,
+          5968,
           -800
         ],
         "id": "e35f2b6d-9a9d-4e51-b6c5-795e44d4ecea",
@@ -1745,7 +1752,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          3568,
+          3840,
           -800
         ],
         "id": "e3d0a56f-4ad2-4086-86dc-ee980bd9146c",
@@ -1769,7 +1776,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          4256,
+          4464,
           -800
         ],
         "id": "a02e3f12-0bdf-400b-968d-7436e06d6325",
@@ -1909,7 +1916,7 @@
         "type": "n8n-nodes-base.renameKeys",
         "typeVersion": 1,
         "position": [
-          3360,
+          3312,
           -928
         ],
         "id": "44174297-94e7-4eb5-a750-4a6fc3549405",
@@ -1930,7 +1937,7 @@
         "type": "n8n-nodes-base.renameKeys",
         "typeVersion": 1,
         "position": [
-          4016,
+          4224,
           -928
         ],
         "id": "2c7354e8-d355-42dd-adf3-7dea6c4de7eb",
@@ -1951,7 +1958,7 @@
         "type": "n8n-nodes-base.renameKeys",
         "typeVersion": 1,
         "position": [
-          4736,
+          4944,
           -928
         ],
         "id": "a582d987-6712-477c-8242-0f96cf783c94",
@@ -1966,7 +1973,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          5008,
+          5216,
           -800
         ],
         "id": "5b1bc817-4626-4473-b13f-d9db418f69c0",
@@ -2004,7 +2011,7 @@
         "parameters": {
           "content": "#### RevComp If Needed and Find Index Ref",
           "height": 400,
-          "width": 432
+          "width": 592
         },
         "type": "n8n-nodes-base.stickyNote",
         "position": [
@@ -2019,7 +2026,7 @@
         "parameters": {
           "content": "#### Find Kit Ref",
           "height": 400,
-          "width": 432
+          "width": 608
         },
         "type": "n8n-nodes-base.stickyNote",
         "position": [
@@ -2034,7 +2041,7 @@
         "parameters": {
           "content": "#### Find Both CareSite Refs",
           "height": 400,
-          "width": 432
+          "width": 640
         },
         "type": "n8n-nodes-base.stickyNote",
         "position": [
@@ -2059,6 +2066,19 @@
         "typeVersion": 1,
         "id": "f059c1b2-114a-48e2-b1ec-ee5e8244d742",
         "name": "Sticky Note4"
+      },
+      {
+        "parameters": {
+          "jsCode": "const firstItem = $('Select Conversion Ref').first().json;\nconst readsSettings = firstItem.readsSettings || '';\n\nconst needsTrim = readsSettings === '151-8-8-151';\n\nconst items = $input.all();\n\nreturn items.map(item => {\n  const data = { ...item.json };\n\n  if (needsTrim) {\n    if (data.i7_sequence && data.i7_sequence.length === 10) {\n      data.i7_sequence = data.i7_sequence.slice(0, 8);\n    }\n    if (data.i5_sequence && data.i5_sequence.length === 10) {\n      data.i5_sequence = data.i5_sequence.slice(0, 8);\n    }\n  }\n\n  return { json: data };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3520,
+          -928
+        ],
+        "id": "475345a8-5733-4244-8bcf-1cb45f7698f0",
+        "name": "Code in JavaScript"
       }
     ],
     "connections": {
@@ -2191,6 +2211,13 @@
               "type": "main",
               "index": 0
             }
+          ],
+          [
+            {
+              "node": "Update Reads",
+              "type": "main",
+              "index": 0
+            }
           ]
         ]
       },
@@ -2285,7 +2312,7 @@
         "main": [
           [
             {
-              "node": "Add Index Ref",
+              "node": "Code in JavaScript",
               "type": "main",
               "index": 0
             }
@@ -2335,14 +2362,25 @@
             }
           ]
         ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Add Index Ref",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1e8f61b9",
+    "name": "Version a32bf8d4",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "23-03-2026/0:00",
+  "commitDate": "24-03-2026/0:00",
   "fileName": "Sub - Reads DB.json"
 }
