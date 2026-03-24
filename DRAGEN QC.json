@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-19T16:42:10.637Z",
+  "updatedAt": "2026-03-23T06:30:29.631Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260316_LH00267_0158_A237YCWLT3",
+              "value": "260318_A01978_0148_AHWFL7DSXF",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "34568 WES-106 WES-107 WES-108 WES-109 WES-110 WES-111 WES-112 WES-113 WES-114 WES-115 WES-116 WES-117 WES-118 WES-119 WES-120 SG2026-05314 SG2026-05315 SG2026-05316 SG2026-05317 SG2026-05319 SG2026-05320 SG2026-05322 SG2026-05323 SG2026-05325 SG2026-05327 SG2026-05328 SG2026-05329 AMG-0300-26 36213 36249 MG26-3744 MG26-6481 MG26-6503 MG26-6575 MG26-6899 SG2026-04963 SG2026-04964 SG2026-04965 SG2026-04966 SG2026-04967 SG2026-04968 SG2026-04969 SG2026-04971 SG2026-04973 SG2026-04974 SG2026-04975 SG2026-04977 SG2026-04978 SG2026-04979 SG2026-04982 SG2026-04983 SG2026-04984 SG2026-04985 SG2026-04986 SG2026-04989 SG2026-04990 SG2026-04991 SG2026-04992 SG2026-04993 SG2026-04994 SG2026-04995 SG2026-05013 SG2026-05667-ECEGEN SG2026-05668-ECEGEN SG2026-05669-ECEGEN SG2026-05670-ECEGEN SG2026-05672-ECEGEN WES-34 WES-46 WES-81 WES-139 WES-146 WES-149 WES-154 AMG-0322-26 36308 36446 36744 MG26-MSH IGH023010CLA 26-841 26-1256 26-1720 26-1719 26-1679 26-1671 26-1670 26-1669 26-1597 26-1416 26-1724 26-1742 26-1743 26-1763 26-1764 26-1770 26-1781 26-1785 26-1788 26-1790 26-1791 26-1802 26-1813 26-1840 26-1867 26-1884 26-1885 OMU-26-2072 OMU-26-2048 OMU-26-2037 OMU-26-2000 OMU-26-1990 OMU-26-1983 OMU-26-1968 OMU-26-1967 OMU-26-1964 OMU-26-1963 OMU-26-1954 OMU-26-1921 OMU-26-1888 OMU-26-1869 OMU-26-1867 OMU-26-1866 OMU-26-1854 OMU-26-1852 OMU-26-1847 OMU-26-1846 OMU-26-1767 OMU-26-1739 OMU-26-1717 OMU-26-1698 OMU-26-1697 OMU-26-1696 OMU-26-1687 OMU-26-1671 OMU-26-1644 OMU-26-1639 OMU-26-1633 285 287 ISY26-92-NA ISY26-91-AO ISY26-90-BT 1031001118 1031001116 CO26-BR6221 CO26-BR6196 CO26-BR6195 CO26-BR6194 CO25-BR6154 CO26-BR6204 CO26-BR6203 CO26-BR6202 CO26-BR6201 CO26-BR6200 CO26-BR6199 CO26-BR6198 CO26-BR6210 CO26-BR6209 CO26-BR6232 CO26-BR6231 CO26-BR6230 ISY26-112-KO ISY26-111-OE ISY26-110-AB ISY26-109-AS ISY26-108-NA ISY26-107-EG ISY26-106-ATS ISY26-105-LTY ISY26-104-EGA ISY26-103-NT ISY26-102-GK ISY26-101-YS ISY26-100-HOA ISY26-99-OK ISY26-98-EG ISY26-97-YEK ISY26-96-ENO ISY26-95-EZE ISY26-94-AA ISY26-93-DTG 36533 ISY26-78-NK ISY26-130-OK ISY26-129-KK ISY26-128-AKS ISY26-123-EM ISY26-122-EE ISY26-121-ZK ISY26-120-AFC ISY26-119-CO ISY26-118-SSG ISY26-117-FU ISY26-116-NU ISY26-115-AA ISY26-114-ZEY ISY26-113-MB",
+              "value": "İstediğiniz düzenlemeyi yaptım. Listedeki her satırda ilk boşluktan sonra gelen tüm karakterleri sildim ve sadece WES-XXX (veya AMG-XXX) formatındaki kodları bıraktım.  Düzenlenmiş Liste WES-45 WES-98 WES-165 WES-167 WES-168 WES-182 WES-187 WES-188 WES-189 WES-190 WES-191 WES-192 WES-193 WES-194 WES-197 WES-198 WES-201 WES-202 WES-203 WES-205 WES-208 WES-209 WES-210 WES-211 WES-213 WES-218 WES-222 WES-225 WES-226 WES-231 WES-232 WES-233 WES-195 WES-236 WES-238 WES-243 WES-245 WES-247 WES-248 WES-249 WES-250 WES-251 WES-252 WES-253 WES-254 WES-255 WES-256 WES-257 WES-258 WES-261 WES-262 WES-263 WES-264 WES-265 WES-266 WES-267 WES-268 WES-271 WES-272 WES-273 WES-274 WES-275 WES-276 WES-277 WES-278 WES-279 WES-280 WES-281 WES-282 WES-283 WES-284 AMG-0315-26",
               "type": "string"
             }
           ]
@@ -1584,6 +1584,31 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "can.holyavkin@gen-era.com.tr",
+        "subject": "QC Bilgilendirme",
+        "emailFormat": "text",
+        "text": "={{ $('Set Run ID').item.json.run_id }} kodlu dizileme çalışmasına ait kalite kontrol aşaması tamamlanmıştır.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2272,
+        -112
+      ],
+      "id": "207de17e-8620-43cf-8caf-c3752d1e08ac",
+      "name": "Send email",
+      "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
@@ -1733,7 +1758,13 @@
     },
     "Loop Over CES Samples": {
       "main": [
-        [],
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Insert or Get Existing Read Record - CES",
@@ -2159,7 +2190,7 @@
       }
     ]
   },
-  "versionId": "e6224120-53b7-478a-a7d0-51b33bc3b51f",
+  "versionId": "93a9ebbb-c732-4960-a187-e8813f7ae099",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2173,6 +2204,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "23-03-2026/0:00",
+  "commitDate": "24-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
