@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-23T06:30:29.631Z",
+  "updatedAt": "2026-03-24T09:13:57.432Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1042,7 +1042,13 @@
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "İstediğiniz düzenlemeyi yaptım. Listedeki her satırda ilk boşluktan sonra gelen tüm karakterleri sildim ve sadece WES-XXX (veya AMG-XXX) formatındaki kodları bıraktım.  Düzenlenmiş Liste WES-45 WES-98 WES-165 WES-167 WES-168 WES-182 WES-187 WES-188 WES-189 WES-190 WES-191 WES-192 WES-193 WES-194 WES-197 WES-198 WES-201 WES-202 WES-203 WES-205 WES-208 WES-209 WES-210 WES-211 WES-213 WES-218 WES-222 WES-225 WES-226 WES-231 WES-232 WES-233 WES-195 WES-236 WES-238 WES-243 WES-245 WES-247 WES-248 WES-249 WES-250 WES-251 WES-252 WES-253 WES-254 WES-255 WES-256 WES-257 WES-258 WES-261 WES-262 WES-263 WES-264 WES-265 WES-266 WES-267 WES-268 WES-271 WES-272 WES-273 WES-274 WES-275 WES-276 WES-277 WES-278 WES-279 WES-280 WES-281 WES-282 WES-283 WES-284 AMG-0315-26",
+              "value": "SG2026-05515\tSG2026-05516\tSG2026-05693\t\t\t\t\t\t SG2026-05558\tSG2026-05576\tSG2026-05584\t\t\t\t\t\t SG2026-05390\tSG2026-05394 \tSG2026-05397\t\t\t\t\t\t OMU-26-1052\tISY26-144-AMA\tISY26-143-CMA\t\t\t\t\t\t OMU-26-1404\tOMU-26-1311\tOMU-26-1282\t\t\t\t\t\t OMU-26-1579\tOMU-26-1578\tOMU-26-1572\t\t\t\t\t\t 26-299\t26-254\tSG2026-05221\t\t\t\t\t\t SG2024-148\tSG2026-05658\tSG2026-05656\t\t\t\t\t\t SG2026-05277\tSG2026-05276\tSG2026-05275\t\t\t\t\t\t SG2026-05122\tSG2026-05128\tSG2026-05146\t\t\t\t\t\t IE26-YTG-1\tB26-YTG-2\tU26-YTG-4\t\t\t\t\t\t GU26-YCES-7110\tSE26-YCES-2354\tSE26-YCES-2355\tZK26-YCES-5166\tZK26-YCES-5167\tGU26-YCES-7211\t\t\t M26-YCES-4321\tM26-YCES-4323\tGU26-YCES-7205\tSK26-YCES-490\tH26-YCES-1420\tH26-YCES-1421\tM26-YCES-4330\tM26-YCES-4331\tM26-YCES-4332 WES-282 İBR ŞEN 5355528\tWES-283 ROJ IŞI 5354801\tWES-284 BÜL AYD 5298938\t\t\t\t\t\t WES-272 BAR VEY KON 5342731\tWES-273 KAH BER GÜN 5352717\tWES-274 MİR ASA ETİ 5238875\t\t\t\t\t\t WES-261 GÜL AKK 5350785\tWES-262 İLH AKK 5350786\tWES-263 ARG AÇK 5350901\t\t\t\t\t\t WES-250 ŞER ERO 5352292\tWES-251 MEH EMİ ÜÇP 5329652\tWES-252 TAL ATA 5349159\t\t\t\t\t\t WES-195 MUH HEJ AKK 5310819\tWES-236 ÖMÜ MAS GEN 5321339\tWES-238 MED AKB 5320529\t\t\t\t\t\t WES-225 ROJ DUM 5318877\tWES-226 FER ÖZT 5319271\tWES-231 AYA TAR 5229742\t\t\t\t\t\t WES-202 CU DİL KAY 5312700\tWES-203 MİR ART 5314419\tWES-205 NİS KES 5252168\t\t\t\t\t\t WES-192 YUN EMR TUN 5309829\tWES-193 BEB LEY YEŞ 5311120\tWES-194 ÖZK SİN 5104701\t\t\t\t\t\t WES-165 AYŞ AKS 5180891\tWES-167 EFE PAŞ ELÇ 5300857\tWES-168 AYC TAN 5300878\t\t\t\t\t\t MG26-5055\tMG26-5239\tMG26-5274\t\t\t\t\t\t ST26-YCES-664\tST26-YCES-665\tST26-YCES-666\tSE26-YCES-2320\tGU26-YCES-7160\tGU26-YCES-7161\tU26-YCES-7707\tU26-YCES-7708\tU26-YCES-7709",
+              "type": "string"
+            },
+            {
+              "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
+              "name": "notify_target",
+              "value": "deniz.ozturk@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -1588,11 +1594,14 @@
     {
       "parameters": {
         "fromEmail": "bioinf.notify@gen-era.tech",
-        "toEmail": "can.holyavkin@gen-era.com.tr",
+        "toEmail": "={{ $('Set Run ID').item.json.notify_target }}",
         "subject": "QC Bilgilendirme",
         "emailFormat": "text",
         "text": "={{ $('Set Run ID').item.json.run_id }} kodlu dizileme çalışmasına ait kalite kontrol aşaması tamamlanmıştır.",
-        "options": {}
+        "options": {
+          "appendAttribution": false,
+          "ccEmail": "can.holyavkin@gen-era.com.tr"
+        }
       },
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
@@ -1603,6 +1612,7 @@
       "id": "207de17e-8620-43cf-8caf-c3752d1e08ac",
       "name": "Send email",
       "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
+      "executeOnce": true,
       "credentials": {
         "smtp": {
           "id": "clTmxNgA7AqNrh5h",
@@ -2190,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "93a9ebbb-c732-4960-a187-e8813f7ae099",
+  "versionId": "59c77ef0-ad8a-473d-8fa9-7656233df192",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2204,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "24-03-2026/0:00",
+  "commitDate": "25-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
