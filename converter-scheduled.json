@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-27T11:36:47.739Z",
+  "updatedAt": "2026-03-26T13:43:10.797Z",
   "createdAt": "2025-08-29T07:09:31.570Z",
   "id": "u3Gwkokw9EhG5M3O",
   "name": "converter-scheduled",
@@ -1428,8 +1428,7 @@
         -320
       ],
       "id": "2bf75dc0-c928-41aa-909c-e044811f751a",
-      "name": "Call 'interop'",
-      "disabled": true
+      "name": "Call 'interop'"
     },
     {
       "parameters": {
@@ -1806,22 +1805,6 @@
           "name": "PG-ALB-1.5"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "Cihaza özel workflow tipi tanımlaması eklenecek",
-        "height": 240,
-        "width": 256,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        3744,
-        144
-      ],
-      "typeVersion": 1,
-      "id": "b4866f42-2399-406e-abbf-f1200c8d388e",
-      "name": "Sticky Note3"
     }
   ],
   "connections": {
@@ -2283,7 +2266,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6d512bce-b157-46cc-9d16-9d3e3fa8cafd",
+  "versionId": "8c9d1868-a8a5-42be-a29c-d68f492b0a35",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -2297,6 +2280,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "26-03-2026/0:08",
+  "commitDate": "27-03-2026/0:00",
   "fileName": "converter-scheduled.json"
 }
