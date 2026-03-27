@@ -1,77 +1,11 @@
 {
-  "updatedAt": "2026-03-03T07:31:19.166Z",
+  "updatedAt": "2026-03-26T13:41:58.748Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
   "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {
-        "command": "=docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path }}:/data yserdem/illumina-interop:latest python3 /app/process_interop.py /data > {{ $('When Executed by Another Workflow').item.json.path }}/{{ $('When Executed by Another Workflow').item.json.folder }}-interop.csv && docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path }}:/data:ro yserdem/illumina-interop:latest python3 /app/stats_interop.py /data {{ $('When Executed by Another Workflow').item.json.folder }}"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        160,
-        0
-      ],
-      "id": "16723fdc-1a4d-4aad-bd1a-50268f5e67f5",
-      "name": "Execute Command"
-    },
-    {
-      "parameters": {
-        "fileSelector": "={{ $('When Executed by Another Workflow').item.json.path }}/{{$('When Executed by Another Workflow').item.json.folder }}-interop.csv",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        384,
-        -192
-      ],
-      "id": "bc7ebf37-8062-4a15-9115-d9f50a8f0d05",
-      "name": "Read/Write Files from Disk"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.extractFromFile",
-      "typeVersion": 1.1,
-      "position": [
-        560,
-        -192
-      ],
-      "id": "15641d6b-5cff-4d29-99c1-c2747fd9d2e7",
-      "name": "Extract from File"
-    },
-    {
-      "parameters": {
-        "jsCode": "// items is an array of { json: {...} }\nconst input = items.map(x => x.json);\n\n// Group rows by Lane\nconst groups = {};\ninput.forEach(row => {\n  const lane = row[\"Lane\"];\n  if (!groups[lane]) groups[lane] = [];\n  groups[lane].push(row);\n});\n\n// helper functions\nconst mean = arr => arr.reduce((a,b)=>a+b,0) / arr.length;\nconst stddev = arr => {\n  const m = mean(arr);\n  const variance = arr.reduce((a,b)=> a + (b - m) ** 2, 0) / arr.length;\n  return Math.sqrt(variance);\n};\n\n// compute per-lane stats\nconst output = {};\n\nfor (const lane in groups) {\n  const rows = groups[lane];\n  const stats = {};\n\n  // Collect all column names across rows\n  const columns = new Set();\n  rows.forEach(r => Object.keys(r).forEach(k => columns.add(k)));\n\n  columns.forEach(col => {\n    // Convert values to numbers where possible\n    const numericValues = rows\n      .map(r => Number(r[col]))\n      .filter(v => !isNaN(v));\n\n    if (numericValues.length > 0) {\n      stats[col] = {\n        mean: mean(numericValues),\n        sd: stddev(numericValues)\n      };\n    }\n  });\n\n  output[lane] = stats;\n}\n\n// Return final result\nreturn [\n  {\n    json: output\n  }\n];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        768,
-        -192
-      ],
-      "id": "49dfe8e0-4c11-4f88-af17-be2e82e648a4",
-      "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "jsCode": "const laneStats = items[0].json; // stats from previous node\nconst runId = $json.run_id || null; // from workflow or fixed\n\nconst conceptMap = {\n  \"Mean Density Pass Filter L1\": 49, \"Mean Density Pass Filter L2\": 50,\n  \"Mean Density Pass Filter L3\": 51, \"Mean Density Pass Filter L4\": 52,\n  \"SD Density Pass Filter L1\": 53, \"SD Density Pass Filter L2\": 54,\n  \"SD Density Pass Filter L3\": 55, \"SD Density Pass Filter L4\": 56,\n  \"Mean Cluster Count Pass Filter L1\": 57, \"Mean Cluster Count Pass Filter L2\": 58,\n  \"Mean Cluster Count Pass Filter L3\": 59, \"Mean Cluster Count Pass Filter L4\": 60,\n  \"SD Mean Cluster Count Pass Filter L1\": 61, \"SD Mean Cluster Count Pass Filter L2\": 62,\n  \"SD Mean Cluster Count Pass Filter L3\": 63, \"SD Mean Cluster Count Pass Filter L4\": 64,\n  \"Mean Pass Filter L1\": 65, \"Mean Pass Filter L2\": 66,\n  \"Mean Pass Filter L3\": 67, \"Mean Pass Filter L4\": 68,\n  \"SD Pass Filter L1\": 69, \"SD Pass Filter L2\": 70,\n  \"SD Pass Filter L3\": 71, \"SD Pass Filter L4\": 72,\n  \"Mean Error Rate L1\": 73, \"Mean Error Rate L2\": 74,\n  \"Mean Error Rate L3\": 75, \"Mean Error Rate L4\": 76,\n  \"SD Error Rate L1\": 77, \"SD Error Rate L2\": 78,\n  \"SD Error Rate L3\": 79, \"SD Error Rate L4\": 80,\n  \"Mean Q30 L1\": 81, \"Mean Q30 L2\": 82,\n  \"Mean Q30 L3\": 83, \"Mean Q30 L4\": 84,\n  \"SD Q30 L1\": 85, \"SD Q30 L2\": 86,\n  \"SD Q30 L3\": 87, \"SD Q30 L4\": 88,\n  \"Mean Cluster Count Occupied L1\": 89, \"Mean Cluster Count Occupied L2\": 90,\n  \"Mean Cluster Count Occupied L3\": 91, \"Mean Cluster Count Occupied L4\": 92,\n  \"SD Cluster Count Occupied L1\": 93, \"SD Cluster Count Occupied L2\": 94,\n  \"SD Cluster Count Occupied L3\": 95, \"SD Cluster Count Occupied L4\": 96,\n  \"Mean Occupied L1\": 97, \"Mean Occupied L2\": 98,\n  \"Mean Occupied L3\": 99, \"Mean Occupied L4\": 100,\n  \"SD Occupied L1\": 101, \"SD Occupied L2\": 102,\n  \"SD Occupied L3\": 103, \"SD Occupied L4\": 104\n};\n\nfunction makeRow(conceptName, value, lane) {\n  return {\n    json: {\n      measurement_concept_id: conceptMap[conceptName],\n      measurement_source_value: conceptName,\n      value_as_number: value,\n      lane: lane,\n      run_id: runId,\n      measurement_date: new Date().toISOString().slice(0,10)\n    }\n  };\n}\n\nconst outputs = [];\n\nfor (const lane in laneStats) {\n  const stats = laneStats[lane];\n\n  // Map columns\n  const mappings = [\n    [\"Density Pf(k/mm2)\", \"Density Pass Filter\"],\n    [\"Cluster Count Pf (k)\", \"Cluster Count Pass Filter\"],\n    [\"% Pass Filter\", \"Pass Filter\"],\n    [\"Error Rate\", \"Error Rate\"],\n    [\"%>= Q30\", \"Q30\"],\n    [\"Cluster Count Occupied (k)\", \"Cluster Count Occupied\"],\n    [\"% Occupied\", \"Occupied\"]\n  ];\n\n  mappings.forEach(([column, label]) => {\n    if (stats[column]) {\n      outputs.push(makeRow(`Mean ${label} L${lane}`, stats[column].mean, lane));\n      outputs.push(makeRow(`SD ${label} L${lane}`, stats[column].sd, lane));\n    }\n  });\n}\n\nreturn outputs;\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        976,
-        -192
-      ],
-      "id": "64e0fa2c-5f11-421b-ad76-d584a1a06da4",
-      "name": "Code in JavaScript1"
-    },
     {
       "parameters": {
         "operation": "select",
@@ -100,8 +34,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -80,
-        0
+        -64,
+        240
       ],
       "id": "4779e9df-2b5b-4cdb-b8e5-4e725fa90436",
       "name": "Select rows from a table",
@@ -111,6 +45,97 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "folder"
+            },
+            {
+              "name": "path"
+            },
+            {
+              "name": "status"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        240
+      ],
+      "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "command": "=docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path\n  }}:/data yserdem/illumina-interop:latest python3 /app/summary_interop.py /data Lane json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        160,
+        240
+      ],
+      "id": "f4cf6736-67d2-4deb-aeb7-7dfa3351b8c4",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_class_id",
+              "value": "Lane Metric"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        384,
+        240
+      ],
+      "id": "ea8abc79-c6bd-4e32-be55-cacf1904c55d",
+      "name": "Select rows from a table2",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Map ReadNumber to R notation (1→R1, 4→R2)\n  const readMapping = {\n    1: 'R1',\n    4: 'R2'\n  };\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readMapping[readNumber];\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        240
+      ],
+      "id": "1ebed043-ed78-48d8-98a4-b8dff9e728f1",
+      "name": "Code in JavaScript3"
     },
     {
       "parameters": {
@@ -180,152 +205,25 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        864,
-        0
+        816,
+        240
       ],
-      "id": "cbba27b5-df04-433f-b8f1-fc02f73d45be",
-      "name": "Insert rows in a table",
+      "id": "453ffdcc-468e-4c27-b19c-fd5d301b2ad5",
+      "name": "Insert rows in a table1",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
       }
-    },
-    {
-      "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "folder"
-            },
-            {
-              "name": "path"
-            },
-            {
-              "name": "status"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -304,
-        0
-      ],
-      "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
-      "name": "When Executed by Another Workflow"
-    },
-    {
-      "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "concepts",
-          "mode": "list",
-          "cachedResultName": "concepts"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "concept_class_id",
-              "value": "Lane Metric"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        368,
-        0
-      ],
-      "id": "889aab38-f972-42db-ab0a-994f53896287",
-      "name": "Select rows from a table1",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// Get the stats JSON from the Execute Command node\nconst statsOutput = JSON.parse($('Execute Command').item.json.stdout);\n\n// Get concepts from Postgres node\nconst concepts = $('Select rows from a table1').all().map(item => item.json);\n\n// Mapping from InterOp field names to concept base names\nconst fieldMapping = {\n  \"Density Pf(k/mm2)\": \"Density Pass Filter\",\n  \"Cluster Count Pf (k)\": \"Cluster Count Pass Filter\",\n  \"% Pass Filter\": \"Pass Filter\",\n  \"Error Rate\": \"Error Rate\",\n  \"%>= Q30\": \"Q30\",\n  \"Cluster Count Occupied (k)\": \"Cluster Count Occupied\",\n  \"% Occupied\": \"Occupied\"\n};\n\n// Build output array for database insertion\nconst measurements = [];\n\nfor (const [lane, metrics] of Object.entries(statsOutput)) {\n  for (const [field, values] of Object.entries(metrics)) {\n    const conceptBase = fieldMapping[field];\n    if (!conceptBase) continue;\n    \n    // Find matching concepts for mean and sd\n    const meanConceptName = `Mean ${conceptBase} L${lane}`;\n    const sdConceptName = `SD ${conceptBase} L${lane}`;\n    \n    const meanConcept = concepts.find(c => c.concept_name === meanConceptName);\n    const sdConcept = concepts.find(c => c.concept_name === sdConceptName);\n    \n    if (meanConcept) {\n      measurements.push({\n        concept_id: meanConcept.uniqueref,\n        concept_name: meanConceptName,\n        value: values.mean,\n        lane: lane\n      });\n    }\n    \n    if (sdConcept) {\n      measurements.push({\n        concept_id: sdConcept.uniqueref,\n        concept_name: sdConceptName,\n        value: values.sd,\n        lane: lane\n      });\n    }\n  }\n}\n\nreturn measurements.map(m => ({ json: m }));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        576,
-        0
-      ],
-      "id": "6eed59c5-1b1d-4117-bb1e-2d04795df96b",
-      "name": "Code in JavaScript2"
     }
   ],
   "connections": {
-    "Execute Command": {
-      "main": [
-        [
-          {
-            "node": "Select rows from a table1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read/Write Files from Disk": {
-      "main": [
-        [
-          {
-            "node": "Extract from File",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Extract from File": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code in JavaScript1": {
-      "main": [
-        []
-      ]
-    },
     "Select rows from a table": {
       "main": [
         [
           {
-            "node": "Execute Command",
+            "node": "Execute Command1",
             "type": "main",
             "index": 0
           }
@@ -343,22 +241,33 @@
         ]
       ]
     },
-    "Select rows from a table1": {
+    "Execute Command1": {
       "main": [
         [
           {
-            "node": "Code in JavaScript2",
+            "node": "Select rows from a table2",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript2": {
+    "Select rows from a table2": {
       "main": [
         [
           {
-            "node": "Insert rows in a table",
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table1",
             "type": "main",
             "index": 0
           }
@@ -379,15 +288,15 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "folder": "260221_A01978_0147_BHWC27DSXF",
-          "path": "/mnt/illuminastorage/run_folder/260221_A01978_0147_BHWC27DSXF",
+          "folder": "260323_A01978_0150_AHWFTFDSXF",
+          "path": "/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF",
           "status": "READY_FOR_CONVERSION"
         }
       }
     ]
   },
-  "versionId": "0c523762-cc37-497d-a456-355dc0fa90b8",
-  "activeVersionId": "0c523762-cc37-497d-a456-355dc0fa90b8",
+  "versionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
+  "activeVersionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
   "triggerCount": 0,
   "shared": [
     {
@@ -399,77 +308,11 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-16T09:14:26.000Z",
-    "createdAt": "2026-01-07T04:47:09.251Z",
-    "versionId": "0c523762-cc37-497d-a456-355dc0fa90b8",
+    "updatedAt": "2026-03-26T13:42:01.000Z",
+    "createdAt": "2026-03-26T13:41:58.750Z",
+    "versionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
     "workflowId": "SeGWQ7ai2D66eUSG",
     "nodes": [
-      {
-        "parameters": {
-          "command": "=docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path }}:/data yserdem/illumina-interop:latest python3 /app/process_interop.py /data > {{ $('When Executed by Another Workflow').item.json.path }}/{{ $('When Executed by Another Workflow').item.json.folder }}-interop.csv && docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path }}:/data:ro yserdem/illumina-interop:latest python3 /app/stats_interop.py /data {{ $('When Executed by Another Workflow').item.json.folder }}"
-        },
-        "type": "n8n-nodes-base.executeCommand",
-        "typeVersion": 1,
-        "position": [
-          160,
-          0
-        ],
-        "id": "16723fdc-1a4d-4aad-bd1a-50268f5e67f5",
-        "name": "Execute Command"
-      },
-      {
-        "parameters": {
-          "fileSelector": "={{ $('When Executed by Another Workflow').item.json.path }}/{{$('When Executed by Another Workflow').item.json.folder }}-interop.csv",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.readWriteFile",
-        "typeVersion": 1,
-        "position": [
-          384,
-          -192
-        ],
-        "id": "bc7ebf37-8062-4a15-9115-d9f50a8f0d05",
-        "name": "Read/Write Files from Disk"
-      },
-      {
-        "parameters": {
-          "options": {}
-        },
-        "type": "n8n-nodes-base.extractFromFile",
-        "typeVersion": 1.1,
-        "position": [
-          560,
-          -192
-        ],
-        "id": "15641d6b-5cff-4d29-99c1-c2747fd9d2e7",
-        "name": "Extract from File"
-      },
-      {
-        "parameters": {
-          "jsCode": "// items is an array of { json: {...} }\nconst input = items.map(x => x.json);\n\n// Group rows by Lane\nconst groups = {};\ninput.forEach(row => {\n  const lane = row[\"Lane\"];\n  if (!groups[lane]) groups[lane] = [];\n  groups[lane].push(row);\n});\n\n// helper functions\nconst mean = arr => arr.reduce((a,b)=>a+b,0) / arr.length;\nconst stddev = arr => {\n  const m = mean(arr);\n  const variance = arr.reduce((a,b)=> a + (b - m) ** 2, 0) / arr.length;\n  return Math.sqrt(variance);\n};\n\n// compute per-lane stats\nconst output = {};\n\nfor (const lane in groups) {\n  const rows = groups[lane];\n  const stats = {};\n\n  // Collect all column names across rows\n  const columns = new Set();\n  rows.forEach(r => Object.keys(r).forEach(k => columns.add(k)));\n\n  columns.forEach(col => {\n    // Convert values to numbers where possible\n    const numericValues = rows\n      .map(r => Number(r[col]))\n      .filter(v => !isNaN(v));\n\n    if (numericValues.length > 0) {\n      stats[col] = {\n        mean: mean(numericValues),\n        sd: stddev(numericValues)\n      };\n    }\n  });\n\n  output[lane] = stats;\n}\n\n// Return final result\nreturn [\n  {\n    json: output\n  }\n];\n"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          768,
-          -192
-        ],
-        "id": "49dfe8e0-4c11-4f88-af17-be2e82e648a4",
-        "name": "Code in JavaScript"
-      },
-      {
-        "parameters": {
-          "jsCode": "const laneStats = items[0].json; // stats from previous node\nconst runId = $json.run_id || null; // from workflow or fixed\n\nconst conceptMap = {\n  \"Mean Density Pass Filter L1\": 49, \"Mean Density Pass Filter L2\": 50,\n  \"Mean Density Pass Filter L3\": 51, \"Mean Density Pass Filter L4\": 52,\n  \"SD Density Pass Filter L1\": 53, \"SD Density Pass Filter L2\": 54,\n  \"SD Density Pass Filter L3\": 55, \"SD Density Pass Filter L4\": 56,\n  \"Mean Cluster Count Pass Filter L1\": 57, \"Mean Cluster Count Pass Filter L2\": 58,\n  \"Mean Cluster Count Pass Filter L3\": 59, \"Mean Cluster Count Pass Filter L4\": 60,\n  \"SD Mean Cluster Count Pass Filter L1\": 61, \"SD Mean Cluster Count Pass Filter L2\": 62,\n  \"SD Mean Cluster Count Pass Filter L3\": 63, \"SD Mean Cluster Count Pass Filter L4\": 64,\n  \"Mean Pass Filter L1\": 65, \"Mean Pass Filter L2\": 66,\n  \"Mean Pass Filter L3\": 67, \"Mean Pass Filter L4\": 68,\n  \"SD Pass Filter L1\": 69, \"SD Pass Filter L2\": 70,\n  \"SD Pass Filter L3\": 71, \"SD Pass Filter L4\": 72,\n  \"Mean Error Rate L1\": 73, \"Mean Error Rate L2\": 74,\n  \"Mean Error Rate L3\": 75, \"Mean Error Rate L4\": 76,\n  \"SD Error Rate L1\": 77, \"SD Error Rate L2\": 78,\n  \"SD Error Rate L3\": 79, \"SD Error Rate L4\": 80,\n  \"Mean Q30 L1\": 81, \"Mean Q30 L2\": 82,\n  \"Mean Q30 L3\": 83, \"Mean Q30 L4\": 84,\n  \"SD Q30 L1\": 85, \"SD Q30 L2\": 86,\n  \"SD Q30 L3\": 87, \"SD Q30 L4\": 88,\n  \"Mean Cluster Count Occupied L1\": 89, \"Mean Cluster Count Occupied L2\": 90,\n  \"Mean Cluster Count Occupied L3\": 91, \"Mean Cluster Count Occupied L4\": 92,\n  \"SD Cluster Count Occupied L1\": 93, \"SD Cluster Count Occupied L2\": 94,\n  \"SD Cluster Count Occupied L3\": 95, \"SD Cluster Count Occupied L4\": 96,\n  \"Mean Occupied L1\": 97, \"Mean Occupied L2\": 98,\n  \"Mean Occupied L3\": 99, \"Mean Occupied L4\": 100,\n  \"SD Occupied L1\": 101, \"SD Occupied L2\": 102,\n  \"SD Occupied L3\": 103, \"SD Occupied L4\": 104\n};\n\nfunction makeRow(conceptName, value, lane) {\n  return {\n    json: {\n      measurement_concept_id: conceptMap[conceptName],\n      measurement_source_value: conceptName,\n      value_as_number: value,\n      lane: lane,\n      run_id: runId,\n      measurement_date: new Date().toISOString().slice(0,10)\n    }\n  };\n}\n\nconst outputs = [];\n\nfor (const lane in laneStats) {\n  const stats = laneStats[lane];\n\n  // Map columns\n  const mappings = [\n    [\"Density Pf(k/mm2)\", \"Density Pass Filter\"],\n    [\"Cluster Count Pf (k)\", \"Cluster Count Pass Filter\"],\n    [\"% Pass Filter\", \"Pass Filter\"],\n    [\"Error Rate\", \"Error Rate\"],\n    [\"%>= Q30\", \"Q30\"],\n    [\"Cluster Count Occupied (k)\", \"Cluster Count Occupied\"],\n    [\"% Occupied\", \"Occupied\"]\n  ];\n\n  mappings.forEach(([column, label]) => {\n    if (stats[column]) {\n      outputs.push(makeRow(`Mean ${label} L${lane}`, stats[column].mean, lane));\n      outputs.push(makeRow(`SD ${label} L${lane}`, stats[column].sd, lane));\n    }\n  });\n}\n\nreturn outputs;\n"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          976,
-          -192
-        ],
-        "id": "64e0fa2c-5f11-421b-ad76-d584a1a06da4",
-        "name": "Code in JavaScript1"
-      },
       {
         "parameters": {
           "operation": "select",
@@ -498,8 +341,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -80,
-          0
+          -64,
+          240
         ],
         "id": "4779e9df-2b5b-4cdb-b8e5-4e725fa90436",
         "name": "Select rows from a table",
@@ -509,6 +352,97 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "folder"
+              },
+              {
+                "name": "path"
+              },
+              {
+                "name": "status"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -288,
+          240
+        ],
+        "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "command": "=docker run --rm -v {{ $('When Executed by Another Workflow').item.json.path\n  }}:/data yserdem/illumina-interop:latest python3 /app/summary_interop.py /data Lane json"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          160,
+          240
+        ],
+        "id": "f4cf6736-67d2-4deb-aeb7-7dfa3351b8c4",
+        "name": "Execute Command1"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "concepts",
+            "mode": "list",
+            "cachedResultName": "concepts"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "concept_class_id",
+                "value": "Lane Metric"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          384,
+          240
+        ],
+        "id": "ea8abc79-c6bd-4e32-be55-cacf1904c55d",
+        "name": "Select rows from a table2",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Map ReadNumber to R notation (1→R1, 4→R2)\n  const readMapping = {\n    1: 'R1',\n    4: 'R2'\n  };\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readMapping[readNumber];\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          576,
+          240
+        ],
+        "id": "1ebed043-ed78-48d8-98a4-b8dff9e728f1",
+        "name": "Code in JavaScript3"
       },
       {
         "parameters": {
@@ -578,152 +512,25 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          864,
-          0
+          816,
+          240
         ],
-        "id": "cbba27b5-df04-433f-b8f1-fc02f73d45be",
-        "name": "Insert rows in a table",
+        "id": "453ffdcc-468e-4c27-b19c-fd5d301b2ad5",
+        "name": "Insert rows in a table1",
         "credentials": {
           "postgres": {
             "id": "vvzB2Z8ymgMiekHW",
             "name": "PG-ALB-1.5"
           }
         }
-      },
-      {
-        "parameters": {
-          "workflowInputs": {
-            "values": [
-              {
-                "name": "folder"
-              },
-              {
-                "name": "path"
-              },
-              {
-                "name": "status"
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.executeWorkflowTrigger",
-        "typeVersion": 1.1,
-        "position": [
-          -304,
-          0
-        ],
-        "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
-        "name": "When Executed by Another Workflow"
-      },
-      {
-        "parameters": {
-          "operation": "select",
-          "schema": {
-            "__rl": true,
-            "mode": "list",
-            "value": "public"
-          },
-          "table": {
-            "__rl": true,
-            "value": "concepts",
-            "mode": "list",
-            "cachedResultName": "concepts"
-          },
-          "returnAll": true,
-          "where": {
-            "values": [
-              {
-                "column": "concept_class_id",
-                "value": "Lane Metric"
-              }
-            ]
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.postgres",
-        "typeVersion": 2.6,
-        "position": [
-          368,
-          0
-        ],
-        "id": "889aab38-f972-42db-ab0a-994f53896287",
-        "name": "Select rows from a table1",
-        "credentials": {
-          "postgres": {
-            "id": "vvzB2Z8ymgMiekHW",
-            "name": "PG-ALB-1.5"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "jsCode": "// Get the stats JSON from the Execute Command node\nconst statsOutput = JSON.parse($('Execute Command').item.json.stdout);\n\n// Get concepts from Postgres node\nconst concepts = $('Select rows from a table1').all().map(item => item.json);\n\n// Mapping from InterOp field names to concept base names\nconst fieldMapping = {\n  \"Density Pf(k/mm2)\": \"Density Pass Filter\",\n  \"Cluster Count Pf (k)\": \"Cluster Count Pass Filter\",\n  \"% Pass Filter\": \"Pass Filter\",\n  \"Error Rate\": \"Error Rate\",\n  \"%>= Q30\": \"Q30\",\n  \"Cluster Count Occupied (k)\": \"Cluster Count Occupied\",\n  \"% Occupied\": \"Occupied\"\n};\n\n// Build output array for database insertion\nconst measurements = [];\n\nfor (const [lane, metrics] of Object.entries(statsOutput)) {\n  for (const [field, values] of Object.entries(metrics)) {\n    const conceptBase = fieldMapping[field];\n    if (!conceptBase) continue;\n    \n    // Find matching concepts for mean and sd\n    const meanConceptName = `Mean ${conceptBase} L${lane}`;\n    const sdConceptName = `SD ${conceptBase} L${lane}`;\n    \n    const meanConcept = concepts.find(c => c.concept_name === meanConceptName);\n    const sdConcept = concepts.find(c => c.concept_name === sdConceptName);\n    \n    if (meanConcept) {\n      measurements.push({\n        concept_id: meanConcept.uniqueref,\n        concept_name: meanConceptName,\n        value: values.mean,\n        lane: lane\n      });\n    }\n    \n    if (sdConcept) {\n      measurements.push({\n        concept_id: sdConcept.uniqueref,\n        concept_name: sdConceptName,\n        value: values.sd,\n        lane: lane\n      });\n    }\n  }\n}\n\nreturn measurements.map(m => ({ json: m }));"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          576,
-          0
-        ],
-        "id": "6eed59c5-1b1d-4117-bb1e-2d04795df96b",
-        "name": "Code in JavaScript2"
       }
     ],
     "connections": {
-      "Execute Command": {
-        "main": [
-          [
-            {
-              "node": "Select rows from a table1",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Read/Write Files from Disk": {
-        "main": [
-          [
-            {
-              "node": "Extract from File",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Extract from File": {
-        "main": [
-          [
-            {
-              "node": "Code in JavaScript",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Code in JavaScript": {
-        "main": [
-          [
-            {
-              "node": "Code in JavaScript1",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Code in JavaScript1": {
-        "main": [
-          []
-        ]
-      },
       "Select rows from a table": {
         "main": [
           [
             {
-              "node": "Execute Command",
+              "node": "Execute Command1",
               "type": "main",
               "index": 0
             }
@@ -741,22 +548,33 @@
           ]
         ]
       },
-      "Select rows from a table1": {
+      "Execute Command1": {
         "main": [
           [
             {
-              "node": "Code in JavaScript2",
+              "node": "Select rows from a table2",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Code in JavaScript2": {
+      "Select rows from a table2": {
         "main": [
           [
             {
-              "node": "Insert rows in a table",
+              "node": "Code in JavaScript3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript3": {
+        "main": [
+          [
+            {
+              "node": "Insert rows in a table1",
               "type": "main",
               "index": 0
             }
@@ -765,11 +583,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 0c523762",
+    "name": "Version 796e1b6b",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "26-03-2026/0:08",
+  "commitDate": "27-03-2026/0:00",
   "fileName": "interop.json"
 }
