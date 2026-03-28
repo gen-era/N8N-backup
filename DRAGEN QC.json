@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-26T10:09:37.275Z",
+  "updatedAt": "2026-03-27T16:09:55.214Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1042,13 +1042,13 @@
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "M26-YMTD-22\tH26-YMTD-15\tH26-YMTD-16\tU26-YCES-7785\tU26-YCES-7786\tU26-YCES-7787 OMU-26-1983\tOMU-26-1968\tOMU-26-1967\t\t\t SG2026-04979\tSG2026-04982\tSG2026-04983",
+              "value": "26-1897 26-1900 26-1903 26-1917 26-1919 26-1937 37067 37069 SG2026-05954 SG2026-05955 SG2026-05956 SG2026-05958 SG2026-05959 SG2026-05960 SG2026-05961 SG2026-05962 AMG-0350-26 AMG-0351-26 AMG-0356-26 AMG-0360-26 AMG-0363-26 AMG-0366-26 MG26-MSH WES-108 WES-111 WES-283 WES-284 WES-286 WES-287 WES-288 WES-289 WES-290 WES-292 WES-293 WES-295 WES-296 WES-297 WES-298 WES-300 WES-307 WES-309 WES-310 WES-312 WES-313 WES-314 WES-315 WES-316 WES-317 WES-318 WES-319 WES-320 WES-321 WES-322 WES-324 WES-327 WES-333 WES-334 WES-335 WES-336 WES-337 WES-338 WES-339 WES-340 WES-343 WES-167 WES-218 WES-226 WES-243 WES-251 WES-254 WES-258 WES-262 WES-268 WES-272 WES-275 WES-276 WES-291 WES-294 WES-299 WES-303",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "deniz.ozturk@gen-era.com.tr",
+              "value": "aylin.kilyoz@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "c71a3f36-0059-47ae-8f3c-122f6a8d29e4",
+  "versionId": "b6d489e5-20b7-47fe-b3b4-f10bf9101d99",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2214,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "27-03-2026/0:00",
+  "commitDate": "28-03-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
