@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-01T13:48:36.828Z",
+  "updatedAt": "2026-04-02T13:41:19.324Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -994,7 +994,7 @@
     },
     {
       "parameters": {
-        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq\" /mnt/illuminastorage/hold_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260227_A01228_0255_AHW7WWDSXF",
+              "value": "260325_A01978_0151_BHFT5YDMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "C1518    C1519    C1520",
+              "value": "WES-275 MEH ŞAK BEK 5352870\tWES-276 MİR YIL 5353078\tWES-291 BAH KÖS 5360723 WES-218 MUH ÖME NOĞ 5318615\tWES-226 FER ÖZT 5319271\tWES-243 BAT ALP ASL 5258941 WES-337 POY KAR 5370568\tWES-338 DEV VUR 5262486\tWES-339 İKR EYL ALP 5369947 WES-320 ÇAĞ BAR SİN 4209422\tWES-321 ESM AKG 5277921\tWES-322 ALP SIR 5301631 WES-310 FAT SAR 5288039\tWES-312 ARA ZEY ŞAH 5364327\tWES-313 FAT SEN ÇAÇ 5364557 WES-293 HAZ KAP 5361615\tWES-295 ZEY BAL 5362774\tWES-296 MUH TAH GÜR 5360242 WES-284 EVİ EKİ DUR 5356864\tWES-286 ÜMM GÜL YIL 5358564\tWES-287 CAN ÖZM 5356817 AMG-0351-26\tAMG-0356-26\tAMG-0360-26 SG2026-05956 ECE26-325-İK\tSG2026-05958 ECE26-326-SA\tSG2026-05959 ECE26-327-RÜ SG2026-05914\tSG2026-05915\tSG2026-05927 SG2026-05463\tSG2026-05501\tSG2026-05507 26-1919\t26-1937\t37067 KS26-YBRCA-101\tO26-YBRCA-7\tSK26-YBRCA-226",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "hande.beklen@gen-era.com.tr",
+              "value": "deniz.ozturk@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "2023140f-6a24-47c0-8510-bb00990c85d6",
+  "versionId": "e57e2df8-39cb-4f70-a156-deaf20989dad",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2214,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "02-04-2026/0:00",
+  "commitDate": "03-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
