@@ -1,0 +1,254 @@
+{
+  "updatedAt": "2026-04-03T07:40:36.601Z",
+  "createdAt": "2026-04-03T07:13:57.781Z",
+  "id": "Qq67uvJBJGmNexCh",
+  "name": "FTP Share",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -48
+      ],
+      "id": "93bc3057-df29-44e0-bb6a-f8861d5bd1a2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "head /pool0/kozapeta/Data_Consolidation/consolidated/index/20260401_SAMPLEINDEX.csv"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -48
+      ],
+      "id": "da695658-d7c0-46b3-89e9-1c493304a604",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = items[0].json.stdout; // Execute Command'dan gelen veri\n\n// Satırlara böl ve boş satırları temizle\nconst lines = stdout.trim().split('\\n');\n\n// İlk satırı başlık (header) olarak al\nconst headers = lines[0].split(',');\n\n// Veri satırlarını objelere dönüştür\nconst result = lines.slice(1).map(line => {\n  const values = line.split(',');\n  let obj = {};\n  headers.forEach((header, index) => {\n    obj[header.trim()] = values[index] ? values[index].trim() : null;\n  });\n  return { json: obj };\n});\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "7630baee-d217-4d41-a660-fe9b0b526457",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8f5ef9a-d10f-4079-a3e5-d47a9286492d",
+              "name": "inst_id",
+              "value": "i000040",
+              "type": "string"
+            },
+            {
+              "id": "12125115-bd5a-43d3-a4b7-760b4ebffa14",
+              "name": "sample_id",
+              "value": "25-4566 25-4500 25-4520 25-4596 25-4601 25-4514 25-4499 25-4502",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        -48
+      ],
+      "id": "af0a0170-eb09-4472-998e-e76ea8efed37",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6a1eee92-4358-4ad7-8bce-1fdc6b821a02",
+              "leftValue": "={{ $json['SAMPLE ID'] }}",
+              "rightValue": "WES-5248|26-783",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "9767e74a-2037-4338-bc28-1b114481dec7",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e08d8c0d-062e-443f-ab94-fe06240f9c13",
+              "name": "abs_path",
+              "value": "={{ $json.PATH.replace(/^P:/i, '/pool0/kozapeta/Data_Consolidation').replace(/\\\\/g, '/') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        -48
+      ],
+      "id": "e6de6eb7-69ec-45c2-9ed9-3b27fa6105fd",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -48
+      ],
+      "id": "8f4de2a1-fe51-4c9e-94a9-6e3a1cc981cc",
+      "name": "Execute a command1",
+      "credentials": {
+        "sshPassword": {
+          "id": "GXNt5WFwoYM7WSOV",
+          "name": "Peta - BIOS User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Execute a command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "versionId": "68b928fe-8e28-4547-be10-bff2bc34acc8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-03T07:13:57.794Z",
+      "createdAt": "2026-04-03T07:13:57.794Z",
+      "role": "workflow:owner",
+      "workflowId": "Qq67uvJBJGmNexCh",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "04-04-2026/0:00",
+  "fileName": "FTP Share.json"
+}
