@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-02T13:41:19.324Z",
+  "updatedAt": "2026-04-03T13:57:12.011Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,7 +98,7 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Sample_Project}}",
+              "leftValue": "={{ $json.Sample_ID}}",
               "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
               "operator": {
                 "type": "string",
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260325_A01978_0151_BHFT5YDMX2",
+              "value": "260325_A01978_0152_AHFTF2DMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "WES-275 MEH ŞAK BEK 5352870\tWES-276 MİR YIL 5353078\tWES-291 BAH KÖS 5360723 WES-218 MUH ÖME NOĞ 5318615\tWES-226 FER ÖZT 5319271\tWES-243 BAT ALP ASL 5258941 WES-337 POY KAR 5370568\tWES-338 DEV VUR 5262486\tWES-339 İKR EYL ALP 5369947 WES-320 ÇAĞ BAR SİN 4209422\tWES-321 ESM AKG 5277921\tWES-322 ALP SIR 5301631 WES-310 FAT SAR 5288039\tWES-312 ARA ZEY ŞAH 5364327\tWES-313 FAT SEN ÇAÇ 5364557 WES-293 HAZ KAP 5361615\tWES-295 ZEY BAL 5362774\tWES-296 MUH TAH GÜR 5360242 WES-284 EVİ EKİ DUR 5356864\tWES-286 ÜMM GÜL YIL 5358564\tWES-287 CAN ÖZM 5356817 AMG-0351-26\tAMG-0356-26\tAMG-0360-26 SG2026-05956 ECE26-325-İK\tSG2026-05958 ECE26-326-SA\tSG2026-05959 ECE26-327-RÜ SG2026-05914\tSG2026-05915\tSG2026-05927 SG2026-05463\tSG2026-05501\tSG2026-05507 26-1919\t26-1937\t37067 KS26-YBRCA-101\tO26-YBRCA-7\tSK26-YBRCA-226",
+              "value": "SG2026-05516\tSG2026-05693\tSG2026-05609\t SG2026-05514\tSG2026-05534\tSG2026-05541\t SG2026-05354\tSG2026-05357\tSG2026-05361\t SG2026-04979 ECE26-276-ATA\tSG2026-04982 ECE26-278-AH\tSG2026-04983 ECE26-279-MI",
               "type": "string"
             },
             {
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "e57e2df8-39cb-4f70-a156-deaf20989dad",
+  "versionId": "944f5eb3-c293-471a-b10f-414e839668fd",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2214,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "03-04-2026/0:00",
+  "commitDate": "04-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
