@@ -1,0 +1,504 @@
+{
+  "updatedAt": "2026-04-06T08:29:03.456Z",
+  "createdAt": "2026-04-06T08:27:15.062Z",
+  "id": "yX8KU6tOTPKunLhA",
+  "name": "Genomize Upload Sapiens",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        -80
+      ],
+      "id": "2b8f0b2c-3c62-45d5-b2fc-ae165b9a35a4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 26,
+            "recipe_ref": "={{ $json.recipe_ref }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "7b481a33-3f86-4232-91ce-0f4390d7a784",
+      "name": "Update Data Op as In Progress",
+      "credentials": {
+        "postgres": {
+          "id": "ZyjqJkXzGlIdKt0w",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 29,
+            "recipe_ref": "={{ $json.recipe_ref }}",
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -32,
+        304
+      ],
+      "id": "d1c7a960-88dc-4440-ba4e-f11355982f86",
+      "name": "Update Data Op as Completed",
+      "credentials": {
+        "postgres": {
+          "id": "ZyjqJkXzGlIdKt0w",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "sudo rm  -r /tmp/genomize/*"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        176,
+        128
+      ],
+      "id": "54f7548b-3e6a-4e88-98c2-22050addbd54",
+      "name": "Cleanup Symlink"
+    },
+    {
+      "parameters": {
+        "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/ genomize/{{ $json.account_id }}.static.seq.genomize.com/external/ "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "8cc47a23-fd35-472e-9590-e3f9f9434922",
+      "name": "Upload Genomize"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "={{ $json.command }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -208
+      ],
+      "id": "638ac22e-2a04-42ef-bb23-f0b08d003955",
+      "name": "Create Symlink"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Stdout'daki fastq dosya yollarını al\nconst fastqPaths = $input.item.json.stdout.trim().split('\\n');\n\n// batch_source_value'yu önceki node'dan al\nconst batchSourceValue = $('Get On Hold Genomize Uploads').item.json.batch_source_value;\n\n// /tmp/genomize altında hedef dizini oluştur\nconst symlinkBaseDir = `/tmp/genomize/${batchSourceValue}`;\n\n// Symlink komutlarını oluştur\nconst commands = [];\ncommands.push(`mkdir -p ${symlinkBaseDir}`);\n\nfastqPaths.forEach(sourcePath => {\n  const fileName = sourcePath.split('/').pop();\n  const targetPath = `${symlinkBaseDir}/${fileName}`;\n  commands.push(`ln -sf ${sourcePath} ${targetPath}`);\n});\n\nconst finalCommand = commands.join(' && ');\n\nreturn {\n  json: {\n    command: finalCommand,\n    targetDirectory: symlinkBaseDir,\n    fileCount: fastqPaths.length,\n    batchSourceValue: batchSourceValue\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -208
+      ],
+      "id": "cad001fd-86a0-4052-bea4-ffe166688f1f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=fdfind \"{{ $json.sample_id }}_\"  /mnt/smb_share/Conversions/{{ $json.id_source_value }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -208
+      ],
+      "id": "3b954bbb-a3e1-41c7-bca0-fce42434568f",
+      "name": "Find Files"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 109\n    AND data_operation_recipes.type_concept_ref = 251;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        -80
+      ],
+      "id": "117b5b48-3a4a-48d6-835b-2fd72e2bcc6e",
+      "name": "Get On Hold Genomize Uploads",
+      "credentials": {
+        "postgres": {
+          "id": "ZyjqJkXzGlIdKt0w",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "/volume1/illuminastorage/bios/mc alias set genomize https://s3-4.genomize.com.tr gen_era_ngs '5Wk2h5!Qx^)>'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -304
+      ],
+      "id": "912a8a22-0dbe-4782-9018-7732ecf73eb8",
+      "name": "Login Genomize",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get On Hold Genomize Uploads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Login Genomize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Genomize": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Symlink",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create Symlink",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Files": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get On Hold Genomize Uploads": {
+      "main": [
+        [
+          {
+            "node": "Update Data Op as Completed",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update Data Op as In Progress",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upload Genomize",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Find Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4467b0d6-dbb2-4879-a1cf-e133fa756658",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-06T08:27:15.077Z",
+      "createdAt": "2026-04-06T08:27:15.077Z",
+      "role": "workflow:owner",
+      "workflowId": "yX8KU6tOTPKunLhA",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "07-04-2026/0:00",
+  "fileName": "Genomize Upload Sapiens.json"
+}
