@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-04T10:51:38.845Z",
+  "updatedAt": "2026-04-06T06:56:20.643Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -994,7 +994,7 @@
     },
     {
       "parameters": {
-        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/GEN_ERA_3_flat/{{ $json.run_id }}\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
+        "command": "=  result=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage/fastq_folder/ /media/dragen/fastq_folder/ --max-depth 1 -E '*.lnk')\n  if [ -z \"$result\" ]; then\n\n    # Alternatif 1: smb_share\n    smb_path=$(fdfind \"{{ $json.run_id }}\" /mnt/smb_share/Conversions/ --max-depth 2 | head -n 1)\n\n    if [ -n \"$smb_path\" ]; then\n      echo \"${smb_path}\"\n    else\n      # Alternatif 2: usb1-2\n      alt_path=$(fdfind \"{{ $json.run_id }}-Fastq$\" /mnt/illuminastorage_usb1-2/ --max-depth 2 | head -n 1)\n\n      if [ -n \"$alt_path\" ]; then\n        echo \"${alt_path}/\"\n      else\n        # Alternatif 3: usb2\n        usb2_path=\"/mnt/illuminastorage_usb2/{{ $json.run_id }}-Fastq\"\n        if [ -d \"$usb2_path\" ]; then\n          echo \"${usb2_path}/\"\n        else\n          echo \"ERROR: Klasör hiçbir yerde bulunamadı\" >&2\n          exit 1\n        fi\n      fi\n    fi\n  else\n    echo \"$result\"\n  fi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260327_A01228_0261_AHFNWKDMX2",
+              "value": "20260330_LH00267_0159_B23C2KWLT3",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "OMU-26-1470\tOMU-26-1469\tOMU-26-1468 OMU-26-1620\tOMU-26-1619\tOMU-26-1604 OMU-26-1572\tOMU-26-1569\tOMU-26-1560",
+              "value": "WES-353 WES-282 WES-285 WES-301 WES-302 WES-304 WES-305 WES-306 WES-308 WES-311 WES-323 WES-325 WES-326 WES-328 WES-329 WES-330 WES-331 WES-350 WES-351 WES-352 WES-354 WES-355N WES-358 WES-332 WES-341 WES-342 WES-344 WES-345 WES-346 WES-347 WES-348 WES-349 WES-356 WES-357 WES-359 WES-360 WES-361 WES-362 WES-363 WES-364 WES-365 WES-366 WES-367 WES-368 WES-369 WES-370 WES-371 WES-372 WES-373 WES-374 WES-375 WES-376 WES-377 WES-378 WES-379 WES-380 WES-381 WES-382 WES-383 WES-384 WES-385 WES-386 WES-387 WES-388 WES-389 WES-390 WES-391 WES-392 WES-393 WES-394 WES-395 WES-396 WES-397 WES-398 WES-399 WES-400 WES-401 WES-402 WES-403 1031001170 37084 CO26-BR6234 CO26-BR6233 CO26-BR6243 CO26-BR6242 CO26-BR6241 CO26-BR6240 CO26-BR6238 CO26-BR6237 CO26-BR6236 CO26-BR6235 CO26-BR6251 CO26-BR6250 CO26-BR6249 CO26-BR6248 CO26-BR6247 CO26-BR6246 CO26-BR6245 CO26-BR6244 CO26-BR6220 CO26-BR6217 CO26-BR6216 CO26-BR6214 CO26-BR6212 CO26-BR6211 CO26-BR6229 CO26-BR6228 CO26-BR6227 CO26-BR6226 CO26-BR6225 CO26-BR6224 CO26-BR6223 CO26-BR6222 CO26-BR6254 CO26-BR6253 CO26-BR6252 962-2026 FN393-PR0232-GO 289 1031001153 2600272 37262 ISY26-154-DA ISY26-147-HB ISY26-146-SI ISY26-141-EP ISY26-140-OG ISY26-139-TNM ISY26-138-MB ISY26-137-BK AMG-0361-26 ISY26-149-MES T26-321 T26-318 T26-306 T26-305 T26-293 T26-292 T26-282 T26-345",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "deniz.ozturk@gen-era.com.tr",
+              "value": "aylin.kilyoz@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "2c0801fe-c795-4479-93e0-4c598f9fd75f",
+  "versionId": "130d2150-25c6-4249-a7e6-217695ef46f0",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2214,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-04-2026/0:00",
+  "commitDate": "07-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
