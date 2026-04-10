@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-31T10:58:50.043Z",
+  "updatedAt": "2026-04-09T11:52:58.752Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260316_A01832R_0238_BHKY7MDRX7",
+              "value": "=260407_A01228_0265_AHMMHNDRX7",
               "type": "string"
             }
           ]
@@ -46,12 +46,11 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
-        "command": "=rclone copy /staging/fastq_folder/{{ $('Edit Fields').item.json.run_id }}-Fastq \\\n    /mnt/koza_alldata/Conversions/{{ $('Edit Fields').item.json.run_id }}-Fastq \\\n    --transfers=32 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=128M \\\n    --no-traverse \\\n    --stats=10s \\\n    --stats-one-line \\\n    -v"
+        "command": "=rclone copy /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    /mnt/koza_alldata/Conversions/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    --transfers=32 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=128M \\\n    --no-traverse \\\n    --stats=10s \\\n    --stats-one-line \\\n    -v"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -66,8 +65,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -86,8 +84,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -106,8 +103,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -121,7 +117,7 @@
           "conditions": [
             {
               "id": "d8f44fa5-d3f0-4219-8dc1-2ac2a4b9c2c0",
-              "leftValue": "={{ parseFloat($('Run File Size').item.json.stdout) * 1.8}}",
+              "leftValue": "={{ parseFloat($('Run File Size').item.json.stdout) * 2}}",
               "rightValue": "={{ parseFloat($('Available Space on DRAGEN').item.json.stdout) }}",
               "operator": {
                 "type": "number",
@@ -141,8 +137,7 @@
         -464
       ],
       "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
-      "name": "Is it available for Transfer and Conversion",
-      "disabled": true
+      "name": "Is it available for Transfer and Conversion"
     },
     {
       "parameters": {
@@ -161,8 +156,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {},
@@ -182,7 +176,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        176,
+        32,
         -320
       ],
       "id": "c0fd0dc9-5e98-44d6-99c6-d7676027920b",
@@ -192,8 +186,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -212,8 +205,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -234,8 +226,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -257,8 +248,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -271,8 +261,7 @@
         -16
       ],
       "id": "09850efd-3983-4054-a05b-494442067590",
-      "name": "Generate SampleSheet",
-      "disabled": true
+      "name": "Generate SampleSheet"
     },
     {
       "parameters": {
@@ -291,8 +280,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -336,8 +324,7 @@
         -320
       ],
       "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
-      "name": "Is Run absent on  DRAGEN",
-      "disabled": true
+      "name": "Is Run absent on  DRAGEN"
     },
     {
       "parameters": {
@@ -371,8 +358,7 @@
         144
       ],
       "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
-      "name": "Is SampleSheet Absent",
-      "disabled": true
+      "name": "Is SampleSheet Absent"
     },
     {
       "parameters": {
@@ -393,13 +379,12 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE conversions\nSET status_concept_ref = 29,\n    conversion_time = NOW()\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
+        "query": "UPDATE conversions\nSET status_concept_ref = 29,\n    conversion_time = NOW()\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -415,8 +400,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -456,8 +440,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -491,8 +474,7 @@
         576
       ],
       "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
-      "name": "Is Destination Folder Absent",
-      "disabled": true
+      "name": "Is Destination Folder Absent"
     },
     {
       "parameters": {
@@ -568,8 +550,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1504,
-        576
+        1392,
+        592
       ],
       "id": "a0289a63-6934-45ee-bcd4-3e4f4f9959f0",
       "name": "Cleanup DRAGEN",
@@ -759,7 +741,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -112,
+        -144,
         -16
       ],
       "id": "ac6449e5-80fc-4ca6-8f32-29b52cb684d4",
@@ -807,11 +789,31 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -320,
+        -352,
         -16
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
       "name": "Merge"
+    },
+    {
+      "parameters": {
+        "command": "=rclone copy /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    /mnt/koza_alldata/Conversions/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    --transfers=32 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=128M \\\n    --no-traverse \\\n    --stats=10s \\\n    --stats-one-line \\\n    -v"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        624
+      ],
+      "id": "deb51adc-0884-40c1-9e17-4b9b3df434af",
+      "name": "Push Conversion to AllData1",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -1163,7 +1165,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "32a28ac8-95d2-4607-813c-177eb79c3822",
+  "versionId": "c031fcb8-f1bf-490b-a466-3e7ffcfcb16a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1177,6 +1179,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "09-04-2026/0:00",
+  "commitDate": "10-04-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
