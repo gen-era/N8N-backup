@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-21T16:11:28.086Z",
+  "updatedAt": "2026-04-09T22:13:00.307Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,395 +11,23 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1920,
-        -240
+        -3008,
+        -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
       "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
-        "command": "~/bin/sg-upload-v2-wrapper login-iam --client-id"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        -1760,
-        -688
-      ],
-      "id": "e93a0058-6da2-47e1-9c1a-81250389df51",
-      "name": "Sophia Login",
-      "credentials": {
-        "sshPassword": {
-          "id": "afQJbS7bg7aYGdOW",
-          "name": "Koza ALLData - Can User"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "upsert",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "data_operations",
-          "mode": "list",
-          "cachedResultName": "data_operations"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "uniqueref": "={{ $json.operation_uniqueref }}",
-            "status_concept_ref": 26,
-            "recipe_ref": "={{ $json.recipe_ref }}"
-          },
-          "matchingColumns": [
-            "uniqueref"
-          ],
-          "schema": [
-            {
-              "id": "uniqueref",
-              "displayName": "uniqueref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "read_ref",
-              "displayName": "read_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "recipe_ref",
-              "displayName": "recipe_ref",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "status_concept_ref",
-              "displayName": "status_concept_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "performed_at",
-              "displayName": "performed_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "batch_source_value",
-              "displayName": "batch_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "error_text",
-              "displayName": "error_text",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "operator_ref",
-              "displayName": "operator_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "analysis_source_value",
-              "displayName": "analysis_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
+        "operation": "executeQuery",
+        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    reads.r1_path,\n    reads.r2_path,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id = '{{ $('Loop Over Items').item.json.account_id }}';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
-      "position": [
-        -1008,
-        -240
-      ],
-      "id": "d0c4d674-98a9-4136-814b-cf99f2ee927d",
-      "name": "Update Data Op as In Progress",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "upsert",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "data_operations",
-          "mode": "list",
-          "cachedResultName": "data_operations"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "uniqueref": "={{ $json.operation_uniqueref }}",
-            "status_concept_ref": 29,
-            "recipe_ref": "={{ $json.recipe_ref }}",
-            "performed_at": "={{ $now.toISO() }}"
-          },
-          "matchingColumns": [
-            "uniqueref"
-          ],
-          "schema": [
-            {
-              "id": "uniqueref",
-              "displayName": "uniqueref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "read_ref",
-              "displayName": "read_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "recipe_ref",
-              "displayName": "recipe_ref",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "status_concept_ref",
-              "displayName": "status_concept_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "performed_at",
-              "displayName": "performed_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "batch_source_value",
-              "displayName": "batch_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "error_text",
-              "displayName": "error_text",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "operator_ref",
-              "displayName": "operator_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "analysis_source_value",
-              "displayName": "analysis_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -1008,
-        160
-      ],
-      "id": "7088e638-df34-4bb6-ad1f-5c98014a96b4",
-      "name": "Update Data Op as Completed",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "command": "sudo rm  -r /tmp/genomize/*"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -800,
-        -16
-      ],
-      "id": "0c1b4879-5798-4085-a3ac-fb3ae69bccd8",
-      "name": "Cleanup Symlink"
-    },
-    {
-      "parameters": {
-        "command": "=/opt/bin/mc mirror /tmp/genomize/ genomize/{{ $json.account_id }}.static.seq.genomize.com/external/ "
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -1008,
-        -16
-      ],
-      "id": "95e96ed5-3083-4961-8cc2-0c4560af7bf2",
-      "name": "Upload Genomize"
-    },
-    {
-      "parameters": {
-        "executeOnce": false,
-        "command": "={{ $json.command }}"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -768,
-        -448
-      ],
-      "id": "134ee9d2-0eaf-4e30-bb97-9c90d5f3f2a1",
-      "name": "Create Symlink"
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all();\n\n// recipe_ref'e göre grupla\nconst groups = {};\n\nitems.forEach(item => {\n  const json = item.json;\n  const recipeRef = json.recipe_ref;\n  const stdout = json.stdout || '';\n  \n  if (!groups[recipeRef]) {\n    groups[recipeRef] = {\n      recipe_ref: recipeRef,\n      target_dir: `/tmp/sophia/recipe_${recipeRef}`,\n      commands: [`mkdir -p /tmp/sophia/recipe_${recipeRef}`],\n      // Sonraki node için lazım olabilecek metadata\n      account_id: json.account_id,\n      pipeline_id: json.pipeline_id,\n    };\n  }\n  \n  // Bu item'ın fastq dosyalarını ekle\n  const fastqPaths = stdout.trim().split('\\n').filter(p => p.length > 0);\n  fastqPaths.forEach(sourcePath => {\n    const fileName = sourcePath.split('/').pop();\n    const targetPath = `/tmp/sophia/recipe_${recipeRef}/${fileName}`;\n    groups[recipeRef].commands.push(`ln -sf \"${sourcePath}\" \"${targetPath}\"`);\n  });\n});\n\n// Her recipe_ref için bir item döndür\nreturn Object.values(groups).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    target_dir: group.target_dir,\n    account_id: group.account_id,\n    pipeline_id: group.pipeline_id,\n    command: group.commands.join(' && '),\n    file_count: group.commands.length - 1 // mkdir hariç\n  }\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1008,
-        -448
-      ],
-      "id": "333030b1-e7fa-4cdb-b556-a9eb68e5246d",
-      "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "executeOnce": false,
-        "command": "=fdfind --fixed-strings \"{{ $json.sample_id }}_\"  /mnt/illuminastorage/fastq_folder/{{ $json.id_source_value }}"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -1456,
-        -384
-      ],
-      "id": "2942536c-6bca-48db-9b4d-528125a2ac58",
-      "name": "Find Files"
-    },
-    {
-      "parameters": {
-        "command": "/opt/bin/mc alias set genomize https://s3-3.genomize.com.tr gen_era_ngs '5Wk2h5!Qx^)>'"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
       "position": [
         -1488,
-        -688
-      ],
-      "id": "f6fabc8b-c365-4360-8216-619c2e8eac2f",
-      "name": "Login Genomize"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -1680,
-        -240
+        -288
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
       "name": "Get On Hold Sophia Uploads",
@@ -412,18 +40,410 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "combineBy": "combineByPosition",
         "options": {}
       },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
       "position": [
-        -1232,
-        -256
+        -2528,
+        -288
       ],
-      "id": "4f65c0b4-22c2-4098-9bc9-8cbdc18d4230",
-      "name": "Merge"
+      "id": "66bec76f-14a8-4dde-9397-074d3974da25",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT data_operation_recipes.account_id\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id IS NOT NULL;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2784,
+        -288
+      ],
+      "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
+      "name": "Get Unique Upload Ready Accounts",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py login-iam --client-id {{ $json.account_id }} --force-platform\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2240,
+        -288
+      ],
+      "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
+      "name": "Login Sophia"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "667f43be-8dcb-461c-a100-36042adaeaf8",
+              "leftValue": "={{ $json.stdout.match(/client id:\\s*(\\d+)/)[1] }}",
+              "rightValue": "={{ $('Loop Over Items').item.json.account_id }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2016,
+        -288
+      ],
+      "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
+      "name": "Login Verification"
+    },
+    {
+      "parameters": {
+        "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py new --folder /mnt/smb_share/Temp/sophia_launch_site --ref {{ $('Get On Hold Sophia Uploads').item.json.batch_source_value }} --pipeline {{ $('Get On Hold Sophia Uploads').item.json.pipeline_id }} --upload --bdsNumber {{ $('Get On Hold Sophia Uploads').item.json.bdsnumber }} --force-platform\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -288
+      ],
+      "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
+      "name": "Launch Files"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 26
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1168,
+        -496
+      ],
+      "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
+      "name": "Update Records as In Progress",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /mnt/smb_share/Temp/sophia_launch_site/*"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        -288
+      ],
+      "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
+      "name": "Post Clean Up Launch Site"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 29
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1184,
+        -64
+      ],
+      "id": "261241cf-7b3a-41d5-a6d9-cfb27c1bf47b",
+      "name": "Update Records as Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /mnt/smb_share/Temp/sophia_launch_site/*"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1744,
+        -288
+      ],
+      "id": "390e4411-abcf-4774-bbba-9f25809333f4",
+      "name": "Pre Clean Up Launch Site"
+    },
+    {
+      "parameters": {
+        "command": "=rsync -avu \"{{ $json.r1_path }}\" \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        -288
+      ],
+      "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
+      "name": "Move Files to Launch Site",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     }
   ],
   "connections": {
@@ -431,40 +451,7 @@
       "main": [
         [
           {
-            "node": "Get On Hold Sophia Uploads",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Upload Genomize": {
-      "main": [
-        [
-          {
-            "node": "Cleanup Symlink",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Create Symlink",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Find Files": {
-      "main": [
-        [
-          {
-            "node": "Merge",
+            "node": "Get Unique Upload Ready Accounts",
             "type": "main",
             "index": 0
           }
@@ -475,28 +462,106 @@
       "main": [
         [
           {
-            "node": "Find Files",
+            "node": "Update Records as In Progress",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Merge",
+            "node": "Update Records as Completed",
             "type": "main",
-            "index": 1
+            "index": 0
+          },
+          {
+            "node": "Move Files to Launch Site",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
-    "Merge": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Login Sophia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Unique Upload Ready Accounts": {
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Login Sophia": {
+      "main": [
+        [
           {
-            "node": "Update Data Op as In Progress",
+            "node": "Login Verification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Login Verification": {
+      "main": [
+        [
+          {
+            "node": "Pre Clean Up Launch Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Launch Files": {
+      "main": [
+        [
+          {
+            "node": "Post Clean Up Launch Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pre Clean Up Launch Site": {
+      "main": [
+        [
+          {
+            "node": "Get On Hold Sophia Uploads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Files to Launch Site": {
+      "main": [
+        [
+          {
+            "node": "Launch Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Records as Completed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -512,7 +577,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "163ac300-0fe1-40b0-aad7-9bc324463cd9",
+  "versionId": "fab8f828-1348-436e-af96-90d8afe0eb4c",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -526,6 +591,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "09-04-2026/0:00",
+  "commitDate": "10-04-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
