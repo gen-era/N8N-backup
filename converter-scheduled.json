@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-30T09:00:12.263Z",
+  "updatedAt": "2026-04-10T14:14:05.574Z",
   "createdAt": "2025-08-29T07:09:31.570Z",
   "id": "u3Gwkokw9EhG5M3O",
   "name": "converter-scheduled",
@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "command": "find /mnt/illuminastorage/run_folder -mindepth 1 -maxdepth 2 -type d -regextype posix-extended -regex '.*/[0-9]{6,8}_[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+' | sort"
+        "command": "find /mnt/illuminastorage/run_folder /mnt/usb -mindepth 1 -maxdepth 2 -type d -regextype posix-extended -regex '.*/[0-9]{6,8}_[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+' | sort"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -2266,7 +2266,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "51f2af37-b32c-4c79-be2c-62ebcfb52e2c",
+  "versionId": "27fa0983-6973-40a9-b25a-4ba6f1304ecf",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -2280,6 +2280,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "10-04-2026/0:00",
+  "commitDate": "11-04-2026/0:00",
   "fileName": "converter-scheduled.json"
 }
