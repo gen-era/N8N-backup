@@ -1,0 +1,360 @@
+{
+  "updatedAt": "2026-04-11T14:53:15.625Z",
+  "createdAt": "2026-04-11T14:53:15.625Z",
+  "id": "d1Z2YbyaiUZ38yZT",
+  "name": "Scans_to_Supabase_Robust_Upsert",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "8dfb385e-e391-4619-9443-9cfbc6c26f64",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -960,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "command": "STATE_DIR=\"/volume1/ALLDATA/.n8n_scan_state\"\nmkdir -p \"$STATE_DIR\"\nLAST_CHECK=\"$STATE_DIR/last_scan_check\"\nSKIP_LOG=\"$STATE_DIR/scan_skip_log\"\nTIMER_LOG=\"$STATE_DIR/scan_timer_log\"\nPROCESSED=\"$STATE_DIR/scan_processed\"\n\ntouch \"$LAST_CHECK\" \"$SKIP_LOG\" \"$TIMER_LOG\"\n> \"$PROCESSED\"\n\n# Daha önce zaman aşımına düşmüş ama sonra Metrics oluşmuş klasörleri tekrar yakala\nwhile IFS= read -r SENTRIX; do\n  [ -z \"$SENTRIX\" ] && continue\n  FOLDER=\"/volume1/ALLDATA/Scans/${SENTRIX}/\"\n  [ ! -d \"$FOLDER\" ] && continue\n\n  METRICS=$(find \"$FOLDER\" -maxdepth 1 -type f -name 'Metrics*.txt' | grep -v old | head -1)\n  if [ -n \"$METRICS\" ]; then\n    sed -i \"/^${SENTRIX}$/d\" \"$SKIP_LOG\"\n    sed -i \"/^${SENTRIX} /d\" \"$TIMER_LOG\"\n    echo \"$SENTRIX\" >> \"$PROCESSED\"\n    echo \"{\\\"kind\\\":\\\"candidate\\\",\\\"path\\\":\\\"$METRICS\\\"}\"\n  fi\ndone < \"$SKIP_LOG\"\n\n# Yeni klasörleri tara\nfor FOLDER in /volume1/ALLDATA/Scans/*/; do\n  [ ! -d \"$FOLDER\" ] && continue\n  SENTRIX=$(basename \"$FOLDER\" | tr -d ' ')\n  [[ \"$SENTRIX\" == *diag* ]] && continue\n\n  grep -q \"^$SENTRIX$\" \"$PROCESSED\" && continue\n\n  METRICS=$(find \"$FOLDER\" -maxdepth 1 -type f -name 'Metrics*.txt' | grep -v old | head -1)\n  CFG=\"$FOLDER/Effective.cfg\"\n  QC=\"$FOLDER/${SENTRIX}_qc.txt\"\n  SDF=\"$FOLDER/${SENTRIX}.sdf\"\n\n  if [ -z \"$METRICS\" ]; then\n    FIRST_SEEN=$(grep \"^${SENTRIX} \" \"$TIMER_LOG\" | awk '{print $2}')\n    if [ -z \"$FIRST_SEEN\" ]; then\n      echo \"$SENTRIX $(date +%s)\" >> \"$TIMER_LOG\"\n    else\n      NOW=$(date +%s)\n      ELAPSED=$((NOW - FIRST_SEEN))\n      if [ \"$ELAPSED\" -gt 1800 ]; then\n        if ! grep -q \"^$SENTRIX$\" \"$SKIP_LOG\"; then\n          echo \"{\\\"kind\\\":\\\"alert\\\",\\\"reason\\\":\\\"Metrics.txt bulunamadı (30 dk)\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\"\n          echo \"$SENTRIX\" >> \"$SKIP_LOG\"\n        fi\n        sed -i \"/^${SENTRIX} /d\" \"$TIMER_LOG\"\n      fi\n    fi\n    continue\n  fi\n\n  if [ ! -f \"$CFG\" ]; then\n    if ! grep -q \"^$SENTRIX$\" \"$SKIP_LOG\"; then\n      echo \"{\\\"kind\\\":\\\"alert\\\",\\\"reason\\\":\\\"Effective.cfg bulunamadı\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\"\n      echo \"$SENTRIX\" >> \"$SKIP_LOG\"\n    fi\n    continue\n  fi\n\n  if [ ! -f \"$QC\" ] && [ ! -f \"$SDF\" ]; then\n    if ! grep -q \"^$SENTRIX$\" \"$SKIP_LOG\"; then\n      echo \"{\\\"kind\\\":\\\"alert\\\",\\\"reason\\\":\\\"qc.txt ve sdf bulunamadı\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\"\n      echo \"$SENTRIX\" >> \"$SKIP_LOG\"\n    fi\n    continue\n  fi\n\n  # Son kontrolden sonra değişmiş Metrics dosyaları\n  if [ \"$METRICS\" -nt \"$LAST_CHECK\" ]; then\n    echo \"{\\\"kind\\\":\\\"candidate\\\",\\\"path\\\":\\\"$METRICS\\\"}\"\n  fi\ndone\n\ntouch \"$LAST_CHECK\""
+      },
+      "id": "ca701587-70b1-4d2a-925c-58abca0015e3",
+      "name": "SSH - Find Candidates",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        160
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "ygN0iMbDsZngxa5z",
+          "name": "alldata hande"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = ($input.first().json.stdout || '').trim();\nif (!stdout) return [];\n\nconst lines = stdout.split('\\n').map(v => v.trim()).filter(Boolean);\nreturn lines.map(line => {\n  try {\n    return { json: JSON.parse(line) };\n  } catch (e) {\n    return { json: { kind: 'alert', reason: 'JSON parse edilemedi', raw: line } };\n  }\n});"
+      },
+      "id": "cb483b8e-3fde-438c-b190-027a818bf4ba",
+      "name": "Parse SSH Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.kind }}",
+              "rightValue": "alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9c9a6fff-57b7-4a7e-8da0-b25a280a699d",
+      "name": "If Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -240,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "hande.beklen@gen-era.com.tr",
+        "subject": "=⚠️ iScan uyarı - {{ $json.sentrix_id || 'Bilinmiyor' }}",
+        "html": "=<p><b>Sentrix ID:</b> {{ $json.sentrix_id || '-' }}</p><p><b>Sebep:</b> {{ $json.reason || '-' }}</p><p><b>Ham kayıt:</b> {{ $json.raw || '-' }}</p>",
+        "options": {}
+      },
+      "id": "5aa10983-01f0-45f4-b619-96deacd5ea0e",
+      "name": "Send Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "d89f5771-7c3b-4519-84a5-a8590c52639c",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=FILEPATH=\"{{ $json.path }}\";\nFOLDER=$(dirname \"$FILEPATH\");\nSENTRIX=$(basename \"$FOLDER\" | tr -d ' ');\nMETRICS_FILE=$(find \"$FOLDER\" -maxdepth 1 -type f -name 'Metrics*.txt' | grep -v old | head -1);\n\nRAW_DATE=$(sed -n '2p' \"$METRICS_FILE\" | awk '{print $1}');\nSCAN_DATE=\"\";\nif [ -n \"$RAW_DATE\" ]; then\n  SCAN_DATE=$(python3 - <<'PY'\nfrom datetime import datetime\nraw = \"\"\"$RAW_DATE\"\"\".strip()\nfor fmt in (\"%m/%d/%Y\", \"%d.%m.%Y\", \"%Y-%m-%d\"):\n    try:\n        print(datetime.strptime(raw, fmt).strftime(\"%Y-%m-%d\"))\n        break\n    except Exception:\n        pass\nPY\n)\nfi\n\nINSTRUMENT=$(grep -m1 '^name = ' \"$FOLDER/Effective.cfg\" 2>/dev/null | sed 's/^name = //g' | xargs)\nDESCRIPTOR=$(grep -m1 'Descriptor:' \"$FOLDER/${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs)\nif [ -z \"$DESCRIPTOR\" ]; then\n  DESCRIPTOR=$(grep -m1 '<Name>' \"$FOLDER/${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs)\nfi\n\necho \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\",\\\"metrics_path\\\":\\\"$METRICS_FILE\\\"}\""
+      },
+      "id": "f2534408-6a79-4ee2-a135-c5ede0abf9b2",
+      "name": "SSH - Parse Scan Data",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        0,
+        320
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "2KgBkvNiNUPxE0oC",
+          "name": "SSH Password account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  let parsed;\n  try {\n    parsed = JSON.parse(item.json.stdout || '{}');\n  } catch (e) {\n    parsed = {};\n  }\n\n  return {\n    json: {\n      sentrix_id: (parsed.sentrix_id || '').trim(),\n      scan_date: (parsed.scan_date || '').trim(),\n      instrument_serial: (parsed.instrument_serial || '').trim(),\n      descriptor: (parsed.descriptor || '').trim(),\n      metrics_path: (parsed.metrics_path || '').trim()\n    }\n  };\n});"
+      },
+      "id": "68d9216b-afeb-4ab8-8d71-3d4d78d9954c",
+      "name": "Normalize Scan JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const baseUrl = (process.env.SUPABASE_URL || '').replace(/\\/$/, '');\nconst serviceKey = process.env.SUPABASE_SERVICE_KEY || '';\n\nif (!baseUrl || !serviceKey) {\n  throw new Error('SUPABASE_URL ve SUPABASE_SERVICE_KEY environment variable olarak tanımlı değil.');\n}\n\nasync function getOne(path) {\n  const response = await this.helpers.request({\n    method: 'GET',\n    url: `${baseUrl}${path}`,\n    headers: {\n      apikey: serviceKey,\n      Authorization: `Bearer ${serviceKey}`\n    },\n    json: true\n  });\n  return Array.isArray(response) ? response[0] : null;\n}\n\nconst out = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n\n  if (!row.sentrix_id || !row.scan_date || !row.instrument_serial || !row.descriptor) {\n    out.push({\n      json: {\n        action: 'alert',\n        reason: 'Eksik alan var',\n        ...row\n      }\n    });\n    continue;\n  }\n\n  const instrument = await getOne.call(this, `/rest/v1/instruments?serial_number=eq.${encodeURIComponent(row.instrument_serial)}&select=uniqueref,care_site_ref`);\n  if (!instrument) {\n    out.push({\n      json: {\n        action: 'alert',\n        reason: `Instrument bulunamadı: ${row.instrument_serial}`,\n        ...row\n      }\n    });\n    continue;\n  }\n\n  const chiptype = await getOne.call(this, `/rest/v1/kits_mapping?source_value=eq.${encodeURIComponent(row.descriptor)}&select=kits_ref,source_value`);\n  if (!chiptype) {\n    out.push({\n      json: {\n        action: 'alert',\n        reason: `Kit mapping bulunamadı: ${row.descriptor}`,\n        ...row\n      }\n    });\n    continue;\n  }\n\n  const status = await getOne.call(this, `/rest/v1/concepts?concept_name=eq.Completed&select=uniqueref`);\n  if (!status) {\n    out.push({\n      json: {\n        action: 'alert',\n        reason: 'Completed status concept bulunamadı',\n        ...row\n      }\n    });\n    continue;\n  }\n\n  out.push({\n    json: {\n      action: 'upsert',\n      sentrix_id: row.sentrix_id,\n      scan_date: row.scan_date,\n      instrument_serial: row.instrument_serial,\n      descriptor: row.descriptor,\n      metrics_path: row.metrics_path,\n      db_row: {\n        sentrix_id: row.sentrix_id,\n        scan_date: row.scan_date,\n        status_concept_ref: status.uniqueref,\n        instrument_ref: instrument.uniqueref,\n        chiptype_ref: chiptype.kits_ref,\n        care_site_ref: instrument.care_site_ref,\n        created_at: new Date().toISOString(),\n        updated_at: new Date().toISOString()\n      }\n    }\n  });\n}\n\nreturn out;"
+      },
+      "id": "7d825a80-803b-4bee-a968-68db606ae666",
+      "name": "Prepare DB Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "alert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fc826841-0731-4879-bbc4-dd9a8f2f0444",
+      "name": "If DB Alert",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "hande.beklen@gen-era.com.tr",
+        "subject": "=⚠️ Scan DB uyarı - {{ $json.sentrix_id }}",
+        "html": "=<p><b>Sentrix ID:</b> {{ $json.sentrix_id }}</p><p><b>Sebep:</b> {{ $json.reason }}</p><p><b>Instrument:</b> {{ $json.instrument_serial }}</p><p><b>Descriptor:</b> {{ $json.descriptor }}</p>",
+        "options": {}
+      },
+      "id": "8560a51c-c717-48cb-8b44-0a03b77c18a8",
+      "name": "Send DB Alert Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        160
+      ],
+      "webhookId": "553f6bea-8668-4372-a0d0-6b1f48dc13e4",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const baseUrl = (process.env.SUPABASE_URL || '').replace(/\\/$/, '');\nconst serviceKey = process.env.SUPABASE_SERVICE_KEY || '';\n\nif (!baseUrl || !serviceKey) {\n  throw new Error('SUPABASE_URL ve SUPABASE_SERVICE_KEY environment variable olarak tanımlı değil.');\n}\n\nconst results = [];\n\nfor (const item of $input.all()) {\n  const payload = item.json.db_row;\n\n  const response = await this.helpers.request({\n    method: 'POST',\n    url: `${baseUrl}/rest/v1/scans?on_conflict=sentrix_id`,\n    headers: {\n      apikey: serviceKey,\n      Authorization: `Bearer ${serviceKey}`,\n      Prefer: 'resolution=merge-duplicates,return=representation'\n    },\n    body: payload,\n    json: true\n  });\n\n  results.push({\n    json: {\n      status: 'ok',\n      sentrix_id: item.json.sentrix_id,\n      response\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "c36887f1-cdd3-4478-ad5b-14194f8ecc01",
+      "name": "Upsert Scan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "SSH - Find Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH - Find Candidates": {
+      "main": [
+        [
+          {
+            "node": "Parse SSH Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SSH Output": {
+      "main": [
+        [
+          {
+            "node": "If Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Alert": {
+      "main": [
+        [
+          {
+            "node": "Send Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SSH - Parse Scan Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH - Parse Scan Data": {
+      "main": [
+        [
+          {
+            "node": "Normalize Scan JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Scan JSON": {
+      "main": [
+        [
+          {
+            "node": "Prepare DB Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare DB Payload": {
+      "main": [
+        [
+          {
+            "node": "If DB Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If DB Alert": {
+      "main": [
+        [
+          {
+            "node": "Send DB Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upsert Scan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "06090a70-467c-4de5-a94a-5bf17d143b25",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-11T14:53:15.629Z",
+      "createdAt": "2026-04-11T14:53:15.629Z",
+      "role": "workflow:owner",
+      "workflowId": "d1Z2YbyaiUZ38yZT",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "12-04-2026/0:00",
+  "fileName": "Scans_to_Supabase_Robust_Upsert.json"
+}
