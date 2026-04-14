@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-25T10:06:10.187Z",
+  "updatedAt": "2026-04-13T14:00:14.135Z",
   "createdAt": "2026-01-29T05:40:00.653Z",
   "id": "erir5LnAsqscCafr",
   "name": "BCL Convert - 04 Post-Copy (Finalization)",
@@ -195,8 +195,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1184,
-        16
+        848,
+        32
       ],
       "id": "5895a888-31f8-4b90-bc4c-2124a0a1c90c",
       "name": "Mark Run Complete",
@@ -257,8 +257,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        896,
-        16
+        848,
+        256
       ],
       "id": "23b618eb-84be-4f15-aab7-544db8933a7d",
       "name": "Generate Combined Demux"
@@ -310,6 +310,11 @@
             "node": "Generate Combined Demux",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Mark Run Complete",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -326,13 +331,7 @@
     },
     "Generate Combined Demux": {
       "main": [
-        [
-          {
-            "node": "Mark Run Complete",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
@@ -343,8 +342,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "43669629-7450-42cf-8ccb-07e897ed788c",
-  "activeVersionId": "43669629-7450-42cf-8ccb-07e897ed788c",
+  "versionId": "5e012dcf-e1fe-4a67-b1c1-8bb4269d9761",
+  "activeVersionId": "5e012dcf-e1fe-4a67-b1c1-8bb4269d9761",
   "triggerCount": 1,
   "shared": [
     {
@@ -356,9 +355,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-25T10:06:12.000Z",
-    "createdAt": "2026-02-25T10:06:10.191Z",
-    "versionId": "43669629-7450-42cf-8ccb-07e897ed788c",
+    "updatedAt": "2026-04-13T14:00:16.000Z",
+    "createdAt": "2026-04-13T14:00:14.137Z",
+    "versionId": "5e012dcf-e1fe-4a67-b1c1-8bb4269d9761",
     "workflowId": "erir5LnAsqscCafr",
     "nodes": [
       {
@@ -550,8 +549,8 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          1184,
-          16
+          848,
+          32
         ],
         "id": "5895a888-31f8-4b90-bc4c-2124a0a1c90c",
         "name": "Mark Run Complete",
@@ -612,8 +611,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          896,
-          16
+          848,
+          256
         ],
         "id": "23b618eb-84be-4f15-aab7-544db8933a7d",
         "name": "Generate Combined Demux"
@@ -665,6 +664,11 @@
               "node": "Generate Combined Demux",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Mark Run Complete",
+              "type": "main",
+              "index": 0
             }
           ]
         ]
@@ -681,22 +685,16 @@
       },
       "Generate Combined Demux": {
         "main": [
-          [
-            {
-              "node": "Mark Run Complete",
-              "type": "main",
-              "index": 0
-            }
-          ]
+          []
         ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 43669629",
+    "name": "Version 5e012dcf",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "13-04-2026/0:00",
+  "commitDate": "14-04-2026/0:00",
   "fileName": "BCL Convert - 04 Post-Copy (Finalization).json"
 }
