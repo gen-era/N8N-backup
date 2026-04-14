@@ -1,136 +1,11 @@
 {
-  "updatedAt": "2026-04-11T14:38:21.779Z",
+  "updatedAt": "2026-04-13T16:35:46.512Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
   "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "e155ece9-33f5-4266-a2e2-3e9c90d9a1ad",
-              "leftValue": "={{ $json.exists }}",
-              "rightValue": "0",
-              "operator": {
-                "type": "boolean",
-                "operation": "false",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        448,
-        96
-      ],
-      "id": "024890e8-e937-4bd1-8295-50fcbaf366a9",
-      "name": "If"
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "instruments",
-        "limit": 1,
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "=serial_number",
-              "condition": "eq",
-              "keyValue": "={{ $('Parse Scan JSON').item.json.instrument_serial }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        672,
-        80
-      ],
-      "id": "e6994699-376b-41fa-85ee-eb750fbb00f0",
-      "name": "Get instrument_ref",
-      "credentials": {
-        "supabaseApi": {
-          "id": "HA1IMjyc0iMX0UIX",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "kits_mapping",
-        "limit": 1,
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "source_value",
-              "condition": "eq",
-              "keyValue": "={{ $('Parse Scan JSON').item.json.descriptor }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        880,
-        80
-      ],
-      "id": "2bd75da8-6f16-45b1-b3e2-c41fd2ea9ba7",
-      "name": "Get chiptype_ref",
-      "credentials": {
-        "supabaseApi": {
-          "id": "HA1IMjyc0iMX0UIX",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "concepts",
-        "limit": 1,
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "concept_name",
-              "condition": "eq",
-              "keyValue": "Completed"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        1104,
-        80
-      ],
-      "id": "d20d75f1-4c10-4959-b67b-65dd8198435b",
-      "name": "Get status_concept_ref",
-      "credentials": {
-        "supabaseApi": {
-          "id": "HA1IMjyc0iMX0UIX",
-          "name": "Supabase account"
-        }
-      }
-    },
     {
       "parameters": {
         "rule": {
@@ -144,21 +19,21 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -832,
-        -128
+        -992,
+        -80
       ],
       "id": "f76f93ef-2dad-4717-bbef-d7ca3d431a1e",
       "name": "Schedule Trigger"
     },
     {
       "parameters": {
-        "command": "SKIP_LOG=\"/tmp/scan_skip_log\"; TIMER_LOG=\"/tmp/scan_timer_log\"; PROCESSED=\"/tmp/scan_processed\"; touch \"$SKIP_LOG\" \"$TIMER_LOG\"; > \"$PROCESSED\"; while IFS= read -r SENTRIX; do [ -z \"$SENTRIX\" ] && continue; FOLDER=\"/volume1/ALLDATA/Scans/${SENTRIX}/\"; METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); if [ -n \"$METRICS\" ]; then sed -i \"/^${SENTRIX}$/d\" \"$SKIP_LOG\"; sed -i \"/^${SENTRIX}/d\" \"$TIMER_LOG\"; echo \"$SENTRIX\" >> \"$PROCESSED\"; echo \"{\\\"new\\\":true,\\\"path\\\":\\\"$METRICS\\\"}\"; fi; done < \"$SKIP_LOG\"; for FOLDER in /volume1/ALLDATA/Scans/*/; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); [[ \"$SENTRIX\" == *\"diag\"* ]] && continue; grep -q \"^$SENTRIX$\" \"$SKIP_LOG\" && continue; grep -q \"^$SENTRIX$\" \"$PROCESSED\" && continue; METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); if [ -z \"$METRICS\" ]; then FIRST_SEEN=$(grep \"^${SENTRIX} \" \"$TIMER_LOG\" | awk '{print $2}'); if [ -z \"$FIRST_SEEN\" ]; then echo \"$SENTRIX $(date +%s)\" >> \"$TIMER_LOG\"; else NOW=$(date +%s); ELAPSED=$((NOW - FIRST_SEEN)); if [ $ELAPSED -gt 1800 ]; then echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"Metrics.txt bulunamadi (30 dk)\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\"; echo \"$SENTRIX\" >> \"$SKIP_LOG\"; sed -i \"/^${SENTRIX}/d\" \"$TIMER_LOG\"; fi; fi; continue; fi; [ ! -f \"${FOLDER}Effective.cfg\" ] && echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"Effective.cfg bulunamadi\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\" && echo \"$SENTRIX\" >> \"$SKIP_LOG\" && continue; [ ! -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && [ ! -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"qc.txt ve sdf bulunamadi\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\" && echo \"$SENTRIX\" >> \"$SKIP_LOG\" && continue; if [ \"$METRICS\" -nt /tmp/last_scan_check ]; then echo \"{\\\"new\\\":true,\\\"path\\\":\\\"$METRICS\\\"}\"; fi; done; touch /tmp/last_scan_check"
+        "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -v diag | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -608,
-        -128
+        -768,
+        -80
       ],
       "id": "311d718a-fef0-412e-a15b-144b91f727e1",
       "name": "SSH: Find New Metrics Files",
@@ -171,48 +46,159 @@
     },
     {
       "parameters": {
-        "jsCode": "const stdout = $input.first().json.stdout.trim();\nif (!stdout) return [];\n\nconst lines = stdout.split('\\n').filter(f => f.trim());\n\nreturn lines.map(line => {\n  try {\n    const parsed = JSON.parse(line.trim());\n    return { json: parsed };\n  } catch {\n    return { json: { path: line.trim() } };\n  }\n});"
+        "jsCode": "const stdout = $input.first().json.stdout.trim();\nif (!stdout) return [];\n\nconst lines = stdout.split('\\n').filter(f => f.trim());\n\nreturn lines.map(line => {\n  try {\n    return { json: JSON.parse(line.trim()) };\n  } catch {\n    return null;\n  }\n}).filter(item => item !== null);"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -400,
-        -128
+        -560,
+        -80
       ],
       "id": "44d3c185-e360-45fa-9820-a35140507962",
       "name": "Parse File List"
     },
     {
       "parameters": {
-        "command": "=FILEPATH=\"{{ $json.path }}\"; FOLDER=$(dirname \"$FILEPATH\"); SENTRIX=$(basename \"$FOLDER\" | tr -d ' '); METRICS_FILE=$(ls \"$FOLDER\"/Metrics*.txt 2>/dev/null | grep -v old | head -1); RAW_DATE=$(sed -n '2p' \"$METRICS_FILE\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"$FOLDER/Effective.cfg\" 2>/dev/null | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"$FOLDER/${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); if [ -z \"$DESCRIPTOR\" ]; then DESCRIPTOR=$(grep -m1 \"<Name>\" \"$FOLDER/${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); fi; echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\""
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref, sentrix_id, status_concept_ref, updated_at \nFROM scans \nWHERE sentrix_id IN ({{ $json.sentrix_ids }})",
+        "options": {}
       },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
       "position": [
-        0,
-        -128
+        -208,
+        64
       ],
-      "id": "52254c30-b671-4b9a-ad39-1835aa615b59",
-      "name": "SSH: Parse Scan Data",
+      "id": "195745cd-b3ff-44d1-b1b9-a05495f35251",
+      "name": "Execute a SQL query",
+      "alwaysOutputData": true,
       "credentials": {
-        "sshPassword": {
-          "id": "ygN0iMbDsZngxa5z",
-          "name": "alldata hande"
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nreturn items\n  .filter(item => {\n    try {\n      const parsed = JSON.parse(item.json.stdout);\n      return !parsed.skip;\n    } catch {\n      return false;\n    }\n  })\n  .map(item => ({ json: JSON.parse(item.json.stdout) }));"
+        "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json))\n  } \n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        -128
+        -384,
+        -80
       ],
-      "id": "fb672f3d-1291-44f4-85e7-5cce9973f344",
-      "name": "Parse Scan JSON"
+      "id": "200667ad-ed19-402f-8d9a-21255b6b2b76",
+      "name": "list sentrix ids"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "insert_completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1f89ca7f-c3c8-4ea8-b48e-4cdf979d5e2e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d52e4848-bf77-4030-88b9-c9b3139047f9",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "insert_inprogress",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3afa2c8d-9fd7-4801-bee9-db2e7c20f526",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "update_completed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e3d1d039-e7c3-4a9d-ac84-d57643cec9ba",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "update_failed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        256
+      ],
+      "id": "52de688f-5410-4fee-bd8e-03fbbebf52a2",
+      "name": "Switch"
     },
     {
       "parameters": {
@@ -221,23 +207,27 @@
           "fieldValues": [
             {
               "fieldId": "sentrix_id",
-              "fieldValue": "={{ $('Parse Scan JSON').item.json.sentrix_id }}"
+              "fieldValue": "={{ $json.sentrix_id }}"
             },
             {
               "fieldId": "scan_date",
-              "fieldValue": "={{ $('Parse Scan JSON').item.json.scan_date }}"
+              "fieldValue": "={{ $json.scan_date }}"
             },
             {
               "fieldId": "status_concept_ref",
-              "fieldValue": "={{ $('Get status_concept_ref').item.json.uniqueref }}"
+              "fieldValue": "29"
             },
             {
               "fieldId": "instrument_ref",
-              "fieldValue": "={{ $('Get instrument_ref').item.json.uniqueref }}"
+              "fieldValue": "={{ $json.instrument_ref }}"
             },
             {
               "fieldId": "chiptype_ref",
-              "fieldValue": "={{ $('Get chiptype_ref').item.json.kits_ref }}"
+              "fieldValue": "={{ $json.chiptype_ref }}"
+            },
+            {
+              "fieldId": "care_site_ref",
+              "fieldValue": "={{ $json.care_site_ref }}"
             },
             {
               "fieldId": "updated_at",
@@ -246,10 +236,6 @@
             {
               "fieldId": "created_at",
               "fieldValue": "={{ new Date().toISOString() }}"
-            },
-            {
-              "fieldId": "care_site_ref",
-              "fieldValue": "={{ $('Get instrument_ref').item.json.care_site_ref }}"
             }
           ]
         }
@@ -257,11 +243,11 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1296,
-        80
+        1280,
+        -96
       ],
-      "id": "53d560ae-6ac0-456b-905f-dc2816b4ba69",
-      "name": "Insert Scan",
+      "id": "9d6b6634-8be2-4d57-ae31-05361a1bd4e9",
+      "name": "insert_completed",
       "credentials": {
         "supabaseApi": {
           "id": "HA1IMjyc0iMX0UIX",
@@ -271,121 +257,200 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
+        "tableId": "scans",
+        "fieldsUi": {
+          "fieldValues": [
             {
-              "id": "24fb1867-8bd1-4177-84c7-26846d235cd2",
-              "leftValue": "={{ $json.skip }}",
-              "rightValue": "",
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
+              "fieldId": "sentrix_id",
+              "fieldValue": "={{ $json.sentrix_id }}"
+            },
+            {
+              "fieldId": "status_concept_ref",
+              "fieldValue": "26"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
             }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
+          ]
+        }
       },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [
-        -208,
-        -368
+        1280,
+        96
       ],
-      "id": "62862a89-64ba-4cb8-803c-3e218ee52f0a",
-      "name": "If1"
-    },
-    {
-      "parameters": {
-        "fromEmail": "bioinf.notifty@gen-era.tech",
-        "toEmail": "hande.beklen@gen-era.com.tr",
-        "subject": "=⚠️ iScan Uyarı: {{ $json.reason }} - {{ $json.sentrix_id }}",
-        "html": "=<p>Sentrix ID: {{ $json.sentrix_id }}</p>\n             <p>Sebep: {{ $json.reason }}</p>",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        0,
-        -464
-      ],
-      "id": "e3f6f2b1-d28d-4838-aa3b-00f88f206cab",
-      "name": "Send email",
-      "webhookId": "fb7de934-7832-41a7-9605-61c03b44f721",
+      "id": "3f942faa-a8cc-494a-a07e-2f92f57aef17",
+      "name": "insert_inprogress",
       "credentials": {
-        "smtp": {
-          "id": "clTmxNgA7AqNrh5h",
-          "name": "bioinf.notify@gen-era.tech"
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n  const sentrixId = item.json.sentrix_id;\n  \nconst response = await this.helpers.request({\n  method: 'GET',\n  url: `https://gpjoobesseqdjwccxumn.supabase.co/rest/v1/scans?sentrix_id=eq.${sentrixId}&select=sentrix_id`,\n  headers: {\n    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwam9vYmVzc2VxZGp3Y2N4dW1uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDM5MDE3NywiZXhwIjoyMDY5OTY2MTc3fQ.YRAqx6RubaPjxhw3pQAnAVc10ff5VpblR4KyBs1jbE0',\n    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwam9vYmVzc2VxZGp3Y2N4dW1uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDM5MDE3NywiZXhwIjoyMDY5OTY2MTc3fQ.YRAqx6RubaPjxhw3pQAnAVc10ff5VpblR4KyBs1jbE0'\n  },\n  json: true\n});\n\nresults.push({\n    json: {\n      sentrix_id: item.json.sentrix_id,\n      scan_date: item.json.scan_date,\n      instrument_serial: item.json.instrument_serial,\n      descriptor: item.json.descriptor,\n      exists: response.length > 0\n    }\n  });\n}\n\nreturn results;"
+        "operation": "update",
+        "tableId": "scans",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "uniqueref",
+              "condition": "eq",
+              "keyValue": "={{ $json.uniqueref }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status_concept_ref",
+              "fieldValue": "29"
+            },
+            {
+              "fieldId": "scan_date",
+              "fieldValue": "={{ $json.scan_date }}"
+            },
+            {
+              "fieldId": "instrument_ref",
+              "fieldValue": "={{ $json.instrument_ref }}"
+            },
+            {
+              "fieldId": "chiptype_ref",
+              "fieldValue": "={{ $json.chiptype_ref }}"
+            },
+            {
+              "fieldId": "care_site_ref",
+              "fieldValue": "={{ $json.care_site_ref }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        288
+      ],
+      "id": "7eecf130-7fa1-4d41-8856-79603c48333b",
+      "name": "update_completed",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29 || parseInt(dbRecord.status_concept_ref) === 27) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        -128
+        496,
+        64
       ],
-      "id": "b2593a75-58cc-429b-be4e-d7e0adb36e21",
-      "name": "Code in JavaScript"
+      "id": "dbc8a323-2faf-42c7-b8f4-af69d64aec6c",
+      "name": "Get action"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "scans",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "uniqueref",
+              "condition": "eq",
+              "keyValue": "={{ $json.uniqueref }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status_concept_ref",
+              "fieldValue": "27"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        512
+      ],
+      "id": "d12faded-a0fb-4b7b-b868-73e25bfe22f4",
+      "name": "update_failed",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref, serial_number, care_site_ref FROM instruments",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        16,
+        64
+      ],
+      "id": "19c76b80-612b-4551-81a9-2b1be7828cf2",
+      "name": "Execute SQL: Get Instruments",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT kits_ref, source_value FROM kits_mapping",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        208,
+        64
+      ],
+      "id": "228dae35-005c-44c0-a6a7-c93402e05e05",
+      "name": "Execute SQL: Get Kits Mapping",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
-    "If": {
-      "main": [
-        [
-          {
-            "node": "Get instrument_ref",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get instrument_ref": {
-      "main": [
-        [
-          {
-            "node": "Get chiptype_ref",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get chiptype_ref": {
-      "main": [
-        [
-          {
-            "node": "Get status_concept_ref",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get status_concept_ref": {
-      "main": [
-        [
-          {
-            "node": "Insert Scan",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Schedule Trigger": {
       "main": [
         [
@@ -412,58 +477,94 @@
       "main": [
         [
           {
-            "node": "If1",
+            "node": "list sentrix ids",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "SSH: Parse Scan Data": {
+    "list sentrix ids": {
       "main": [
         [
           {
-            "node": "Parse Scan JSON",
+            "node": "Execute a SQL query",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Parse Scan JSON": {
+    "Execute a SQL query": {
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "Execute SQL: Get Instruments",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If1": {
+    "Switch": {
       "main": [
         [
           {
-            "node": "Send email",
+            "node": "insert_completed",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "SSH: Parse Scan Data",
+            "node": "insert_inprogress",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "update_completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "update_failed",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript": {
+    "Get action": {
       "main": [
         [
           {
-            "node": "If",
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute SQL: Get Instruments": {
+      "main": [
+        [
+          {
+            "node": "Execute SQL: Get Kits Mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute SQL: Get Kits Mapping": {
+      "main": [
+        [
+          {
+            "node": "Get action",
             "type": "main",
             "index": 0
           }
@@ -484,8 +585,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2fdeba63-36c9-4ae2-aebb-0965d0e64aba",
-  "activeVersionId": "2fdeba63-36c9-4ae2-aebb-0965d0e64aba",
+  "versionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
+  "activeVersionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
   "triggerCount": 1,
   "shared": [
     {
@@ -497,136 +598,11 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-11T14:38:24.000Z",
-    "createdAt": "2026-04-11T14:38:21.781Z",
-    "versionId": "2fdeba63-36c9-4ae2-aebb-0965d0e64aba",
+    "updatedAt": "2026-04-13T16:35:48.000Z",
+    "createdAt": "2026-04-13T16:35:46.514Z",
+    "versionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
-      {
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "loose",
-              "version": 3
-            },
-            "conditions": [
-              {
-                "id": "e155ece9-33f5-4266-a2e2-3e9c90d9a1ad",
-                "leftValue": "={{ $json.exists }}",
-                "rightValue": "0",
-                "operator": {
-                  "type": "boolean",
-                  "operation": "false",
-                  "singleValue": true
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "looseTypeValidation": true,
-          "options": {}
-        },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
-        "position": [
-          448,
-          96
-        ],
-        "id": "024890e8-e937-4bd1-8295-50fcbaf366a9",
-        "name": "If"
-      },
-      {
-        "parameters": {
-          "operation": "getAll",
-          "tableId": "instruments",
-          "limit": 1,
-          "filters": {
-            "conditions": [
-              {
-                "keyName": "=serial_number",
-                "condition": "eq",
-                "keyValue": "={{ $('Parse Scan JSON').item.json.instrument_serial }}"
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.supabase",
-        "typeVersion": 1,
-        "position": [
-          672,
-          80
-        ],
-        "id": "e6994699-376b-41fa-85ee-eb750fbb00f0",
-        "name": "Get instrument_ref",
-        "credentials": {
-          "supabaseApi": {
-            "id": "HA1IMjyc0iMX0UIX",
-            "name": "Supabase account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "operation": "getAll",
-          "tableId": "kits_mapping",
-          "limit": 1,
-          "filters": {
-            "conditions": [
-              {
-                "keyName": "source_value",
-                "condition": "eq",
-                "keyValue": "={{ $('Parse Scan JSON').item.json.descriptor }}"
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.supabase",
-        "typeVersion": 1,
-        "position": [
-          880,
-          80
-        ],
-        "id": "2bd75da8-6f16-45b1-b3e2-c41fd2ea9ba7",
-        "name": "Get chiptype_ref",
-        "credentials": {
-          "supabaseApi": {
-            "id": "HA1IMjyc0iMX0UIX",
-            "name": "Supabase account"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "operation": "getAll",
-          "tableId": "concepts",
-          "limit": 1,
-          "filters": {
-            "conditions": [
-              {
-                "keyName": "concept_name",
-                "condition": "eq",
-                "keyValue": "Completed"
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.supabase",
-        "typeVersion": 1,
-        "position": [
-          1104,
-          80
-        ],
-        "id": "d20d75f1-4c10-4959-b67b-65dd8198435b",
-        "name": "Get status_concept_ref",
-        "credentials": {
-          "supabaseApi": {
-            "id": "HA1IMjyc0iMX0UIX",
-            "name": "Supabase account"
-          }
-        }
-      },
       {
         "parameters": {
           "rule": {
@@ -640,21 +616,21 @@
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.3,
         "position": [
-          -832,
-          -128
+          -992,
+          -80
         ],
         "id": "f76f93ef-2dad-4717-bbef-d7ca3d431a1e",
         "name": "Schedule Trigger"
       },
       {
         "parameters": {
-          "command": "SKIP_LOG=\"/tmp/scan_skip_log\"; TIMER_LOG=\"/tmp/scan_timer_log\"; PROCESSED=\"/tmp/scan_processed\"; touch \"$SKIP_LOG\" \"$TIMER_LOG\"; > \"$PROCESSED\"; while IFS= read -r SENTRIX; do [ -z \"$SENTRIX\" ] && continue; FOLDER=\"/volume1/ALLDATA/Scans/${SENTRIX}/\"; METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); if [ -n \"$METRICS\" ]; then sed -i \"/^${SENTRIX}$/d\" \"$SKIP_LOG\"; sed -i \"/^${SENTRIX}/d\" \"$TIMER_LOG\"; echo \"$SENTRIX\" >> \"$PROCESSED\"; echo \"{\\\"new\\\":true,\\\"path\\\":\\\"$METRICS\\\"}\"; fi; done < \"$SKIP_LOG\"; for FOLDER in /volume1/ALLDATA/Scans/*/; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); [[ \"$SENTRIX\" == *\"diag\"* ]] && continue; grep -q \"^$SENTRIX$\" \"$SKIP_LOG\" && continue; grep -q \"^$SENTRIX$\" \"$PROCESSED\" && continue; METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); if [ -z \"$METRICS\" ]; then FIRST_SEEN=$(grep \"^${SENTRIX} \" \"$TIMER_LOG\" | awk '{print $2}'); if [ -z \"$FIRST_SEEN\" ]; then echo \"$SENTRIX $(date +%s)\" >> \"$TIMER_LOG\"; else NOW=$(date +%s); ELAPSED=$((NOW - FIRST_SEEN)); if [ $ELAPSED -gt 1800 ]; then echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"Metrics.txt bulunamadi (30 dk)\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\"; echo \"$SENTRIX\" >> \"$SKIP_LOG\"; sed -i \"/^${SENTRIX}/d\" \"$TIMER_LOG\"; fi; fi; continue; fi; [ ! -f \"${FOLDER}Effective.cfg\" ] && echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"Effective.cfg bulunamadi\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\" && echo \"$SENTRIX\" >> \"$SKIP_LOG\" && continue; [ ! -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && [ ! -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"{\\\"skip\\\":true,\\\"reason\\\":\\\"qc.txt ve sdf bulunamadi\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\"}\" && echo \"$SENTRIX\" >> \"$SKIP_LOG\" && continue; if [ \"$METRICS\" -nt /tmp/last_scan_check ]; then echo \"{\\\"new\\\":true,\\\"path\\\":\\\"$METRICS\\\"}\"; fi; done; touch /tmp/last_scan_check"
+          "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -v diag | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
         },
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          -608,
-          -128
+          -768,
+          -80
         ],
         "id": "311d718a-fef0-412e-a15b-144b91f727e1",
         "name": "SSH: Find New Metrics Files",
@@ -667,48 +643,159 @@
       },
       {
         "parameters": {
-          "jsCode": "const stdout = $input.first().json.stdout.trim();\nif (!stdout) return [];\n\nconst lines = stdout.split('\\n').filter(f => f.trim());\n\nreturn lines.map(line => {\n  try {\n    const parsed = JSON.parse(line.trim());\n    return { json: parsed };\n  } catch {\n    return { json: { path: line.trim() } };\n  }\n});"
+          "jsCode": "const stdout = $input.first().json.stdout.trim();\nif (!stdout) return [];\n\nconst lines = stdout.split('\\n').filter(f => f.trim());\n\nreturn lines.map(line => {\n  try {\n    return { json: JSON.parse(line.trim()) };\n  } catch {\n    return null;\n  }\n}).filter(item => item !== null);"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -400,
-          -128
+          -560,
+          -80
         ],
         "id": "44d3c185-e360-45fa-9820-a35140507962",
         "name": "Parse File List"
       },
       {
         "parameters": {
-          "command": "=FILEPATH=\"{{ $json.path }}\"; FOLDER=$(dirname \"$FILEPATH\"); SENTRIX=$(basename \"$FOLDER\" | tr -d ' '); METRICS_FILE=$(ls \"$FOLDER\"/Metrics*.txt 2>/dev/null | grep -v old | head -1); RAW_DATE=$(sed -n '2p' \"$METRICS_FILE\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"$FOLDER/Effective.cfg\" 2>/dev/null | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"$FOLDER/${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); if [ -z \"$DESCRIPTOR\" ]; then DESCRIPTOR=$(grep -m1 \"<Name>\" \"$FOLDER/${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); fi; echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\""
+          "operation": "executeQuery",
+          "query": "SELECT uniqueref, sentrix_id, status_concept_ref, updated_at \nFROM scans \nWHERE sentrix_id IN ({{ $json.sentrix_ids }})",
+          "options": {}
         },
-        "type": "n8n-nodes-base.ssh",
-        "typeVersion": 1,
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
         "position": [
-          0,
-          -128
+          -208,
+          64
         ],
-        "id": "52254c30-b671-4b9a-ad39-1835aa615b59",
-        "name": "SSH: Parse Scan Data",
+        "id": "195745cd-b3ff-44d1-b1b9-a05495f35251",
+        "name": "Execute a SQL query",
+        "alwaysOutputData": true,
         "credentials": {
-          "sshPassword": {
-            "id": "ygN0iMbDsZngxa5z",
-            "name": "alldata hande"
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
           }
         }
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all();\nreturn items\n  .filter(item => {\n    try {\n      const parsed = JSON.parse(item.json.stdout);\n      return !parsed.skip;\n    } catch {\n      return false;\n    }\n  })\n  .map(item => ({ json: JSON.parse(item.json.stdout) }));"
+          "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json))\n  } \n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          240,
-          -128
+          -384,
+          -80
         ],
-        "id": "fb672f3d-1291-44f4-85e7-5cce9973f344",
-        "name": "Parse Scan JSON"
+        "id": "200667ad-ed19-402f-8d9a-21255b6b2b76",
+        "name": "list sentrix ids"
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "insert_completed",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "1f89ca7f-c3c8-4ea8-b48e-4cdf979d5e2e"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "d52e4848-bf77-4030-88b9-c9b3139047f9",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "insert_inprogress",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "3afa2c8d-9fd7-4801-bee9-db2e7c20f526",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "update_completed",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "e3d1d039-e7c3-4a9d-ac84-d57643cec9ba",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "update_failed",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          512,
+          256
+        ],
+        "id": "52de688f-5410-4fee-bd8e-03fbbebf52a2",
+        "name": "Switch"
       },
       {
         "parameters": {
@@ -717,23 +804,27 @@
             "fieldValues": [
               {
                 "fieldId": "sentrix_id",
-                "fieldValue": "={{ $('Parse Scan JSON').item.json.sentrix_id }}"
+                "fieldValue": "={{ $json.sentrix_id }}"
               },
               {
                 "fieldId": "scan_date",
-                "fieldValue": "={{ $('Parse Scan JSON').item.json.scan_date }}"
+                "fieldValue": "={{ $json.scan_date }}"
               },
               {
                 "fieldId": "status_concept_ref",
-                "fieldValue": "={{ $('Get status_concept_ref').item.json.uniqueref }}"
+                "fieldValue": "29"
               },
               {
                 "fieldId": "instrument_ref",
-                "fieldValue": "={{ $('Get instrument_ref').item.json.uniqueref }}"
+                "fieldValue": "={{ $json.instrument_ref }}"
               },
               {
                 "fieldId": "chiptype_ref",
-                "fieldValue": "={{ $('Get chiptype_ref').item.json.kits_ref }}"
+                "fieldValue": "={{ $json.chiptype_ref }}"
+              },
+              {
+                "fieldId": "care_site_ref",
+                "fieldValue": "={{ $json.care_site_ref }}"
               },
               {
                 "fieldId": "updated_at",
@@ -742,10 +833,6 @@
               {
                 "fieldId": "created_at",
                 "fieldValue": "={{ new Date().toISOString() }}"
-              },
-              {
-                "fieldId": "care_site_ref",
-                "fieldValue": "={{ $('Get instrument_ref').item.json.care_site_ref }}"
               }
             ]
           }
@@ -753,11 +840,11 @@
         "type": "n8n-nodes-base.supabase",
         "typeVersion": 1,
         "position": [
-          1296,
-          80
+          1280,
+          -96
         ],
-        "id": "53d560ae-6ac0-456b-905f-dc2816b4ba69",
-        "name": "Insert Scan",
+        "id": "9d6b6634-8be2-4d57-ae31-05361a1bd4e9",
+        "name": "insert_completed",
         "credentials": {
           "supabaseApi": {
             "id": "HA1IMjyc0iMX0UIX",
@@ -767,121 +854,200 @@
       },
       {
         "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
-            },
-            "conditions": [
+          "tableId": "scans",
+          "fieldsUi": {
+            "fieldValues": [
               {
-                "id": "24fb1867-8bd1-4177-84c7-26846d235cd2",
-                "leftValue": "={{ $json.skip }}",
-                "rightValue": "",
-                "operator": {
-                  "type": "boolean",
-                  "operation": "true",
-                  "singleValue": true
-                }
+                "fieldId": "sentrix_id",
+                "fieldValue": "={{ $json.sentrix_id }}"
+              },
+              {
+                "fieldId": "status_concept_ref",
+                "fieldValue": "26"
+              },
+              {
+                "fieldId": "updated_at",
+                "fieldValue": "={{ new Date().toISOString() }}"
+              },
+              {
+                "fieldId": "created_at",
+                "fieldValue": "={{ new Date().toISOString() }}"
               }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
+            ]
+          }
         },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
         "position": [
-          -208,
-          -368
+          1280,
+          96
         ],
-        "id": "62862a89-64ba-4cb8-803c-3e218ee52f0a",
-        "name": "If1"
-      },
-      {
-        "parameters": {
-          "fromEmail": "bioinf.notifty@gen-era.tech",
-          "toEmail": "hande.beklen@gen-era.com.tr",
-          "subject": "=⚠️ iScan Uyarı: {{ $json.reason }} - {{ $json.sentrix_id }}",
-          "html": "=<p>Sentrix ID: {{ $json.sentrix_id }}</p>\n             <p>Sebep: {{ $json.reason }}</p>",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          0,
-          -464
-        ],
-        "id": "e3f6f2b1-d28d-4838-aa3b-00f88f206cab",
-        "name": "Send email",
-        "webhookId": "fb7de934-7832-41a7-9605-61c03b44f721",
+        "id": "3f942faa-a8cc-494a-a07e-2f92f57aef17",
+        "name": "insert_inprogress",
         "credentials": {
-          "smtp": {
-            "id": "clTmxNgA7AqNrh5h",
-            "name": "bioinf.notify@gen-era.tech"
+          "supabaseApi": {
+            "id": "HA1IMjyc0iMX0UIX",
+            "name": "Supabase account"
           }
         }
       },
       {
         "parameters": {
-          "jsCode": "const results = [];\n\nfor (const item of $input.all()) {\n  const sentrixId = item.json.sentrix_id;\n  \nconst response = await this.helpers.request({\n  method: 'GET',\n  url: `https://gpjoobesseqdjwccxumn.supabase.co/rest/v1/scans?sentrix_id=eq.${sentrixId}&select=sentrix_id`,\n  headers: {\n    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwam9vYmVzc2VxZGp3Y2N4dW1uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDM5MDE3NywiZXhwIjoyMDY5OTY2MTc3fQ.YRAqx6RubaPjxhw3pQAnAVc10ff5VpblR4KyBs1jbE0',\n    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdwam9vYmVzc2VxZGp3Y2N4dW1uIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NDM5MDE3NywiZXhwIjoyMDY5OTY2MTc3fQ.YRAqx6RubaPjxhw3pQAnAVc10ff5VpblR4KyBs1jbE0'\n  },\n  json: true\n});\n\nresults.push({\n    json: {\n      sentrix_id: item.json.sentrix_id,\n      scan_date: item.json.scan_date,\n      instrument_serial: item.json.instrument_serial,\n      descriptor: item.json.descriptor,\n      exists: response.length > 0\n    }\n  });\n}\n\nreturn results;"
+          "operation": "update",
+          "tableId": "scans",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "uniqueref",
+                "condition": "eq",
+                "keyValue": "={{ $json.uniqueref }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "status_concept_ref",
+                "fieldValue": "29"
+              },
+              {
+                "fieldId": "scan_date",
+                "fieldValue": "={{ $json.scan_date }}"
+              },
+              {
+                "fieldId": "instrument_ref",
+                "fieldValue": "={{ $json.instrument_ref }}"
+              },
+              {
+                "fieldId": "chiptype_ref",
+                "fieldValue": "={{ $json.chiptype_ref }}"
+              },
+              {
+                "fieldId": "care_site_ref",
+                "fieldValue": "={{ $json.care_site_ref }}"
+              },
+              {
+                "fieldId": "updated_at",
+                "fieldValue": "={{ new Date().toISOString() }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          1280,
+          288
+        ],
+        "id": "7eecf130-7fa1-4d41-8856-79603c48333b",
+        "name": "update_completed",
+        "credentials": {
+          "supabaseApi": {
+            "id": "HA1IMjyc0iMX0UIX",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29 || parseInt(dbRecord.status_concept_ref) === 27) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          448,
-          -128
+          496,
+          64
         ],
-        "id": "b2593a75-58cc-429b-be4e-d7e0adb36e21",
-        "name": "Code in JavaScript"
+        "id": "dbc8a323-2faf-42c7-b8f4-af69d64aec6c",
+        "name": "Get action"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "tableId": "scans",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "uniqueref",
+                "condition": "eq",
+                "keyValue": "={{ $json.uniqueref }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "status_concept_ref",
+                "fieldValue": "27"
+              },
+              {
+                "fieldId": "updated_at",
+                "fieldValue": "={{ new Date().toISOString() }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          1280,
+          512
+        ],
+        "id": "d12faded-a0fb-4b7b-b868-73e25bfe22f4",
+        "name": "update_failed",
+        "credentials": {
+          "supabaseApi": {
+            "id": "HA1IMjyc0iMX0UIX",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT uniqueref, serial_number, care_site_ref FROM instruments",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          16,
+          64
+        ],
+        "id": "19c76b80-612b-4551-81a9-2b1be7828cf2",
+        "name": "Execute SQL: Get Instruments",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT kits_ref, source_value FROM kits_mapping",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          208,
+          64
+        ],
+        "id": "228dae35-005c-44c0-a6a7-c93402e05e05",
+        "name": "Execute SQL: Get Kits Mapping",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
       }
     ],
     "connections": {
-      "If": {
-        "main": [
-          [
-            {
-              "node": "Get instrument_ref",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get instrument_ref": {
-        "main": [
-          [
-            {
-              "node": "Get chiptype_ref",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get chiptype_ref": {
-        "main": [
-          [
-            {
-              "node": "Get status_concept_ref",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Get status_concept_ref": {
-        "main": [
-          [
-            {
-              "node": "Insert Scan",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Schedule Trigger": {
         "main": [
           [
@@ -908,58 +1074,94 @@
         "main": [
           [
             {
-              "node": "If1",
+              "node": "list sentrix ids",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "SSH: Parse Scan Data": {
+      "list sentrix ids": {
         "main": [
           [
             {
-              "node": "Parse Scan JSON",
+              "node": "Execute a SQL query",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Parse Scan JSON": {
+      "Execute a SQL query": {
         "main": [
           [
             {
-              "node": "Code in JavaScript",
+              "node": "Execute SQL: Get Instruments",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "If1": {
+      "Switch": {
         "main": [
           [
             {
-              "node": "Send email",
+              "node": "insert_completed",
               "type": "main",
               "index": 0
             }
           ],
           [
             {
-              "node": "SSH: Parse Scan Data",
+              "node": "insert_inprogress",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "update_completed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "update_failed",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Code in JavaScript": {
+      "Get action": {
         "main": [
           [
             {
-              "node": "If",
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute SQL: Get Instruments": {
+        "main": [
+          [
+            {
+              "node": "Execute SQL: Get Kits Mapping",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute SQL: Get Kits Mapping": {
+        "main": [
+          [
+            {
+              "node": "Get action",
               "type": "main",
               "index": 0
             }
@@ -968,11 +1170,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 2fdeba63",
+    "name": "Version 76d9d4c6",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "13-04-2026/0:00",
+  "commitDate": "14-04-2026/0:00",
   "fileName": "Scans2Sup.json"
 }
