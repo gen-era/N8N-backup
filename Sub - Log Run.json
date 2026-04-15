@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-13T14:04:18.975Z",
+  "updatedAt": "2026-04-14T08:48:03.892Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -38,7 +38,8 @@
         -192
       ],
       "id": "e4b310f5-ddf7-40d2-afad-f250a5df9cca",
-      "name": "Instrument Check"
+      "name": "Instrument Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -72,7 +73,8 @@
         -16
       ],
       "id": "591183e3-77dd-4fb3-a939-3053961a06db",
-      "name": "Flowcell Check"
+      "name": "Flowcell Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -85,7 +87,8 @@
         -192
       ],
       "id": "32f2a136-3824-42f3-8ca0-4d50dbb7cad6",
-      "name": "Extract Instrument ID"
+      "name": "Extract Instrument ID",
+      "disabled": true
     },
     {
       "parameters": {
@@ -125,7 +128,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -300,7 +304,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -340,7 +345,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -374,7 +380,8 @@
         160
       ],
       "id": "113afd43-7e0d-45e8-82ba-08158a297c7e",
-      "name": "Flowcell Lot Check"
+      "name": "Flowcell Lot Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -549,7 +556,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -724,7 +732,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -889,7 +898,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -923,7 +933,8 @@
         336
       ],
       "id": "e2b081d1-ebff-4466-818b-48b9792a547b",
-      "name": "Flowcell Settings Check"
+      "name": "Flowcell Settings Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -957,7 +968,8 @@
         -352
       ],
       "id": "83674f94-dae0-4ab8-a51d-fcbc59d8fd15",
-      "name": "Date Check"
+      "name": "Date Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -997,7 +1009,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1172,7 +1185,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1227,7 +1241,8 @@
         528
       ],
       "id": "b9049fef-c327-4dd9-bb0a-331532dfe06a",
-      "name": "Status Check"
+      "name": "Status Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1262,7 +1277,8 @@
         544
       ],
       "id": "8e07a89c-d27a-4a28-a728-e03c3253c27a",
-      "name": "If"
+      "name": "If",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1275,7 +1291,8 @@
         512
       ],
       "id": "f3c82859-d38f-4dba-8e87-ced2df770e02",
-      "name": "Execute Command"
+      "name": "Execute Command",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1358,7 +1375,8 @@
         752
       ],
       "id": "17008834-390d-49ff-8f81-e6c5280d059f",
-      "name": "Switch"
+      "name": "Switch",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1393,7 +1411,8 @@
         768
       ],
       "id": "af85fcfe-aba4-4982-947b-6131b7f39e29",
-      "name": "Storage Check"
+      "name": "Storage Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1558,7 +1577,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1723,7 +1743,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1888,7 +1909,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1902,6 +1924,7 @@
       ],
       "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
       "name": "Extract Instrument ID5",
+      "disabled": true,
       "onError": "continueErrorOutput"
     },
     {
@@ -1936,7 +1959,8 @@
         1024
       ],
       "id": "57ca76bb-b565-451b-ad95-a7fe77eda348",
-      "name": "Workflow Check"
+      "name": "Workflow Check",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1997,7 +2021,8 @@
         1040
       ],
       "id": "dae27ba8-5db9-4c37-9434-350774762f13",
-      "name": "Switch1"
+      "name": "Switch1",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2172,7 +2197,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -2347,7 +2373,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -2522,7 +2549,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -2535,7 +2563,8 @@
         -352
       ],
       "id": "c7b8fe2e-8576-4998-8a9d-99649e9fce31",
-      "name": "Code in JavaScript"
+      "name": "Code in JavaScript",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2553,7 +2582,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        272,
+        -400,
         -16
       ],
       "id": "b087ac02-bddd-4f1e-bb2d-668465285a4d",
@@ -2580,6 +2609,7 @@
           "name": "PG-ALB-1.5"
         }
       },
+      "disabled": true,
       "onError": "continueRegularOutput"
     },
     {
@@ -2593,7 +2623,8 @@
         160
       ],
       "id": "32e766d3-ab8d-4401-9353-4054507213e7",
-      "name": "Extract Lot"
+      "name": "Extract Lot",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2606,7 +2637,8 @@
         -16
       ],
       "id": "cdd9c4ca-6211-4c2f-95ea-62ba90d18b8b",
-      "name": "Extract Flowcell"
+      "name": "Extract Flowcell",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2619,7 +2651,8 @@
         336
       ],
       "id": "08c7acdf-1f8a-4ffa-b901-785d17dd4dba",
-      "name": "Extract Settings"
+      "name": "Extract Settings",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2794,7 +2827,125 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  '{{ $json.path }}' AS path,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        208
+      ],
+      "id": "52d60478-34e1-430e-b9c9-568a890b6abd",
+      "name": "Check Measurement",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+              "leftValue": "={{ $json.has_measurements }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        208
+      ],
+      "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
+      "name": "Has Measurement"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SeGWQ7ai2D66eUSG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+          "cachedResultName": "interop"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "folder": "={{ $json.path }}",
+            "path": "={{ $json.run_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "folder",
+              "displayName": "folder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        208
+      ],
+      "id": "b01e558a-45da-4b24-8e89-a23537caff48",
+      "name": "Call 'interop'"
     }
   ],
   "connections": {
@@ -3150,6 +3301,11 @@
             "node": "Get DB Record",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Check Measurement",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -3243,6 +3399,29 @@
           }
         ]
       ]
+    },
+    "Check Measurement": {
+      "main": [
+        [
+          {
+            "node": "Has Measurement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Measurement": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'interop'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -3262,7 +3441,7 @@
       }
     ]
   },
-  "versionId": "a954622a-d14d-48de-9313-a686f572cf5d",
+  "versionId": "7d9e99e1-f128-4d0c-b6c5-eae5881a4172",
   "activeVersionId": "f17c9348-4f24-4bb8-8a10-203c6b26b8cb",
   "triggerCount": 0,
   "shared": [
@@ -6525,6 +6704,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "14-04-2026/0:00",
+  "commitDate": "15-04-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
