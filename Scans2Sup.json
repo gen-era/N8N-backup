@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-13T16:35:46.512Z",
+  "updatedAt": "2026-04-15T09:37:18.049Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
@@ -11,7 +11,7 @@
         "rule": {
           "interval": [
             {
-              "field": "minutes"
+              "field": "hours"
             }
           ]
         }
@@ -585,8 +585,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
-  "activeVersionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
+  "versionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
+  "activeVersionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
   "triggerCount": 1,
   "shared": [
     {
@@ -598,9 +598,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-13T16:35:48.000Z",
-    "createdAt": "2026-04-13T16:35:46.514Z",
-    "versionId": "76d9d4c6-ac9c-4783-88fd-326a22fa8cbd",
+    "updatedAt": "2026-04-15T09:37:19.000Z",
+    "createdAt": "2026-04-15T09:37:18.051Z",
+    "versionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
       {
@@ -608,7 +608,7 @@
           "rule": {
             "interval": [
               {
-                "field": "minutes"
+                "field": "hours"
               }
             ]
           }
@@ -1170,11 +1170,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 76d9d4c6",
+    "name": "Version 2521878e",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "15-04-2026/0:00",
+  "commitDate": "16-04-2026/0:00",
   "fileName": "Scans2Sup.json"
 }
