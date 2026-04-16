@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-25T08:58:56.089Z",
+  "updatedAt": "2026-04-15T09:37:06.631Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -188,6 +188,16 @@
                 "type": "string",
                 "operation": "equals",
                 "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "010035ee-e869-41f4-abf1-1498b75cab07",
+              "leftValue": "={{ $json.care_site_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
               }
             }
           ],
@@ -451,8 +461,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
-  "activeVersionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
+  "versionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
+  "activeVersionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
   "triggerCount": 1,
   "shared": [
     {
@@ -464,9 +474,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-19T06:46:26.000Z",
-    "createdAt": "2026-02-19T06:46:24.627Z",
-    "versionId": "fd71017c-397c-4d75-b0c1-5f25e8e78074",
+    "updatedAt": "2026-04-15T09:37:13.000Z",
+    "createdAt": "2026-04-15T09:37:06.633Z",
+    "versionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -651,6 +661,16 @@
                   "type": "string",
                   "operation": "equals",
                   "name": "filter.operator.equals"
+                }
+              },
+              {
+                "id": "010035ee-e869-41f4-abf1-1498b75cab07",
+                "leftValue": "={{ $json.care_site_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
                 }
               }
             ],
@@ -901,7 +921,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version fd71017c",
+    "name": "Version 3ed8e6e8",
     "description": "",
     "autosaved": false
   },
@@ -913,6 +933,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-04-2026/0:00",
+  "commitDate": "16-04-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
