@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-09T15:58:56.879Z",
+  "updatedAt": "2026-04-15T20:17:36.838Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -541,7 +541,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA,\n`;\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
       },
       "id": "065d2779-3452-4de5-99f1-e96c0ddc97a5",
       "name": "Generate Sample Sheet1",
@@ -1029,8 +1029,8 @@
       }
     ]
   },
-  "versionId": "f7249c51-201a-46c9-8309-1fdb6c1d27ee",
-  "activeVersionId": "3c5a4f14-acab-4298-abc2-c8fdf69fc10c",
+  "versionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
+  "activeVersionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
   "triggerCount": 1,
   "shared": [
     {
@@ -1042,9 +1042,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-12T07:55:21.000Z",
-    "createdAt": "2026-02-12T07:55:20.165Z",
-    "versionId": "3c5a4f14-acab-4298-abc2-c8fdf69fc10c",
+    "updatedAt": "2026-04-15T20:17:38.000Z",
+    "createdAt": "2026-04-15T20:17:36.841Z",
+    "versionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1072,8 +1072,8 @@
             "conditions": [
               {
                 "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
-                "leftValue": "={{ $json.analysis_type }}",
-                "rightValue": "TSO500_HT",
+                "leftValue": "={{ $('Webhook').item.json.body.Panel }}",
+                "rightValue": "FFPE",
                 "operator": {
                   "type": "string",
                   "operation": "equals",
@@ -1089,7 +1089,7 @@
         "typeVersion": 2.2,
         "position": [
           416,
-          624
+          672
         ],
         "id": "3591b387-c980-47cb-b04f-1311bf380497",
         "name": "TSO500_HT"
@@ -1102,7 +1102,7 @@
         "typeVersion": 2,
         "position": [
           640,
-          624
+          672
         ],
         "id": "f46a481d-eba3-4b54-bfd3-534664b8085b",
         "name": "Group Samples"
@@ -1115,7 +1115,7 @@
         "typeVersion": 2,
         "position": [
           1760,
-          624
+          672
         ],
         "id": "369787f4-d9f4-46c2-9bd1-2516609e998e",
         "name": "Parse Folder IDs"
@@ -1128,7 +1128,7 @@
         "typeVersion": 1,
         "position": [
           1552,
-          624
+          672
         ],
         "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
         "name": "Get Folder ID"
@@ -1141,7 +1141,7 @@
         "typeVersion": 1,
         "position": [
           1120,
-          624
+          672
         ],
         "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
         "name": "SampleSheet Upload"
@@ -1154,7 +1154,7 @@
         "typeVersion": 2,
         "position": [
           1344,
-          624
+          672
         ],
         "id": "9e3fca6c-5acc-4e28-8e94-d802c558e3dc",
         "name": "Prepare Pipeline Launch"
@@ -1167,7 +1167,7 @@
         "typeVersion": 1,
         "position": [
           1984,
-          624
+          672
         ],
         "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
         "name": "Launch Analysis",
@@ -1186,8 +1186,8 @@
             "conditions": [
               {
                 "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
-                "leftValue": "={{ $json.analysis_type }}",
-                "rightValue": "TSO500_ctDNA",
+                "leftValue": "={{ $('Webhook').item.json.body.Panel }}",
+                "rightValue": "ctDNA",
                 "operator": {
                   "type": "string",
                   "operation": "equals",
@@ -1314,8 +1314,8 @@
             "conditions": [
               {
                 "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
-                "leftValue": "={{ $json.analysis_type }}",
-                "rightValue": "TSO500_HRD",
+                "leftValue": "={{ $('Webhook').item.json.body.Panel }}",
+                "rightValue": "HRD",
                 "operator": {
                   "type": "string",
                   "operation": "equals",
@@ -1440,7 +1440,7 @@
         "typeVersion": 2,
         "position": [
           912,
-          624
+          672
         ]
       },
       {
@@ -1498,6 +1498,134 @@
         "id": "7711de67-95cf-4da5-87c2-f44933e09453",
         "name": "Wait",
         "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
+      },
+      {
+        "parameters": {
+          "jsCode": "  // Tüm önceki item'ları al\n  const items = $input.all();\n\n  // sample_id'ye göre grupla\n  const sampleGroups = {};\n\n  for (const item of items) {\n    const sampleId = item.json.sample_id;\n\n    if (!sampleGroups[sampleId]) {\n      sampleGroups[sampleId] = {\n        sample_id: sampleId,\n        files: [],\n        PROJECT_ID: item.json.PROJECT_ID\n      };\n    }\n\n    sampleGroups[sampleId].files.push(item.json.filename);\n  }\n\n  // Her sample için ayrı item oluştur\n  return Object.values(sampleGroups).map(group => ({\n    json: {\n      sample_id: group.sample_id,\n      file_count: group.files.length,\n      files: group.files,\n      PROJECT_ID: group.PROJECT_ID\n    }\n  }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          432
+        ],
+        "id": "144be4a1-89a0-41c4-84ff-4bc145a3c138",
+        "name": "Group Samples1"
+      },
+      {
+        "parameters": {
+          "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          432
+        ],
+        "id": "8884e81b-8c75-4afa-b9bb-9270fdda44f0",
+        "name": "Parse Folder IDs1"
+      },
+      {
+        "parameters": {
+          "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1552,
+          432
+        ],
+        "id": "97f7b199-cb18-41bf-9600-e57f99d59492",
+        "name": "Get Folder ID1"
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          432
+        ],
+        "id": "a507ac04-03c1-4eb9-9faf-3bf50657a133",
+        "name": "SampleSheet Upload1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sampleId = $('Generate Sample Sheet1').item.json.sample_id;\n  const projectId = $('Generate Sample Sheet1').item.json.PROJECT_ID;\n  const files = $('Generate Sample Sheet1').item.json.files;  // <-- files'ı al\n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files  // <-- files'ı ekle\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          432
+        ],
+        "id": "f401a8b0-4387-4d6d-bc48-29863a29eaf1",
+        "name": "Prepare Pipeline Launch1"
+      },
+      {
+        "parameters": {
+          "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch1').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch1').item.json.sample_id }}-analysis\"\n"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1984,
+          432
+        ],
+        "id": "33cb2ac7-5de8-4bd4-8365-6d0b92546b84",
+        "name": "Launch Analysis1",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA,\n`;\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+        },
+        "id": "065d2779-3452-4de5-99f1-e96c0ddc97a5",
+        "name": "Generate Sample Sheet1",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          912,
+          432
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a752bd9b-e446-421d-bc7c-3d7ae546f9f2",
+                "leftValue": "={{ $('Webhook').item.json.body.Panel }}",
+                "rightValue": "FFPE_v2",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          416,
+          432
+        ],
+        "id": "ac4c7e57-2bc5-40b0-a754-71780591ccf9",
+        "name": "TSO500_HT_v2"
       }
     ],
     "connections": {
@@ -1516,6 +1644,11 @@
             },
             {
               "node": "TSO500_HRD",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "TSO500_HT_v2",
               "type": "main",
               "index": 0
             }
@@ -1823,10 +1956,87 @@
             }
           ]
         ]
+      },
+      "Group Samples1": {
+        "main": [
+          [
+            {
+              "node": "Generate Sample Sheet1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Folder IDs1": {
+        "main": [
+          [
+            {
+              "node": "Launch Analysis1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Folder ID1": {
+        "main": [
+          [
+            {
+              "node": "Parse Folder IDs1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SampleSheet Upload1": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Launch1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Launch1": {
+        "main": [
+          [
+            {
+              "node": "Get Folder ID1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Sample Sheet1": {
+        "main": [
+          [
+            {
+              "node": "SampleSheet Upload1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TSO500_HT_v2": {
+        "main": [
+          [
+            {
+              "node": "Group Samples1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 3c5a4f14",
+    "name": "Version 5ca0fbe5",
     "description": "",
     "autosaved": false
   },
@@ -1838,6 +2048,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-04-2026/0:00",
+  "commitDate": "16-04-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
