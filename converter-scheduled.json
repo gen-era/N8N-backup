@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-10T14:14:05.574Z",
+  "updatedAt": "2026-04-16T06:09:54.454Z",
   "createdAt": "2025-08-29T07:09:31.570Z",
   "id": "u3Gwkokw9EhG5M3O",
   "name": "converter-scheduled",
@@ -1664,7 +1664,8 @@
             "storage_instrument_ref": 12,
             "run_id": "={{ $('Limit').item.json.folder }}",
             "flowcell_kit_ref": "={{ $json.data[1].flowcell_uniqueref }}",
-            "workflow_concept_ref": "={{ $json.data[1].workflow_mode_concept_ref }}"
+            "workflow_concept_ref": "={{ $json.data[1].workflow_mode_concept_ref }}",
+            "care_site_ref": "={{ $json.data[0].care_site_ref }}"
           },
           "matchingColumns": [
             "run_id"
@@ -1784,6 +1785,16 @@
               "type": "dateTime",
               "canBeUsedToMatch": true,
               "removed": true
+            },
+            {
+              "id": "care_site_ref",
+              "displayName": "care_site_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -2266,7 +2277,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "27fa0983-6973-40a9-b25a-4ba6f1304ecf",
+  "versionId": "9bbfc88f-9031-4e34-a069-3301e50b174a",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -2280,6 +2291,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "16-04-2026/0:00",
+  "commitDate": "17-04-2026/0:00",
   "fileName": "converter-scheduled.json"
 }
