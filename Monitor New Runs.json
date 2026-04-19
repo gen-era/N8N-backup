@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-15T09:37:06.631Z",
+  "updatedAt": "2026-04-18T09:04:10.187Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -23,34 +23,15 @@
     },
     {
       "parameters": {
-        "operation": "select",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "runs",
-          "mode": "list",
-          "cachedResultName": "runs"
-        },
-        "returnAll": true,
-        "where": {
-          "values": [
-            {
-              "column": "run_id",
-              "value": "={{ $json.run_id }}"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "SELECT * FROM runs\nWHERE run_id = ANY(string_to_array('{{ $json.run_ids_str }}', ',')) ",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        560,
-        -192
+        816,
+        -176
       ],
       "id": "15f0c21e-f575-4e27-b478-f7a2c085b872",
       "name": "Get Recorded Runs",
@@ -94,8 +75,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        752,
-        0
+        1056,
+        128
       ],
       "id": "69cdd13c-38c3-4ec5-8081-6948a895329b",
       "name": "Absent on DB"
@@ -209,8 +190,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        752,
-        -400
+        1056,
+        -432
       ],
       "id": "d64b3289-68b6-4f8f-a10b-1124268a664d",
       "name": "Present on DB with Missing Info"
@@ -288,8 +269,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1152,
-        -176
+        2096,
+        -224
       ],
       "id": "31d4adbe-644d-4c0c-a560-75d540c87ece",
       "name": "Call 'Log Run - Sub'"
@@ -304,8 +285,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        944,
-        -592
+        1248,
+        -544
       ],
       "id": "982f3026-56c6-4e55-9362-1c8071704df1",
       "name": "Add Paths"
@@ -324,11 +305,183 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -608,
+        -576,
         -192
       ],
       "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allIds = $input.all().map(i => i.json.run_id).join(',');\nreturn [{ json: { run_ids_str: allIds } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -176
+      ],
+      "id": "b0c697bf-3ddf-4ae2-b900-b8cc39a393f8",
+      "name": "Aggregate Run IDs"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements\nFROM runs\nWHERE run_id = '{{ $json.run_id }}'\n  AND status_concept_ref = 29",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        -176
+      ],
+      "id": "54811ec9-94d6-48fc-afa3-dce2e9276d54",
+      "name": "Check Measurement",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SeGWQ7ai2D66eUSG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+          "cachedResultName": "interop"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "folder": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "folder",
+              "displayName": "folder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        -528
+      ],
+      "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
+      "name": "Call 'interop'"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+              "leftValue": "={{ $json.has_measurements }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        -176
+      ],
+      "id": "9b78b958-d0b7-46e6-acb0-6411e3c3aa60",
+      "name": "Has No Measurement"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "run_id",
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        -336
+      ],
+      "id": "c8b590f8-9ffb-43c8-a5be-41b48eadf1ba",
+      "name": "Add Paths1"
+    },
+    {
+      "parameters": {
+        "maxItems": 2
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -624
+      ],
+      "id": "541010fe-9cde-4daf-a350-50a0cbfc2ab0",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1856,
+        -624
+      ],
+      "id": "2abcad21-c986-49f4-83df-d030579121f6",
+      "name": "Loop Over Items"
     }
   ],
   "connections": {
@@ -336,17 +489,22 @@
       "main": [
         [
           {
-            "node": "Get Recorded Runs",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Absent on DB",
             "type": "main",
             "index": 1
           },
           {
             "node": "Add Paths",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate Run IDs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Paths1",
             "type": "main",
             "index": 0
           }
@@ -363,6 +521,11 @@
           },
           {
             "node": "Absent on DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Measurement",
             "type": "main",
             "index": 0
           }
@@ -445,6 +608,84 @@
           }
         ]
       ]
+    },
+    "Aggregate Run IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Recorded Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Measurement": {
+      "main": [
+        [
+          {
+            "node": "Has No Measurement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has No Measurement": {
+      "main": [
+        [
+          {
+            "node": "Add Paths1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Paths1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'interop'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'interop'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -460,9 +701,1414 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
-  "activeVersionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
+  "pinData": {
+    "Find Runs": [
+      {
+        "json": {
+          "exitCode": 0,
+          "stderr": "",
+          "stdout": "/mnt/illuminastorage/run_folder/260411_A01978_0160_BHMMTNDRX7/,/mnt/illuminastorage/run_folder/260130_A01228_0246_BHF3VGDMX2/,/mnt/illuminastorage/run_folder/260408_A01228_0266_AHMCFVDRX7/,/mnt/illuminastorage/run_folder/260414_A01978_0162_AHMMT7DRX7/,/mnt/illuminastorage/run_folder/20260330_LH00267_0159_B23C2KWLT3/,/mnt/illuminastorage/run_folder/260414_A01228_0269_AHMLTKDRX7/,/mnt/illuminastorage/run_folder/260403_A01228_0263_BHMMVCDRX7/,/mnt/illuminastorage/run_folder/260411_A01978_0161_AHMLGWDRX7/,/mnt/illuminastorage/run_folder/260128_A01228_0245_BHVNT7DSXF/,/mnt/illuminastorage/run_folder/20251222_LH00897_0041_B237Y2NLT3/,/mnt/illuminastorage/run_folder/260401_A01228_0262_BHLM3FDRX7/,/mnt/illuminastorage/run_folder/260408_A01978_0158_BHMMLYDRX7/,/mnt/illuminastorage/run_folder/260408_A01978_0159_AHFYW5DMX2/,/mnt/illuminastorage/run_folder/260327_A01228_0261_AHFNWKDMX2/,/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF/,/mnt/illuminastorage/run_folder/260403_A01228_0264_AHFNKNDMX2/,/mnt/illuminastorage/run_folder/260415_A01228_0270_AHG5TLDMX2/,/mnt/smb_share/Runs/251205_A01228_0228_BHNLM2DSXF/,/mnt/smb_share/Runs/251217_NDX550412_RUO_0088_AH3C53BGY2/,/mnt/smb_share/Runs/20251010_LH00267_0137_A2327HGLT4/,/mnt/smb_share/Runs/251119_A01978_0133_AHCGVCDMX2/,/mnt/smb_share/Runs/251009_VH01921_29_AACWFFVHV/,/mnt/smb_share/Runs/20251222_LH00897_0041_B237Y2NLT3/,/mnt/smb_share/Runs/251118_A01832R_0230_BHMKT3DSXF/,/mnt/smb_share/Runs/260123_A01228_0244_BHT5NYDSXF/,/mnt/smb_share/Runs/260109_A01228_0238_BHT5GJDSXF/,/mnt/smb_share/Runs/251009_A01832R_0227_BHMKHNDSXF/,/mnt/smb_share/Runs/260316_A01832R_0238_BHKY7MDRX7/,/mnt/smb_share/Runs/251024_A01832R_0228_BHGYYLDRX7/,/mnt/smb_share/Runs/251126_NDX550412_RUO_0085_AHW2TGBGYX/,/mnt/smb_share/Runs/251224_A01228_0235_BHJKMCDRX7/,/mnt/smb_share/Runs/251226_A01228_0236_BHNMWCDSXF/,/mnt/smb_share/Runs/260109_A01228_0239_AHT5MKDSXF/,/mnt/smb_share/Runs/251226_A01228_0237_AHNK5TDSXF/,/mnt/smb_share/Runs/251124_A01228_0225_BHNLVFDSXF/,/mnt/smb_share/Runs/250430_VH00818_47_AAH33TKM5/,/mnt/smb_share/Runs/251226_A01832R_0234_BHJJFLDRX7/,/mnt/smb_share/Runs/260204_NDX550412_RUO_0090_AHTV5CBGYX/,/mnt/smb_share/Runs/260123_A01228_0243_AHT5VJDSXF/,/mnt/smb_share/Runs/260407_A01228_0265_AHMMHNDRX7/,/mnt/smb_share/Runs/260317_VH01407_44_AACY2KYHV/,/mnt/smb_share/Runs/251215_A01228_0230_BHCN7LDMX2/,/mnt/smb_share/Runs/251212_A01832R_0233_BHJ23JDRX7/,/mnt/smb_share/Runs/260211_A01832R_0236_BHJF3FDRX7/,/mnt/smb_share/Runs/20250919_LH00267_0133_B2327KGLT4/,/mnt/smb_share/Runs/260121_NDX550412_RUO_0089_AH3JGMBGY2/,/mnt/smb_share/Runs/251121_A01832R_0231_BHJ3WGDRX7/,/mnt/smb_share/Runs/260303_A01832R_0237_BHKN52DRX7/,/mnt/smb_share/Runs/251205_VH01138_10_AAHLYWCM5/,/mnt/smb_share/Runs/20251020_LH00267_0141_B2327TWLT4/,/mnt/smb_share/Runs/260128_A01228_0245_BHVNT7DSXF/,/mnt/smb_share/Runs/260211_NDX550412_RUO_0091_AHTVK3BGYX/,/mnt/smb_share/Runs/251210_A01832R_0232_BHNK5YDSXF/,/mnt/smb_share/Runs/260116_A01832R_0235_BHJJVGDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Split Runs": [
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0160_BHMMTNDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260130_A01228_0246_BHF3VGDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01228_0266_AHMCFVDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01978_0162_AHMMT7DRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20260330_LH00267_0159_B23C2KWLT3/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01228_0269_AHMLTKDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0263_BHMMVCDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0161_AHMLGWDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260128_A01228_0245_BHVNT7DSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20251222_LH00897_0041_B237Y2NLT3/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260401_A01228_0262_BHLM3FDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0158_BHMMLYDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0159_AHFYW5DMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260327_A01228_0261_AHFNWKDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0264_AHFNKNDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260415_A01228_0270_AHG5TLDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_A01228_0228_BHNLM2DSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251217_NDX550412_RUO_0088_AH3C53BGY2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251010_LH00267_0137_A2327HGLT4/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251119_A01978_0133_AHCGVCDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_VH01921_29_AACWFFVHV/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251222_LH00897_0041_B237Y2NLT3/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251118_A01832R_0230_BHMKT3DSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0244_BHT5NYDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0238_BHT5GJDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_A01832R_0227_BHMKHNDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260316_A01832R_0238_BHKY7MDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251024_A01832R_0228_BHGYYLDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251126_NDX550412_RUO_0085_AHW2TGBGYX/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251224_A01228_0235_BHJKMCDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0236_BHNMWCDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0239_AHT5MKDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0237_AHNK5TDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251124_A01228_0225_BHNLVFDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/250430_VH00818_47_AAH33TKM5/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01832R_0234_BHJJFLDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260204_NDX550412_RUO_0090_AHTV5CBGYX/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0243_AHT5VJDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260407_A01228_0265_AHMMHNDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260317_VH01407_44_AACY2KYHV/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251215_A01228_0230_BHCN7LDMX2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251212_A01832R_0233_BHJ23JDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_A01832R_0236_BHJF3FDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20250919_LH00267_0133_B2327KGLT4/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260121_NDX550412_RUO_0089_AH3JGMBGY2/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251121_A01832R_0231_BHJ3WGDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260303_A01832R_0237_BHKN52DRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_VH01138_10_AAHLYWCM5/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251020_LH00267_0141_B2327TWLT4/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260128_A01228_0245_BHVNT7DSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_NDX550412_RUO_0091_AHTVK3BGYX/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251210_A01832R_0232_BHNK5YDSXF/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260116_A01832R_0235_BHJJVGDRX7/"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Get Run IDs": [
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0160_BHMMTNDRX7/",
+          "run_id": "260411_A01978_0160_BHMMTNDRX7"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260130_A01228_0246_BHF3VGDMX2/",
+          "run_id": "260130_A01228_0246_BHF3VGDMX2"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01228_0266_AHMCFVDRX7/",
+          "run_id": "260408_A01228_0266_AHMCFVDRX7"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01978_0162_AHMMT7DRX7/",
+          "run_id": "260414_A01978_0162_AHMMT7DRX7"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20260330_LH00267_0159_B23C2KWLT3/",
+          "run_id": "20260330_LH00267_0159_B23C2KWLT3"
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01228_0269_AHMLTKDRX7/",
+          "run_id": "260414_A01228_0269_AHMLTKDRX7"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0263_BHMMVCDRX7/",
+          "run_id": "260403_A01228_0263_BHMMVCDRX7"
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0161_AHMLGWDRX7/",
+          "run_id": "260411_A01978_0161_AHMLGWDRX7"
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260128_A01228_0245_BHVNT7DSXF/",
+          "run_id": "260128_A01228_0245_BHVNT7DSXF"
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20251222_LH00897_0041_B237Y2NLT3/",
+          "run_id": "20251222_LH00897_0041_B237Y2NLT3"
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260401_A01228_0262_BHLM3FDRX7/",
+          "run_id": "260401_A01228_0262_BHLM3FDRX7"
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0158_BHMMLYDRX7/",
+          "run_id": "260408_A01978_0158_BHMMLYDRX7"
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0159_AHFYW5DMX2/",
+          "run_id": "260408_A01978_0159_AHFYW5DMX2"
+        },
+        "pairedItem": {
+          "item": 12
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260327_A01228_0261_AHFNWKDMX2/",
+          "run_id": "260327_A01228_0261_AHFNWKDMX2"
+        },
+        "pairedItem": {
+          "item": 13
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF/",
+          "run_id": "260323_A01978_0150_AHWFTFDSXF"
+        },
+        "pairedItem": {
+          "item": 14
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0264_AHFNKNDMX2/",
+          "run_id": "260403_A01228_0264_AHFNKNDMX2"
+        },
+        "pairedItem": {
+          "item": 15
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260415_A01228_0270_AHG5TLDMX2/",
+          "run_id": "260415_A01228_0270_AHG5TLDMX2"
+        },
+        "pairedItem": {
+          "item": 16
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_A01228_0228_BHNLM2DSXF/",
+          "run_id": "251205_A01228_0228_BHNLM2DSXF"
+        },
+        "pairedItem": {
+          "item": 17
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251217_NDX550412_RUO_0088_AH3C53BGY2/",
+          "run_id": "251217_NDX550412_RUO_0088_AH3C53BGY2"
+        },
+        "pairedItem": {
+          "item": 18
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251010_LH00267_0137_A2327HGLT4/",
+          "run_id": "20251010_LH00267_0137_A2327HGLT4"
+        },
+        "pairedItem": {
+          "item": 19
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251119_A01978_0133_AHCGVCDMX2/",
+          "run_id": "251119_A01978_0133_AHCGVCDMX2"
+        },
+        "pairedItem": {
+          "item": 20
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_VH01921_29_AACWFFVHV/",
+          "run_id": "251009_VH01921_29_AACWFFVHV"
+        },
+        "pairedItem": {
+          "item": 21
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251222_LH00897_0041_B237Y2NLT3/",
+          "run_id": "20251222_LH00897_0041_B237Y2NLT3"
+        },
+        "pairedItem": {
+          "item": 22
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251118_A01832R_0230_BHMKT3DSXF/",
+          "run_id": "251118_A01832R_0230_BHMKT3DSXF"
+        },
+        "pairedItem": {
+          "item": 23
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0244_BHT5NYDSXF/",
+          "run_id": "260123_A01228_0244_BHT5NYDSXF"
+        },
+        "pairedItem": {
+          "item": 24
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0238_BHT5GJDSXF/",
+          "run_id": "260109_A01228_0238_BHT5GJDSXF"
+        },
+        "pairedItem": {
+          "item": 25
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_A01832R_0227_BHMKHNDSXF/",
+          "run_id": "251009_A01832R_0227_BHMKHNDSXF"
+        },
+        "pairedItem": {
+          "item": 26
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260316_A01832R_0238_BHKY7MDRX7/",
+          "run_id": "260316_A01832R_0238_BHKY7MDRX7"
+        },
+        "pairedItem": {
+          "item": 27
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251024_A01832R_0228_BHGYYLDRX7/",
+          "run_id": "251024_A01832R_0228_BHGYYLDRX7"
+        },
+        "pairedItem": {
+          "item": 28
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251126_NDX550412_RUO_0085_AHW2TGBGYX/",
+          "run_id": "251126_NDX550412_RUO_0085_AHW2TGBGYX"
+        },
+        "pairedItem": {
+          "item": 29
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251224_A01228_0235_BHJKMCDRX7/",
+          "run_id": "251224_A01228_0235_BHJKMCDRX7"
+        },
+        "pairedItem": {
+          "item": 30
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0236_BHNMWCDSXF/",
+          "run_id": "251226_A01228_0236_BHNMWCDSXF"
+        },
+        "pairedItem": {
+          "item": 31
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0239_AHT5MKDSXF/",
+          "run_id": "260109_A01228_0239_AHT5MKDSXF"
+        },
+        "pairedItem": {
+          "item": 32
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0237_AHNK5TDSXF/",
+          "run_id": "251226_A01228_0237_AHNK5TDSXF"
+        },
+        "pairedItem": {
+          "item": 33
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251124_A01228_0225_BHNLVFDSXF/",
+          "run_id": "251124_A01228_0225_BHNLVFDSXF"
+        },
+        "pairedItem": {
+          "item": 34
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/250430_VH00818_47_AAH33TKM5/",
+          "run_id": "250430_VH00818_47_AAH33TKM5"
+        },
+        "pairedItem": {
+          "item": 35
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01832R_0234_BHJJFLDRX7/",
+          "run_id": "251226_A01832R_0234_BHJJFLDRX7"
+        },
+        "pairedItem": {
+          "item": 36
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260204_NDX550412_RUO_0090_AHTV5CBGYX/",
+          "run_id": "260204_NDX550412_RUO_0090_AHTV5CBGYX"
+        },
+        "pairedItem": {
+          "item": 37
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0243_AHT5VJDSXF/",
+          "run_id": "260123_A01228_0243_AHT5VJDSXF"
+        },
+        "pairedItem": {
+          "item": 38
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260407_A01228_0265_AHMMHNDRX7/",
+          "run_id": "260407_A01228_0265_AHMMHNDRX7"
+        },
+        "pairedItem": {
+          "item": 39
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260317_VH01407_44_AACY2KYHV/",
+          "run_id": "260317_VH01407_44_AACY2KYHV"
+        },
+        "pairedItem": {
+          "item": 40
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251215_A01228_0230_BHCN7LDMX2/",
+          "run_id": "251215_A01228_0230_BHCN7LDMX2"
+        },
+        "pairedItem": {
+          "item": 41
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251212_A01832R_0233_BHJ23JDRX7/",
+          "run_id": "251212_A01832R_0233_BHJ23JDRX7"
+        },
+        "pairedItem": {
+          "item": 42
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_A01832R_0236_BHJF3FDRX7/",
+          "run_id": "260211_A01832R_0236_BHJF3FDRX7"
+        },
+        "pairedItem": {
+          "item": 43
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20250919_LH00267_0133_B2327KGLT4/",
+          "run_id": "20250919_LH00267_0133_B2327KGLT4"
+        },
+        "pairedItem": {
+          "item": 44
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260121_NDX550412_RUO_0089_AH3JGMBGY2/",
+          "run_id": "260121_NDX550412_RUO_0089_AH3JGMBGY2"
+        },
+        "pairedItem": {
+          "item": 45
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251121_A01832R_0231_BHJ3WGDRX7/",
+          "run_id": "251121_A01832R_0231_BHJ3WGDRX7"
+        },
+        "pairedItem": {
+          "item": 46
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260303_A01832R_0237_BHKN52DRX7/",
+          "run_id": "260303_A01832R_0237_BHKN52DRX7"
+        },
+        "pairedItem": {
+          "item": 47
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_VH01138_10_AAHLYWCM5/",
+          "run_id": "251205_VH01138_10_AAHLYWCM5"
+        },
+        "pairedItem": {
+          "item": 48
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251020_LH00267_0141_B2327TWLT4/",
+          "run_id": "20251020_LH00267_0141_B2327TWLT4"
+        },
+        "pairedItem": {
+          "item": 49
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260128_A01228_0245_BHVNT7DSXF/",
+          "run_id": "260128_A01228_0245_BHVNT7DSXF"
+        },
+        "pairedItem": {
+          "item": 50
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_NDX550412_RUO_0091_AHTVK3BGYX/",
+          "run_id": "260211_NDX550412_RUO_0091_AHTVK3BGYX"
+        },
+        "pairedItem": {
+          "item": 51
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251210_A01832R_0232_BHNK5YDSXF/",
+          "run_id": "251210_A01832R_0232_BHNK5YDSXF"
+        },
+        "pairedItem": {
+          "item": 52
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260116_A01832R_0235_BHJJVGDRX7/",
+          "run_id": "260116_A01832R_0235_BHJJVGDRX7"
+        },
+        "pairedItem": {
+          "item": 53
+        }
+      }
+    ],
+    "Remove Duplicates": [
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0160_BHMMTNDRX7/",
+          "run_id": "260411_A01978_0160_BHMMTNDRX7"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260130_A01228_0246_BHF3VGDMX2/",
+          "run_id": "260130_A01228_0246_BHF3VGDMX2"
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01228_0266_AHMCFVDRX7/",
+          "run_id": "260408_A01228_0266_AHMCFVDRX7"
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01978_0162_AHMMT7DRX7/",
+          "run_id": "260414_A01978_0162_AHMMT7DRX7"
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20260330_LH00267_0159_B23C2KWLT3/",
+          "run_id": "20260330_LH00267_0159_B23C2KWLT3"
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260414_A01228_0269_AHMLTKDRX7/",
+          "run_id": "260414_A01228_0269_AHMLTKDRX7"
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0263_BHMMVCDRX7/",
+          "run_id": "260403_A01228_0263_BHMMVCDRX7"
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260411_A01978_0161_AHMLGWDRX7/",
+          "run_id": "260411_A01978_0161_AHMLGWDRX7"
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260128_A01228_0245_BHVNT7DSXF/",
+          "run_id": "260128_A01228_0245_BHVNT7DSXF"
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/20251222_LH00897_0041_B237Y2NLT3/",
+          "run_id": "20251222_LH00897_0041_B237Y2NLT3"
+        },
+        "pairedItem": {
+          "item": 9
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260401_A01228_0262_BHLM3FDRX7/",
+          "run_id": "260401_A01228_0262_BHLM3FDRX7"
+        },
+        "pairedItem": {
+          "item": 10
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0158_BHMMLYDRX7/",
+          "run_id": "260408_A01978_0158_BHMMLYDRX7"
+        },
+        "pairedItem": {
+          "item": 11
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260408_A01978_0159_AHFYW5DMX2/",
+          "run_id": "260408_A01978_0159_AHFYW5DMX2"
+        },
+        "pairedItem": {
+          "item": 12
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260327_A01228_0261_AHFNWKDMX2/",
+          "run_id": "260327_A01228_0261_AHFNWKDMX2"
+        },
+        "pairedItem": {
+          "item": 13
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF/",
+          "run_id": "260323_A01978_0150_AHWFTFDSXF"
+        },
+        "pairedItem": {
+          "item": 14
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260403_A01228_0264_AHFNKNDMX2/",
+          "run_id": "260403_A01228_0264_AHFNKNDMX2"
+        },
+        "pairedItem": {
+          "item": 15
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/illuminastorage/run_folder/260415_A01228_0270_AHG5TLDMX2/",
+          "run_id": "260415_A01228_0270_AHG5TLDMX2"
+        },
+        "pairedItem": {
+          "item": 16
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_A01228_0228_BHNLM2DSXF/",
+          "run_id": "251205_A01228_0228_BHNLM2DSXF"
+        },
+        "pairedItem": {
+          "item": 17
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251217_NDX550412_RUO_0088_AH3C53BGY2/",
+          "run_id": "251217_NDX550412_RUO_0088_AH3C53BGY2"
+        },
+        "pairedItem": {
+          "item": 18
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251010_LH00267_0137_A2327HGLT4/",
+          "run_id": "20251010_LH00267_0137_A2327HGLT4"
+        },
+        "pairedItem": {
+          "item": 19
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251119_A01978_0133_AHCGVCDMX2/",
+          "run_id": "251119_A01978_0133_AHCGVCDMX2"
+        },
+        "pairedItem": {
+          "item": 20
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_VH01921_29_AACWFFVHV/",
+          "run_id": "251009_VH01921_29_AACWFFVHV"
+        },
+        "pairedItem": {
+          "item": 21
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251118_A01832R_0230_BHMKT3DSXF/",
+          "run_id": "251118_A01832R_0230_BHMKT3DSXF"
+        },
+        "pairedItem": {
+          "item": 23
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0244_BHT5NYDSXF/",
+          "run_id": "260123_A01228_0244_BHT5NYDSXF"
+        },
+        "pairedItem": {
+          "item": 24
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0238_BHT5GJDSXF/",
+          "run_id": "260109_A01228_0238_BHT5GJDSXF"
+        },
+        "pairedItem": {
+          "item": 25
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251009_A01832R_0227_BHMKHNDSXF/",
+          "run_id": "251009_A01832R_0227_BHMKHNDSXF"
+        },
+        "pairedItem": {
+          "item": 26
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260316_A01832R_0238_BHKY7MDRX7/",
+          "run_id": "260316_A01832R_0238_BHKY7MDRX7"
+        },
+        "pairedItem": {
+          "item": 27
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251024_A01832R_0228_BHGYYLDRX7/",
+          "run_id": "251024_A01832R_0228_BHGYYLDRX7"
+        },
+        "pairedItem": {
+          "item": 28
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251126_NDX550412_RUO_0085_AHW2TGBGYX/",
+          "run_id": "251126_NDX550412_RUO_0085_AHW2TGBGYX"
+        },
+        "pairedItem": {
+          "item": 29
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251224_A01228_0235_BHJKMCDRX7/",
+          "run_id": "251224_A01228_0235_BHJKMCDRX7"
+        },
+        "pairedItem": {
+          "item": 30
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0236_BHNMWCDSXF/",
+          "run_id": "251226_A01228_0236_BHNMWCDSXF"
+        },
+        "pairedItem": {
+          "item": 31
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260109_A01228_0239_AHT5MKDSXF/",
+          "run_id": "260109_A01228_0239_AHT5MKDSXF"
+        },
+        "pairedItem": {
+          "item": 32
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01228_0237_AHNK5TDSXF/",
+          "run_id": "251226_A01228_0237_AHNK5TDSXF"
+        },
+        "pairedItem": {
+          "item": 33
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251124_A01228_0225_BHNLVFDSXF/",
+          "run_id": "251124_A01228_0225_BHNLVFDSXF"
+        },
+        "pairedItem": {
+          "item": 34
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/250430_VH00818_47_AAH33TKM5/",
+          "run_id": "250430_VH00818_47_AAH33TKM5"
+        },
+        "pairedItem": {
+          "item": 35
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251226_A01832R_0234_BHJJFLDRX7/",
+          "run_id": "251226_A01832R_0234_BHJJFLDRX7"
+        },
+        "pairedItem": {
+          "item": 36
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260204_NDX550412_RUO_0090_AHTV5CBGYX/",
+          "run_id": "260204_NDX550412_RUO_0090_AHTV5CBGYX"
+        },
+        "pairedItem": {
+          "item": 37
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260123_A01228_0243_AHT5VJDSXF/",
+          "run_id": "260123_A01228_0243_AHT5VJDSXF"
+        },
+        "pairedItem": {
+          "item": 38
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260407_A01228_0265_AHMMHNDRX7/",
+          "run_id": "260407_A01228_0265_AHMMHNDRX7"
+        },
+        "pairedItem": {
+          "item": 39
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260317_VH01407_44_AACY2KYHV/",
+          "run_id": "260317_VH01407_44_AACY2KYHV"
+        },
+        "pairedItem": {
+          "item": 40
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251215_A01228_0230_BHCN7LDMX2/",
+          "run_id": "251215_A01228_0230_BHCN7LDMX2"
+        },
+        "pairedItem": {
+          "item": 41
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251212_A01832R_0233_BHJ23JDRX7/",
+          "run_id": "251212_A01832R_0233_BHJ23JDRX7"
+        },
+        "pairedItem": {
+          "item": 42
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_A01832R_0236_BHJF3FDRX7/",
+          "run_id": "260211_A01832R_0236_BHJF3FDRX7"
+        },
+        "pairedItem": {
+          "item": 43
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20250919_LH00267_0133_B2327KGLT4/",
+          "run_id": "20250919_LH00267_0133_B2327KGLT4"
+        },
+        "pairedItem": {
+          "item": 44
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260121_NDX550412_RUO_0089_AH3JGMBGY2/",
+          "run_id": "260121_NDX550412_RUO_0089_AH3JGMBGY2"
+        },
+        "pairedItem": {
+          "item": 45
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251121_A01832R_0231_BHJ3WGDRX7/",
+          "run_id": "251121_A01832R_0231_BHJ3WGDRX7"
+        },
+        "pairedItem": {
+          "item": 46
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260303_A01832R_0237_BHKN52DRX7/",
+          "run_id": "260303_A01832R_0237_BHKN52DRX7"
+        },
+        "pairedItem": {
+          "item": 47
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251205_VH01138_10_AAHLYWCM5/",
+          "run_id": "251205_VH01138_10_AAHLYWCM5"
+        },
+        "pairedItem": {
+          "item": 48
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/20251020_LH00267_0141_B2327TWLT4/",
+          "run_id": "20251020_LH00267_0141_B2327TWLT4"
+        },
+        "pairedItem": {
+          "item": 49
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260211_NDX550412_RUO_0091_AHTVK3BGYX/",
+          "run_id": "260211_NDX550412_RUO_0091_AHTVK3BGYX"
+        },
+        "pairedItem": {
+          "item": 51
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/251210_A01832R_0232_BHNK5YDSXF/",
+          "run_id": "251210_A01832R_0232_BHNK5YDSXF"
+        },
+        "pairedItem": {
+          "item": 52
+        }
+      },
+      {
+        "json": {
+          "path": "/mnt/smb_share/Runs/260116_A01832R_0235_BHJJVGDRX7/",
+          "run_id": "260116_A01832R_0235_BHJJVGDRX7"
+        },
+        "pairedItem": {
+          "item": 53
+        }
+      }
+    ]
+  },
+  "versionId": "b712f80a-64f3-4098-a394-75387b3459c9",
+  "activeVersionId": "b76b19c5-f588-4440-8eea-00e5bfd17ff4",
   "triggerCount": 1,
   "shared": [
     {
@@ -474,9 +2120,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-15T09:37:13.000Z",
-    "createdAt": "2026-04-15T09:37:06.633Z",
-    "versionId": "3ed8e6e8-4966-4665-aaa8-4078d29ae9d9",
+    "updatedAt": "2026-04-18T08:59:37.000Z",
+    "createdAt": "2026-04-18T08:55:28.134Z",
+    "versionId": "b76b19c5-f588-4440-8eea-00e5bfd17ff4",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -496,34 +2142,15 @@
       },
       {
         "parameters": {
-          "operation": "select",
-          "schema": {
-            "__rl": true,
-            "mode": "list",
-            "value": "public"
-          },
-          "table": {
-            "__rl": true,
-            "value": "runs",
-            "mode": "list",
-            "cachedResultName": "runs"
-          },
-          "returnAll": true,
-          "where": {
-            "values": [
-              {
-                "column": "run_id",
-                "value": "={{ $json.run_id }}"
-              }
-            ]
-          },
+          "operation": "executeQuery",
+          "query": "SELECT * FROM runs\nWHERE run_id = ANY(string_to_array('{{ $json.run_ids_str }}', ',')) ",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          560,
-          -192
+          816,
+          -176
         ],
         "id": "15f0c21e-f575-4e27-b478-f7a2c085b872",
         "name": "Get Recorded Runs",
@@ -567,8 +2194,8 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          752,
-          0
+          1056,
+          128
         ],
         "id": "69cdd13c-38c3-4ec5-8081-6948a895329b",
         "name": "Absent on DB"
@@ -682,8 +2309,8 @@
         "type": "n8n-nodes-base.filter",
         "typeVersion": 2.2,
         "position": [
-          752,
-          -400
+          1056,
+          -432
         ],
         "id": "d64b3289-68b6-4f8f-a10b-1124268a664d",
         "name": "Present on DB with Missing Info"
@@ -761,8 +2388,8 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          1152,
-          -176
+          2096,
+          -224
         ],
         "id": "31d4adbe-644d-4c0c-a560-75d540c87ece",
         "name": "Call 'Log Run - Sub'"
@@ -777,8 +2404,8 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          944,
-          -592
+          1248,
+          -544
         ],
         "id": "982f3026-56c6-4e55-9362-1c8071704df1",
         "name": "Add Paths"
@@ -797,11 +2424,168 @@
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
         "position": [
-          -608,
+          -576,
           -192
         ],
         "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
         "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "jsCode": "const allIds = $input.all().map(i => i.json.run_id).join(',');\nreturn [{ json: { run_ids_str: allIds } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          608,
+          -176
+        ],
+        "id": "b0c697bf-3ddf-4ae2-b900-b8cc39a393f8",
+        "name": "Aggregate Run IDs"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements\nFROM runs\nWHERE run_id = '{{ $json.run_id }}'\n  AND status_concept_ref = 29",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1056,
+          -176
+        ],
+        "id": "54811ec9-94d6-48fc-afa3-dce2e9276d54",
+        "name": "Check Measurement",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "SeGWQ7ai2D66eUSG",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+            "cachedResultName": "interop"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "folder": "={{ $json.run_id }}",
+              "path": "={{ $json.path }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "folder",
+                "displayName": "folder",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "path",
+                "displayName": "path",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          1872,
+          -256
+        ],
+        "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
+        "name": "Call 'interop'"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+                "leftValue": "={{ $json.has_measurements }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1264,
+          -176
+        ],
+        "id": "9b78b958-d0b7-46e6-acb0-6411e3c3aa60",
+        "name": "Has No Measurement"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "fieldsToMatchString": "run_id",
+          "joinMode": "enrichInput2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1440,
+          -336
+        ],
+        "id": "c8b590f8-9ffb-43c8-a5be-41b48eadf1ba",
+        "name": "Add Paths1"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1,
+        "position": [
+          1632,
+          -272
+        ],
+        "id": "541010fe-9cde-4daf-a350-50a0cbfc2ab0",
+        "name": "Limit"
       }
     ],
     "connections": {
@@ -809,17 +2593,22 @@
         "main": [
           [
             {
-              "node": "Get Recorded Runs",
-              "type": "main",
-              "index": 0
-            },
-            {
               "node": "Absent on DB",
               "type": "main",
               "index": 1
             },
             {
               "node": "Add Paths",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Aggregate Run IDs",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Add Paths1",
               "type": "main",
               "index": 0
             }
@@ -836,6 +2625,11 @@
             },
             {
               "node": "Absent on DB",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Check Measurement",
               "type": "main",
               "index": 0
             }
@@ -918,10 +2712,65 @@
             }
           ]
         ]
+      },
+      "Aggregate Run IDs": {
+        "main": [
+          [
+            {
+              "node": "Get Recorded Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Measurement": {
+        "main": [
+          [
+            {
+              "node": "Has No Measurement",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has No Measurement": {
+        "main": [
+          [
+            {
+              "node": "Add Paths1",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Add Paths1": {
+        "main": [
+          [
+            {
+              "node": "Limit",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Limit": {
+        "main": [
+          [
+            {
+              "node": "Call 'interop'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 3ed8e6e8",
+    "name": "Version b76b19c5",
     "description": "",
     "autosaved": false
   },
@@ -933,6 +2782,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "18-04-2026/0:00",
+  "commitDate": "19-04-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
