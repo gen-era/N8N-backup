@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-15T09:56:46.092Z",
+  "updatedAt": "2026-04-18T08:43:42.731Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -906,7 +906,7 @@
               "leftValue": "={{ $json.reads_settings_concept_ref }}",
               "rightValue": "",
               "operator": {
-                "type": "dateTime",
+                "type": "string",
                 "operation": "empty",
                 "singleValue": true
               }
@@ -1163,7 +1163,7 @@
       "typeVersion": 2.6,
       "position": [
         1680,
-        240
+        336
       ],
       "id": "b07bb81c-f752-45a9-8897-293d731eca32",
       "name": "Update Settings",
@@ -1203,16 +1203,6 @@
                 "operation": "equals",
                 "name": "filter.operator.equals"
               }
-            },
-            {
-              "id": "717b00d3-55ad-49e3-83ff-889e22a5e28e",
-              "leftValue": "",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "equals",
-                "name": "filter.operator.equals"
-              }
             }
           ],
           "combinator": "or"
@@ -1224,7 +1214,7 @@
       "typeVersion": 2.2,
       "position": [
         992,
-        528
+        -752
       ],
       "id": "b9049fef-c327-4dd9-bb0a-331532dfe06a",
       "name": "Status Check"
@@ -1259,7 +1249,7 @@
       "typeVersion": 2.2,
       "position": [
         1472,
-        544
+        -752
       ],
       "id": "8e07a89c-d27a-4a28-a728-e03c3253c27a",
       "name": "If"
@@ -1272,7 +1262,7 @@
       "typeVersion": 1,
       "position": [
         1264,
-        512
+        -752
       ],
       "id": "f3c82859-d38f-4dba-8e87-ced2df770e02",
       "name": "Execute Command"
@@ -1355,7 +1345,7 @@
       "typeVersion": 3.3,
       "position": [
         1264,
-        752
+        528
       ],
       "id": "17008834-390d-49ff-8f81-e6c5280d059f",
       "name": "Switch"
@@ -1390,7 +1380,7 @@
       "typeVersion": 2.2,
       "position": [
         992,
-        768
+        544
       ],
       "id": "af85fcfe-aba4-4982-947b-6131b7f39e29",
       "name": "Storage Check"
@@ -1549,7 +1539,7 @@
       "typeVersion": 2.6,
       "position": [
         1680,
-        752
+        528
       ],
       "id": "c306eb90-201f-4a6e-bd89-0d2f3a51d6c4",
       "name": "Update Storage Sapiens",
@@ -1714,7 +1704,7 @@
       "typeVersion": 2.6,
       "position": [
         1680,
-        944
+        720
       ],
       "id": "64f3b9d4-cd93-41a7-901d-707e3c976483",
       "name": "Update Storage Koza",
@@ -1898,7 +1888,7 @@
       "typeVersion": 1,
       "position": [
         1264,
-        1040
+        816
       ],
       "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
       "name": "Extract Instrument ID5",
@@ -1910,7 +1900,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 2
           },
           "conditions": [
@@ -1927,13 +1917,14 @@
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
         992,
-        1024
+        800
       ],
       "id": "57ca76bb-b565-451b-ad95-a7fe77eda348",
       "name": "Workflow Check"
@@ -1994,7 +1985,7 @@
       "typeVersion": 3.3,
       "position": [
         1472,
-        1040
+        816
       ],
       "id": "dae27ba8-5db9-4c37-9434-350774762f13",
       "name": "Switch1"
@@ -2163,7 +2154,7 @@
       "typeVersion": 2.6,
       "position": [
         1680,
-        1120
+        896
       ],
       "id": "5b8a10c3-caaa-493f-bd53-a039dfd7b1d9",
       "name": "Update Workflow",
@@ -2338,7 +2329,7 @@
       "typeVersion": 2.6,
       "position": [
         1680,
-        1328
+        1104
       ],
       "id": "669c06dc-fb18-4d49-ac7a-4575cff0dfb0",
       "name": "Update Workflow1",
@@ -2512,8 +2503,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
-        400
+        1744,
+        -832
       ],
       "id": "c20ceeab-14d3-43a3-8c19-3e92973c66e5",
       "name": "Update Status Completed",
@@ -2784,8 +2775,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
-        576
+        1744,
+        -640
       ],
       "id": "e7bda862-ddf7-497f-93b8-6860f981cdbc",
       "name": "Update Settings In Progress",
@@ -2805,8 +2796,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2384,
-        400
+        2144,
+        -832
       ],
       "id": "52d60478-34e1-430e-b9c9-568a890b6abd",
       "name": "Check Measurement",
@@ -2816,40 +2807,6 @@
           "name": "PG-ALB-1.5"
         }
       }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
-              "leftValue": "={{ $json.has_measurements }}",
-              "rightValue": false,
-              "operator": {
-                "type": "boolean",
-                "operation": "true",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        2640,
-        400
-      ],
-      "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
-      "name": "Has Measurement"
     },
     {
       "parameters": {
@@ -2907,8 +2864,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2912,
-        400
+        2672,
+        -832
       ],
       "id": "b01e558a-45da-4b24-8e89-a23537caff48",
       "name": "Call 'interop'"
@@ -3174,6 +3131,40 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+              "leftValue": "={{ $json.has_measurements }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2400,
+        -832
+      ],
+      "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
+      "name": "Has No Measurement"
     }
   ],
   "connections": {
@@ -3637,19 +3628,7 @@
       "main": [
         [
           {
-            "node": "Has Measurement",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Has Measurement": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Call 'interop'",
+            "node": "Has No Measurement",
             "type": "main",
             "index": 0
           }
@@ -3699,6 +3678,18 @@
           }
         ]
       ]
+    },
+    "Has No Measurement": {
+      "main": [
+        [
+          {
+            "node": "Call 'interop'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "settings": {
@@ -3718,8 +3709,8 @@
       }
     ]
   },
-  "versionId": "e2216a15-82dc-4ff1-a6ae-f8930d043115",
-  "activeVersionId": "e2216a15-82dc-4ff1-a6ae-f8930d043115",
+  "versionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
+  "activeVersionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
   "triggerCount": 0,
   "shared": [
     {
@@ -3731,9 +3722,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-15T09:56:48.000Z",
-    "createdAt": "2026-04-15T09:56:46.095Z",
-    "versionId": "e2216a15-82dc-4ff1-a6ae-f8930d043115",
+    "updatedAt": "2026-04-18T08:43:51.000Z",
+    "createdAt": "2026-04-18T08:43:42.733Z",
+    "versionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -4636,7 +4627,7 @@
                 "leftValue": "={{ $json.reads_settings_concept_ref }}",
                 "rightValue": "",
                 "operator": {
-                  "type": "dateTime",
+                  "type": "string",
                   "operation": "empty",
                   "singleValue": true
                 }
@@ -4893,7 +4884,7 @@
         "typeVersion": 2.6,
         "position": [
           1680,
-          240
+          336
         ],
         "id": "b07bb81c-f752-45a9-8897-293d731eca32",
         "name": "Update Settings",
@@ -4933,16 +4924,6 @@
                   "operation": "equals",
                   "name": "filter.operator.equals"
                 }
-              },
-              {
-                "id": "717b00d3-55ad-49e3-83ff-889e22a5e28e",
-                "leftValue": "",
-                "rightValue": "",
-                "operator": {
-                  "type": "string",
-                  "operation": "equals",
-                  "name": "filter.operator.equals"
-                }
               }
             ],
             "combinator": "or"
@@ -4954,7 +4935,7 @@
         "typeVersion": 2.2,
         "position": [
           992,
-          528
+          -752
         ],
         "id": "b9049fef-c327-4dd9-bb0a-331532dfe06a",
         "name": "Status Check"
@@ -4989,7 +4970,7 @@
         "typeVersion": 2.2,
         "position": [
           1472,
-          544
+          -752
         ],
         "id": "8e07a89c-d27a-4a28-a728-e03c3253c27a",
         "name": "If"
@@ -5002,7 +4983,7 @@
         "typeVersion": 1,
         "position": [
           1264,
-          512
+          -752
         ],
         "id": "f3c82859-d38f-4dba-8e87-ced2df770e02",
         "name": "Execute Command"
@@ -5085,7 +5066,7 @@
         "typeVersion": 3.3,
         "position": [
           1264,
-          752
+          528
         ],
         "id": "17008834-390d-49ff-8f81-e6c5280d059f",
         "name": "Switch"
@@ -5120,7 +5101,7 @@
         "typeVersion": 2.2,
         "position": [
           992,
-          768
+          544
         ],
         "id": "af85fcfe-aba4-4982-947b-6131b7f39e29",
         "name": "Storage Check"
@@ -5279,7 +5260,7 @@
         "typeVersion": 2.6,
         "position": [
           1680,
-          752
+          528
         ],
         "id": "c306eb90-201f-4a6e-bd89-0d2f3a51d6c4",
         "name": "Update Storage Sapiens",
@@ -5444,7 +5425,7 @@
         "typeVersion": 2.6,
         "position": [
           1680,
-          944
+          720
         ],
         "id": "64f3b9d4-cd93-41a7-901d-707e3c976483",
         "name": "Update Storage Koza",
@@ -5628,7 +5609,7 @@
         "typeVersion": 1,
         "position": [
           1264,
-          1040
+          816
         ],
         "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
         "name": "Extract Instrument ID5",
@@ -5640,7 +5621,7 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict",
+              "typeValidation": "loose",
               "version": 2
             },
             "conditions": [
@@ -5657,13 +5638,14 @@
             ],
             "combinator": "and"
           },
+          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
           992,
-          1024
+          800
         ],
         "id": "57ca76bb-b565-451b-ad95-a7fe77eda348",
         "name": "Workflow Check"
@@ -5724,7 +5706,7 @@
         "typeVersion": 3.3,
         "position": [
           1472,
-          1040
+          816
         ],
         "id": "dae27ba8-5db9-4c37-9434-350774762f13",
         "name": "Switch1"
@@ -5893,7 +5875,7 @@
         "typeVersion": 2.6,
         "position": [
           1680,
-          1120
+          896
         ],
         "id": "5b8a10c3-caaa-493f-bd53-a039dfd7b1d9",
         "name": "Update Workflow",
@@ -6068,7 +6050,7 @@
         "typeVersion": 2.6,
         "position": [
           1680,
-          1328
+          1104
         ],
         "id": "669c06dc-fb18-4d49-ac7a-4575cff0dfb0",
         "name": "Update Workflow1",
@@ -6242,8 +6224,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1680,
-          400
+          1744,
+          -832
         ],
         "id": "c20ceeab-14d3-43a3-8c19-3e92973c66e5",
         "name": "Update Status Completed",
@@ -6514,8 +6496,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1680,
-          576
+          1744,
+          -640
         ],
         "id": "e7bda862-ddf7-497f-93b8-6860f981cdbc",
         "name": "Update Settings In Progress",
@@ -6535,8 +6517,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2384,
-          400
+          2144,
+          -832
         ],
         "id": "52d60478-34e1-430e-b9c9-568a890b6abd",
         "name": "Check Measurement",
@@ -6546,40 +6528,6 @@
             "name": "PG-ALB-1.5"
           }
         }
-      },
-      {
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "strict",
-              "version": 3
-            },
-            "conditions": [
-              {
-                "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
-                "leftValue": "={{ $json.has_measurements }}",
-                "rightValue": false,
-                "operator": {
-                  "type": "boolean",
-                  "operation": "true",
-                  "singleValue": true
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
-        },
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.3,
-        "position": [
-          2640,
-          400
-        ],
-        "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
-        "name": "Has Measurement"
       },
       {
         "parameters": {
@@ -6637,8 +6585,8 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2912,
-          400
+          2672,
+          -832
         ],
         "id": "b01e558a-45da-4b24-8e89-a23537caff48",
         "name": "Call 'interop'"
@@ -6904,6 +6852,40 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+                "leftValue": "={{ $json.has_measurements }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2400,
+          -832
+        ],
+        "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
+        "name": "Has No Measurement"
       }
     ],
     "connections": {
@@ -7367,19 +7349,7 @@
         "main": [
           [
             {
-              "node": "Has Measurement",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Has Measurement": {
-        "main": [
-          [],
-          [
-            {
-              "node": "Call 'interop'",
+              "node": "Has No Measurement",
               "type": "main",
               "index": 0
             }
@@ -7429,14 +7399,26 @@
             }
           ]
         ]
+      },
+      "Has No Measurement": {
+        "main": [
+          [
+            {
+              "node": "Call 'interop'",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version e2216a15",
+    "name": "Version 1289951a",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "18-04-2026/0:00",
+  "commitDate": "19-04-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
