@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-15T20:17:36.838Z",
+  "updatedAt": "2026-04-19T20:46:11.041Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -48,7 +48,7 @@
       "typeVersion": 2.2,
       "position": [
         416,
-        672
+        704
       ],
       "id": "3591b387-c980-47cb-b04f-1311bf380497",
       "name": "TSO500_HT"
@@ -61,7 +61,7 @@
       "typeVersion": 2,
       "position": [
         640,
-        672
+        704
       ],
       "id": "f46a481d-eba3-4b54-bfd3-534664b8085b",
       "name": "Group Samples"
@@ -74,7 +74,7 @@
       "typeVersion": 2,
       "position": [
         1760,
-        672
+        704
       ],
       "id": "369787f4-d9f4-46c2-9bd1-2516609e998e",
       "name": "Parse Folder IDs"
@@ -87,7 +87,7 @@
       "typeVersion": 1,
       "position": [
         1552,
-        672
+        704
       ],
       "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
       "name": "Get Folder ID"
@@ -100,7 +100,7 @@
       "typeVersion": 1,
       "position": [
         1120,
-        672
+        704
       ],
       "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
       "name": "SampleSheet Upload"
@@ -113,7 +113,7 @@
       "typeVersion": 2,
       "position": [
         1344,
-        672
+        704
       ],
       "id": "9e3fca6c-5acc-4e28-8e94-d802c558e3dc",
       "name": "Prepare Pipeline Launch"
@@ -126,7 +126,7 @@
       "typeVersion": 1,
       "position": [
         1984,
-        672
+        704
       ],
       "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
       "name": "Launch Analysis",
@@ -162,7 +162,7 @@
       "typeVersion": 2.2,
       "position": [
         416,
-        1168
+        1104
       ],
       "id": "06052ff4-a582-40b6-961d-715f1a819a32",
       "name": "TSO500_ctDNA"
@@ -175,7 +175,7 @@
       "typeVersion": 2,
       "position": [
         640,
-        1168
+        1104
       ],
       "id": "d966b2ff-716b-4f82-9523-864701b6d90b",
       "name": "Group ctDNA Samples"
@@ -191,7 +191,7 @@
       "typeVersion": 2,
       "position": [
         880,
-        1168
+        1104
       ]
     },
     {
@@ -202,7 +202,7 @@
       "typeVersion": 1,
       "position": [
         1136,
-        1168
+        1104
       ],
       "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
       "name": "SampleSheet Upload ctDNA"
@@ -215,7 +215,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        1168
+        1104
       ],
       "id": "982813fa-7441-43a0-90f6-4b88da62daae",
       "name": "Prepare Pipeline Launch ctDNA"
@@ -228,7 +228,7 @@
       "typeVersion": 1,
       "position": [
         1552,
-        1168
+        1104
       ],
       "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
       "name": "Get Folder ID ctDNA"
@@ -241,7 +241,7 @@
       "typeVersion": 1,
       "position": [
         1984,
-        1168
+        1104
       ],
       "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
       "name": "Launch ctDNA Analysis",
@@ -256,7 +256,7 @@
       "typeVersion": 2,
       "position": [
         1744,
-        1168
+        1104
       ],
       "id": "a75a57b1-0564-4649-a5de-c37e04b4cad2",
       "name": "Parse Folder IDs ctDNA"
@@ -302,11 +302,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1552,
-        896
+        1536,
+        96
       ],
       "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
-      "name": "Prepare Pipeline Launch HRD"
+      "name": "Prepare Pipeline Launch HRD",
+      "disabled": true
     },
     {
       "parameters": {
@@ -315,11 +316,12 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1328,
-        896
+        1312,
+        96
       ],
       "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
-      "name": "SampleSheet Upload HRD"
+      "name": "SampleSheet Upload HRD",
+      "disabled": true
     },
     {
       "parameters": {
@@ -328,11 +330,12 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        912,
-        896
+        896,
+        96
       ],
       "id": "e991e081-6797-4020-96c3-254206f5e1da",
-      "name": "Loop Over Items HRD"
+      "name": "Loop Over Items HRD",
+      "disabled": true
     },
     {
       "parameters": {
@@ -341,11 +344,12 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1760,
-        896
+        1744,
+        96
       ],
       "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
-      "name": "Launch HRD Analysis"
+      "name": "Launch HRD Analysis",
+      "disabled": true
     },
     {
       "parameters": {
@@ -354,8 +358,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1984,
-        896
+        1968,
+        96
       ],
       "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
       "name": "Update File Tags HRD",
@@ -377,16 +381,17 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${new Date().toLocaleDateString('en-US', { month: '1-digit', day: '1-digit', year: 'numeric' })}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+        "jsCode": "const sampleId = $input.item.json.sample_id;\n// Note: PROJECT_ID was not present in your provided input JSON. \n// Ensure it exists, or provide a fallback.\nconst projectId = $input.item.json.PROJECT_ID || \"DEFAULT_PROJECT\";\nconst files = $input.item.json.files;\n\n// Using '2-digit' ensures you get leading zeros (e.g., 04/19/2026)\nconst dateString = new Date().toLocaleDateString('en-US', { \n    month: '2-digit', \n    day: '2-digit', \n    year: 'numeric' \n});\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${dateString}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
       },
       "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
       "name": "Generate HRD Sample Sheet",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
-        896
-      ]
+        1104,
+        96
+      ],
+      "disabled": true
     },
     {
       "parameters": {
@@ -399,7 +404,7 @@
       "typeVersion": 2,
       "position": [
         912,
-        672
+        704
       ]
     },
     {
@@ -466,7 +471,7 @@
       "typeVersion": 2,
       "position": [
         640,
-        432
+        480
       ],
       "id": "144be4a1-89a0-41c4-84ff-4bc145a3c138",
       "name": "Group Samples1"
@@ -479,7 +484,7 @@
       "typeVersion": 2,
       "position": [
         1760,
-        432
+        480
       ],
       "id": "8884e81b-8c75-4afa-b9bb-9270fdda44f0",
       "name": "Parse Folder IDs1"
@@ -492,7 +497,7 @@
       "typeVersion": 1,
       "position": [
         1552,
-        432
+        480
       ],
       "id": "97f7b199-cb18-41bf-9600-e57f99d59492",
       "name": "Get Folder ID1"
@@ -505,7 +510,7 @@
       "typeVersion": 1,
       "position": [
         1120,
-        432
+        480
       ],
       "id": "a507ac04-03c1-4eb9-9faf-3bf50657a133",
       "name": "SampleSheet Upload1"
@@ -518,7 +523,7 @@
       "typeVersion": 2,
       "position": [
         1344,
-        432
+        480
       ],
       "id": "f401a8b0-4387-4d6d-bc48-29863a29eaf1",
       "name": "Prepare Pipeline Launch1"
@@ -531,7 +536,7 @@
       "typeVersion": 1,
       "position": [
         1984,
-        432
+        480
       ],
       "id": "33cb2ac7-5de8-4bd4-8365-6d0b92546b84",
       "name": "Launch Analysis1",
@@ -549,7 +554,7 @@
       "typeVersion": 2,
       "position": [
         912,
-        432
+        480
       ]
     },
     {
@@ -581,10 +586,91 @@
       "typeVersion": 2.2,
       "position": [
         416,
-        432
+        480
       ],
       "id": "ac4c7e57-2bc5-40b0-a754-71780591ccf9",
       "name": "TSO500_HT_v2"
+    },
+    {
+      "parameters": {
+        "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        896
+      ],
+      "id": "f067d22c-b36b-44e8-8d14-44e8816524af",
+      "name": "Parse Folder IDs2"
+    },
+    {
+      "parameters": {
+        "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        896
+      ],
+      "id": "e3ce6c63-3835-45bc-aaeb-285b644c8d39",
+      "name": "Get Folder ID2"
+    },
+    {
+      "parameters": {
+        "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        896
+      ],
+      "id": "7a32c6be-5760-4485-9222-907562e64f64",
+      "name": "SampleSheet Upload2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sampleId = $('Generate Sample Sheet2').item.json.sample_id;\n  const projectId = $('Generate Sample Sheet2').item.json.PROJECT_ID;\n  const files = $('Generate Sample Sheet2').item.json.files;  // <-- files'ı al\n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files  // <-- files'ı ekle\n    }\n  };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        896
+      ],
+      "id": "d749b819-3586-4edd-86b9-ebc5877edbac",
+      "name": "Prepare Pipeline Launch2"
+    },
+    {
+      "parameters": {
+        "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch2').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch2').item.json.sample_id }}-analysis\"\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        896
+      ],
+      "id": "1bb6166f-3056-45a7-a030-e97faa11b700",
+      "name": "Launch Analysis2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n`;\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+      },
+      "id": "b2c51767-9c0f-4bfe-9801-77ad9bdb059f",
+      "name": "Generate Sample Sheet2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        912,
+        896
+      ]
     }
   ],
   "connections": {
@@ -843,7 +929,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items HRD",
+            "node": "Generate Sample Sheet2",
             "type": "main",
             "index": 0
           }
@@ -992,6 +1078,61 @@
           }
         ]
       ]
+    },
+    "Parse Folder IDs2": {
+      "main": [
+        [
+          {
+            "node": "Launch Analysis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Folder ID2": {
+      "main": [
+        [
+          {
+            "node": "Parse Folder IDs2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SampleSheet Upload2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pipeline Launch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pipeline Launch2": {
+      "main": [
+        [
+          {
+            "node": "Get Folder ID2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Sample Sheet2": {
+      "main": [
+        [
+          {
+            "node": "SampleSheet Upload2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1011,17 +1152,20 @@
             "user-agent": "curl/7.86.0",
             "accept": "*/*",
             "content-type": "application/json",
-            "content-length": "425"
+            "content-length": "643"
           },
           "params": {},
           "query": {},
           "body": {
-            "LOCAL_FILE_COUNT": "",
-            "LOCAL_FILES": "",
+            "LOCAL_FILE_COUNT": "2",
+            "LOCAL_FILES": "/volume1/illuminastorage/fastq_folder/260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2//SG2026-04856-DENEME-D_S2_R1_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2//SG2026-04856-DENEME-D_S2_R2_001.fastq.gz",
             "REMOTE_FILES": "",
-            "PROJECT_ID": "5a2ca97b-25dd-4a0f-8841-79347677d8a3",
-            "FOLDER": "",
-            "SAMPLE_ID": "SG2022-848-XPlus"
+            "id": "recdx58Smy55C5gDM",
+            "createdTime": "2026-04-18T06:40:38.000Z",
+            "PROJECT_ID": "d29155ad-9965-46ae-9a53-8a7a61b70758",
+            "FOLDER": "260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2/",
+            "SAMPLE_ID": "SG2026-04856-DENEME",
+            "Panel": "HRD"
           },
           "webhookUrl": "http://localhost:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971",
           "executionMode": "production"
@@ -1029,8 +1173,8 @@
       }
     ]
   },
-  "versionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
-  "activeVersionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
+  "versionId": "03cf0660-6bd2-4bd5-b871-a1b1cd9d9cc9",
+  "activeVersionId": "03cf0660-6bd2-4bd5-b871-a1b1cd9d9cc9",
   "triggerCount": 1,
   "shared": [
     {
@@ -1042,9 +1186,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-15T20:17:38.000Z",
-    "createdAt": "2026-04-15T20:17:36.841Z",
-    "versionId": "5ca0fbe5-e96b-4d97-8d21-af1b6969d6d6",
+    "updatedAt": "2026-04-19T20:34:38.000Z",
+    "createdAt": "2026-04-19T20:34:34.928Z",
+    "versionId": "03cf0660-6bd2-4bd5-b871-a1b1cd9d9cc9",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1089,7 +1233,7 @@
         "typeVersion": 2.2,
         "position": [
           416,
-          672
+          704
         ],
         "id": "3591b387-c980-47cb-b04f-1311bf380497",
         "name": "TSO500_HT"
@@ -1102,7 +1246,7 @@
         "typeVersion": 2,
         "position": [
           640,
-          672
+          704
         ],
         "id": "f46a481d-eba3-4b54-bfd3-534664b8085b",
         "name": "Group Samples"
@@ -1115,7 +1259,7 @@
         "typeVersion": 2,
         "position": [
           1760,
-          672
+          704
         ],
         "id": "369787f4-d9f4-46c2-9bd1-2516609e998e",
         "name": "Parse Folder IDs"
@@ -1128,7 +1272,7 @@
         "typeVersion": 1,
         "position": [
           1552,
-          672
+          704
         ],
         "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
         "name": "Get Folder ID"
@@ -1141,7 +1285,7 @@
         "typeVersion": 1,
         "position": [
           1120,
-          672
+          704
         ],
         "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
         "name": "SampleSheet Upload"
@@ -1154,7 +1298,7 @@
         "typeVersion": 2,
         "position": [
           1344,
-          672
+          704
         ],
         "id": "9e3fca6c-5acc-4e28-8e94-d802c558e3dc",
         "name": "Prepare Pipeline Launch"
@@ -1167,7 +1311,7 @@
         "typeVersion": 1,
         "position": [
           1984,
-          672
+          704
         ],
         "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
         "name": "Launch Analysis",
@@ -1203,7 +1347,7 @@
         "typeVersion": 2.2,
         "position": [
           416,
-          1168
+          1104
         ],
         "id": "06052ff4-a582-40b6-961d-715f1a819a32",
         "name": "TSO500_ctDNA"
@@ -1216,7 +1360,7 @@
         "typeVersion": 2,
         "position": [
           640,
-          1168
+          1104
         ],
         "id": "d966b2ff-716b-4f82-9523-864701b6d90b",
         "name": "Group ctDNA Samples"
@@ -1232,7 +1376,7 @@
         "typeVersion": 2,
         "position": [
           880,
-          1168
+          1104
         ]
       },
       {
@@ -1243,7 +1387,7 @@
         "typeVersion": 1,
         "position": [
           1136,
-          1168
+          1104
         ],
         "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
         "name": "SampleSheet Upload ctDNA"
@@ -1256,7 +1400,7 @@
         "typeVersion": 2,
         "position": [
           1360,
-          1168
+          1104
         ],
         "id": "982813fa-7441-43a0-90f6-4b88da62daae",
         "name": "Prepare Pipeline Launch ctDNA"
@@ -1269,7 +1413,7 @@
         "typeVersion": 1,
         "position": [
           1552,
-          1168
+          1104
         ],
         "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
         "name": "Get Folder ID ctDNA"
@@ -1282,7 +1426,7 @@
         "typeVersion": 1,
         "position": [
           1984,
-          1168
+          1104
         ],
         "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
         "name": "Launch ctDNA Analysis",
@@ -1297,7 +1441,7 @@
         "typeVersion": 2,
         "position": [
           1744,
-          1168
+          1104
         ],
         "id": "a75a57b1-0564-4649-a5de-c37e04b4cad2",
         "name": "Parse Folder IDs ctDNA"
@@ -1343,11 +1487,12 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1552,
-          896
+          1536,
+          96
         ],
         "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
-        "name": "Prepare Pipeline Launch HRD"
+        "name": "Prepare Pipeline Launch HRD",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1356,11 +1501,12 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1328,
-          896
+          1312,
+          96
         ],
         "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
-        "name": "SampleSheet Upload HRD"
+        "name": "SampleSheet Upload HRD",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1369,11 +1515,12 @@
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "position": [
-          912,
-          896
+          896,
+          96
         ],
         "id": "e991e081-6797-4020-96c3-254206f5e1da",
-        "name": "Loop Over Items HRD"
+        "name": "Loop Over Items HRD",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1382,11 +1529,12 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1760,
-          896
+          1744,
+          96
         ],
         "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
-        "name": "Launch HRD Analysis"
+        "name": "Launch HRD Analysis",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1395,8 +1543,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1984,
-          896
+          1968,
+          96
         ],
         "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
         "name": "Update File Tags HRD",
@@ -1418,16 +1566,17 @@
       {
         "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${new Date().toLocaleDateString('en-US', { month: '1-digit', day: '1-digit', year: 'numeric' })}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+          "jsCode": "const sampleId = $input.item.json.sample_id;\n// Note: PROJECT_ID was not present in your provided input JSON. \n// Ensure it exists, or provide a fallback.\nconst projectId = $input.item.json.PROJECT_ID || \"DEFAULT_PROJECT\";\nconst files = $input.item.json.files;\n\n// Using '2-digit' ensures you get leading zeros (e.g., 04/19/2026)\nconst dateString = new Date().toLocaleDateString('en-US', { \n    month: '2-digit', \n    day: '2-digit', \n    year: 'numeric' \n});\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${dateString}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
         },
         "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
         "name": "Generate HRD Sample Sheet",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1120,
-          896
-        ]
+          1104,
+          96
+        ],
+        "disabled": true
       },
       {
         "parameters": {
@@ -1440,7 +1589,7 @@
         "typeVersion": 2,
         "position": [
           912,
-          672
+          704
         ]
       },
       {
@@ -1507,7 +1656,7 @@
         "typeVersion": 2,
         "position": [
           640,
-          432
+          480
         ],
         "id": "144be4a1-89a0-41c4-84ff-4bc145a3c138",
         "name": "Group Samples1"
@@ -1520,7 +1669,7 @@
         "typeVersion": 2,
         "position": [
           1760,
-          432
+          480
         ],
         "id": "8884e81b-8c75-4afa-b9bb-9270fdda44f0",
         "name": "Parse Folder IDs1"
@@ -1533,7 +1682,7 @@
         "typeVersion": 1,
         "position": [
           1552,
-          432
+          480
         ],
         "id": "97f7b199-cb18-41bf-9600-e57f99d59492",
         "name": "Get Folder ID1"
@@ -1546,7 +1695,7 @@
         "typeVersion": 1,
         "position": [
           1120,
-          432
+          480
         ],
         "id": "a507ac04-03c1-4eb9-9faf-3bf50657a133",
         "name": "SampleSheet Upload1"
@@ -1559,7 +1708,7 @@
         "typeVersion": 2,
         "position": [
           1344,
-          432
+          480
         ],
         "id": "f401a8b0-4387-4d6d-bc48-29863a29eaf1",
         "name": "Prepare Pipeline Launch1"
@@ -1572,7 +1721,7 @@
         "typeVersion": 1,
         "position": [
           1984,
-          432
+          480
         ],
         "id": "33cb2ac7-5de8-4bd4-8365-6d0b92546b84",
         "name": "Launch Analysis1",
@@ -1590,7 +1739,7 @@
         "typeVersion": 2,
         "position": [
           912,
-          432
+          480
         ]
       },
       {
@@ -1622,10 +1771,91 @@
         "typeVersion": 2.2,
         "position": [
           416,
-          432
+          480
         ],
         "id": "ac4c7e57-2bc5-40b0-a754-71780591ccf9",
         "name": "TSO500_HT_v2"
+      },
+      {
+        "parameters": {
+          "jsCode": "  const stdout = $input.item.json.stdout;\n  const inputId = stdout.match(/INPUT_ID=(\\S+)/)[1];\n  const outputId = stdout.match(/OUTPUT_ID=(\\S+)/)[1];\n\n  return {\n    json: {\n      sample_id: $input.item.json.sample_id,\n      PROJECT_ID: $input.item.json.PROJECT_ID,\n      samplesheet_id: $input.item.json.samplesheet_id,\n      input_folder_id: inputId,\n      output_folder_id: outputId\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          896
+        ],
+        "id": "f067d22c-b36b-44e8-8d14-44e8816524af",
+        "name": "Parse Folder IDs2"
+      },
+      {
+        "parameters": {
+          "command": "=  INPUT_ID=$(icav2 projectdata get \"/input_folder/{{ $json.sample_id }}/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  OUTPUT_ID=$(icav2 projectdata get \"/output_folder/\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>/dev/null | grep \"^id\" | awk '{print $2}') && \\\n  echo \"INPUT_ID=$INPUT_ID OUTPUT_ID=$OUTPUT_ID\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1552,
+          896
+        ],
+        "id": "e3ce6c63-3835-45bc-aaeb-285b644c8d39",
+        "name": "Get Folder ID2"
+      },
+      {
+        "parameters": {
+          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1120,
+          896
+        ],
+        "id": "7a32c6be-5760-4485-9222-907562e64f64",
+        "name": "SampleSheet Upload2"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sampleId = $('Generate Sample Sheet2').item.json.sample_id;\n  const projectId = $('Generate Sample Sheet2').item.json.PROJECT_ID;\n  const files = $('Generate Sample Sheet2').item.json.files;  // <-- files'ı al\n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files  // <-- files'ı ekle\n    }\n  };"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          896
+        ],
+        "id": "d749b819-3586-4edd-86b9-ebc5877edbac",
+        "name": "Prepare Pipeline Launch2"
+      },
+      {
+        "parameters": {
+          "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch2').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch2').item.json.sample_id }}-analysis\"\n"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1984,
+          896
+        ],
+        "id": "1bb6166f-3056-45a7-a030-e97faa11b700",
+        "name": "Launch Analysis2",
+        "retryOnFail": true,
+        "waitBetweenTries": 5000
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n`;\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
+        },
+        "id": "b2c51767-9c0f-4bfe-9801-77ad9bdb059f",
+        "name": "Generate Sample Sheet2",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          912,
+          896
+        ]
       }
     ],
     "connections": {
@@ -1884,7 +2114,7 @@
         "main": [
           [
             {
-              "node": "Loop Over Items HRD",
+              "node": "Generate Sample Sheet2",
               "type": "main",
               "index": 0
             }
@@ -2033,10 +2263,65 @@
             }
           ]
         ]
+      },
+      "Parse Folder IDs2": {
+        "main": [
+          [
+            {
+              "node": "Launch Analysis2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Folder ID2": {
+        "main": [
+          [
+            {
+              "node": "Parse Folder IDs2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "SampleSheet Upload2": {
+        "main": [
+          [
+            {
+              "node": "Prepare Pipeline Launch2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Pipeline Launch2": {
+        "main": [
+          [
+            {
+              "node": "Get Folder ID2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Sample Sheet2": {
+        "main": [
+          [
+            {
+              "node": "SampleSheet Upload2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 5ca0fbe5",
+    "name": "Version 03cf0660",
     "description": "",
     "autosaved": false
   },
@@ -2048,6 +2333,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "19-04-2026/0:00",
+  "commitDate": "20-04-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
