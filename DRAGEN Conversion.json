@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-19T22:15:55.995Z",
+  "updatedAt": "2026-04-20T13:04:10.993Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260416_A01832R_0239_BHLGJ3DRX7",
+              "value": "=260416_VH01138_2_AAF3CTNHV",
               "type": "string"
             }
           ]
@@ -23,7 +23,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -864,
+        -784,
         -320
       ],
       "id": "10c2d4f6-7a39-4927-bf5f-a5278122b4ff",
@@ -163,7 +163,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1104,
+        -992,
         -320
       ],
       "id": "c41b00f0-86c7-40e0-97cc-21f1d1cbacb8",
@@ -176,7 +176,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        32,
+        0,
         -320
       ],
       "id": "c0fd0dc9-5e98-44d6-99c6-d7676027920b",
@@ -252,7 +252,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\n\n// Check if any lane is not 0 (handle both string and number)\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\n// Build SampleSheet content\nlet sampleSheet = '[Header]\\n';\nsampleSheet += 'FileFormatVersion,2\\n\\n';\n\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\n\nsampleSheet += '[Sequencing_Settings]\\n\\n';\n\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,2.2.2\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += 'CreateFastqForIndexReads,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex1,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex2,0\\n\\n';\n\nsampleSheet += '[BCLConvert_Data]\\n';\n\n// Header with conditional Lane column\nif (hasLanes) {\n  sampleSheet += 'Sample_ID,Sample_Project,Lane,Index,Index2,OverrideCycles\\n';\n} else {\n  sampleSheet += 'Sample_ID,Sample_Project,Index,Index2,OverrideCycles\\n';\n}\n\n// Add sample rows\nfor (const sample of samples) {\n  const s = sample.json;\n  \n  // Calculate OverrideCycles\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = s.index2 ? s.index2.length : 0;\n  \n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n  \n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n  \n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    index2Part = `I${i5Length}N${mask2}`;\n  }\n  \n  const overrideCycles = `Y${readsSettings.read1cycles};${index1Part};${index2Part};Y${readsSettings.read2cycles}`;\n  \n  // Build row\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${s.sample_id},${s.sample_project},${laneValue},${s.index},${s.index2},${overrideCycles}\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.sample_project},${s.index},${s.index2},${overrideCycles}\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
+        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\nconst instrumentModel = $('Get Run Ref').item.json.instrument_model;\n\nconst needsRC = instrumentModel === 'Illumina NextSeq 2000';\n\n// Reverse complement helper\nfunction reverseComplement(seq) {\n  if (!seq) return seq;\n  const complement = { A: 'T', T: 'A', G: 'C', C: 'G', N: 'N' };\n  return seq.toUpperCase().split('').reverse().map(b => complement[b] ?? b).join('');\n}\n\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\nlet sampleSheet = '[Header]\\n';\nsampleSheet += 'FileFormatVersion,2\\n\\n';\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\nsampleSheet += '[Sequencing_Settings]\\n\\n';\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,2.2.2\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += 'CreateFastqForIndexReads,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex1,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex2,0\\n\\n';\nsampleSheet += '[BCLConvert_Data]\\n';\n\nif (hasLanes) {\n  sampleSheet += 'Sample_ID,Sample_Project,Lane,Index,Index2,OverrideCycles\\n';\n} else {\n  sampleSheet += 'Sample_ID,Sample_Project,Index,Index2,OverrideCycles\\n';\n}\n\nfor (const sample of samples) {\n  const s = sample.json;\n\n  const i5Sequence = needsRC ? reverseComplement(s.index2) : s.index2;\n\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = i5Sequence ? i5Sequence.length : 0;\n\n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n\n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n\n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    index2Part = `I${i5Length}N${mask2}`;\n  }\n\n  const overrideCycles = `Y${readsSettings.read1cycles};${index1Part};${index2Part};Y${readsSettings.read2cycles}`;\n\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${s.sample_id},${s.sample_project},${laneValue},${s.index},${i5Sequence},${overrideCycles}\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.sample_project},${s.index},${i5Sequence},${overrideCycles}\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -405,13 +405,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n  r.*,\n  c.concept_name as workflow_type\nFROM runs r\nLEFT JOIN concepts c ON r.workflow_concept_ref = c.uniqueref\nWHERE r.run_id = '{{ $json.run_id }}';",
+        "query": "SELECT \n  r.*,\n  c.concept_name as workflow_type,\n  ic.concept_name as instrument_model\nFROM runs r\nLEFT JOIN concepts c ON r.workflow_concept_ref = c.uniqueref\nLEFT JOIN instruments i ON r.instrument_ref = i.uniqueref\nLEFT JOIN concepts ic ON i.instrument_concept_ref = ic.uniqueref\nWHERE r.run_id = '{{ $json.run_id }}';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -608,
+        -576,
         -320
       ],
       "id": "57ed4b27-b70e-4213-83c0-494b87fe529b",
@@ -814,6 +814,69 @@
         }
       },
       "disabled": true
+    },
+    {
+      "parameters": {
+        "command": "=ls /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -544
+      ],
+      "id": "575e6c76-c473-4d00-9f4d-92da44ef813e",
+      "name": "Check Run in ALLData",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "58c4103c-a6b9-49f5-b2b9-546195543d52",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "64ae441a-0ede-47b5-8cf2-4390ec9b7c81",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "No such file or directory",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        -544
+      ],
+      "id": "a726eebb-a218-44ba-ae4e-57ecb82c672a",
+      "name": "Is Run absent on  ALLDATA"
     }
   ],
   "connections": {
@@ -1155,6 +1218,17 @@
           }
         ]
       ]
+    },
+    "Check Run in ALLData": {
+      "main": [
+        [
+          {
+            "node": "Is Run absent on  ALLDATA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1165,7 +1239,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7d2384b0-1c6a-4061-8bfd-009de7722798",
+  "versionId": "8e7e48f0-2df6-49c7-8e22-c4760e01c61d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1186,6 +1260,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "20-04-2026/0:00",
+  "commitDate": "21-04-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
