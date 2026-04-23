@@ -1,0 +1,553 @@
+{
+  "updatedAt": "2026-04-22T10:58:13.349Z",
+  "createdAt": "2026-04-21T09:56:53.901Z",
+  "id": "gNQvXKZ12sRVaKYt",
+  "name": "idats2Supa",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1392,
+        -48
+      ],
+      "id": "f7edb37e-43fa-4f3e-afc7-8137c5c07e22",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "curl -g 'https://sheets.googleapis.com/v4/spreadsheets/1BqKAsezocz_ECKbgR66WY6hwKW8Es8U-y5HA7IIqsE4/values/Sayfa2%21A%3AZ?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'\n"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        -48
+      ],
+      "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "const scans = $('Get completed scans').all().map(i => i.json);\nconst sheetRaw = $('Extract Sentrixs').first().json.sheet;\nconst sheet = JSON.parse(sheetRaw);\nconst careSiteMapping = $('Get care_site_mapping').all().map(i => i.json);\n\nconst scanMap = {};\nscans.forEach(scan => {\n  scanMap[scan.sentrix_id] = scan;\n});\n\nconst careSiteMap = {};\ncareSiteMapping.forEach(row => {\n  careSiteMap[row.care_site_source_value] = row.care_site_ref;\n});\n\nconst results = [];\nsheet.forEach(row => {\n  const scan = scanMap[row.Barkod];\n  if (scan) {\n    results.push({\n      json: {\n        scan_ref: scan.uniqueref,\n        sentrix_id: scan.sentrix_id,\n        chiptype_ref: scan.chiptype_ref,\n        performing_caresite_ref: scan.care_site_ref,\n        position: row.Pozisyon,\n        sample_id: row['Örnek'],\n        requesting_caresite_ref: careSiteMap[row.Kurum] || null\n      }\n    });\n  }\n});\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        -48
+      ],
+      "id": "d16f3c17-e9b3-402c-9633-f5f39ba254d4",
+      "name": "Merge SQL and Sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($input.first().json.stdout);\nconst [headers, ...rows] = data.values;\n\nreturn rows.map(row => ({\n  json: Object.fromEntries(headers.map((h, i) => [h, row[i] ?? '']))\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -976,
+        -48
+      ],
+      "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
+      "name": "sheet"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT s.uniqueref, s.sentrix_id::text, s.chiptype_ref, s.care_site_ref\nFROM scans s\nWHERE s.status_concept_ref = 29\nAND s.sentrix_id::text IN ({{ $json.barkodlar }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -544,
+        -48
+      ],
+      "id": "c87bda64-56dc-4d34-96ed-41a2628cad58",
+      "name": "Get completed scans",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT care_site_ref, care_site_source_value FROM care_site_mapping",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -320,
+        -48
+      ],
+      "id": "464f7a6b-ff2a-4ac9-8db1-880637b8fd2a",
+      "name": "Get care_site_mapping",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=FOLDER=\"/volume1/ALLDATA/Scans/{{ $json.sentrix_id }}/\"; SENTRIX=\"{{ $json.sentrix_id }}\"; POSITION=\"{{ $json.position }}\"; GREEN=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Grn.idat\" 2>/dev/null | head -1); RED=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Red.idat\" 2>/dev/null | head -1); TOTAL_RESCAN=$(ls \"${FOLDER}\"Metrics_old*.txt 2>/dev/null | wc -l | tr -d ' '); POS_RESCAN=$(for f in \"${FOLDER}\"Metrics_old*.txt; do [[ \"$f\" == *\"Metrics_old0.txt\" ]] && continue; grep -q \"${POSITION}_\" \"$f\" && echo \"$f\"; done 2>/dev/null | wc -l | tr -d ' '); IS_RESCANNED=$(grep -q \"${POSITION}_\" \"${FOLDER}Metrics.txt\" 2>/dev/null && echo 1 || echo 0); if [ \"$IS_RESCANNED\" = \"1\" ]; then POS_RESCAN=$((POS_RESCAN + 1)); fi; echo \"{\\\"green_idat_path\\\":\\\"$GREEN\\\",\\\"red_idat_path\\\":\\\"$RED\\\",\\\"total_rescan_count\\\":$TOTAL_RESCAN,\\\"position_rescan_count\\\":$POS_RESCAN,\\\"is_rescanned\\\":$IS_RESCANNED}\""
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -48
+      ],
+      "id": "a350611a-a1e7-49a9-a17b-b2b407ff8c69",
+      "name": "Get idat path and rescan count",
+      "credentials": {
+        "sshPassword": {
+          "id": "ygN0iMbDsZngxa5z",
+          "name": "alldata hande"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst prevItems = $('Merge SQL and Sheet').all();\nconst results = [];\n\nitems.forEach((item, index) => {\n  try {\n    const parsed = JSON.parse(item.json.stdout);\n    const prev = prevItems[index].json;\n    results.push({\n      json: {\n        scan_ref: prev.scan_ref,\n        sentrix_id: prev.sentrix_id,\n        chiptype_ref: prev.chiptype_ref,\n        performing_caresite_ref: prev.performing_caresite_ref,\n        requesting_caresite_ref: prev.requesting_caresite_ref,\n        position: prev.position,\n        sample_id: prev.sample_id,\n        green_idat_path: parsed.green_idat_path,\n        red_idat_path: parsed.red_idat_path,\n        total_rescan_count: parsed.total_rescan_count,\n        position_rescan_count: parsed.position_rescan_count,\n        is_rescanned: parsed.is_rescanned\n      }\n    });\n  } catch {\n    // parse hatası, atla\n  }\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "eef25d12-d233-4f79-8845-313d630fdadb",
+      "name": "Parse"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE scans \nSET total_rescan_count = {{ $json.total_rescan_count }},\n    updated_at = now()\nWHERE uniqueref = {{ $json.scan_ref }}\nAND (total_rescan_count IS NULL OR total_rescan_count != {{ $json.total_rescan_count }})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        464,
+        -432
+      ],
+      "id": "b00ebffb-775d-4141-a7fb-e520fbfa2ba8",
+      "name": "Update rescan count",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref, rescan_count FROM idats \nWHERE scan_ref = {{ $json.scan_ref }} \nAND position = '{{ $json.position }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        480,
+        -48
+      ],
+      "id": "d56a1479-f0b9-41ac-82fe-8b08ca47f379",
+      "name": "Check idat exists",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "insert",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "813410f3-ad15-4bd9-99fd-a56a77bfdf38"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e89ffcf6-45a2-4244-a942-1bd1c89d1494",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "update",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b0aaa0b1-d57e-4144-b2e6-164432319d21",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "none",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -64
+      ],
+      "id": "c89dc950-a25c-4f27-ab9f-f15029f18337",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "tableId": "idats",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "scan_ref",
+              "fieldValue": "={{ $json.scan_ref }}"
+            },
+            {
+              "fieldId": "position",
+              "fieldValue": "={{ $json.position }}"
+            },
+            {
+              "fieldId": "sample_id",
+              "fieldValue": "={{ $json.sample_id }}"
+            },
+            {
+              "fieldId": "green_idat_path",
+              "fieldValue": "={{ $json.green_idat_path }}"
+            },
+            {
+              "fieldId": "red_idat_path",
+              "fieldValue": "={{ $json.red_idat_path }}"
+            },
+            {
+              "fieldId": "performing_caresite_ref",
+              "fieldValue": "={{ $json.performing_caresite_ref }}"
+            },
+            {
+              "fieldId": "requesting_caresite_ref",
+              "fieldValue": "={{ $json.requesting_caresite_ref }}"
+            },
+            {
+              "fieldId": "rescan_count",
+              "fieldValue": "={{ $json.position_rescan_count }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        -256
+      ],
+      "id": "63a04aa2-c33e-4a9b-a8fd-f54651b9a40e",
+      "name": "Insert idats",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "idats",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "uniqueref",
+              "condition": "eq",
+              "keyValue": "={{ $json.idat_ref }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "rescan_count",
+              "fieldValue": "={{ $json.position_rescan_count }}"
+            },
+            {
+              "fieldId": "updated_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        -48
+      ],
+      "id": "5bfc0a07-0f86-4b9f-8eeb-181567df3abd",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "HA1IMjyc0iMX0UIX",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Parse').all().map(i => i.json); // SSH parse node adın ne?\n\nconst results = [];\n\nparseResults.forEach((current, index) => {\n  const dbRecord = checkResults[index] || {};\n  \n  if (!dbRecord.uniqueref) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (parseInt(dbRecord.rescan_count) !== current.position_rescan_count) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        -48
+      ],
+      "id": "0bfe1185-7f13-42e2-a988-2b433db893f4",
+      "name": "Decision code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheet = $input.all().map(i => i.json);\nconst barkodlar = [...new Set(sheet.map(row => `'${row.Barkod}'`))].join(',');\nreturn [{ json: { barkodlar, sheet: JSON.stringify(sheet) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        -48
+      ],
+      "id": "758549dd-9753-4833-9222-6fdeb683a74f",
+      "name": "Extract Sentrixs"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "sheet": {
+      "main": [
+        [
+          {
+            "node": "Extract Sentrixs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get completed scans": {
+      "main": [
+        [
+          {
+            "node": "Get care_site_mapping",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge SQL and Sheet": {
+      "main": [
+        [
+          {
+            "node": "Get idat path and rescan count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get care_site_mapping": {
+      "main": [
+        [
+          {
+            "node": "Merge SQL and Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get idat path and rescan count": {
+      "main": [
+        [
+          {
+            "node": "Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse": {
+      "main": [
+        [
+          {
+            "node": "Check idat exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check idat exists": {
+      "main": [
+        [
+          {
+            "node": "Decision code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Insert idats",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decision code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Sentrixs": {
+      "main": [
+        [
+          {
+            "node": "Get completed scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "22237f14-9fc3-4e85-990f-8459329d934d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-21T09:56:53.908Z",
+      "createdAt": "2026-04-21T09:56:53.908Z",
+      "role": "workflow:owner",
+      "workflowId": "gNQvXKZ12sRVaKYt",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "23-04-2026/0:00",
+  "fileName": "idats2Supa.json"
+}
