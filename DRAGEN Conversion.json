@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-20T13:04:10.993Z",
+  "updatedAt": "2026-04-23T01:27:47.990Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260416_VH01138_2_AAF3CTNHV",
+              "value": "=260414_VH01138_1_AACNKLCHV",
               "type": "string"
             }
           ]
@@ -141,7 +141,7 @@
     },
     {
       "parameters": {
-        "command": "=rclone copy /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
+        "command": "=rclone copy /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -430,7 +430,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        144,
+        160,
         576
       ],
       "id": "3eb3aea9-43eb-4a87-9fd7-0d904ba2db14",
@@ -560,8 +560,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -1239,7 +1238,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8e7e48f0-2df6-49c7-8e22-c4760e01c61d",
+  "versionId": "f6ea157a-702a-44ca-95b1-349863df479c",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1260,6 +1259,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "21-04-2026/0:00",
+  "commitDate": "23-04-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
