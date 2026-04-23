@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-20T10:56:31.845Z",
+  "updatedAt": "2026-04-23T02:21:57.431Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        1264,
-        -752
+        -64,
+        -1024
       ],
       "id": "0c679ca5-7a0f-4002-9f62-32ff30eac723",
       "name": "When clicking ‘Execute workflow’"
@@ -24,8 +24,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2000,
-        -256
+        656,
+        -624
       ],
       "id": "558e11f1-be42-46b3-a365-51bd41bd1aef",
       "name": "Execute Command"
@@ -37,8 +37,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2576,
-        -352
+        1232,
+        -720
       ],
       "id": "8d2640ed-8c95-42e8-9d8d-05dc5c256a13",
       "name": "Read SampleSheet"
@@ -52,8 +52,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1264,
-        -256
+        -80,
+        -624
       ],
       "id": "42959807-1afe-4970-b0bb-f3f4f8a8ce01",
       "name": "Check and Update Run Record",
@@ -73,8 +73,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1792,
-        -256
+        448,
+        -624
       ],
       "id": "1250d365-41a4-450a-8357-cd746e2f6e8c",
       "name": "Check and Update Conversion Record",
@@ -99,7 +99,7 @@
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
               "leftValue": "={{ $json.Sample_ID}}",
-              "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|') }}",
+              "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|').replace(/\\//g, '-') }}",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -114,8 +114,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        4016,
-        -208
+        2688,
+        -496
       ],
       "id": "07586885-22cf-4be9-95c0-225aa3d17960",
       "name": "Custom Filter"
@@ -932,8 +932,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        4320,
-        -144
+        2880,
+        -432
       ],
       "id": "c5842104-b4dc-4c60-9dc4-97eff928407c",
       "name": "Extract Parameters"
@@ -956,8 +956,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3072,
-        -352
+        1728,
+        -720
       ],
       "id": "dccc20ab-7df1-4a94-8c2b-8eb31a874d15",
       "name": "Add Kit Ref"
@@ -972,8 +972,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3600,
-        -352
+        2256,
+        -720
       ],
       "id": "3d04489f-bd9c-42b8-8a19-1c3b42a7a708",
       "name": "Add Bed Path"
@@ -985,8 +985,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3344,
-        -240
+        2000,
+        -608
       ],
       "id": "e4aa1ce0-27fd-472b-b8e0-5b6d71d0ba9e",
       "name": "Bed Mapping",
@@ -999,8 +999,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1520,
-        -256
+        176,
+        -624
       ],
       "id": "1dd87495-3b01-4fd7-9d32-523af617fdd2",
       "name": "Find Conversions in Sapiens"
@@ -1023,8 +1023,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        768,
-        224
+        912,
+        128
       ],
       "id": "4458dee3-65a7-4119-b103-cfa9845419af",
       "name": "Rename SampleID"
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260403_A01978_0157_AHFTCKDMX2",
+              "value": "20260420_LH00267_0165_A23JJCKLT3",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "SG2026-06607\tSG2026-06536\tSG2026-06717 874-2026\t875-2026\t885-2026 830-2026\t844-2026\t847-2026 797-2026\t803-2026\t809-2026 709-2026\t710-2026\t726-2026 675-2026\t676-2026\t680-2026 250-2026\t269-2026\t329-2026 26-2140\t26-2157\t26-2158 AMG-0386-26\t26-1853\t26-1966 AMG-0386-26\t26-1853\t26-1966 CO26-BR6255\t317\tSG2026-06923  37523\tSG2026-06313\tSG2026-06339 1394652-BE\t1394292-KBM\t1394282-AA SG2026-06409\tSG2026-06417\tSG2026-06609 26-2016\t26-2000\t26-1982",
+              "value": "",
               "type": "string"
             },
             {
@@ -1058,8 +1058,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2192,
-        -480
+        848,
+        -848
       ],
       "id": "f4301350-f7b1-4dd4-abb2-1436d14170af",
       "name": "Set Run ID"
@@ -1102,8 +1102,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1024,
-        224
+        1168,
+        128
       ],
       "id": "9b90b9eb-8236-40c6-9c34-88f2bf1f82df",
       "name": "Filter"
@@ -1115,8 +1115,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1504,
-        -752
+        176,
+        -1024
       ],
       "id": "07be1af6-f832-45cc-bb47-871ef762a587",
       "name": "Check DRAGEN Availability",
@@ -1155,8 +1155,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1712,
-        -752
+        384,
+        -1024
       ],
       "id": "5837340a-4bee-4b7d-bed9-48bffa06bff6",
       "name": "Is DRAGEN Idle"
@@ -1405,8 +1405,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1952,
-        -752
+        624,
+        -1024
       ],
       "id": "a0df3323-d5f3-4e91-9178-9bbd77663c63",
       "name": "DRAGEN QC Pre-Cleanup",
@@ -1444,8 +1444,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2208,
-        -256
+        864,
+        -624
       ],
       "id": "32c64c81-bc7f-406c-bbaf-6c85b9536328",
       "name": "Does Sheet Contains Kit"
@@ -1460,8 +1460,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3600,
-        -144
+        2256,
+        -512
       ],
       "id": "d5190705-8cb4-4a2d-a264-ad3be2a57c93",
       "name": "Add Bed Path1"
@@ -1494,8 +1494,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2832,
-        -496
+        1488,
+        -864
       ],
       "id": "0a929c1e-f217-4b02-b457-faa623f44cf3",
       "name": "Kits Mapping",
@@ -1515,8 +1515,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1264,
-        96
+        1408,
+        0
       ],
       "id": "fbb86cb8-31b7-44de-a3cb-ae690d0e96bd",
       "name": "Execute Command1"
@@ -1530,8 +1530,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1472,
-        208
+        1616,
+        112
       ],
       "id": "1f669806-92d0-4325-8115-096564ece3da",
       "name": "Merge"
@@ -1564,8 +1564,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        1680,
-        208
+        1824,
+        112
       ],
       "id": "0a06de73-479c-4a58-9462-a2fc9ce89c4d",
       "name": "Filter1"
@@ -1579,8 +1579,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2576,
-        -144
+        1232,
+        -512
       ],
       "id": "440508fd-4987-412a-b661-f60d3aa52128",
       "name": "Get Sheet from DB",
@@ -1606,8 +1606,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2272,
-        -112
+        2192,
+        -48
       ],
       "id": "207de17e-8620-43cf-8caf-c3752d1e08ac",
       "name": "Send email",
@@ -1618,7 +1618,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -2200,7 +2201,7 @@
       }
     ]
   },
-  "versionId": "c3c147bc-53cc-450c-b058-6f7dbccacfc2",
+  "versionId": "d8093858-9dd4-40ef-8e16-3f626dd0e153",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2214,6 +2215,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "21-04-2026/0:00",
+  "commitDate": "23-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
