@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-30T09:01:45.345Z",
+  "updatedAt": "2026-04-21T07:48:21.815Z",
   "createdAt": "2025-12-29T14:18:49.525Z",
   "id": "OaLTopm8qW98Uf6u",
   "name": "My workflow 10",
@@ -160,8 +160,8 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        1888,
-        624
+        4272,
+        672
       ],
       "id": "ac2e5b0b-12ca-4413-a708-d5073499725b"
     },
@@ -850,6 +850,17 @@
           }
         ]
       ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -860,7 +871,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1319f74a-653a-4b8d-b9e7-e0db73e4855a",
+  "versionId": "570ba5f5-02a6-4108-9dca-bb4c9ddcee0e",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -874,6 +885,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "21-04-2026/0:00",
+  "commitDate": "23-04-2026/0:00",
   "fileName": "My workflow 10.json"
 }
