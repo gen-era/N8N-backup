@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-26T13:41:58.748Z",
+  "updatedAt": "2026-04-23T06:33:08.327Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
@@ -34,7 +34,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -64,
+        -144,
         240
       ],
       "id": "4779e9df-2b5b-4cdb-b8e5-4e725fa90436",
@@ -65,7 +65,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -288,
+        -368,
         240
       ],
       "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
@@ -78,7 +78,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        160,
+        80,
         240
       ],
       "id": "f4cf6736-67d2-4deb-aeb7-7dfa3351b8c4",
@@ -112,7 +112,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        384,
+        592,
         240
       ],
       "id": "ea8abc79-c6bd-4e32-be55-cacf1904c55d",
@@ -131,7 +131,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        576,
+        784,
         240
       ],
       "id": "1ebed043-ed78-48d8-98a4-b8dff9e728f1",
@@ -205,7 +205,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        816,
+        1024,
         240
       ],
       "id": "453ffdcc-468e-4c27-b19c-fd5d301b2ad5",
@@ -216,6 +216,39 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8419d5fd-22af-4bee-a634-87eda656d0ea",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "[]",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        240
+      ],
+      "id": "0647f35e-0e3b-4adb-b437-7633e0304dbf",
+      "name": "If"
     }
   ],
   "connections": {
@@ -245,7 +278,7 @@
       "main": [
         [
           {
-            "node": "Select rows from a table2",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -273,6 +306,17 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -288,15 +332,15 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "folder": "260323_A01978_0150_AHWFTFDSXF",
-          "path": "/mnt/illuminastorage/run_folder/260323_A01978_0150_AHWFTFDSXF",
-          "status": "READY_FOR_CONVERSION"
+          "folder": "20260420_LH00267_0165_A23JJCKLT3",
+          "path": "/mnt/smb_share/Runs/20260420_LH00267_0165_A23JJCKLT3/",
+          "status": null
         }
       }
     ]
   },
-  "versionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
-  "activeVersionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
+  "versionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
+  "activeVersionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
   "triggerCount": 0,
   "shared": [
     {
@@ -308,9 +352,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-26T13:42:01.000Z",
-    "createdAt": "2026-03-26T13:41:58.750Z",
-    "versionId": "796e1b6b-9d45-4ac2-ba10-2735b04729a0",
+    "updatedAt": "2026-04-23T06:33:10.000Z",
+    "createdAt": "2026-04-23T06:33:08.330Z",
+    "versionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
     "workflowId": "SeGWQ7ai2D66eUSG",
     "nodes": [
       {
@@ -341,7 +385,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -64,
+          -144,
           240
         ],
         "id": "4779e9df-2b5b-4cdb-b8e5-4e725fa90436",
@@ -372,7 +416,7 @@
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "typeVersion": 1.1,
         "position": [
-          -288,
+          -368,
           240
         ],
         "id": "4a98d2cc-0ed9-4363-a526-6e53a98610ac",
@@ -385,7 +429,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          160,
+          80,
           240
         ],
         "id": "f4cf6736-67d2-4deb-aeb7-7dfa3351b8c4",
@@ -419,7 +463,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          384,
+          592,
           240
         ],
         "id": "ea8abc79-c6bd-4e32-be55-cacf1904c55d",
@@ -438,7 +482,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          576,
+          784,
           240
         ],
         "id": "1ebed043-ed78-48d8-98a4-b8dff9e728f1",
@@ -512,7 +556,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          816,
+          1024,
           240
         ],
         "id": "453ffdcc-468e-4c27-b19c-fd5d301b2ad5",
@@ -523,6 +567,39 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "8419d5fd-22af-4bee-a634-87eda656d0ea",
+                "leftValue": "={{ $json.stdout }}",
+                "rightValue": "[]",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          320,
+          240
+        ],
+        "id": "0647f35e-0e3b-4adb-b437-7633e0304dbf",
+        "name": "If"
       }
     ],
     "connections": {
@@ -552,7 +629,7 @@
         "main": [
           [
             {
-              "node": "Select rows from a table2",
+              "node": "If",
               "type": "main",
               "index": 0
             }
@@ -580,14 +657,25 @@
             }
           ]
         ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Select rows from a table2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 796e1b6b",
+    "name": "Version 5968e418",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "23-04-2026/0:00",
+  "commitDate": "24-04-2026/0:00",
   "fileName": "interop.json"
 }
