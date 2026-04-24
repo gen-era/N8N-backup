@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-20T11:34:29.635Z",
+  "updatedAt": "2026-04-23T08:08:06.343Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/backup_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -396,17 +396,19 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
+        "mode": "each",
         "options": {}
       },
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        2096,
-        -528
+        2688,
+        -400
       ],
       "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
       "name": "Call 'interop'",
-      "disabled": true
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -460,30 +462,78 @@
     },
     {
       "parameters": {
-        "maxItems": 2
-      },
-      "type": "n8n-nodes-base.limit",
-      "typeVersion": 1,
-      "position": [
-        1648,
-        -624
-      ],
-      "id": "541010fe-9cde-4daf-a350-50a0cbfc2ab0",
-      "name": "Limit"
-    },
-    {
-      "parameters": {
         "options": {}
       },
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1856,
-        -624
+        2448,
+        -496
       ],
       "id": "2abcad21-c986-49f4-83df-d030579121f6",
-      "name": "Loop Over Items",
-      "disabled": true
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=test -f {{ $json.path }}RunInfo.xml && test -d {{ $json.path }}InterOp && echo \"EXISTS\" || echo \"MISSING\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        -624
+      ],
+      "id": "b1365e9d-4fb1-459c-8e97-42457df7d22b",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1952,
+        -496
+      ],
+      "id": "8b1e786e-5846-4a84-a475-058202582860",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5bc65677-43b7-4c93-ada8-0d1b0ee6ca84",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "EXISTS",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2160,
+        -496
+      ],
+      "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
+      "name": "Filter"
     }
   ],
   "connections": {
@@ -648,20 +698,14 @@
       "main": [
         [
           {
-            "node": "Limit",
+            "node": "Execute Command",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "Limit": {
-      "main": [
-        [
+          },
           {
-            "node": "Loop Over Items",
+            "node": "Merge",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -688,6 +732,39 @@
           }
         ]
       ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -704,8 +781,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c68afedc-d676-402c-9b62-ef646cd2b413",
-  "activeVersionId": "c68afedc-d676-402c-9b62-ef646cd2b413",
+  "versionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
+  "activeVersionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
   "triggerCount": 1,
   "shared": [
     {
@@ -717,9 +794,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-20T11:34:31.000Z",
-    "createdAt": "2026-04-20T11:34:29.636Z",
-    "versionId": "c68afedc-d676-402c-9b62-ef646cd2b413",
+    "updatedAt": "2026-04-23T08:08:09.000Z",
+    "createdAt": "2026-04-23T08:08:06.347Z",
+    "versionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -914,7 +991,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/backup_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -1112,17 +1189,19 @@
             "attemptToConvertTypes": false,
             "convertFieldsToString": true
           },
+          "mode": "each",
           "options": {}
         },
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          2096,
-          -528
+          2688,
+          -400
         ],
         "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
         "name": "Call 'interop'",
-        "disabled": true
+        "alwaysOutputData": true,
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1176,30 +1255,78 @@
       },
       {
         "parameters": {
-          "maxItems": 2
-        },
-        "type": "n8n-nodes-base.limit",
-        "typeVersion": 1,
-        "position": [
-          1648,
-          -624
-        ],
-        "id": "541010fe-9cde-4daf-a350-50a0cbfc2ab0",
-        "name": "Limit"
-      },
-      {
-        "parameters": {
           "options": {}
         },
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "position": [
-          1856,
-          -624
+          2448,
+          -496
         ],
         "id": "2abcad21-c986-49f4-83df-d030579121f6",
-        "name": "Loop Over Items",
-        "disabled": true
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "executeOnce": false,
+          "command": "=test -f {{ $json.path }}RunInfo.xml && test -d {{ $json.path }}InterOp && echo \"EXISTS\" || echo \"MISSING\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1776,
+          -624
+        ],
+        "id": "b1365e9d-4fb1-459c-8e97-42457df7d22b",
+        "name": "Execute Command"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1952,
+          -496
+        ],
+        "id": "8b1e786e-5846-4a84-a475-058202582860",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "5bc65677-43b7-4c93-ada8-0d1b0ee6ca84",
+                "leftValue": "={{ $json.stdout }}",
+                "rightValue": "EXISTS",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          2160,
+          -496
+        ],
+        "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
+        "name": "Filter"
       }
     ],
     "connections": {
@@ -1364,20 +1491,14 @@
         "main": [
           [
             {
-              "node": "Limit",
+              "node": "Execute Command",
               "type": "main",
               "index": 0
-            }
-          ]
-        ]
-      },
-      "Limit": {
-        "main": [
-          [
+            },
             {
-              "node": "Loop Over Items",
+              "node": "Merge",
               "type": "main",
-              "index": 0
+              "index": 1
             }
           ]
         ]
@@ -1404,10 +1525,43 @@
             }
           ]
         ]
+      },
+      "Execute Command": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version c68afedc",
+    "name": "Version 0ed59470",
     "description": "",
     "autosaved": false
   },
@@ -1419,6 +1573,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "23-04-2026/0:00",
+  "commitDate": "24-04-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
