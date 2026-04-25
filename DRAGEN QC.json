@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-23T02:21:57.431Z",
+  "updatedAt": "2026-04-24T14:38:18.202Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260420_LH00267_0165_A23JJCKLT3",
+              "value": "260415_A01228_0271_BHG3VFDMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "",
+              "value": "ZK26-YCES-5205\tZK26-YCES-5206\tZK26-YCES-5230\tU26-YCES-8001\tU26-YCES-8002\tU26-YCES-8003\tHP26-YCES-342\tHP26-YCES-343\tGU26-YCES-7322 M26-YNP-150\tM26-YNP-151\tM26-YNP-152\t\t\t\t\t\t U26-YRITM-799\tU26-YRITM-800\tU26-YRITM-801\t\t\t\t\t\t U26-YFAID-852\tO26-YFAID-1\tKS26-YFAID-57\t\t\t\t\t\t ST26-YCES-708\tST26-YCES-709\tST26-YCES-710\t\t\t\t\t\t SE26-YCES-2415\tSE26-YCES-2416\tSE26-YCES-2417\tZK26-YCES-5280\tZK26-YCES-5281\tZK26-YCES-5282\t\t\t H26-YCES-1481\tH26-YCES-1482\tH26-YCES-1483\tGU26-YCES-7315\tGU26-YCES-7316\tGU26-YCES-7317\tU26-YCES-7970\tU26-YCES-7971\tU26-YCES-7972 U26-YCES-7986\tU26-YCES-7987\tU26-YCES-7989\tM26-YCES-4431\tM26-YCES-4432\tM26-YCES-4433\tSE26-YCES-2439\tSE26-YCES-2440\tM26-YCES-4435 GU26-YHCS-4493\tGU26-YHCS-4494\tGU26-YHCS-4495\tZK26-YHCS-1896\tM26-YHCS-1170\tM26-YHCS-1171\t\t\t U26-YHCS-3224\tU26-YHCS-3225\tU26-YHCS-3226\tH26-YHCS-1187\tB26-YHCS-663\tB26-YHCS-664\t\t\t K26-YTG-9\tIE26-YTG-8\tIE26-YTG-9\tIE26-YTG-11\tIE26-YTG-12\tHP26-YTG-3",
               "type": "string"
             },
             {
@@ -1618,8 +1618,7 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      },
-      "disabled": true
+      }
     }
   ],
   "connections": {
@@ -2201,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "d8093858-9dd4-40ef-8e16-3f626dd0e153",
+  "versionId": "70b03c07-2d8e-4abb-a00b-3f6e31ca5d23",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2215,6 +2214,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "24-04-2026/0:00",
+  "commitDate": "25-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
