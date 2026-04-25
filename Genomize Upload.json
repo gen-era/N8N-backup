@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-20T09:28:03.573Z",
+  "updatedAt": "2026-04-24T10:24:30.729Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -512,
-        -80
+        -960,
+        -288
       ],
       "id": "191f0bac-05ed-4298-b7f6-e046a49166de",
       "name": "When clicking ‘Execute workflow’"
@@ -141,8 +141,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -32,
-        -48
+        720,
+        -272
       ],
       "id": "d7c5fcb4-d02f-403d-9558-94dbb2faa263",
       "name": "Update Data Op as In Progress",
@@ -151,7 +151,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -278,8 +279,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -32,
-        304
+        720,
+        160
       ],
       "id": "b653a3c5-d81c-4688-9386-9d6f0c49be12",
       "name": "Update Data Op as Completed",
@@ -292,26 +293,26 @@
     },
     {
       "parameters": {
-        "command": "sudo rm  -r /tmp/genomize/*"
+        "command": "=sudo rm -r /tmp/genomize/{{ $('Code in JavaScript').item.json.batchSourceValue }}"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        176,
-        128
+        1616,
+        -48
       ],
       "id": "8a5d13c6-ff7e-4588-b6d8-d850bd3ee117",
       "name": "Cleanup Symlink"
     },
     {
       "parameters": {
-        "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/ genomize/{{ $json.account_id }}.static.seq.genomize.com/external/ "
+        "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/ genomize/{{ $('Code in JavaScript').item.json.accountId }}.static.seq.genomize.com/external/"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -32,
-        128
+        1408,
+        -48
       ],
       "id": "dce3c93f-6be1-4a0b-a7e3-302825a041ff",
       "name": "Upload Genomize"
@@ -324,22 +325,21 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        400,
-        -208
+        1152,
+        -48
       ],
       "id": "4c50f3a6-8035-4ef0-8042-15ad3c634308",
       "name": "Create Symlink"
     },
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "// Stdout'daki fastq dosya yollarını al\nconst fastqPaths = $input.item.json.stdout.trim().split('\\n');\n\n// batch_source_value'yu önceki node'dan al\nconst batchSourceValue = $('Get On Hold Genomize Uploads').item.json.batch_source_value;\n\n// /tmp/genomize altında hedef dizini oluştur\nconst symlinkBaseDir = `/tmp/genomize/${batchSourceValue}`;\n\n// Symlink komutlarını oluştur\nconst commands = [];\ncommands.push(`mkdir -p ${symlinkBaseDir}`);\n\nfastqPaths.forEach(sourcePath => {\n  const fileName = sourcePath.split('/').pop();\n  const targetPath = `${symlinkBaseDir}/${fileName}`;\n  commands.push(`ln -sf ${sourcePath} ${targetPath}`);\n});\n\nconst finalCommand = commands.join(' && ');\n\nreturn {\n  json: {\n    command: finalCommand,\n    targetDirectory: symlinkBaseDir,\n    fileCount: fastqPaths.length,\n    batchSourceValue: batchSourceValue\n  }\n};"
+        "jsCode": "const findFilesResults = $input.all();\nconst expandedItems = $('Expand Recipe Items').all();\n\nconst batchSourceValue = expandedItems[0].json.batch_source_value.trim();\nconst accountId = expandedItems[0].json.account_id.trim();\nconst symlinkBaseDir = `/tmp/genomize/${batchSourceValue}`;\n\nconst commands = [`mkdir -p ${symlinkBaseDir}`];\nconst operationRefs = [];\n\nfindFilesResults.forEach((result, index) => {\n  const fastqPaths = result.json.stdout.trim().split('\\n').filter(p => p);\n  const opRef = expandedItems[index].json.operation_uniqueref;\n  operationRefs.push(opRef);\n\n  fastqPaths.forEach(sourcePath => {\n    const fileName = sourcePath.split('/').pop();\n    commands.push(`ln -sf ${sourcePath} ${symlinkBaseDir}/${fileName}`);\n  });\n});\n\nreturn [{\n  json: {\n    command: commands.join(' && '),\n    targetDirectory: symlinkBaseDir,\n    batchSourceValue,\n    accountId,\n    operationRefs\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
-        -208
+        928,
+        -48
       ],
       "id": "3c917ed2-b7cc-43ee-b825-97cf5e0331fa",
       "name": "Code in JavaScript"
@@ -352,8 +352,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -32,
-        -208
+        720,
+        -48
       ],
       "id": "545b08bf-8360-445d-aef0-d74b12a806fc",
       "name": "Find Files"
@@ -365,8 +365,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -288,
-        -272
+        -656,
+        -288
       ],
       "id": "c4e67749-3c32-4b92-a610-06469b2eec62",
       "name": "Login Genomize"
@@ -380,8 +380,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -288,
-        -80
+        -480,
+        -48
       ],
       "id": "71bc3dcd-e6de-4583-8a2f-2cdfb924c506",
       "name": "Get On Hold Genomize Uploads",
@@ -391,6 +391,45 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        16,
+        -48
+      ],
+      "id": "5cb7108f-14ca-423c-8e30-c7ef2e1bb3e2",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentRecipe = $input.first().json;\n\nreturn currentRecipe.operations.map(op => ({\n  json: op\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -48
+      ],
+      "id": "b74cf809-a04b-4e3a-9a70-f9c996b55ef5",
+      "name": "Expand Recipe Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst recipeMap = {};\n\nitems.forEach(item => {\n  const recipeRef = item.json.recipe_ref;\n  if (!recipeMap[recipeRef]) {\n    recipeMap[recipeRef] = [];\n  }\n  recipeMap[recipeRef].push(item.json);\n});\n\nreturn Object.keys(recipeMap).map(recipeRef => ({\n  json: {\n    recipe_ref: Number(recipeRef),\n    operations: recipeMap[recipeRef]\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -48
+      ],
+      "id": "d7b9422b-7b64-4251-8694-348d03c78ffb",
+      "name": "Extract Unique Recipes"
     }
   ],
   "connections": {
@@ -447,7 +486,30 @@
       "main": [
         [
           {
-            "node": "Update Data Op as Completed",
+            "node": "Extract Unique Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Expand Recipe Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand Recipe Items": {
+      "main": [
+        [
+          {
+            "node": "Find Files",
             "type": "main",
             "index": 0
           },
@@ -457,12 +519,34 @@
             "index": 0
           },
           {
-            "node": "Upload Genomize",
+            "node": "Update Data Op as Completed",
             "type": "main",
             "index": 0
-          },
+          }
+        ]
+      ]
+    },
+    "Extract Unique Recipes": {
+      "main": [
+        [
           {
-            "node": "Find Files",
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Data Op as Completed": {
+      "main": [
+        []
+      ]
+    },
+    "Create Symlink": {
+      "main": [
+        [
+          {
+            "node": "Upload Genomize",
             "type": "main",
             "index": 0
           }
@@ -478,7 +562,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9b84fc12-d485-440d-8f4d-5e7a6fc1be90",
+  "versionId": "33acd703-4ace-4e9a-a31c-832c5ab05b7a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -499,6 +583,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "24-04-2026/0:00",
+  "commitDate": "25-04-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
