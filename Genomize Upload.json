@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-24T10:24:30.729Z",
+  "updatedAt": "2026-04-25T10:39:38.412Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -151,8 +151,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -539,7 +538,13 @@
     },
     "Update Data Op as Completed": {
       "main": [
-        []
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Create Symlink": {
@@ -562,7 +567,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "33acd703-4ace-4e9a-a31c-832c5ab05b7a",
+  "versionId": "da36f184-bb13-4e84-885f-78b70845f1da",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -583,6 +588,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "25-04-2026/0:00",
+  "commitDate": "26-04-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
