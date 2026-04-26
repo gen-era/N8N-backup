@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-09T22:13:00.307Z",
+  "updatedAt": "2026-04-25T08:57:28.563Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -20,7 +20,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    reads.r1_path,\n    reads.r2_path,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id = '{{ $('Loop Over Items').item.json.account_id }}';",
+        "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    reads.r1_path,\n    reads.r2_path,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.operator_ref as conversion_operator_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id = '{{ $('Loop Over Items').item.json.account_id }}'\n    AND data_operations.recipe_ref = {{ $('Loop Over Items').item.json.recipe_ref }};",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -54,7 +54,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT DISTINCT data_operation_recipes.account_id\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id IS NOT NULL;",
+        "query": "SELECT DISTINCT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nORDER BY dor.account_id, dor.uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -297,7 +297,8 @@
           "mappingMode": "defineBelow",
           "value": {
             "uniqueref": "={{ $json.operation_uniqueref }}",
-            "status_concept_ref": 29
+            "status_concept_ref": 29,
+            "performed_at": "={{ $now.toISO() }}"
           },
           "matchingColumns": [
             "uniqueref"
@@ -350,7 +351,7 @@
               "display": true,
               "type": "dateTime",
               "canBeUsedToMatch": true,
-              "removed": true
+              "removed": false
             },
             {
               "id": "batch_source_value",
@@ -577,7 +578,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fab8f828-1348-436e-af96-90d8afe0eb4c",
+  "versionId": "d023cb99-545f-4929-ba94-3a8d80888961",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -590,7 +591,14 @@
     }
   ],
   "activeVersion": null,
-  "tags": [],
-  "commitDate": "25-04-2026/0:00",
+  "tags": [
+    {
+      "updatedAt": "2026-02-25T08:58:40.172Z",
+      "createdAt": "2026-02-25T08:58:40.172Z",
+      "id": "haVpXFpEUMjyquhf",
+      "name": "Production"
+    }
+  ],
+  "commitDate": "26-04-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
