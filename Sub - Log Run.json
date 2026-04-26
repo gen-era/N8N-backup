@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-18T08:43:42.731Z",
+  "updatedAt": "2026-04-25T12:04:31.289Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -2553,7 +2553,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH inserted AS (\n  INSERT INTO runs (run_id)\n  VALUES ('{{ $json.run_id }}')\n  ON CONFLICT (run_id) DO NOTHING\n  RETURNING *\n)\nSELECT * FROM inserted\nUNION ALL\nSELECT * FROM runs WHERE run_id = '{{ $json.run_id }}' AND NOT EXISTS (SELECT 1 FROM inserted);",
+        "query": "WITH params AS (\n  SELECT '{{ $json.run_id }}'::text AS run_id\n),\ninst AS (\n  SELECT i.uniqueref       AS instrument_ref,\n         c.concept_name    AS instrument_model\n  FROM params p\n  LEFT JOIN instruments i\n    ON i.serial_number = split_part(p.run_id, '_', 2)\n  LEFT JOIN concepts c\n    ON c.uniqueref = i.instrument_concept_ref\n),\ninserted AS (\n  INSERT INTO runs (run_id, instrument_ref)\n  SELECT p.run_id, ins.instrument_ref\n  FROM params p CROSS JOIN inst ins\n  ON CONFLICT (run_id) DO NOTHING\n  RETURNING *\n)\nSELECT i.*, ins.instrument_model\nFROM inserted i CROSS JOIN inst ins\nUNION ALL\nSELECT r.*, ins.instrument_model\nFROM runs r\nCROSS JOIN inst ins\nCROSS JOIN params p\nWHERE r.run_id = p.run_id\n  AND NOT EXISTS (SELECT 1 FROM inserted);",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -3165,6 +3165,225 @@
       ],
       "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
       "name": "Has No Measurement"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+              "leftValue": "={{ $json.instrument_model }}",
+              "rightValue": "NovaSeq",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1008,
+        1312
+      ],
+      "id": "c204f725-d4aa-4e70-94fa-0dbf9e7654bc",
+      "name": "Workflow Check1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+            "part": "={{ $json.run_id.split('_')[3].charAt(0) }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "care_site_ref",
+              "displayName": "care_site_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "part",
+              "displayName": "part",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1696,
+        1312
+      ],
+      "id": "87501381-a6cc-43f7-8a06-8c4be9ad2356",
+      "name": "Update Part",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -3576,6 +3795,11 @@
             "node": "Care Site Check",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Workflow Check1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -3690,6 +3914,28 @@
         ],
         []
       ]
+    },
+    "Update Part": {
+      "main": [
+        [
+          {
+            "node": "Update Update Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Check1": {
+      "main": [
+        [
+          {
+            "node": "Update Part",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -3709,8 +3955,8 @@
       }
     ]
   },
-  "versionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
-  "activeVersionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
+  "versionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
+  "activeVersionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
   "triggerCount": 0,
   "shared": [
     {
@@ -3722,9 +3968,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-18T08:43:51.000Z",
-    "createdAt": "2026-04-18T08:43:42.733Z",
-    "versionId": "1289951a-f29e-4b3b-a1d6-fd5fd8ad7617",
+    "updatedAt": "2026-04-25T12:04:36.000Z",
+    "createdAt": "2026-04-25T12:04:31.292Z",
+    "versionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -6274,7 +6520,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH inserted AS (\n  INSERT INTO runs (run_id)\n  VALUES ('{{ $json.run_id }}')\n  ON CONFLICT (run_id) DO NOTHING\n  RETURNING *\n)\nSELECT * FROM inserted\nUNION ALL\nSELECT * FROM runs WHERE run_id = '{{ $json.run_id }}' AND NOT EXISTS (SELECT 1 FROM inserted);",
+          "query": "WITH params AS (\n  SELECT '{{ $json.run_id }}'::text AS run_id\n),\ninst AS (\n  SELECT i.uniqueref       AS instrument_ref,\n         c.concept_name    AS instrument_model\n  FROM params p\n  LEFT JOIN instruments i\n    ON i.serial_number = split_part(p.run_id, '_', 2)\n  LEFT JOIN concepts c\n    ON c.uniqueref = i.instrument_concept_ref\n),\ninserted AS (\n  INSERT INTO runs (run_id, instrument_ref)\n  SELECT p.run_id, ins.instrument_ref\n  FROM params p CROSS JOIN inst ins\n  ON CONFLICT (run_id) DO NOTHING\n  RETURNING *\n)\nSELECT i.*, ins.instrument_model\nFROM inserted i CROSS JOIN inst ins\nUNION ALL\nSELECT r.*, ins.instrument_model\nFROM runs r\nCROSS JOIN inst ins\nCROSS JOIN params p\nWHERE r.run_id = p.run_id\n  AND NOT EXISTS (SELECT 1 FROM inserted);",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -6886,6 +7132,225 @@
         ],
         "id": "efea70f4-8c4a-4162-b69d-2dddcc3106ad",
         "name": "Has No Measurement"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a093496e-b262-4091-9b1e-fa3784d3476c",
+                "leftValue": "={{ $json.instrument_model }}",
+                "rightValue": "NovaSeq",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1008,
+          1312
+        ],
+        "id": "c204f725-d4aa-4e70-94fa-0dbf9e7654bc",
+        "name": "Workflow Check1"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "runs",
+            "mode": "list",
+            "cachedResultName": "runs"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $('Get DB Record').item.json.uniqueref }}",
+              "part": "={{ $json.run_id.split('_')[3].charAt(0) }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "run_id",
+                "displayName": "run_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "instrument_ref",
+                "displayName": "instrument_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "flowcell_kit_ref",
+                "displayName": "flowcell_kit_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "flowcell_lot",
+                "displayName": "flowcell_lot",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "date",
+                "displayName": "date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "reads_settings_concept_ref",
+                "displayName": "reads_settings_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "storage_instrument_ref",
+                "displayName": "storage_instrument_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "updated_at",
+                "displayName": "updated_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "workflow_concept_ref",
+                "displayName": "workflow_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "created_at",
+                "displayName": "created_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "care_site_ref",
+                "displayName": "care_site_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "part",
+                "displayName": "part",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1696,
+          1312
+        ],
+        "id": "87501381-a6cc-43f7-8a06-8c4be9ad2356",
+        "name": "Update Part",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
       }
     ],
     "connections": {
@@ -7297,6 +7762,11 @@
               "node": "Care Site Check",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Workflow Check1",
+              "type": "main",
+              "index": 0
             }
           ]
         ]
@@ -7411,14 +7881,36 @@
           ],
           []
         ]
+      },
+      "Update Part": {
+        "main": [
+          [
+            {
+              "node": "Update Update Time",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Workflow Check1": {
+        "main": [
+          [
+            {
+              "node": "Update Part",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1289951a",
+    "name": "Version feb2f3ae",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "25-04-2026/0:00",
+  "commitDate": "26-04-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
