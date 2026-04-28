@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-25T18:06:10.724Z",
+  "updatedAt": "2026-04-27T10:16:02.800Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/alldata_usb1 /mnt/alldata_usb2 \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -781,7 +781,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "977bb054-ee6f-4777-826a-b77a9be3a170",
+  "versionId": "22fc6d04-642d-4fd8-b425-0e86142309ae",
   "activeVersionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
   "triggerCount": 1,
   "shared": [
@@ -1573,6 +1573,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "27-04-2026/0:00",
+  "commitDate": "28-04-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
