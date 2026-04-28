@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-23T01:27:47.990Z",
+  "updatedAt": "2026-04-27T12:34:36.329Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260414_VH01138_1_AACNKLCHV",
+              "value": "=260424_A01228_0276_BHG5KFDMX2",
               "type": "string"
             }
           ]
@@ -793,89 +793,6 @@
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
       "name": "Merge"
-    },
-    {
-      "parameters": {
-        "command": "=rclone copy /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    /mnt/koza_alldata/Conversions/{{ $('Edit Fields').first().json.run_id }}-Fastq \\\n    --transfers=32 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=128M \\\n    --no-traverse \\\n    --stats=10s \\\n    --stats-one-line \\\n    -v"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        -784,
-        624
-      ],
-      "id": "deb51adc-0884-40c1-9e17-4b9b3df434af",
-      "name": "Push Conversion to AllData1",
-      "credentials": {
-        "sshPassword": {
-          "id": "roUCz67T2VbHNQzo",
-          "name": "Koza DRAGEN - Root User"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=ls /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }}"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        -784,
-        -544
-      ],
-      "id": "575e6c76-c473-4d00-9f4d-92da44ef813e",
-      "name": "Check Run in ALLData",
-      "credentials": {
-        "sshPassword": {
-          "id": "afQJbS7bg7aYGdOW",
-          "name": "Koza ALLData - Can User"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "58c4103c-a6b9-49f5-b2b9-546195543d52",
-              "leftValue": "={{ $json.stdout }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "empty",
-                "singleValue": true
-              }
-            },
-            {
-              "id": "64ae441a-0ede-47b5-8cf2-4390ec9b7c81",
-              "leftValue": "={{ $json.stderr }}",
-              "rightValue": "No such file or directory",
-              "operator": {
-                "type": "string",
-                "operation": "contains"
-              }
-            }
-          ],
-          "combinator": "or"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -576,
-        -544
-      ],
-      "id": "a726eebb-a218-44ba-ae4e-57ecb82c672a",
-      "name": "Is Run absent on  ALLDATA"
     }
   ],
   "connections": {
@@ -1217,17 +1134,6 @@
           }
         ]
       ]
-    },
-    "Check Run in ALLData": {
-      "main": [
-        [
-          {
-            "node": "Is Run absent on  ALLDATA",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -1238,7 +1144,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f6ea157a-702a-44ca-95b1-349863df479c",
+  "versionId": "a482c3d4-7ffb-4e7a-aec3-1d4f2e0da7a3",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1259,6 +1165,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "27-04-2026/0:00",
+  "commitDate": "28-04-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
