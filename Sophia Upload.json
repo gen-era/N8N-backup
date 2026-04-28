@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-25T08:57:28.563Z",
+  "updatedAt": "2026-04-27T21:38:38.238Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -121,12 +121,12 @@
     },
     {
       "parameters": {
-        "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py new --folder /mnt/smb_share/Temp/sophia_launch_site --ref {{ $('Get On Hold Sophia Uploads').item.json.batch_source_value }} --pipeline {{ $('Get On Hold Sophia Uploads').item.json.pipeline_id }} --upload --bdsNumber {{ $('Get On Hold Sophia Uploads').item.json.bdsnumber }} --force-platform\""
+        "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py new --folder /mnt/smb_share/Temp/sophia_launch_site --ref {{ $('Get On Hold Sophia Uploads').item.json.batch_source_value }} --pipeline {{ $('Get On Hold Sophia Uploads').item.json.pipeline_id }} --upload{{ $('Get On Hold Sophia Uploads').item.json.bdsnumber ? ' --bdsNumber ' + $('Get On Hold Sophia Uploads').item.json.bdsnumber : '' }} --force-platform\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -944,
+        -752,
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
@@ -273,7 +273,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -736,
+        -544,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -445,6 +445,18 @@
           "name": "Koza ALLData - Can User"
         }
       }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -960,
+        -288
+      ],
+      "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
+      "name": "Wait",
+      "webhookId": "487eeb47-03aa-4272-83a6-355e29fa7cf5"
     }
   ],
   "connections": {
@@ -551,7 +563,7 @@
       "main": [
         [
           {
-            "node": "Launch Files",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -568,6 +580,17 @@
           }
         ]
       ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Launch Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -578,7 +601,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d023cb99-545f-4929-ba94-3a8d80888961",
+  "versionId": "52f12427-a211-470a-b6cd-dd2f034fba2d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -599,6 +622,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "27-04-2026/0:00",
+  "commitDate": "28-04-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
