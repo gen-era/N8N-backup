@@ -1,0 +1,368 @@
+{
+  "updatedAt": "2026-04-27T18:34:12.815Z",
+  "createdAt": "2026-04-27T16:52:28.398Z",
+  "id": "ZvFnUxar8WcQOpLt",
+  "name": "FTP Delivery",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -48
+      ],
+      "id": "9e1954a0-62e4-4a0d-b912-849e8adc40ff",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT DISTINCT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dop.batch_source_value\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 398\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nORDER BY dor.account_id, dor.uniqueref, dop.batch_source_value;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        -48
+      ],
+      "id": "56c815f9-5e82-44b3-b631-5eef4da152a2",
+      "name": "Get Delivery Jobs",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    '{{ $json.account_id }}'         AS account_id,\n    '{{ $json.batch_source_value }}' AS batch_source_value,\n    array_agg(dop.uniqueref)         AS dop_refs,\n    array_agg(r.r1_path) FILTER (WHERE r.r1_path IS NOT NULL)\n      || array_agg(r.r2_path) FILTER (WHERE r.r2_path IS NOT NULL) AS files,\n    COUNT(*)                         AS read_count\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads r\n    ON r.uniqueref = dop.read_ref\nWHERE dop.status_concept_ref = 24\n    AND dor.account_id = '{{ $json.account_id }}'\n    AND dor.uniqueref  = {{ $json.recipe_ref }}\n    AND dop.batch_source_value = '{{ $json.batch_source_value }}';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -240,
+        -48
+      ],
+      "id": "7e17fc7e-5e12-4232-8dcc-9d5a9ee881ab",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Build Commands').item.json.verify_cmd }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        384,
+        -128
+      ],
+      "id": "e7a7f628-5930-4fa1-b78e-ad0326789cae",
+      "name": "Execute a command1",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const it = $input.item.json;\nconst target = `/volume1/${it.account_id}/${it.batch_source_value}`;\nconst quoted = it.files.map(f => `\"${f}\"`).join(' ');\n\nreturn {\n  json: {\n    ...it,\n    target,\n    file_count: it.files.length,\n    rsync_cmd: `mkdir -p \"${target}.partial\" && rsync -av --no-perms ${quoted} \"${target}.partial/\" && chmod 644 \"${target}.partial\"/*.fastq.gz && rm -rf \"${target}\" && mv \"${target}.partial\" \"${target}\"`,\n    verify_cmd: `ls \"${target}\"/*.fastq.gz | wc -l`,\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        -48
+      ],
+      "id": "3cde3efd-e338-493e-a5b2-bbe858d99883",
+      "name": "Build Commands"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "102ad517-abe9-4ac4-9a22-3b90399e5566",
+              "leftValue": "={{ Number($json.stdout.trim()) }}",
+              "rightValue": "={{ $('Build Commands').item.json.file_count }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        -112
+      ],
+      "id": "9c38e25c-6489-42bf-b896-2e901f4d439a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.rsync_cmd }}"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -48
+      ],
+      "id": "71ac9275-d2fb-4caf-a524-b35c5ac70e2f",
+      "name": "Execute rsync",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations\nSET status_concept_ref = 29,\n    performed_at = NOW()\nWHERE uniqueref = ANY(ARRAY[{{ $('Build Commands').item.json.dop_refs.join(',') }}]::bigint[])\nRETURNING uniqueref, status_concept_ref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        -112
+      ],
+      "id": "87afc806-3416-41bc-b6ac-873790023dc9",
+      "name": "Mark Completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations\nSET status_concept_ref = 27,\n    error_text = {{ JSON.stringify($('Execute rsync').item.json.stderr || 'verify failed: file count mismatch') }}\nWHERE uniqueref = ANY(ARRAY[{{ $('Build Commands').item.json.dop_refs.join(',') }}]::bigint[])\nRETURNING uniqueref, status_concept_ref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        832,
+        128
+      ],
+      "id": "c9e577a3-b208-4c05-b7ac-f368bcf350e0",
+      "name": "Mark Failed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "feb9ccbc-7336-4c52-8060-e1fc256d14c5",
+              "leftValue": "={{ $json.account_id }}",
+              "rightValue": "i000038",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "b25da2cc-2fe0-47f0-bb5b-250712df67a7",
+      "name": "Filter"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Delivery Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Delivery Jobs": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Build Commands",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Commands": {
+      "main": [
+        [
+          {
+            "node": "Execute rsync",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Mark Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute rsync": {
+      "main": [
+        [
+          {
+            "node": "Execute a command1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9791eb55-9759-4478-b145-46114f3b3e8e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-04-27T16:52:28.406Z",
+      "createdAt": "2026-04-27T16:52:28.406Z",
+      "role": "workflow:owner",
+      "workflowId": "ZvFnUxar8WcQOpLt",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2026-02-25T08:58:40.172Z",
+      "createdAt": "2026-02-25T08:58:40.172Z",
+      "id": "haVpXFpEUMjyquhf",
+      "name": "Production"
+    }
+  ],
+  "commitDate": "28-04-2026/0:00",
+  "fileName": "FTP Delivery.json"
+}
