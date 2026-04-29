@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-27T21:38:38.238Z",
+  "updatedAt": "2026-04-29T03:34:26.534Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -3008,
+        -3024,
         -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -54,13 +54,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT DISTINCT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nORDER BY dor.account_id, dor.uniqueref;",
+        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd\n    ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c\n    ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r\n    ON c.run_ref = r.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id\nORDER BY dor.account_id, dor.uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2784,
+        -2800,
         -288
       ],
       "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
@@ -601,7 +601,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "52f12427-a211-470a-b6cd-dd2f034fba2d",
+  "versionId": "140f402a-f7bd-472c-9a2f-0b85408acb0e",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -622,6 +622,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "28-04-2026/0:00",
+  "commitDate": "29-04-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
