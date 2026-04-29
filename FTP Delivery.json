@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-27T18:34:12.815Z",
+  "updatedAt": "2026-04-29T03:39:09.810Z",
   "createdAt": "2026-04-27T16:52:28.398Z",
   "id": "ZvFnUxar8WcQOpLt",
   "name": "FTP Delivery",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -864,
+        -672,
         -48
       ],
       "id": "9e1954a0-62e4-4a0d-b912-849e8adc40ff",
@@ -20,13 +20,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT DISTINCT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dop.batch_source_value\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 398\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nORDER BY dor.account_id, dor.uniqueref, dop.batch_source_value;",
+        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dop.batch_source_value,\n    r.run_id,\n    COUNT(DISTINCT dop.read_ref) AS sample_count\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor\n    ON dop.recipe_ref = dor.uniqueref\nLEFT JOIN reads rd\n    ON dop.read_ref = rd.uniqueref\nLEFT JOIN conversions c\n    ON rd.conversion_ref = c.uniqueref\nLEFT JOIN runs r\n    ON c.run_ref = r.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 398\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nGROUP BY dor.account_id, dor.uniqueref, dop.batch_source_value, r.run_id\nORDER BY dor.account_id, dor.uniqueref, r.run_id, dop.batch_source_value;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
+        -464,
         -48
       ],
       "id": "56c815f9-5e82-44b3-b631-5eef4da152a2",
@@ -47,7 +47,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -240,
+        -32,
         -48
       ],
       "id": "7e17fc7e-5e12-4232-8dcc-9d5a9ee881ab",
@@ -66,7 +66,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        384,
+        592,
         -128
       ],
       "id": "e7a7f628-5930-4fa1-b78e-ad0326789cae",
@@ -87,7 +87,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -32,
+        176,
         -48
       ],
       "id": "3cde3efd-e338-493e-a5b2-bbe858d99883",
@@ -120,7 +120,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        608,
+        816,
         -112
       ],
       "id": "9c38e25c-6489-42bf-b896-2e901f4d439a",
@@ -133,7 +133,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        176,
+        384,
         -48
       ],
       "id": "71ac9275-d2fb-4caf-a524-b35c5ac70e2f",
@@ -155,7 +155,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        832,
+        1040,
         -112
       ],
       "id": "87afc806-3416-41bc-b6ac-873790023dc9",
@@ -176,7 +176,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        832,
+        1040,
         128
       ],
       "id": "c9e577a3-b208-4c05-b7ac-f368bcf350e0",
@@ -189,37 +189,15 @@
       }
     },
     {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "feb9ccbc-7336-4c52-8060-e1fc256d14c5",
-              "leftValue": "={{ $json.account_id }}",
-              "rightValue": "i000038",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
       "position": [
-        -448,
+        -256,
         -48
       ],
-      "id": "b25da2cc-2fe0-47f0-bb5b-250712df67a7",
-      "name": "Filter"
+      "id": "07d39b6b-c8a7-4210-83e2-62668756fc98",
+      "name": "Limit"
     }
   ],
   "connections": {
@@ -238,7 +216,7 @@
       "main": [
         [
           {
-            "node": "Filter",
+            "node": "Limit",
             "type": "main",
             "index": 0
           }
@@ -321,7 +299,7 @@
         ]
       ]
     },
-    "Filter": {
+    "Limit": {
       "main": [
         [
           {
@@ -342,7 +320,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9791eb55-9759-4478-b145-46114f3b3e8e",
+  "versionId": "d2a050df-0407-49dc-982b-de5c442daf3d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -363,6 +341,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "28-04-2026/0:00",
+  "commitDate": "29-04-2026/0:00",
   "fileName": "FTP Delivery.json"
 }
