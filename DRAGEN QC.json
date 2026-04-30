@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-28T07:19:58.422Z",
+  "updatedAt": "2026-04-29T18:27:48.656Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260424_A01978_0166_AHWFGHDSXF",
+              "value": "260416_A01832R_0239_BHLGJ3DRX7",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "WES-493 WES-496 WES-497 WES-498 WES-499 WES-500 WES-501 WES-502 WES-503 WES-504 WES-505 WES-506 WES-507 WES-508 WES-509 WES-510 WES-511 WES-512 WES-513 WES-514 WES-515 WES-516 WES-517 WES-518 WES-519 WES-520 WES-521 WES-522 WES-523 WES-524 WES-525 WES-526 WES-527 WES-528 WES-529 WES-530 WES-531 WES-532 WES-533 WES-534 WES-535 WES-536 WES-537 WES-538 WES-539 WES-540 WES-541 WES-542 WES-543 WES-544 WES-545 WES-546 WES-547 WES-548 WES-549 WES-550 WES-552 WES-553 WES-554 WES-555 WES-556 WES-557 WES-558 WES-559 WES-560 WES-561 WES-562 WES-563 WES-564 WES-565 WES-566 WES-567 WES-568 WES-569 WES-570 WES-571 WES-572 WES-573 WES-574 WES-575 WES-576 WES-577 WES-578 WES-579 WES-580 WES-581 WES-582 WES-583 WES-584 WES-585 WES-586 WES-587 WES-588 WES-589 WES-590 WES-591 WES-592 WES-593 WES-594 WES-595 WES-596 WES-597 WES-598 WES-599 WES-600 MG26-1178\nMG26-1240\nMG26-1304\nMG26-1307\nMG26-1309\nMG26-1310\nMG26-1311\nMG26-1314\nMG26-1315\nMG26-1330\nMG26-1331\nMG26-1338\nMG26-1357\nMG26-1360\nMG26-1363\nMG26-1384\nMG26-1396\nMG26-1401\nMG26-1402\nMG26-1403\nMG26-1450",
+              "value": "",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "deniz.ozturk@gen-era.com.tr",
+              "value": "merve.dogan@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -1903,13 +1903,7 @@
     },
     "Add Bed Path": {
       "main": [
-        [
-          {
-            "node": "Custom Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Bed Mapping": {
@@ -2133,7 +2127,13 @@
     },
     "Add Bed Path1": {
       "main": [
-        []
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Execute Command1": {
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "5a5a8e3e-4be1-4023-8e18-e8fb82eda2fe",
+  "versionId": "50de3df3-63d9-4a7d-92e4-dbbc9ece127a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2221,6 +2221,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "29-04-2026/0:00",
+  "commitDate": "30-04-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
