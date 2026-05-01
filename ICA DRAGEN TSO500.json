@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-24T07:52:38.989Z",
+  "updatedAt": "2026-04-30T19:08:35.178Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -21,7 +21,7 @@
       "parameters": {
         "mode": "combine",
         "combineBy": "combineByPosition",
-        "numberInputs": 4,
+        "numberInputs": 5,
         "options": {}
       },
       "type": "n8n-nodes-base.merge",
@@ -214,7 +214,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\n\nconst commands = items.map((item, index) => {\n  const files = item.LOCAL_FILES.split('\\n').filter(f => f.trim());\n  \n  const firstFile = files[0].trim();\n  const parentDir = firstFile.substring(0, firstFile.lastIndexOf('/'));\n  \n  const uploadCommands = files.map(file => {\n    const fileName = file.trim().substring(file.trim().lastIndexOf('/') + 1);\n    // cd sonrası sadece fileName kullan\n    const uploadCmd = `~/bin/icav2 projectdata upload \"${fileName}\" /input_folder/${item.SAMPLE_ID}/${fileName} --project-id ${item.PROJECT_ID} --num-workers 4`;\n    \n    return `(${uploadCmd} || (echo \"Retry 1/3 for ${fileName}\" && sleep 5 && ${uploadCmd}) || (echo \"Retry 2/3 for ${fileName}\" && sleep 10 && ${uploadCmd}) || (echo \"Retry 3/3 for ${fileName}\" && sleep 15 && ${uploadCmd}))`;\n  });\n  \n  // parentDir tırnak içinde - DÜZEN gibi Türkçe karakter koruması\n  const uploadCommand = `cd \"${parentDir}\" && ${uploadCommands.join(' && ')}`;\n  \n  const itemJson = JSON.stringify(item);\n  const encodedJson = Buffer.from(itemJson).toString('base64');\n  \n  return `${uploadCommand} && sleep 60 && echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Sending webhook for ${item.SAMPLE_ID}\" && echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`;\n}).join(' && ');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\n\nreturn [{\n  json: {\n    command: `(${commands}) > ${logFile} 2>&1 &`,\n    logFile: logFile,\n    totalItems: items.length\n  }\n}];"
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\n\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst commands = items.map((item, index) => {\n  const files = item.LOCAL_FILES.split('\\n').filter(f => f.trim());\n\n  const firstFile = files[0].trim();\n  const parentDir = firstFile.substring(0, firstFile.lastIndexOf('/'));\n\n  const uploadCommands = files.map(file => {\n    const fileName = file.trim().substring(file.trim().lastIndexOf('/') + 1);\n    // cd sonrası sadece fileName kullan\n    const uploadCmd = `~/bin/icav2 projectdata upload \"${fileName}\" /input_folder/${item.SAMPLE_ID}/${fileName} --project-id ${item.PROJECT_ID} --num-workers 4`;\n\n    return `(${uploadCmd} || (echo \"Retry 1/3 for ${fileName}\" && sleep 5 && ${uploadCmd}) || (echo \"Retry 2/3 for ${fileName}\" && sleep 10 && ${uploadCmd}) || (echo \"Retry 3/3 for ${fileName}\" && sleep 15 && ${uploadCmd}))`;\n  });\n\n  // parentDir tırnak içinde - DÜZEN gibi Türkçe karakter koruması\n  const uploadCommand = `cd \"${parentDir}\" && ${uploadCommands.join(' && ')}`;\n\n  const itemWithBatch = { ...item, BATCH_HAS_UMI: batchHasUmi };\n  const itemJson = JSON.stringify(itemWithBatch);\n  const encodedJson = Buffer.from(itemJson).toString('base64');\n\n  return `${uploadCommand} && sleep 60 && echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Sending webhook for ${item.SAMPLE_ID}\" && echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`;\n}).join(' && ');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\n\nreturn [{\n  json: {\n    command: `(${commands}) > ${logFile} 2>&1 &`,\n    logFile: logFile,\n    totalItems: items.length,\n    BATCH_HAS_UMI: batchHasUmi\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -286,7 +286,15 @@
           "cachedResultName": "Table 1",
           "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx/tblZHb0ztwV1UVUZh"
         },
-        "options": {}
+        "options": {},
+        "sort": {
+          "property": [
+            {
+              "field": "Priority",
+              "direction": "desc"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
@@ -302,6 +310,48 @@
           "name": "Airtable"
         }
       }
+    },
+    {
+      "parameters": {
+        "command": "=FILE=$(find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*_R1*.fastq.gz' 2>/dev/null | head -1); if [ -z \"$FILE\" ]; then echo 'false'; exit 0; fi; HDR=$(zcat \"$FILE\" 2>/dev/null | head -1); echo \"$HDR\" | grep -qE ':[ACGTN]{6,}\\+[ACGTN]{6,}$' && echo 'true' || echo 'false'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        16,
+        112
+      ],
+      "id": "a1c0de01-umi0-4abc-9def-000000000001",
+      "name": "Check UMI",
+      "credentials": {
+        "sshPassword": {
+          "id": "HCIG28cNohf94uhW",
+          "name": "Sapiens IlluminaStorage - Admin User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2c1de02-umi1-4abc-9def-000000000002",
+              "name": "HAS_UMI",
+              "value": "={{ $json.stdout.trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        112
+      ],
+      "id": "b2c1de02-umi1-4abc-9def-000000000003",
+      "name": "Edit UMI"
     }
   ],
   "connections": {
@@ -461,10 +511,37 @@
             "index": 0
           },
           {
+            "node": "Check UMI",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Limit",
             "type": "main",
             "index": 0
           },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Check UMI": {
+      "main": [
+        [
+          {
+            "node": "Edit UMI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit UMI": {
+      "main": [
+        [
           {
             "node": "Merge",
             "type": "main",
@@ -476,14 +553,15 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "30dc78bd-8a92-451c-86ab-bf30b49ae644",
+  "versionId": "bf497c0e-e7de-483b-92f5-4ed95b604af8",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -504,6 +582,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "30-04-2026/0:00",
+  "commitDate": "01-05-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
