@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-29T18:27:48.656Z",
+  "updatedAt": "2026-05-01T03:31:13.639Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260416_A01832R_0239_BHLGJ3DRX7",
+              "value": "260422_A01228_0275_BHG5KJDMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "",
+              "value": "O26-YHCS-3067\tO26-YHCS-3069\tO26-YHCS-3074\tO26-YHCS-3088\tSE26-YHCS-1068\tSE26-YHCS-1076\t\t\t O26-YCES-2487\tM26-YCES-4501\tM26-YCES-4503\tU26-YCES-8093\tU26-YCES-8097\tU26-YCES-8100\tGU26-YCES-7421\tZK26-YCES-5386\tZK26-YCES-5396 M26-YCES-4473\tB26-YTG-5\tZK26-YCES-5399\tU26-YCES-8081\tU26-YCES-8084\tU26-YCES-8088\tSE26-YCES-2483\tSE26-YCES-2486\t GU26-YHCS-4506\tGU26-YHCS-4517\tGU26-YHCS-4522\tZK26-YHCS-1904\tZK26-YHCS-1910\tHP26-YHCS-1115\t\t\t U26-YHCS-3254\tU26-YHCS-3260\tU26-YHCS-3265\tIE26-YHCS-2614\tIE26-YHCS-2620\tIE26-YHCS-2626\t\t\t U26-YCES-8128\tU26-YCES-8131\tU26-YCES-8135\tO26-YCES-2535\tIE26-YCES-1159\tSE26-YCES-2510\tGU26-YCES-7415\tGU26-YCES-7422\tHP26-YCES-352 ZK26-YCES-5366\tZK26-YCES-5370\tZK26-YCES-5374\tO26-YCES-2517\tSE26-YCES-2474\tSE26-YCES-2477\tU26-YCES-8065\tU26-YCES-8069\tU26-YCES-8074 VP26-008-175\tVP26-008-179\tVP26-008-183\t\t\t\t\t\t VP26-008-134\tVP26-008-138\tVP26-008-143\t\t\t\t\t\t VP26-008-118\tVP26-008-123\tVP26-008-126\t\t\t\t\t\t VP26-008-33\tVP26-008-37\tVP26-008-40\t\t\t\t\t\t VP26-008-15\tVP26-008-19\tVP26-008-22\t\t\t\t\t\t VP26-008-3\tVP26-008-6\tVP26-008-9",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "merve.dogan@gen-era.com.tr",
+              "value": "deniz.ozturk@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -1903,7 +1903,13 @@
     },
     "Add Bed Path": {
       "main": [
-        []
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Bed Mapping": {
@@ -2127,13 +2133,7 @@
     },
     "Add Bed Path1": {
       "main": [
-        [
-          {
-            "node": "Custom Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Execute Command1": {
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "50de3df3-63d9-4a7d-92e4-dbbc9ece127a",
+  "versionId": "990eb402-6fc3-4e85-9f3c-d546026bc44a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2221,6 +2221,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "30-04-2026/0:00",
+  "commitDate": "01-05-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
