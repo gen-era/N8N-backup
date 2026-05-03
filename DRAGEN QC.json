@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-01T15:14:50.610Z",
+  "updatedAt": "2026-05-02T11:26:19.587Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,13 +1036,13 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260427_A01978_0167_AHMNM2DRX7",
+              "value": "260427_A01978_0168_BHWFLGDSXF",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "1031001305\t1031001306\tCO26-BR6202 SG2026-08342\tSG2026-08367\tSG2026-08407 SG2026-08136\tSG2026-08143\tSG2026-08195 T26-345 \tRG-1411912\tAM-1411443 M-872-26\tM-873-26\tSG2026-08481 ISY26-231-CS\tISY26-230-NE\tISY26-229-NAA SG2026-07949\tSG2026-07957\tSG2026-07959",
+              "value": "ISY26-211-CM\tM-872-26\tSG2026-08666 RP26-031-GB-WES-18\tRP26-031-GB-WES-63\tRP26-031-GB-WES-85 ISY26-232-AB\tISY26-231-CS\tISY26-230-NE",
               "type": "string"
             },
             {
@@ -2200,7 +2200,7 @@
       }
     ]
   },
-  "versionId": "77e34098-2bbf-4c57-bb2b-d6094888b82b",
+  "versionId": "2ffa399f-4026-4153-a183-b55c7e2f6976",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2221,6 +2221,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "02-05-2026/0:00",
+  "commitDate": "03-05-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
