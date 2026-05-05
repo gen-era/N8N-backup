@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-30T12:45:26.824Z",
+  "updatedAt": "2026-05-04T12:33:56.172Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -18,8 +18,8 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.sample_project }}",
-              "rightValue": ".",
+              "leftValue": "={{ $json.sample_id }}",
+              "rightValue": "={{ $('Edit Fields').item.json.sample_ids.replace(/\\s+/g, '|').replace(/\\//g, '-') }}",
               "operator": {
                 "type": "string",
                 "operation": "regex"
@@ -34,8 +34,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1152,
-        -512
+        1136,
+        -704
       ],
       "id": "960af35f-949c-4b89-86bf-ba4ff6556e7b",
       "name": "Filter Reads"
@@ -47,7 +47,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1168,
+        1584,
         -16
       ],
       "id": "3005978c-1a85-45d6-b628-943b83155b40",
@@ -121,7 +121,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1648,
+        2064,
         -112
       ],
       "id": "fcfc3e95-4ed4-4e7a-a3a4-ed8b780406ec",
@@ -256,7 +256,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1872,
+        2288,
         -112
       ],
       "id": "048a7484-562b-47b7-b6c5-7d669ab1d414",
@@ -286,7 +286,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1408,
+        1824,
         -112
       ],
       "id": "1e069ead-408e-47c8-977b-6c6b992148a9",
@@ -299,7 +299,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2080,
+        2496,
         32
       ],
       "id": "74a35a14-4cca-4b12-950e-17c279e5fb3a",
@@ -318,7 +318,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        928,
+        1344,
         -112
       ],
       "id": "47268b2c-2099-4af8-a41b-601f8fd6d134",
@@ -362,7 +362,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1168,
+        1584,
         -208
       ],
       "id": "532a4fd4-dca2-48dd-8932-792b682e85c8",
@@ -402,7 +402,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        -800,
+        -608,
         -112
       ],
       "id": "20020e3b-6ec4-4d19-9cce-dc114717fbca",
@@ -415,8 +415,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -592,
-        -512
+        -608,
+        -704
       ],
       "id": "be5afbba-a685-4d9c-9da6-f332f33a94ab",
       "name": "Check DRAGEN Idle",
@@ -455,8 +455,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -352,
-        -512
+        -368,
+        -704
       ],
       "id": "3fd1a262-7e5a-4c63-a4fe-0bd71d1608bc",
       "name": "DRAGEN Idle?"
@@ -534,7 +534,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        704,
+        1120,
         -112
       ],
       "id": "5dd815eb-80f4-4051-aeb4-f8cb9cbf3b9c",
@@ -563,7 +563,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        208,
+        624,
         -112
       ],
       "id": "60d43320-57e4-4789-85ba-eee37781f30c",
@@ -582,11 +582,32 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -800,
-        -512
+        -1312,
+        -704
       ],
       "id": "7a038332-d398-4492-b719-13d944a2319d",
       "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.uniqueref AS conversion_ref,\n       c.run_ref,\n       c.status_concept_ref,\n       c.tool_concept_ref,\n       r.run_id\n  FROM conversions c\n  JOIN runs r ON r.uniqueref = c.run_ref\n WHERE r.run_id = '{{ $('Trigger').item.json.run_id }}'\n   AND c.tool_concept_ref = 112      -- bcl-convert\n   AND c.status_concept_ref = 29     -- Completed\n ORDER BY c.uniqueref DESC\n LIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1088,
+        -704
+      ],
+      "id": "1db092be-70f1-4abf-b34e-4321e556d60e",
+      "name": "Resolve Conversion Ref",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     },
     {
       "parameters": {
@@ -607,7 +628,7 @@
           "values": [
             {
               "column": "conversion_ref",
-              "value": "={{ $('Trigger').item.json.conversion_ref }}"
+              "value": "={{ $('Resolve Conversion Ref').item.json.conversion_ref }}"
             }
           ]
         },
@@ -616,8 +637,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        448,
-        -512
+        432,
+        -704
       ],
       "id": "8dc9fcc5-1e67-44ef-9f38-eabc79a3028e",
       "name": "Get Reads",
@@ -635,8 +656,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        688,
-        -656
+        672,
+        -848
       ],
       "id": "a2a252db-e01a-4ebc-9d4f-2412fcc30afc",
       "name": "Kit BED Map",
@@ -652,8 +673,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        896,
-        -512
+        880,
+        -704
       ],
       "id": "098e4a3b-06b8-47f3-b600-cd91b6f6b737",
       "name": "Attach BED Path"
@@ -665,7 +686,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -592,
+        -176,
         -112
       ],
       "id": "05e54253-bcf9-46a5-9194-1457a72c2b31",
@@ -794,7 +815,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -336,
+        80,
         -112
       ],
       "id": "a2e403c7-9fe4-4e94-84db-2c9c787c7aa1",
@@ -825,7 +846,7 @@
           "values": [
             {
               "column": "uniqueref",
-              "value": "={{ $('Trigger').item.json.conversion_ref }}"
+              "value": "={{ $('Resolve Conversion Ref').item.json.conversion_ref }}"
             }
           ]
         },
@@ -834,8 +855,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -80,
-        -512
+        -96,
+        -704
       ],
       "id": "c76500e2-8248-4ece-94e4-7f8493108058",
       "name": "Get Conversion",
@@ -853,8 +874,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        192,
-        -512
+        176,
+        -704
       ],
       "id": "e64b7c28-cb90-484a-bb24-af06c642d7d8",
       "name": "Find Conversion Path"
@@ -866,7 +887,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -64,
+        352,
         -112
       ],
       "id": "d2b7d747-2956-49af-85c2-11f215bf929d",
@@ -874,12 +895,12 @@
     },
     {
       "parameters": {
-        "command": "=export TERM=xterm\n\n/opt/dragen/4.5.4/bin/dragen \\\n-r /staging/human/reference/hg38_v12_linear \\\n--output-directory /staging/qc/output \\\n--output-file-prefix \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Set R1/R2 Paths').item.json.r1 }}\" \\\n-2 \"{{ $('Set R1/R2 Paths').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/qc/beds/{{ $('Loop Samples').item.json.bed_file_path }}"
+        "command": "=export TERM=xterm\n\n/opt/dragen/4.5.4/bin/dragen \\\n-r /staging/human/reference/hg38_v12_linear \\\n--validate-pangenome-reference=false \\\n--output-directory /staging/qc/output \\\n--output-file-prefix \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Set R1/R2 Paths').item.json.r1 }}\" \\\n-2 \"{{ $('Set R1/R2 Paths').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/qc/beds/{{ $('Loop Samples').item.json.bed_file_path }}"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        448,
+        864,
         -112
       ],
       "id": "943ebdba-38e1-4710-9f56-5ffd6155545b",
@@ -891,6 +912,29 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
+              "name": "sample_ids",
+              "value": "ISY26-240-CBB KLINIK-62-SEV-GUN-5394623 KLINIK-61-AYS-ERG-5394618 KLINIK-60-MAH-MID-5394624 KLINIK-59-HAT-ATE-5394629 KLINIK-58-LUT-UCU-5394625 KLINIK-57-AYS-AVS-5397300 KLINIK-56-FUA-YIR-5052815 KLINIK-55-GUN-SUR-5394720 KLINIK-54-ELI-ETL-5392008 KLINIK-52-TUG-ALA-5392004 KLINIK-51-BER-UNA-5392007 KLINIK-50-TUM-CEL-5392003 KLINIK-49-CAN-KUC-5393035 KLINIK-48-MED-DIB-5395023 KLINIK-47-RUK-ARD-5391412 KLINIK-46-GUL-HAC-5277196 KLINIK-53-HUR-MEL-OLG-5391999 KLINIK-45-FAZ-OZD-2648105 KLINIK-44-ASU-YIL-5391565 KLINIK-43-SEN-AVC-5390456 KLINIK-42-ZAH-KIL-5390440 KLINIK-41-GUL-ARI-ONE-5388833 KLINIK-40-MUK-AKB-5392487 KLINIK-94-NUR-UCA-5414423 KLINIK-93-CAH-GEN-5303479 KLINIK-91-OSM-IMA-5193953 KLINIK-92-SUN-ISL-5409940 KLINIK-90-NUR-YEN-5410468 KLINIK-89-OZL-OGU-5405304 KLINIK-88-NAZ-DEM-5406581 KLINIK-87-HUL-OZB-5406763 KLINIK-86-NEC-KOS-5401617 KLINIK-85-NER-YAM-5406091 KLINIK-84-AYS-KAR-5405145 KLINIK-83-SEV-KUC-5400533 KLINIK-82-HUS-CAK-4764593 KLINIK-81-SEV-GUM-5400531 KLINIK-80-BES-ORH-COB-4414289 KLINIK-79-AYP-KOS-5400276 KLINIK-78-FAT-SAL-5400241 KLINIK-77-HAT-ERA-5403163 KLINIK-76-NAC-URE-5403159 KLINIK-75-AYS-ARS-5403158 KLINIK-74-CAG-IPE-5400891 KLINIK-73-SER-IPE-5400890 KLINIK-72-SAI-BAL-5400889 KLINIK-71-NEV-YOL-5400882 KLINIK-70-REC-GUL-5399162 KLINIK-69-MER-DOG-5399708 KLINIK-68-FAT-YIG-5398435 KLINIK-67-RUK-SAR-5398437 KLINIK-66-HUS-KIR-5398443 KLINIK-65-SUL-CET-5398449 KLINIK-64-UMA-UCA-5371806 KLINIK-63-ERS-AYD-5395095 M-931-26 M-920-26 ISY26-243-NGO WES-603-HAK-KAH-5408411 WES-604-BET-AFR-BIL-5408923 WES-605-MUH-ISM-TUR-5305605 WES-606-POY-EFE-OZT-5258963 WES-607-SER-MAS-KAY-5392762 WES-608-SIN-TEM-5409380 WES-609-DEN-ALP-EKE-5409951 WES-610-GUL-CAN-5197931 WES-611-SAB-CAN-SAY-5409112 WES-612-CAF-CAN-5197935 WES-613-GUN-CEL-5409109 WES-614-GUN-COR-5160289 WES-615-MEH-ALI-CAN-YIG-5409123 WES-616-DIL-TEK-5409824 WES-617-MUH-ALI-BIL-5407567 WES-618-YAG-ASL-5407647 WES-619-MUH-KAR-5408515 WES-620-YAP-GUL-5407762 WES-621-SON-BUD-5409010 WES-622-AHM-OGU-5322410 WES-623-MUZ-TAN-5409227 WES-624-YEL-SEV-5408420 WES-625-AYS-NUR-HAR-5310033 WES-626-BUN-UCA-5409427 WES-627-SIN-YUR-5378774 WES-628-GOK-ALB-5409965 WES-629-LIN-GAM-5410222 WES-630-AYB-YIL-5411087 WES-631-SAM-DEM-5411821 WES-632-AMI-YOK-5411532 WES-633-KER-SAH-5412232 WES-634-MUH-NAC-5411812 WES-635-ARY-LIN-BIC-5410870 WES-636-DIL-GUL-SAL-5411162 WES-637-MUH-ALI-SAR-5410940 WES-638-ELI-RAH-TEK-5203695 WES-639-MEH-AL-AHM-5413830 WES-640-GOK-CEN-5379268 WES-641-AKI-CAN-TUR-5411444 WES-642-BER-GUL-5411504",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -848,
+        -704
+      ],
+      "id": "8c316a5f-2e49-4cb0-8fc2-dd076ca146ec",
+      "name": "Edit Fields"
     }
   ],
   "connections": {
@@ -1048,7 +1092,7 @@
       "main": [
         [
           {
-            "node": "Check DRAGEN Idle",
+            "node": "Resolve Conversion Ref",
             "type": "main",
             "index": 0
           }
@@ -1160,6 +1204,28 @@
         ],
         []
       ]
+    },
+    "Resolve Conversion Ref": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Idle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1169,8 +1235,16 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": null,
-  "versionId": "c32fb840-4d62-495d-a61a-11e023468d20",
+  "pinData": {
+    "Trigger": [
+      {
+        "json": {
+          "run_id": "260430_A01978_0169_BHG5LFDMX2"
+        }
+      }
+    ]
+  },
+  "versionId": "f90b1d11-0d6b-403d-a726-f683d62ad171",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1184,6 +1258,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "04-05-2026/0:00",
+  "commitDate": "05-05-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
