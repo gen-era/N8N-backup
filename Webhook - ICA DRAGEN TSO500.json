@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-04T19:22:35.162Z",
+  "updatedAt": "2026-05-05T05:55:01.227Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -471,7 +471,8 @@
       ],
       "id": "7711de67-95cf-4da5-87c2-f44933e09453",
       "name": "Wait",
-      "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
+      "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1162,20 +1163,23 @@
             "user-agent": "curl/7.86.0",
             "accept": "*/*",
             "content-type": "application/json",
-            "content-length": "643"
+            "content-length": "877"
           },
           "params": {},
           "query": {},
           "body": {
-            "LOCAL_FILE_COUNT": "2",
-            "LOCAL_FILES": "/volume1/illuminastorage/fastq_folder/260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2//SG2026-04856-DENEME-D_S2_R1_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2//SG2026-04856-DENEME-D_S2_R2_001.fastq.gz",
+            "LOCAL_FILE_COUNT": "4",
+            "LOCAL_FILES": "/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-D_S177_L003_R1_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-R_S180_L003_R2_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-D_S177_L003_R2_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-R_S180_L003_R1_001.fastq.gz",
             "REMOTE_FILES": "",
-            "id": "recdx58Smy55C5gDM",
-            "createdTime": "2026-04-18T06:40:38.000Z",
-            "PROJECT_ID": "d29155ad-9965-46ae-9a53-8a7a61b70758",
-            "FOLDER": "260327_A01978_0153_AHLMKTDRX7-SG-TSO500-FFPE-V2-DENEME2/SG-TSO500-FFPE-V2-DENEME2/",
-            "SAMPLE_ID": "SG2026-04856-DENEME",
-            "Panel": "HRD"
+            "HAS_UMI": "true",
+            "id": "recx9DvIZT1k53hgT",
+            "createdTime": "2026-05-04T19:17:10.000Z",
+            "PROJECT_ID": "dae7ac5f-2312-47f9-b7ca-3e45bba32697",
+            "FOLDER": "260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5",
+            "SAMPLE_ID": "M-874-26",
+            "Panel": "FFPE_v2",
+            "Priority": 5,
+            "BATCH_HAS_UMI": true
           },
           "webhookUrl": "http://localhost:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971",
           "executionMode": "production"
@@ -1183,7 +1187,7 @@
       }
     ]
   },
-  "versionId": "4649766d-44da-4359-8c96-f4c2f8506470",
+  "versionId": "afac08ea-a21b-4c97-a320-d50d63dd5499",
   "activeVersionId": "4649766d-44da-4359-8c96-f4c2f8506470",
   "triggerCount": 1,
   "shared": [
@@ -2353,6 +2357,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "05-05-2026/0:00",
+  "commitDate": "06-05-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
