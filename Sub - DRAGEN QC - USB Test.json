@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-03T13:32:17.019Z",
+  "updatedAt": "2026-05-06T06:25:10.203Z",
   "createdAt": "2026-05-03T12:39:48.417Z",
   "id": "e7a9VbzQ7iuZnzPp",
   "name": "Sub - DRAGEN QC - USB Test",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260413_LH00267_0162_A2327MMLT4",
+              "value": "260422_A01228_0275_BHG5KJDMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "620-2024\t636-2026\t689-2025\tSG2026-07226-ECE26-369-HK\tSG2026-07227-ECE26-370-RK\tSG2026-07228-ECE26-371-EG\tSG2026-07206-ECE26-360-TO\tSG2026-07210-ECE26-361-BE\tSG2026-07212-ECE26-362-AK\tAD-50500583084\tAD-53407487974\tAD-56659320792\t26-2357\t26-2374\t26-2376\t26-2296\t26-2297\t26-2298\t26-2222\t26-2244\t26-2246\t952-2026\t955-2026\t963-2026\tAMG-0421-26\t37521\t404980\t1031001235\tCO26-BR6269\tSG2026-07161\t1112-2026\t1116-2026\t1120-2026\t1057-2026\t1067-2026\t1074-2024\t1034-2026\t1038-2026\t1040-2026\tAMG-0424-26\tMG26-1241-E-P\tN156-DO\t1711-2025\t1787-2024\t1802-2024\t997-2026\t1000-2026\t1003-2026\t181-2024\t312-2025\t360-2024\tSG2026-07069\tSG2026-07313\tSG2026-07314\tSG2026-07244-ECE26-378-FC\tSG2026-07245-ECE26-379-BC\tSG2026-07316\tSG2026-07152\tM-799-26\tAMG-0457-26\t4074-2025\t4083-2025\t4125-2025\t3013-2025\t3018-2021\t3035-2025\t2482-2025\t2492-2025\t2496-2025\tSG2023-18899\tSG2026-06503\tSG2026-06505\tSG2026-06533\tSG2026-07665\tSG2026-07660\t1505-2025\t1540-2025\t1542-2025\t2061-2025\t2105-2024\t2131-2024\tT26-435\tT26-436\tT26-437\tT26-417\tT26-420\tT26-421\tT26-397\tT26-402\tT26-410\tT26-380\tT26-382\tT26-383\tT26-354\tT26-359\tT26-360\tMG26-7559\tMG26-7656\tMG26-7709\tMG26-6580\tMG26-6834\tMG26-6912\tSG2026-06237\tSG2026-06238\tSG2026-06241",
+              "value": "VP",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "canholyavkin@icloud.com",
+              "value": "jale.yildiz@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2203,7 +2203,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "4fdbb42f-0717-410e-8487-dfb69cc5c642",
+  "versionId": "77ebae8d-1d6b-4533-9ebc-24bd162af09d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2217,6 +2217,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "06-05-2026/0:00",
+  "commitDate": "07-05-2026/0:00",
   "fileName": "Sub - DRAGEN QC - USB Test.json"
 }
