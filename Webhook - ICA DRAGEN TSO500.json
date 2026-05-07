@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-05T05:55:01.227Z",
+  "updatedAt": "2026-05-06T08:12:01.505Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -245,7 +245,7 @@
     },
     {
       "parameters": {
-        "command": "=  icav2 projectpipelines start nextflow \"850b4fe6-2a2f-4a85-ae57-cf082dfbefd4\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
+        "command": "=  icav2 projectpipelines start nextflow \"89887580-b32d-4277-80e7-4b15f0314365\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -307,76 +307,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const sampleId = $('Generate HRD Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate HRD Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate HRD Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1536,
-        96
-      ],
-      "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
-      "name": "Prepare Pipeline Launch HRD",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{\n  $json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        1312,
-        96
-      ],
-      "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
-      "name": "SampleSheet Upload HRD",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        896,
-        96
-      ],
-      "id": "e991e081-6797-4020-96c3-254206f5e1da",
-      "name": "Loop Over Items HRD",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Prepare Pipeline Launch HRD').item.json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $('Loop Over Items HRD').item.json.output_folder_id }} \\\n    --input \"run_folder:{{ $('Loop Over Items HRD').item.json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch HRD').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch HRD').item.json.sample_id }}-analysis\" 2>&1 | grep \"^id\" | awk '{print $2}'\n"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        1744,
-        96
-      ],
-      "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
-      "name": "Launch HRD Analysis",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=  echo '{{ JSON.stringify($(\"Prepare Pipeline Launch HRD\").item.json.files) }}' | jq -r '.[]' | while read filename; do\n    FILE_ID=$(curl -s -X GET 'https://ica.illumina.com/ica/rest/api/projects/{{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }}/data?filePath=/input_folder/&type=FILE&pageSize=1000' \\\n      -H 'Accept: application/vnd.illumina.v3+json' \\\n      -H 'X-API-Key: RBsYkBubZxrPXkR3AvjLXUlYFGJJ8FOM' | \\\n      jq -r \".items[] | select(.data.details.name == \\\"$filename\\\") | .data.id\")\n\n    if [ ! -z \"$FILE_ID\" ]; then\n      icav2 projectdata update \"$FILE_ID\" --project-id {{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }} --remove-user-tag \"on_hold\" --add-user-tag \"analysis_completed\" 2>&1\n      echo \"Updated: $filename ($FILE_ID)\"\n    fi\n  done"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        1968,
-        96
-      ],
-      "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
-      "name": "Update File Tags HRD",
-      "disabled": true
-    },
-    {
-      "parameters": {
         "jsCode": "// Tüm önceki item'ları al\nconst items = $input.all();\n\n// sample_id'ye göre grupla\nconst sampleGroups = {};\n\nfor (const item of items) {\n  const sampleId = item.json.sample_id;\n  \n  if (!sampleGroups[sampleId]) {\n    sampleGroups[sampleId] = {\n      sample_id: sampleId,\n      files: [],\n      PROJECT_ID: item.json.PROJECT_ID,\n      input_folder_id: item.json.input_folder_id,\n      samplesheet_folder_id: item.json.samplesheet_folder_id,\n      output_folder_id: item.json.output_folder_id\n    };\n  }\n  \n  sampleGroups[sampleId].files.push(item.json.filename);\n}\n\n// Her sample için ayrı item oluştur\nreturn Object.values(sampleGroups).map(group => ({\n  json: {\n    sample_id: group.sample_id,\n    file_count: group.files.length,\n    files: group.files,\n    PROJECT_ID: group.PROJECT_ID,\n    input_folder_id: group.input_folder_id,\n    samplesheet_folder_id: group.samplesheet_folder_id,\n    output_folder_id: group.output_folder_id\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
@@ -387,21 +317,6 @@
       ],
       "id": "50a389a6-84b1-4cb0-b056-178852da6075",
       "name": "Group Samples HRD"
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const sampleId = $input.item.json.sample_id;\n// Note: PROJECT_ID was not present in your provided input JSON. \n// Ensure it exists, or provide a fallback.\nconst projectId = $input.item.json.PROJECT_ID || \"DEFAULT_PROJECT\";\nconst files = $input.item.json.files;\n\n// Using '2-digit' ensures you get leading zeros (e.g., 04/19/2026)\nconst dateString = new Date().toLocaleDateString('en-US', { \n    month: '2-digit', \n    day: '2-digit', \n    year: 'numeric' \n});\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${dateString}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
-      },
-      "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
-      "name": "Generate HRD Sample Sheet",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1104,
-        96
-      ],
-      "disabled": true
     },
     {
       "parameters": {
@@ -875,83 +790,11 @@
         ]
       ]
     },
-    "Prepare Pipeline Launch HRD": {
-      "main": [
-        [
-          {
-            "node": "Launch HRD Analysis",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "SampleSheet Upload HRD": {
-      "main": [
-        [
-          {
-            "node": "Prepare Pipeline Launch HRD",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items HRD": {
-      "main": [
-        [],
-        [
-          {
-            "node": "Generate HRD Sample Sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Launch HRD Analysis": {
-      "main": [
-        [
-          {
-            "node": "Update File Tags HRD",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Loop Over Items HRD",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update File Tags HRD": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items HRD",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Group Samples HRD": {
       "main": [
         [
           {
             "node": "Generate Sample Sheet2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generate HRD Sample Sheet": {
-      "main": [
-        [
-          {
-            "node": "SampleSheet Upload HRD",
             "type": "main",
             "index": 0
           }
@@ -1187,8 +1030,8 @@
       }
     ]
   },
-  "versionId": "afac08ea-a21b-4c97-a320-d50d63dd5499",
-  "activeVersionId": "4649766d-44da-4359-8c96-f4c2f8506470",
+  "versionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
+  "activeVersionId": "46893110-0dcd-4d1b-adfd-4fbc21d62b4c",
   "triggerCount": 1,
   "shared": [
     {
@@ -1200,9 +1043,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-04T19:22:37.000Z",
-    "createdAt": "2026-05-04T19:22:35.165Z",
-    "versionId": "4649766d-44da-4359-8c96-f4c2f8506470",
+    "updatedAt": "2026-05-06T08:11:07.000Z",
+    "createdAt": "2026-05-06T08:11:05.324Z",
+    "versionId": "46893110-0dcd-4d1b-adfd-4fbc21d62b4c",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1506,76 +1349,6 @@
       },
       {
         "parameters": {
-          "jsCode": "const sampleId = $('Generate HRD Sample Sheet').item.json.sample_id;\n  const projectId = $('Generate HRD Sample Sheet').item.json.PROJECT_ID;\n  const files = $('Generate HRD Sample Sheet').item.json.files; \n  const sampleSheetId = $input.item.json.stdout.trim();\n\n  return {\n    json: {\n      sample_id: sampleId,\n      PROJECT_ID: projectId,\n      samplesheet_id: sampleSheetId,\n      files: files\n    }\n  };"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          1536,
-          96
-        ],
-        "id": "79bfad79-5d26-4ea7-9a65-0e1c2436fcf1",
-        "name": "Prepare Pipeline Launch HRD",
-        "disabled": true
-      },
-      {
-        "parameters": {
-          "command": "=  echo '{{ $json.sample_sheet_content }}' > /tmp/{{ $json.sample_sheet_filename }} && icav2 projectdata upload /tmp/{{ $json.sample_sheet_filename }} \"/samplesheet_folder/{{ $json.sample_sheet_filename }}\" --project-id {{\n  $json.PROJECT_ID }} 2>&1 | grep \"^id\" | awk '{print $2}'"
-        },
-        "type": "n8n-nodes-base.executeCommand",
-        "typeVersion": 1,
-        "position": [
-          1312,
-          96
-        ],
-        "id": "a4c89a92-2d23-4ede-80f1-167096e16412",
-        "name": "SampleSheet Upload HRD",
-        "disabled": true
-      },
-      {
-        "parameters": {
-          "options": {}
-        },
-        "type": "n8n-nodes-base.splitInBatches",
-        "typeVersion": 3,
-        "position": [
-          896,
-          96
-        ],
-        "id": "e991e081-6797-4020-96c3-254206f5e1da",
-        "name": "Loop Over Items HRD",
-        "disabled": true
-      },
-      {
-        "parameters": {
-          "command": "=  icav2 projectpipelines start nextflow \"b4dec62d-f3af-4dc3-8d15-6fe6c9a4df6c\" \\\n    --project-id {{ $('Prepare Pipeline Launch HRD').item.json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $('Loop Over Items HRD').item.json.output_folder_id }} \\\n    --input \"run_folder:{{ $('Loop Over Items HRD').item.json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch HRD').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch HRD').item.json.sample_id }}-analysis\" 2>&1 | grep \"^id\" | awk '{print $2}'\n"
-        },
-        "type": "n8n-nodes-base.executeCommand",
-        "typeVersion": 1,
-        "position": [
-          1744,
-          96
-        ],
-        "id": "ccbe240e-79a5-43b4-9a48-f3da03d151f1",
-        "name": "Launch HRD Analysis",
-        "disabled": true
-      },
-      {
-        "parameters": {
-          "command": "=  echo '{{ JSON.stringify($(\"Prepare Pipeline Launch HRD\").item.json.files) }}' | jq -r '.[]' | while read filename; do\n    FILE_ID=$(curl -s -X GET 'https://ica.illumina.com/ica/rest/api/projects/{{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }}/data?filePath=/input_folder/&type=FILE&pageSize=1000' \\\n      -H 'Accept: application/vnd.illumina.v3+json' \\\n      -H 'X-API-Key: RBsYkBubZxrPXkR3AvjLXUlYFGJJ8FOM' | \\\n      jq -r \".items[] | select(.data.details.name == \\\"$filename\\\") | .data.id\")\n\n    if [ ! -z \"$FILE_ID\" ]; then\n      icav2 projectdata update \"$FILE_ID\" --project-id {{ $(\"Prepare Pipeline Launch HRD\").item.json.PROJECT_ID }} --remove-user-tag \"on_hold\" --add-user-tag \"analysis_completed\" 2>&1\n      echo \"Updated: $filename ($FILE_ID)\"\n    fi\n  done"
-        },
-        "type": "n8n-nodes-base.executeCommand",
-        "typeVersion": 1,
-        "position": [
-          1968,
-          96
-        ],
-        "id": "edf179d7-1026-404b-86f1-e3164ae5d0c3",
-        "name": "Update File Tags HRD",
-        "disabled": true
-      },
-      {
-        "parameters": {
           "jsCode": "// Tüm önceki item'ları al\nconst items = $input.all();\n\n// sample_id'ye göre grupla\nconst sampleGroups = {};\n\nfor (const item of items) {\n  const sampleId = item.json.sample_id;\n  \n  if (!sampleGroups[sampleId]) {\n    sampleGroups[sampleId] = {\n      sample_id: sampleId,\n      files: [],\n      PROJECT_ID: item.json.PROJECT_ID,\n      input_folder_id: item.json.input_folder_id,\n      samplesheet_folder_id: item.json.samplesheet_folder_id,\n      output_folder_id: item.json.output_folder_id\n    };\n  }\n  \n  sampleGroups[sampleId].files.push(item.json.filename);\n}\n\n// Her sample için ayrı item oluştur\nreturn Object.values(sampleGroups).map(group => ({\n  json: {\n    sample_id: group.sample_id,\n    file_count: group.files.length,\n    files: group.files,\n    PROJECT_ID: group.PROJECT_ID,\n    input_folder_id: group.input_folder_id,\n    samplesheet_folder_id: group.samplesheet_folder_id,\n    output_folder_id: group.output_folder_id\n  }\n}));"
         },
         "type": "n8n-nodes-base.code",
@@ -1586,21 +1359,6 @@
         ],
         "id": "50a389a6-84b1-4cb0-b056-178852da6075",
         "name": "Group Samples HRD"
-      },
-      {
-        "parameters": {
-          "mode": "runOnceForEachItem",
-          "jsCode": "const sampleId = $input.item.json.sample_id;\n// Note: PROJECT_ID was not present in your provided input JSON. \n// Ensure it exists, or provide a fallback.\nconst projectId = $input.item.json.PROJECT_ID || \"DEFAULT_PROJECT\";\nconst files = $input.item.json.files;\n\n// Using '2-digit' ensures you get leading zeros (e.g., 04/19/2026)\nconst dateString = new Date().toLocaleDateString('en-US', { \n    month: '2-digit', \n    day: '2-digit', \n    year: 'numeric' \n});\n\nconst sampleSheet = `[Header]\nIEMFileVersion,4\nInvestigator Name,Can Holyavkin\nExperiment Name,TSO500_HRD\nDate,${dateString}\nWorkflow Version,DRAGEN TSO500 v2.x\nFileFormatVersion,2\n[Reads]\nRead1Cycles,151\nRead2Cycles,151\nIndex1Cycles,8\nIndex2Cycles,8\n[Sequencing_Settings]\nLibraryPrepKits,TSO500\n[BCLConvert_Settings]\nSoftwareVersion,3.6.3\nAdapterRead1,AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\nAdapterRead2,AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\nAdapterBehavior,trim\nMinimumTrimmedReadLength,35\nMaskShortReads,35\n[BCLConvert_Data]\nSample_ID,index,index2,OverrideCycles\n${sampleId},AGCGATAG,TTATTCGT,U7N1Y143;I8;I8;U7N1Y143\n[TSO500S_Settings]\n[TSO500S_Data]\nSample_ID,Index_ID,Sample_Type,Pair_ID,Sample_Feature\n${sampleId},UP05,DNA,${sampleId},HRD\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}_HRD.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};"
-        },
-        "id": "680c19a2-565b-4e22-89af-0f09c0973e92",
-        "name": "Generate HRD Sample Sheet",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          1104,
-          96
-        ],
-        "disabled": true
       },
       {
         "parameters": {
@@ -1670,7 +1428,8 @@
         ],
         "id": "7711de67-95cf-4da5-87c2-f44933e09453",
         "name": "Wait",
-        "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
+        "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf",
+        "disabled": true
       },
       {
         "parameters": {
@@ -2073,83 +1832,11 @@
           ]
         ]
       },
-      "Prepare Pipeline Launch HRD": {
-        "main": [
-          [
-            {
-              "node": "Launch HRD Analysis",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "SampleSheet Upload HRD": {
-        "main": [
-          [
-            {
-              "node": "Prepare Pipeline Launch HRD",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Loop Over Items HRD": {
-        "main": [
-          [],
-          [
-            {
-              "node": "Generate HRD Sample Sheet",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Launch HRD Analysis": {
-        "main": [
-          [
-            {
-              "node": "Update File Tags HRD",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Loop Over Items HRD",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Update File Tags HRD": {
-        "main": [
-          [
-            {
-              "node": "Loop Over Items HRD",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Group Samples HRD": {
         "main": [
           [
             {
               "node": "Generate Sample Sheet2",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Generate HRD Sample Sheet": {
-        "main": [
-          [
-            {
-              "node": "SampleSheet Upload HRD",
               "type": "main",
               "index": 0
             }
@@ -2345,7 +2032,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 4649766d",
+    "name": "Version 46893110",
     "description": "",
     "autosaved": false
   },
@@ -2357,6 +2044,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "06-05-2026/0:00",
+  "commitDate": "07-05-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
