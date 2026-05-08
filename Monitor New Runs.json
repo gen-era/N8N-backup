@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-27T10:16:02.800Z",
+  "updatedAt": "2026-05-07T13:32:40.368Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -306,7 +306,7 @@
       "typeVersion": 1.2,
       "position": [
         -608,
-        -192
+        -288
       ],
       "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
       "name": "Schedule Trigger"
@@ -534,6 +534,25 @@
       ],
       "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        -96
+      ],
+      "id": "166dea44-b2b0-4c11-8104-dec86bc80a42",
+      "name": "When Executed by Another Workflow"
     }
   ],
   "connections": {
@@ -765,6 +784,17 @@
           }
         ]
       ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Find Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -773,7 +803,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        20
+        0
       ]
     }
   },
@@ -781,8 +811,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "22fc6d04-642d-4fd8-b425-0e86142309ae",
-  "activeVersionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
+  "versionId": "991b038a-7847-4fb7-920d-88df9775195e",
+  "activeVersionId": "991b038a-7847-4fb7-920d-88df9775195e",
   "triggerCount": 1,
   "shared": [
     {
@@ -794,9 +824,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-23T08:08:09.000Z",
-    "createdAt": "2026-04-23T08:08:06.347Z",
-    "versionId": "0ed59470-0aa0-41f0-af5f-e6a815ffa352",
+    "updatedAt": "2026-05-07T13:33:01.000Z",
+    "createdAt": "2026-05-07T13:32:40.370Z",
+    "versionId": "991b038a-7847-4fb7-920d-88df9775195e",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -991,7 +1021,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/backup_folder/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -1099,7 +1129,7 @@
         "typeVersion": 1.2,
         "position": [
           -608,
-          -192
+          -288
         ],
         "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
         "name": "Schedule Trigger"
@@ -1327,6 +1357,25 @@
         ],
         "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
         "name": "Filter"
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "id"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -608,
+          -96
+        ],
+        "id": "166dea44-b2b0-4c11-8104-dec86bc80a42",
+        "name": "When Executed by Another Workflow"
       }
     ],
     "connections": {
@@ -1558,10 +1607,21 @@
             }
           ]
         ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Find Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 0ed59470",
+    "name": "Version 991b038a",
     "description": "",
     "autosaved": false
   },
@@ -1573,6 +1633,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "07-05-2026/0:00",
+  "commitDate": "08-05-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
