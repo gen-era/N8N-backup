@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-25T12:04:31.289Z",
+  "updatedAt": "2026-05-07T19:32:50.070Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -3949,8 +3949,8 @@
     "Start": [
       {
         "json": {
-          "run_id": "260414_A01978_0162_AHMMT7DRX7",
-          "path": "/mnt/illuminastorage/run_folder/260414_A01978_0162_AHMMT7DRX7/"
+          "run_id": "260505_VH01138_3_AAJ2WLLM5",
+          "path": "/mnt/smb_share/Runs/260505_VH01138_3_AAJ2WLLM5/"
         }
       }
     ]
@@ -7911,6 +7911,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "07-05-2026/0:00",
+  "commitDate": "08-05-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
