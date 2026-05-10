@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-07T19:32:50.070Z",
+  "updatedAt": "2026-05-09T11:25:49.647Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -2588,7 +2588,7 @@
     },
     {
       "parameters": {
-        "command": "=  xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"; mode=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1); [ -z \"$mode\" ] && mode=$(awk '/<ConsumableInfo>/{in_block=1;block=\"\"}in_block{block=block $0 \"\\n\"}/<\\/ConsumableInfo>/{if(block~/<Type>Reagent<\\/Type>/){match(block,/<Name>([^<]+)<\\/Name>/,arr);print arr[1];exit}in_block=0}' \"$xml_file\" 2>/dev/null); [ -z \"$mode\" ] && mode=$(sed -n 's/.*<Chemistry>\\([^<]*\\)<\\/Chemistry>.*/\\1/p' \"$xml_file\" 2>/dev/null | head -1); echo \"$mode\""
+        "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count → reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -3955,8 +3955,8 @@
       }
     ]
   },
-  "versionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
-  "activeVersionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
+  "versionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
+  "activeVersionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
   "triggerCount": 0,
   "shared": [
     {
@@ -3968,9 +3968,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-25T12:04:36.000Z",
-    "createdAt": "2026-04-25T12:04:31.292Z",
-    "versionId": "feb2f3ae-cb60-4b66-80cb-910247926501",
+    "updatedAt": "2026-05-09T11:25:51.000Z",
+    "createdAt": "2026-05-09T11:25:49.649Z",
+    "versionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -6555,7 +6555,7 @@
       },
       {
         "parameters": {
-          "command": "=  xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"; mode=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1); [ -z \"$mode\" ] && mode=$(awk '/<ConsumableInfo>/{in_block=1;block=\"\"}in_block{block=block $0 \"\\n\"}/<\\/ConsumableInfo>/{if(block~/<Type>Reagent<\\/Type>/){match(block,/<Name>([^<]+)<\\/Name>/,arr);print arr[1];exit}in_block=0}' \"$xml_file\" 2>/dev/null); [ -z \"$mode\" ] && mode=$(sed -n 's/.*<Chemistry>\\([^<]*\\)<\\/Chemistry>.*/\\1/p' \"$xml_file\" 2>/dev/null | head -1); echo \"$mode\""
+          "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count → reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -7906,11 +7906,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version feb2f3ae",
+    "name": "Version e37554c2",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "09-05-2026/0:00",
+  "commitDate": "10-05-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
