@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-22T10:58:13.349Z",
+  "updatedAt": "2026-05-09T21:34:11.956Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "command": "curl -g 'https://sheets.googleapis.com/v4/spreadsheets/1BqKAsezocz_ECKbgR66WY6hwKW8Es8U-y5HA7IIqsE4/values/Sayfa2%21A%3AZ?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'\n"
+        "command": "curl -g 'https://sheets.googleapis.com/v4/spreadsheets/1BqKAsezocz_ECKbgR66WY6hwKW8Es8U-y5HA7IIqsE4/values/Sayfa3%21A%3AZ?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'\n"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -534,7 +534,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "22237f14-9fc3-4e85-990f-8459329d934d",
+  "versionId": "b9645021-d665-46a9-8c2c-fdab81b29b90",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -548,6 +548,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "09-05-2026/0:00",
+  "commitDate": "10-05-2026/0:00",
   "fileName": "idats2Supa.json"
 }
