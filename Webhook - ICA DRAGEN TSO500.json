@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T08:12:01.505Z",
+  "updatedAt": "2026-05-09T11:07:45.359Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -1006,22 +1006,22 @@
             "user-agent": "curl/7.86.0",
             "accept": "*/*",
             "content-type": "application/json",
-            "content-length": "877"
+            "content-length": "596"
           },
           "params": {},
           "query": {},
           "body": {
-            "LOCAL_FILE_COUNT": "4",
-            "LOCAL_FILES": "/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-D_S177_L003_R1_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-R_S180_L003_R2_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-D_S177_L003_R2_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5/M-874-26-R_S180_L003_R1_001.fastq.gz",
+            "LOCAL_FILE_COUNT": "2",
+            "LOCAL_FILES": "/volume1/illuminastorage/fastq_folder/260506_A01978_0172_AHG5LGDMX2-Fastq/SG-TSO500-CT-V2-RUN6/PRJ26-13_S57_L002_R2_001.fastq.gz\n/volume1/illuminastorage/fastq_folder/260506_A01978_0172_AHG5LGDMX2-Fastq/SG-TSO500-CT-V2-RUN6/PRJ26-13_S57_L002_R1_001.fastq.gz",
             "REMOTE_FILES": "",
             "HAS_UMI": "true",
-            "id": "recx9DvIZT1k53hgT",
-            "createdTime": "2026-05-04T19:17:10.000Z",
-            "PROJECT_ID": "dae7ac5f-2312-47f9-b7ca-3e45bba32697",
-            "FOLDER": "260430_A01978_0170_AHWFNYDSXF-Fastq/SG-TSO500-FFPE-V2-RUN5",
-            "SAMPLE_ID": "M-874-26",
-            "Panel": "FFPE_v2",
-            "Priority": 5,
+            "id": "recdPLoKyvnUdZjn2",
+            "createdTime": "2026-05-08T17:38:59.000Z",
+            "PROJECT_ID": "88c6fa05-ad43-4e6d-b47f-4efc8dad6280",
+            "FOLDER": "260506_A01978_0172_AHG5LGDMX2-Fastq/SG-TSO500-CT-V2-RUN6",
+            "SAMPLE_ID": "PRJ26-13",
+            "Panel": "ctDNA_v2",
+            "Priority": 3,
             "BATCH_HAS_UMI": true
           },
           "webhookUrl": "http://localhost:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971",
@@ -1031,7 +1031,7 @@
     ]
   },
   "versionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
-  "activeVersionId": "46893110-0dcd-4d1b-adfd-4fbc21d62b4c",
+  "activeVersionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
   "triggerCount": 1,
   "shared": [
     {
@@ -1043,9 +1043,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-06T08:11:07.000Z",
-    "createdAt": "2026-05-06T08:11:05.324Z",
-    "versionId": "46893110-0dcd-4d1b-adfd-4fbc21d62b4c",
+    "updatedAt": "2026-05-09T11:06:17.000Z",
+    "createdAt": "2026-05-06T08:12:01.509Z",
+    "versionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1287,7 +1287,7 @@
       },
       {
         "parameters": {
-          "command": "=  icav2 projectpipelines start nextflow \"850b4fe6-2a2f-4a85-ae57-cf082dfbefd4\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
+          "command": "=  icav2 projectpipelines start nextflow \"89887580-b32d-4277-80e7-4b15f0314365\" \\\n    --project-id {{ $('Code in JavaScript1').first().json.PROJECT_ID }} \\\n    --storage-size \"Large\" \\\n    --output-parent-folder {{ $json.output_folder_id }} \\\n    --input \"run_folder:{{ $json.input_folder_id }}\" \\\n    --input \"sample_sheet:{{ $('Prepare Pipeline Launch ctDNA').item.json.samplesheet_id }}\" \\\n    --parameters \"StartsFromFastq:true\" \\\n    --user-reference \"{{ $('Prepare Pipeline Launch ctDNA').item.json.sample_id }}-analysis\"\n"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -2032,7 +2032,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 46893110",
+    "name": "Version eb4f6595",
     "description": "",
     "autosaved": false
   },
@@ -2044,6 +2044,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "09-05-2026/0:00",
+  "commitDate": "10-05-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
