@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-29T03:39:09.810Z",
+  "updatedAt": "2026-05-10T19:19:27.276Z",
   "createdAt": "2026-04-27T16:52:28.398Z",
   "id": "ZvFnUxar8WcQOpLt",
   "name": "FTP Delivery",
@@ -198,6 +198,54 @@
       ],
       "id": "07d39b6b-c8a7-4210-83e2-62668756fc98",
       "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    p.id,\n    p.name,\n    '{{ $('Build Commands').item.json.account_id }}'         AS account_id,\n    '{{ $('Build Commands').item.json.batch_source_value }}' AS batch_source_value,\n    '{{ $('Build Commands').item.json.target }}'             AS target_path,\n    {{ $('Build Commands').item.json.file_count }}           AS file_count,\n    string_agg(DISTINCT r.run_id, ', '  ORDER BY r.run_id)   AS run_ids,\n    string_agg(DISTINCT k.name, ', '   ORDER BY k.name)      AS kit_names,\n    string_agg(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids,\n    COUNT(DISTINCT dop.uniqueref)                            AS total_data_operations\nFROM data_operations dop\nLEFT JOIN providers p              ON dop.operator_ref = p.uniqueref\nLEFT JOIN reads rd                 ON dop.read_ref = rd.uniqueref\nLEFT JOIN conversions c            ON rd.conversion_ref = c.uniqueref\nLEFT JOIN runs r                   ON c.run_ref = r.uniqueref\nLEFT JOIN kits k                   ON rd.kit_ref = k.uniqueref\nWHERE dop.uniqueref = ANY(ARRAY[{{ $('Build Commands').item.json.dop_refs.join(',') }}]::bigint[])\n  AND p.id IS NOT NULL\nGROUP BY p.id, p.name;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1264,
+        -112
+      ],
+      "id": "32e9cda5-fded-4eb2-a38f-fc5ddc9c3a3f",
+      "name": "Get Provider",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "={{ $json.id }}, can.holyavkin@gen-era.com.tr",
+        "subject": "=FTP Teslimi Tamamlandı - {{ $('Build Commands').item.json.account_id }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <div style=\"font-size:20px;font-weight:600;line-height:1.3;color:#102a43;\">FTP Teslimi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba {{ $json.name }},</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Başlatmış olduğunuz FTP teslimi başarıyla tamamlandı. Detaylar aşağıdadır.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.run_ids }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kit</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.kit_names }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.batch_source_value }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hedef Klasör</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.target_path }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Aktarılan dosya sayısı</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.file_count }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Teslim edilen örnek sayısı</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.total_data_operations }}</strong></td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Teslim Edilen Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false,
+          "ccEmail": ""
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1488,
+        -112
+      ],
+      "id": "0294220e-1ba6-41d2-9069-9ec861008ff8",
+      "name": "Send email",
+      "webhookId": "2d02a19f-545c-4329-9de5-3e69f9b4329f",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
@@ -309,18 +357,41 @@
           }
         ]
       ]
+    },
+    "Mark Completed": {
+      "main": [
+        [
+          {
+            "node": "Get Provider",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Provider": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d2a050df-0407-49dc-982b-de5c442daf3d",
+  "versionId": "bf4d67ce-18f2-4e14-a0f0-2d5361d13545",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -341,6 +412,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "10-05-2026/0:00",
+  "commitDate": "11-05-2026/0:00",
   "fileName": "FTP Delivery.json"
 }
