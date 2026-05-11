@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T11:07:45.359Z",
+  "updatedAt": "2026-05-10T13:34:36.326Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -90,7 +90,10 @@
         704
       ],
       "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
-      "name": "Get Folder ID"
+      "name": "Get Folder ID",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -103,7 +106,10 @@
         704
       ],
       "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
-      "name": "SampleSheet Upload"
+      "name": "SampleSheet Upload",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -131,7 +137,8 @@
       "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
       "name": "Launch Analysis",
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 30000,
+      "maxTries": 3
     },
     {
       "parameters": {
@@ -215,7 +222,10 @@
         1104
       ],
       "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
-      "name": "SampleSheet Upload ctDNA"
+      "name": "SampleSheet Upload ctDNA",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -241,7 +251,10 @@
         1104
       ],
       "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
-      "name": "Get Folder ID ctDNA"
+      "name": "Get Folder ID ctDNA",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -256,7 +269,8 @@
       "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
       "name": "Launch ctDNA Analysis",
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 30000,
+      "maxTries": 3
     },
     {
       "parameters": {
@@ -343,7 +357,10 @@
         848
       ],
       "id": "639e0461-776b-4ec4-8eef-e82798383bd3",
-      "name": "List Files"
+      "name": "List Files",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -426,7 +443,10 @@
         480
       ],
       "id": "97f7b199-cb18-41bf-9600-e57f99d59492",
-      "name": "Get Folder ID1"
+      "name": "Get Folder ID1",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -439,7 +459,10 @@
         480
       ],
       "id": "a507ac04-03c1-4eb9-9faf-3bf50657a133",
-      "name": "SampleSheet Upload1"
+      "name": "SampleSheet Upload1",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -467,7 +490,8 @@
       "id": "33cb2ac7-5de8-4bd4-8365-6d0b92546b84",
       "name": "Launch Analysis1",
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 30000,
+      "maxTries": 3
     },
     {
       "parameters": {
@@ -541,7 +565,10 @@
         896
       ],
       "id": "e3ce6c63-3835-45bc-aaeb-285b644c8d39",
-      "name": "Get Folder ID2"
+      "name": "Get Folder ID2",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -554,7 +581,10 @@
         896
       ],
       "id": "7a32c6be-5760-4485-9222-907562e64f64",
-      "name": "SampleSheet Upload2"
+      "name": "SampleSheet Upload2",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
     },
     {
       "parameters": {
@@ -582,7 +612,8 @@
       "id": "1bb6166f-3056-45a7-a030-e97faa11b700",
       "name": "Launch Analysis2",
       "retryOnFail": true,
-      "waitBetweenTries": 5000
+      "waitBetweenTries": 30000,
+      "maxTries": 3
     },
     {
       "parameters": {
@@ -991,7 +1022,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
@@ -1030,8 +1062,8 @@
       }
     ]
   },
-  "versionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
-  "activeVersionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
+  "versionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
+  "activeVersionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
   "triggerCount": 1,
   "shared": [
     {
@@ -1043,9 +1075,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-09T11:06:17.000Z",
-    "createdAt": "2026-05-06T08:12:01.509Z",
-    "versionId": "eb4f6595-e25b-4aa5-84c2-3e0d1bdaa4f9",
+    "updatedAt": "2026-05-10T13:34:36.329Z",
+    "createdAt": "2026-05-10T13:34:36.329Z",
+    "versionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1132,7 +1164,10 @@
           704
         ],
         "id": "d70334fb-9521-42c0-9b39-7e51e9b4843b",
-        "name": "Get Folder ID"
+        "name": "Get Folder ID",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1145,7 +1180,10 @@
           704
         ],
         "id": "415a770b-32ef-480e-9a26-699d35dfdc80",
-        "name": "SampleSheet Upload"
+        "name": "SampleSheet Upload",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1173,7 +1211,8 @@
         "id": "52346f3f-5674-478c-9ee3-1945b0a8cd29",
         "name": "Launch Analysis",
         "retryOnFail": true,
-        "waitBetweenTries": 5000
+        "waitBetweenTries": 30000,
+        "maxTries": 3
       },
       {
         "parameters": {
@@ -1257,7 +1296,10 @@
           1104
         ],
         "id": "4a5b2c21-1694-44ac-bb1e-1bfa08e4ca8f",
-        "name": "SampleSheet Upload ctDNA"
+        "name": "SampleSheet Upload ctDNA",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1283,7 +1325,10 @@
           1104
         ],
         "id": "575658e2-b1d1-4ad8-825c-45edf6e4482e",
-        "name": "Get Folder ID ctDNA"
+        "name": "Get Folder ID ctDNA",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1298,7 +1343,8 @@
         "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
         "name": "Launch ctDNA Analysis",
         "retryOnFail": true,
-        "waitBetweenTries": 5000
+        "waitBetweenTries": 30000,
+        "maxTries": 3
       },
       {
         "parameters": {
@@ -1385,7 +1431,10 @@
           848
         ],
         "id": "639e0461-776b-4ec4-8eef-e82798383bd3",
-        "name": "List Files"
+        "name": "List Files",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1468,7 +1517,10 @@
           480
         ],
         "id": "97f7b199-cb18-41bf-9600-e57f99d59492",
-        "name": "Get Folder ID1"
+        "name": "Get Folder ID1",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1481,7 +1533,10 @@
           480
         ],
         "id": "a507ac04-03c1-4eb9-9faf-3bf50657a133",
-        "name": "SampleSheet Upload1"
+        "name": "SampleSheet Upload1",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1509,7 +1564,8 @@
         "id": "33cb2ac7-5de8-4bd4-8365-6d0b92546b84",
         "name": "Launch Analysis1",
         "retryOnFail": true,
-        "waitBetweenTries": 5000
+        "waitBetweenTries": 30000,
+        "maxTries": 3
       },
       {
         "parameters": {
@@ -1583,7 +1639,10 @@
           896
         ],
         "id": "e3ce6c63-3835-45bc-aaeb-285b644c8d39",
-        "name": "Get Folder ID2"
+        "name": "Get Folder ID2",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1596,7 +1655,10 @@
           896
         ],
         "id": "7a32c6be-5760-4485-9222-907562e64f64",
-        "name": "SampleSheet Upload2"
+        "name": "SampleSheet Upload2",
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 30000
       },
       {
         "parameters": {
@@ -1624,7 +1686,8 @@
         "id": "1bb6166f-3056-45a7-a030-e97faa11b700",
         "name": "Launch Analysis2",
         "retryOnFail": true,
-        "waitBetweenTries": 5000
+        "waitBetweenTries": 30000,
+        "maxTries": 3
       },
       {
         "parameters": {
@@ -2032,8 +2095,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version eb4f6595",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -2044,6 +2107,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "10-05-2026/0:00",
+  "commitDate": "11-05-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
