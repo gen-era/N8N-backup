@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-10T13:34:36.326Z",
+  "updatedAt": "2026-05-11T16:38:26.739Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -269,7 +269,7 @@
       "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
       "name": "Launch ctDNA Analysis",
       "retryOnFail": true,
-      "waitBetweenTries": 30000,
+      "waitBetweenTries": 5000,
       "maxTries": 3
     },
     {
@@ -1062,8 +1062,8 @@
       }
     ]
   },
-  "versionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
-  "activeVersionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
+  "versionId": "3c18a4f9-cade-4681-9510-f1661fb65c74",
+  "activeVersionId": "3c18a4f9-cade-4681-9510-f1661fb65c74",
   "triggerCount": 1,
   "shared": [
     {
@@ -1075,9 +1075,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-10T13:34:36.329Z",
-    "createdAt": "2026-05-10T13:34:36.329Z",
-    "versionId": "5c47169f-c369-4ad6-b4da-37794fcfd8f4",
+    "updatedAt": "2026-05-11T16:38:29.000Z",
+    "createdAt": "2026-05-11T16:38:26.743Z",
+    "versionId": "3c18a4f9-cade-4681-9510-f1661fb65c74",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1343,7 +1343,7 @@
         "id": "9d70317e-b1b4-4af0-84f8-221965b63a34",
         "name": "Launch ctDNA Analysis",
         "retryOnFail": true,
-        "waitBetweenTries": 30000,
+        "waitBetweenTries": 5000,
         "maxTries": 3
       },
       {
@@ -2095,8 +2095,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": null,
-    "description": null,
+    "name": "Version 3c18a4f9",
+    "description": "",
     "autosaved": false
   },
   "tags": [
@@ -2107,6 +2107,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "11-05-2026/0:00",
+  "commitDate": "12-05-2026/0:00",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
