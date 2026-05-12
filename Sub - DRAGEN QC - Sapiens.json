@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-07T12:45:16.157Z",
+  "updatedAt": "2026-05-11T19:34:51.078Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -582,7 +582,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1312,
+        -1424,
         -704
       ],
       "id": "7a038332-d398-4492-b719-13d944a2319d",
@@ -602,6 +602,7 @@
       ],
       "id": "1db092be-70f1-4abf-b34e-4321e556d60e",
       "name": "Resolve Conversion Ref",
+      "executeOnce": true,
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -920,7 +921,7 @@
             {
               "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
               "name": "sample_ids",
-              "value": "1412402-US 1412412-TS 1413812-IY 1413872-AM 1413902-EY 1414432-AA 1414442-EO 1414522-IY 1414802-SI SG2026-09033-ECEGEN SG2026-09034-ECEGEN SG2026-09036-ECEGEN SG2026-09037-ECEGEN SG2026-09038-ECEGEN SG2026-09039-ECEGEN SG2026-09042-ECEGEN SG2026-09043-ECEGEN SG2026-09044-ECEGEN SG2026-09046-ECEGEN SG2026-09048-ECEGEN WES-601 WES-602 WES-643 WES-644 WES-645 WES-646 WES-647 WES-648 WES-649 WES-650 WES-651 WES-652 WES-653 WES-654 WES-655 WES-656 WES-657 WES-658 WES-659 WES-660 WES-661 WES-662 WES-663 WES-664 WES-665 WES-666 AH-PK-318183 EP-PK-318281 HNO-PK-318351 LC-PK-318215 MRK-PK-318376 SA-PK-318290 TP-PK-318211 YCA-PK-318289 WES-563 WES-667 WES-668 WES-669 WES-670 WES-671 AMG-0562-26 SG2026-08703 SG2026-08704 SG2026-08706 SG2026-08708 SG2026-08709 SG2026-08710 SG2026-08711 37888",
+              "value": "AMG-0575-26 M-889-26  M-872-26  M-873-26  M-931-26  ISY26-240-CBB  ISY26-251-AG ISY26-252-SZN T26-595 T26-589 T26-567 T26-557 T26-556 T26-555 T26-530 T26-529 KLINIK-54-ELI-ETL-5392008 KLINIK-40-MUK-AKB-5392487 M-969-26 ISY26-256-IYK M-993-26 ISY26-248-OA ISY26-247-DA ISY26-246-SY ISY26-245-BA ISY26-255-AM 1031001337 1031001331 1571-2026 CO26-BR6328 CO26-BR6327 CO26-BR6326 CO26-BR6325 CO26-BR6324 CO26-BR6323 CO26-BR6322 CO26-BR6321 CO26-BR6320 CO26-BR6319 CO26-BR6306  CO26-BR6304 CO26-BR6317 CO26-BR6316 CO26-BR6298  CO26-BR6293",
               "type": "string"
             }
           ]
@@ -935,6 +936,25 @@
       ],
       "id": "8c316a5f-2e49-4cb0-8fc2-dd076ca146ec",
       "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "command": "rm -rf /staging/qc/output/*"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1264,
+        -560
+      ],
+      "id": "1f47fd5e-02b1-45cc-9cd8-a3d873a72b62",
+      "name": "Cleanup Output1",
+      "credentials": {
+        "sshPassword": {
+          "id": "ibmyt2kAsGpHbe7o",
+          "name": "Sapiens DRAGEN 2 - Root User"
+        }
+      }
     }
   ],
   "connections": {
@@ -1095,6 +1115,11 @@
             "node": "Resolve Conversion Ref",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Cleanup Output1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1226,6 +1251,17 @@
           }
         ]
       ]
+    },
+    "Cleanup Output1": {
+      "main": [
+        [
+          {
+            "node": "Resolve Conversion Ref",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1239,12 +1275,12 @@
     "Trigger": [
       {
         "json": {
-          "run_id": "260430_A01978_0170_AHWFNYDSXF"
+          "run_id": "260508_A01978_0174_BHG55NDMX2"
         }
       }
     ]
   },
-  "versionId": "84a26b31-d959-471f-b5f5-d908aee1a338",
+  "versionId": "5010c523-e71f-40ad-b904-158f023bec19",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1258,6 +1294,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "11-05-2026/0:00",
+  "commitDate": "12-05-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
