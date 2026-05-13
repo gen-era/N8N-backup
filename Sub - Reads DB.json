@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-11T06:47:09.514Z",
+  "updatedAt": "2026-05-12T07:27:33.911Z",
   "createdAt": "2026-02-21T12:45:50.801Z",
   "id": "NdJI7DDLHO194xrO",
   "name": "Sub - Reads DB",
@@ -390,7 +390,8 @@
           "matchingColumns": [
             "sample_id",
             "conversion_ref",
-            "lane"
+            "lane",
+            "index_ref"
           ],
           "schema": [
             {
@@ -430,7 +431,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "lane",
@@ -910,7 +911,8 @@
           "matchingColumns": [
             "sample_id",
             "conversion_ref",
-            "lane"
+            "lane",
+            "index_ref"
           ],
           "schema": [
             {
@@ -950,7 +952,7 @@
               "defaultMatch": false,
               "display": true,
               "type": "number",
-              "canBeUsedToMatch": false
+              "canBeUsedToMatch": true
             },
             {
               "id": "lane",
@@ -1351,7 +1353,8 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
@@ -1366,8 +1369,8 @@
       }
     ]
   },
-  "versionId": "638ddfd4-a494-48a1-9474-0fa8a0079467",
-  "activeVersionId": "a32bf8d4-5c0e-4844-818b-7e974644576c",
+  "versionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
+  "activeVersionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
   "triggerCount": 0,
   "shared": [
     {
@@ -1379,9 +1382,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-03-23T19:06:42.000Z",
-    "createdAt": "2026-03-23T19:06:39.911Z",
-    "versionId": "a32bf8d4-5c0e-4844-818b-7e974644576c",
+    "updatedAt": "2026-05-12T07:27:33.913Z",
+    "createdAt": "2026-05-12T07:27:33.913Z",
+    "versionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
     "workflowId": "NdJI7DDLHO194xrO",
     "nodes": [
       {
@@ -1731,7 +1734,7 @@
         "typeVersion": 2.2,
         "position": [
           5696,
-          -800
+          -752
         ],
         "id": "630b0ef6-9e23-43a8-8adb-217e2c67d521",
         "name": "If"
@@ -1768,7 +1771,8 @@
             "matchingColumns": [
               "sample_id",
               "conversion_ref",
-              "lane"
+              "lane",
+              "index_ref"
             ],
             "schema": [
               {
@@ -1808,7 +1812,7 @@
                 "defaultMatch": false,
                 "display": true,
                 "type": "number",
-                "canBeUsedToMatch": false
+                "canBeUsedToMatch": true
               },
               {
                 "id": "lane",
@@ -1894,8 +1898,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          5968,
-          -800
+          5984,
+          -768
         ],
         "id": "e35f2b6d-9a9d-4e51-b6c5-795e44d4ecea",
         "name": "Update Reads",
@@ -2255,6 +2259,177 @@
         ],
         "id": "475345a8-5733-4244-8bcf-1cb45f7698f0",
         "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "operation": "upsert",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "reads",
+            "mode": "list",
+            "cachedResultName": "reads"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "conversion_ref": "={{ $('Select Conversion Ref').item.json.uniqueref }}",
+              "index_ref": "={{ $json.index_ref }}",
+              "reads_target": "={{ Number($json.SE_Reads) }}",
+              "requesting_caresite_ref": "={{ $json.requesting_caresite_ref }}",
+              "performing_caresite_ref": "={{ $json.performing_care_site_ref}}",
+              "reads": "={{ $json[\"# Reads\"] }}",
+              "lane": "={{ isNaN(Number($json.lane)) ? (isNaN(Number($json.Lane)) ? null : Number($json.Lane)) : Number($json.lane) }}",
+              "sample_id": "={{ $json.Sample_ID }}",
+              "bdsnumber": "={{ $json.BDS_Number }}",
+              "kit_ref": "={{ $json.kits_ref }}",
+              "sample_project": "={{ $json.Sample_Project }}"
+            },
+            "matchingColumns": [
+              "sample_id",
+              "conversion_ref",
+              "lane",
+              "index_ref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "conversion_ref",
+                "displayName": "conversion_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "sample_id",
+                "displayName": "sample_id",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "index_ref",
+                "displayName": "index_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lane",
+                "displayName": "lane",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "reads_target",
+                "displayName": "reads_target",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "bdsnumber",
+                "displayName": "bdsnumber",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "kit_ref",
+                "displayName": "kit_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "requesting_caresite_ref",
+                "displayName": "requesting_caresite_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "performing_caresite_ref",
+                "displayName": "performing_caresite_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "reads",
+                "displayName": "reads",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": false
+              },
+              {
+                "id": "sample_project",
+                "displayName": "sample_project",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {
+            "replaceEmptyStrings": true
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          5696,
+          -928
+        ],
+        "id": "7f87ca57-f203-400f-ab4c-5f53efb333eb",
+        "name": "Update Reads1",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
       }
     ],
     "connections": {
@@ -2369,7 +2544,13 @@
       },
       "Unvalidated Samples?": {
         "main": [
-          [],
+          [
+            {
+              "node": "Update Reads1",
+              "type": "main",
+              "index": 0
+            }
+          ],
           [
             {
               "node": "If",
@@ -2552,11 +2733,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version a32bf8d4",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "12-05-2026/0:00",
+  "commitDate": "13-05-2026/0:00",
   "fileName": "Sub - Reads DB.json"
 }
