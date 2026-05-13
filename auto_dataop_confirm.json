@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-05-11T20:58:46.435Z",
+  "updatedAt": "2026-05-12T13:44:28.959Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "auto_dataop_confirm",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -20,8 +20,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -592,
-        -48
+        -768,
+        -336
       ],
       "id": "465875be-7c65-4dab-aece-958f72e8ac1a",
       "name": "When Executed by Another Workflow"
@@ -29,14 +29,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  dor.uniqueref          AS recipe_ref,\n  dor.pipeline_id,\n  dor.account_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN data_operation_recipes dor\n  ON dor.kit_ref                  = r.kit_ref\n  AND dor.requesting_caresite_ref = r.requesting_caresite_ref\n  AND dor.performing_caresite_ref = r.performing_caresite_ref\n  AND dor.platform_concept_ref IN (11, 12, 109, 398)\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
+        "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -384,
-        -48
+        -560,
+        -336
       ],
       "id": "768f4c2e-aaae-484b-b474-ab69a69c9892",
       "name": "Execute a SQL query",
@@ -75,8 +75,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        112,
-        -96
+        -96,
+        -336
       ],
       "id": "401d49f3-60b9-44e1-b313-0b81972ab3e0",
       "name": "Is Recipe Available"
@@ -108,8 +108,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -176,
-        -48
+        -352,
+        -336
       ],
       "id": "20d61397-ef4b-4c94-9773-6012ce058a98",
       "name": "Is Archer"
@@ -142,8 +142,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        368,
-        -224
+        400,
+        -416
       ],
       "id": "3312c815-0eb5-4aca-b31c-4d977d5d738d",
       "name": "Is QC Passed"
@@ -159,8 +159,8 @@
       "type": "n8n-nodes-base.removeDuplicates",
       "typeVersion": 2,
       "position": [
-        384,
-        112
+        160,
+        -240
       ],
       "id": "430bf295-22c9-4e60-b2cc-390adb464c7e",
       "name": "Missing Combinations"
@@ -278,13 +278,17 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
         864,
-        -336
+        -496
       ],
       "id": "1347c805-fd35-4473-818d-fcfea6f5f7dd",
       "name": "Create Data Op",
@@ -293,7 +297,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -330,7 +335,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [];\n}\n\nfunction fmt(n) {\n  return (Number(n) || 0).toLocaleString('tr-TR');\n}\n\nconst sorted = items.slice().sort((a, b) => {\n  const ka = (a.json.kit_name || '').toString();\n  const kb = (b.json.kit_name || '').toString();\n  if (ka !== kb) return ka.localeCompare(kb, 'tr');\n  return (a.json.sample_id || '').toString().localeCompare((b.json.sample_id || '').toString(), 'tr');\n});\n\nconst byKit = {};\nsorted.forEach(it => {\n  const k = it.json.kit_name || '—';\n  byKit[k] = (byKit[k] || 0) + 1;\n});\n\nconst kitSummaryRows = Object.entries(byKit)\n  .sort((a, b) => b[1] - a[1])\n  .map(([k, c], i, arr) => {\n    const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n    return `<tr>\n      <td style=\"padding:12px 16px;${border}font-size:13px;color:#52606d;\">${k}</td>\n      <td style=\"padding:12px 16px;${border}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;text-align:right;\"><strong>${c}</strong></td>\n    </tr>`;\n  }).join('');\n\nconst sampleRows = sorted.map((it, i, arr) => {\n  const j = it.json;\n  const reads = Number(j.reads) || 0;\n  const req = Number(j.required_se_reads) || 0;\n  const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n  const base = `padding:10px 12px;${border}font-size:13px;color:#102a43;`;\n  return `<tr>\n    <td style=\"${base}width:32px;color:#7b8794;text-align:right;font-family:'SFMono-Regular',Menlo,Consolas,monospace;\">${String(i + 1).padStart(2, '0')}</td>\n    <td style=\"${base}font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:nowrap;\">${j.sample_id || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.kit_name || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.requester_name || ''}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;\">${fmt(reads)}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;color:#7b8794;white-space:nowrap;\">${fmt(req)}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"880\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:880px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#b93a3a;\">QC: Yetersiz Okuma Sayısı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba,</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Aşağıdaki <strong>${items.length}</strong> örnek hedeflenen okuma sayısına ulaşamadığı için otomatik yükleme akışına alınmadı. Veri yeniden hazırlandığında manuel kontrol gerekmektedir.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Kit Bazlı Özet</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              ${kitSummaryRows}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Başarısız Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <thead>\n                <tr style=\"background:#f0f4f8;\">\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">#</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Sample ID</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Kit</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Talep Eden</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Okuma</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Hedef</th>\n                </tr>\n              </thead>\n              <tbody>${sampleRows}</tbody>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    count: items.length,\n    subject: `Archer QC: Yetersiz Okuma Sayısı - ${items.length} örnek`\n  }\n}];\n"
+        "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [];\n}\n\nconst runId = (items[0].json.run_id || '—').toString();\n\nfunction fmt(n) {\n  return (Number(n) || 0).toLocaleString('tr-TR');\n}\n\nconst sorted = items.slice().sort((a, b) => {\n  const ka = (a.json.kit_name || '').toString();\n  const kb = (b.json.kit_name || '').toString();\n  if (ka !== kb) return ka.localeCompare(kb, 'tr');\n  return (a.json.sample_id || '').toString().localeCompare((b.json.sample_id || '').toString(), 'tr');\n});\n\nconst byKit = {};\nsorted.forEach(it => {\n  const k = it.json.kit_name || '—';\n  byKit[k] = (byKit[k] || 0) + 1;\n});\n\nconst kitSummaryRows = Object.entries(byKit)\n  .sort((a, b) => b[1] - a[1])\n  .map(([k, c], i, arr) => {\n    const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n    return `<tr>\n      <td style=\"padding:12px 16px;${border}font-size:13px;color:#52606d;\">${k}</td>\n      <td style=\"padding:12px 16px;${border}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;text-align:right;\"><strong>${c}</strong></td>\n    </tr>`;\n  }).join('');\n\nconst sampleRows = sorted.map((it, i, arr) => {\n  const j = it.json;\n  const reads = Number(j.reads) || 0;\n  const req = Number(j.required_se_reads) || 0;\n  const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n  const base = `padding:10px 12px;${border}font-size:13px;color:#102a43;`;\n  return `<tr>\n    <td style=\"${base}width:32px;color:#7b8794;text-align:right;font-family:'SFMono-Regular',Menlo,Consolas,monospace;\">${String(i + 1).padStart(2, '0')}</td>\n    <td style=\"${base}font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:nowrap;\">${j.sample_id || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.kit_name || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.requester_name || ''}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;\">${fmt(reads)}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;color:#7b8794;white-space:nowrap;\">${fmt(req)}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"880\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:880px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#b93a3a;\">QC: Yetersiz Okuma Sayısı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba,</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              <strong>${runId}</strong> run'ında aşağıdaki <strong>${items.length}</strong> örnek hedeflenen okuma sayısına ulaşamadığı için otomatik yükleme akışına alınmadı.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Kit Bazlı Özet</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              ${kitSummaryRows}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Başarısız Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <thead>\n                <tr style=\"background:#f0f4f8;\">\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">#</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Sample ID</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Kit</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Talep Eden</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Okuma</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Hedef</th>\n                </tr>\n              </thead>\n              <tbody>${sampleRows}</tbody>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    count: items.length,\n    subject: `Archer QC: Yetersiz Okuma Sayısı - ${runId} - ${items.length} örnek`\n  }\n}];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -397,10 +402,235 @@
       "typeVersion": 2.3,
       "position": [
         624,
-        -384
+        -576
       ],
       "id": "54daf957-6fca-4b13-8b51-ca3e1cf47d14",
       "name": "Is Perf Umraniye1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fcb5d442-6969-4d01-bd2e-10175db8c26b",
+              "leftValue": "={{ Number($json.recipe_count) }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "913db96f-8e3f-46af-a35b-adbcf6bdd027",
+      "name": "Is Multi Recipe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Multi-recipe match for read_ref={{ $json.read_ref }} (sample_id={{ $json.sample_id }}, kit={{ $json.kit_name }}). Options: {{ JSON.stringify($json.recipe_options) }}. Manual intervention required."
+      },
+      "id": "7f0e9373-2589-4357-88f7-9f501b3b092f",
+      "name": "Stop and Error (Multi-Recipe)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -608
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [];\n}\n\nconst runId = (items[0].json.run_id || '—').toString();\n\nfunction fmt(n) {\n  return (Number(n) || 0).toLocaleString('tr-TR');\n}\n\nconst sorted = items.slice().sort((a, b) => {\n  const ka = (a.json.kit_name || '').toString();\n  const kb = (b.json.kit_name || '').toString();\n  if (ka !== kb) return ka.localeCompare(kb, 'tr');\n  return (a.json.sample_id || '').toString().localeCompare((b.json.sample_id || '').toString(), 'tr');\n});\n\nconst byKit = {};\nsorted.forEach(it => {\n  const k = it.json.kit_name || '—';\n  byKit[k] = (byKit[k] || 0) + 1;\n});\n\nconst kitSummaryRows = Object.entries(byKit)\n  .sort((a, b) => b[1] - a[1])\n  .map(([k, c], i, arr) => {\n    const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n    return `<tr>\n      <td style=\"padding:12px 16px;${border}font-size:13px;color:#52606d;\">${k}</td>\n      <td style=\"padding:12px 16px;${border}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;text-align:right;\"><strong>${c}</strong></td>\n    </tr>`;\n  }).join('');\n\nconst sampleRows = sorted.map((it, i, arr) => {\n  const j = it.json;\n  const reads = Number(j.reads) || 0;\n  const req = Number(j.required_se_reads) || 0;\n  const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n  const base = `padding:10px 12px;${border}font-size:13px;color:#102a43;`;\n  return `<tr>\n    <td style=\"${base}width:32px;color:#7b8794;text-align:right;font-family:'SFMono-Regular',Menlo,Consolas,monospace;\">${String(i + 1).padStart(2, '0')}</td>\n    <td style=\"${base}font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:nowrap;\">${j.sample_id || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.kit_name || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.requester_name || ''}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;\">${fmt(reads)}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;color:#7b8794;white-space:nowrap;\">${fmt(req)}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"880\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:880px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#b93a3a;\">QC: Yetersiz Okuma Sayısı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba,</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              <strong>${runId}</strong> run'ında aşağıdaki <strong>${items.length}</strong> örnek hedeflenen okuma sayısına ulaşamadığı için otomatik yükleme akışına alınmadı.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Kit Bazlı Özet</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              ${kitSummaryRows}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Başarısız Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <thead>\n                <tr style=\"background:#f0f4f8;\">\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">#</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Sample ID</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Kit</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Talep Eden</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Okuma</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Hedef</th>\n                </tr>\n              </thead>\n              <tbody>${sampleRows}</tbody>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    count: items.length,\n    subject: `Archer QC: Yetersiz Okuma Sayısı - ${runId} - ${items.length} örnek`\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -256
+      ],
+      "id": "81ce42d8-030d-47c2-a1f3-fad8400660c5",
+      "name": "Build Failure Email Body1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "betul.tunc@gen-era.com.tr",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1120,
+        -256
+      ],
+      "id": "5555ea24-2b22-41d0-8bc2-3a41143d3204",
+      "name": "Send QC Failure Email1",
+      "executeOnce": true,
+      "webhookId": "f6ec0a26-86b5-4f89-8091-870f2c05a89e",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.read_ref }}",
+            "recipe_ref": "={{ $json.recipe_ref }}",
+            "status_concept_ref": 24
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        864,
+        -672
+      ],
+      "id": "8e118ee5-2745-479a-8fe3-73b0e98d9e62",
+      "name": "Create Data Op1",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -430,7 +660,7 @@
       "main": [
         [
           {
-            "node": "Is QC Passed",
+            "node": "Is Multi Recipe",
             "type": "main",
             "index": 0
           }
@@ -453,13 +683,7 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Is Recipe Available",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Is QC Passed": {
@@ -482,7 +706,13 @@
     },
     "Is Perf Umraniye": {
       "main": [
-        [],
+        [
+          {
+            "node": "Build Failure Email Body1",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Build Failure Email Body",
@@ -505,10 +735,45 @@
     },
     "Is Perf Umraniye1": {
       "main": [
-        [],
+        [
+          {
+            "node": "Create Data Op1",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Create Data Op",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Multi Recipe": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error (Multi-Recipe)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is QC Passed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Failure Email Body1": {
+      "main": [
+        [
+          {
+            "node": "Send QC Failure Email1",
             "type": "main",
             "index": 0
           }
@@ -529,13 +794,13 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": 998
+          "conversion_ref": 993
         }
       }
     ]
   },
-  "versionId": "7cc47d19-ce63-4720-90dd-1a0b261f81f1",
-  "activeVersionId": null,
+  "versionId": "b1300cc2-cf87-4e13-8af3-2e26203185a3",
+  "activeVersionId": "0d52c1ec-15f8-4374-8283-90fd0f86374f",
   "triggerCount": 0,
   "shared": [
     {
@@ -546,8 +811,785 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-05-12T12:19:47.000Z",
+    "createdAt": "2026-05-12T12:19:20.787Z",
+    "versionId": "0d52c1ec-15f8-4374-8283-90fd0f86374f",
+    "workflowId": "oja1t4300qVhTLyb",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "conversion_ref",
+                "type": "number"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -784,
+          -112
+        ],
+        "id": "465875be-7c65-4dab-aece-958f72e8ac1a",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -576,
+          -112
+        ],
+        "id": "768f4c2e-aaae-484b-b474-ab69a69c9892",
+        "name": "Execute a SQL query",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "e8663827-d00c-48d2-b7e4-7181a34fcece",
+                "leftValue": "={{ $json.recipe_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -80,
+          -160
+        ],
+        "id": "401d49f3-60b9-44e1-b313-0b81972ab3e0",
+        "name": "Is Recipe Available"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "e7d56b52-2dd8-4f38-ab9b-697fbcbc974a",
+                "leftValue": "={{ $json.kit_producer }}",
+                "rightValue": "Archer",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -368,
+          -112
+        ],
+        "id": "20d61397-ef4b-4c94-9773-6012ce058a98",
+        "name": "Is Archer"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "7aa42ff0-610e-4d11-95b9-ff53c006181d",
+                "leftValue": "={{ $json.reads }}",
+                "rightValue": "={{ $json.required_se_reads }}",
+                "operator": {
+                  "type": "number",
+                  "operation": "gte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          400,
+          -368
+        ],
+        "id": "3312c815-0eb5-4aca-b31c-4d977d5d738d",
+        "name": "Is QC Passed"
+      },
+      {
+        "parameters": {
+          "compare": "selectedFields",
+          "fieldsToCompare": "kit_name, requester_name, performing_name",
+          "options": {
+            "removeOtherFields": true
+          }
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2,
+        "position": [
+          224,
+          16
+        ],
+        "id": "430bf295-22c9-4e60-b2cc-390adb464c7e",
+        "name": "Missing Combinations"
+      },
+      {
+        "parameters": {
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "read_ref": "={{ $json.read_ref }}",
+              "recipe_ref": "={{ $json.recipe_ref }}",
+              "status_concept_ref": 24
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          864,
+          -496
+        ],
+        "id": "1347c805-fd35-4473-818d-fcfea6f5f7dd",
+        "name": "Create Data Op",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        },
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "39151203-9421-4e5d-8b44-195394d540d5",
+                "leftValue": "={{ $json.performing_name }}",
+                "rightValue": "Istanbul Umraniye Egitim ve Arastirma Hastanesi",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          624,
+          -160
+        ],
+        "id": "5bb835fe-a2c1-47a0-aef6-53190a9bac88",
+        "name": "Is Perf Umraniye"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [];\n}\n\nconst runId = (items[0].json.run_id || '—').toString();\n\nfunction fmt(n) {\n  return (Number(n) || 0).toLocaleString('tr-TR');\n}\n\nconst sorted = items.slice().sort((a, b) => {\n  const ka = (a.json.kit_name || '').toString();\n  const kb = (b.json.kit_name || '').toString();\n  if (ka !== kb) return ka.localeCompare(kb, 'tr');\n  return (a.json.sample_id || '').toString().localeCompare((b.json.sample_id || '').toString(), 'tr');\n});\n\nconst byKit = {};\nsorted.forEach(it => {\n  const k = it.json.kit_name || '—';\n  byKit[k] = (byKit[k] || 0) + 1;\n});\n\nconst kitSummaryRows = Object.entries(byKit)\n  .sort((a, b) => b[1] - a[1])\n  .map(([k, c], i, arr) => {\n    const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n    return `<tr>\n      <td style=\"padding:12px 16px;${border}font-size:13px;color:#52606d;\">${k}</td>\n      <td style=\"padding:12px 16px;${border}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;text-align:right;\"><strong>${c}</strong></td>\n    </tr>`;\n  }).join('');\n\nconst sampleRows = sorted.map((it, i, arr) => {\n  const j = it.json;\n  const reads = Number(j.reads) || 0;\n  const req = Number(j.required_se_reads) || 0;\n  const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n  const base = `padding:10px 12px;${border}font-size:13px;color:#102a43;`;\n  return `<tr>\n    <td style=\"${base}width:32px;color:#7b8794;text-align:right;font-family:'SFMono-Regular',Menlo,Consolas,monospace;\">${String(i + 1).padStart(2, '0')}</td>\n    <td style=\"${base}font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:nowrap;\">${j.sample_id || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.kit_name || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.requester_name || ''}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;\">${fmt(reads)}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;color:#7b8794;white-space:nowrap;\">${fmt(req)}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"880\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:880px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#b93a3a;\">QC: Yetersiz Okuma Sayısı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba,</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              <strong>${runId}</strong> run'ında aşağıdaki <strong>${items.length}</strong> örnek hedeflenen okuma sayısına ulaşamadığı için otomatik yükleme akışına alınmadı.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Kit Bazlı Özet</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              ${kitSummaryRows}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Başarısız Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <thead>\n                <tr style=\"background:#f0f4f8;\">\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">#</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Sample ID</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Kit</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Talep Eden</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Okuma</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Hedef</th>\n                </tr>\n              </thead>\n              <tbody>${sampleRows}</tbody>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    count: items.length,\n    subject: `Archer QC: Yetersiz Okuma Sayısı - ${runId} - ${items.length} örnek`\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          864,
+          -80
+        ],
+        "id": "e2873247-40e8-4f1b-a217-dee61bd29d80",
+        "name": "Build Failure Email Body"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "generapatolojings@gen-era.com.tr",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false,
+            "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1120,
+          -80
+        ],
+        "id": "8a20241e-a35f-4c46-abaf-b2810dbe70b7",
+        "name": "Send QC Failure Email",
+        "executeOnce": true,
+        "webhookId": "f6ec0a26-86b5-4f89-8091-870f2c05a89e",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "39151203-9421-4e5d-8b44-195394d540d5",
+                "leftValue": "={{ $json.performing_name }}",
+                "rightValue": "Istanbul Umraniye Egitim ve Arastirma Hastanesi",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          624,
+          -576
+        ],
+        "id": "54daf957-6fca-4b13-8b51-ca3e1cf47d14",
+        "name": "Is Perf Umraniye1"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "fcb5d442-6969-4d01-bd2e-10175db8c26b",
+                "leftValue": "={{ Number($json.recipe_count) }}",
+                "rightValue": 1,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "id": "913db96f-8e3f-46af-a35b-adbcf6bdd027",
+        "name": "Is Multi Recipe",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          160,
+          -368
+        ]
+      },
+      {
+        "parameters": {
+          "errorMessage": "=Multi-recipe match for read_ref={{ $json.read_ref }} (sample_id={{ $json.sample_id }}, kit={{ $json.kit_name }}). Options: {{ JSON.stringify($json.recipe_options) }}. Manual intervention required."
+        },
+        "id": "7f0e9373-2589-4357-88f7-9f501b3b092f",
+        "name": "Stop and Error (Multi-Recipe)",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          400,
+          -768
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nif (items.length === 0) {\n  return [];\n}\n\nconst runId = (items[0].json.run_id || '—').toString();\n\nfunction fmt(n) {\n  return (Number(n) || 0).toLocaleString('tr-TR');\n}\n\nconst sorted = items.slice().sort((a, b) => {\n  const ka = (a.json.kit_name || '').toString();\n  const kb = (b.json.kit_name || '').toString();\n  if (ka !== kb) return ka.localeCompare(kb, 'tr');\n  return (a.json.sample_id || '').toString().localeCompare((b.json.sample_id || '').toString(), 'tr');\n});\n\nconst byKit = {};\nsorted.forEach(it => {\n  const k = it.json.kit_name || '—';\n  byKit[k] = (byKit[k] || 0) + 1;\n});\n\nconst kitSummaryRows = Object.entries(byKit)\n  .sort((a, b) => b[1] - a[1])\n  .map(([k, c], i, arr) => {\n    const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n    return `<tr>\n      <td style=\"padding:12px 16px;${border}font-size:13px;color:#52606d;\">${k}</td>\n      <td style=\"padding:12px 16px;${border}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;text-align:right;\"><strong>${c}</strong></td>\n    </tr>`;\n  }).join('');\n\nconst sampleRows = sorted.map((it, i, arr) => {\n  const j = it.json;\n  const reads = Number(j.reads) || 0;\n  const req = Number(j.required_se_reads) || 0;\n  const border = i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : '';\n  const base = `padding:10px 12px;${border}font-size:13px;color:#102a43;`;\n  return `<tr>\n    <td style=\"${base}width:32px;color:#7b8794;text-align:right;font-family:'SFMono-Regular',Menlo,Consolas,monospace;\">${String(i + 1).padStart(2, '0')}</td>\n    <td style=\"${base}font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:nowrap;\">${j.sample_id || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.kit_name || ''}</td>\n    <td style=\"${base}font-size:12px;color:#52606d;\">${j.requester_name || ''}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;\">${fmt(reads)}</td>\n    <td style=\"${base}text-align:right;font-variant-numeric:tabular-nums;color:#7b8794;white-space:nowrap;\">${fmt(req)}</td>\n  </tr>`;\n}).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"880\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:880px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#b93a3a;\">QC: Yetersiz Okuma Sayısı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba,</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              <strong>${runId}</strong> run'ında aşağıdaki <strong>${items.length}</strong> örnek hedeflenen okuma sayısına ulaşamadığı için otomatik yükleme akışına alınmadı.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Kit Bazlı Özet</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              ${kitSummaryRows}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Başarısız Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <thead>\n                <tr style=\"background:#f0f4f8;\">\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">#</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Sample ID</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Kit</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:left;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Talep Eden</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Okuma</th>\n                  <th style=\"padding:10px 12px;border-bottom:1px solid #e4e7eb;font-size:11px;color:#52606d;text-align:right;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;\">Hedef</th>\n                </tr>\n              </thead>\n              <tbody>${sampleRows}</tbody>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>`;\n\nreturn [{\n  json: {\n    html,\n    count: items.length,\n    subject: `Archer QC: Yetersiz Okuma Sayısı - ${runId} - ${items.length} örnek`\n  }\n}];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          864,
+          -256
+        ],
+        "id": "81ce42d8-030d-47c2-a1f3-fad8400660c5",
+        "name": "Build Failure Email Body1",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "betul.tunc@gen-era.com.tr",
+          "subject": "={{ $json.subject }}",
+          "html": "={{ $json.html }}",
+          "options": {
+            "appendAttribution": false,
+            "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1120,
+          -256
+        ],
+        "id": "5555ea24-2b22-41d0-8bc2-3a41143d3204",
+        "name": "Send QC Failure Email1",
+        "executeOnce": true,
+        "webhookId": "f6ec0a26-86b5-4f89-8091-870f2c05a89e",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        },
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "read_ref": "={{ $json.read_ref }}",
+              "recipe_ref": "={{ $json.recipe_ref }}",
+              "status_concept_ref": 24
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          864,
+          -672
+        ],
+        "id": "8e118ee5-2745-479a-8fe3-73b0e98d9e62",
+        "name": "Create Data Op1",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        },
+        "disabled": true
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL query": {
+        "main": [
+          [
+            {
+              "node": "Is Archer",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Recipe Available": {
+        "main": [
+          [
+            {
+              "node": "Is Multi Recipe",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Missing Combinations",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Archer": {
+        "main": [
+          [
+            {
+              "node": "Is Recipe Available",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Is QC Passed": {
+        "main": [
+          [
+            {
+              "node": "Is Perf Umraniye1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Is Perf Umraniye",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Perf Umraniye": {
+        "main": [
+          [
+            {
+              "node": "Build Failure Email Body1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build Failure Email Body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Failure Email Body": {
+        "main": [
+          [
+            {
+              "node": "Send QC Failure Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Perf Umraniye1": {
+        "main": [
+          [
+            {
+              "node": "Create Data Op1",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Create Data Op",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is Multi Recipe": {
+        "main": [
+          [
+            {
+              "node": "Stop and Error (Multi-Recipe)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Is QC Passed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Failure Email Body1": {
+        "main": [
+          [
+            {
+              "node": "Send QC Failure Email1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 0d52c1ec",
+    "description": "",
+    "autosaved": false
+  },
   "tags": [],
-  "commitDate": "12-05-2026/0:00",
+  "commitDate": "13-05-2026/0:00",
   "fileName": "auto_dataop_confirm.json"
 }
