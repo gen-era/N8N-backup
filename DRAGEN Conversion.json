@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-11T20:01:12.663Z",
+  "updatedAt": "2026-05-12T05:30:58.535Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -505,8 +505,7 @@
         -16
       ],
       "id": "0620d715-0659-43e1-9acb-0166e1751d62",
-      "name": "Code in JavaScript",
-      "disabled": true
+      "name": "Code in JavaScript"
     },
     {
       "parameters": {
@@ -519,8 +518,7 @@
         -16
       ],
       "id": "6cc1789d-2993-4d94-b5e3-364603d27ebb",
-      "name": "Parse Demux",
-      "disabled": true
+      "name": "Parse Demux"
     },
     {
       "parameters": {
@@ -541,8 +539,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -562,8 +559,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -773,8 +769,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -788,8 +783,7 @@
         144
       ],
       "id": "d9abe771-36b9-4d6c-be29-7d9ec4294e18",
-      "name": "Find R1R2 File Paths",
-      "disabled": true
+      "name": "Find R1R2 File Paths"
     },
     {
       "parameters": {
@@ -802,8 +796,7 @@
         144
       ],
       "id": "b1610ae6-79e1-424e-8550-f39d7879b1c5",
-      "name": "Parse FASTQ Paths",
-      "disabled": true
+      "name": "Parse FASTQ Paths"
     },
     {
       "parameters": {
@@ -818,8 +811,7 @@
         -16
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
-      "name": "Merge",
-      "disabled": true
+      "name": "Merge"
     },
     {
       "parameters": {
@@ -840,8 +832,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -875,8 +866,7 @@
         272
       ],
       "id": "e6095f51-e7f4-499f-8f66-b18097af9023",
-      "name": "Has No Measurement",
-      "disabled": true
+      "name": "Has No Measurement"
     },
     {
       "parameters": {
@@ -941,7 +931,6 @@
       "id": "1522cd7b-ee8b-40b4-8b12-8fa1620e32cd",
       "name": "Call 'interop'",
       "alwaysOutputData": true,
-      "disabled": true,
       "onError": "continueRegularOutput"
     },
     {
@@ -970,8 +959,7 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -992,8 +980,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     }
   ],
   "connections": {
@@ -1391,7 +1378,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fc8dc0f0-6c50-48ea-bec9-5454d98357b8",
+  "versionId": "a09d21c3-802c-4130-be4c-7de93aa30a9d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1412,6 +1399,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "12-05-2026/0:00",
+  "commitDate": "13-05-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
