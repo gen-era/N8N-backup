@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-07T13:32:40.368Z",
+  "updatedAt": "2026-05-13T12:42:13.891Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -198,7 +198,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -803,7 +803,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        0
+        20
       ]
     }
   },
@@ -811,8 +811,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "991b038a-7847-4fb7-920d-88df9775195e",
-  "activeVersionId": "991b038a-7847-4fb7-920d-88df9775195e",
+  "versionId": "2dd0d4b7-82cd-4bf4-bbfe-4d174912da83",
+  "activeVersionId": "e2d14abc-eb31-406c-82f4-ce27e23850fe",
   "triggerCount": 1,
   "shared": [
     {
@@ -824,9 +824,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-07T13:33:01.000Z",
-    "createdAt": "2026-05-07T13:32:40.370Z",
-    "versionId": "991b038a-7847-4fb7-920d-88df9775195e",
+    "updatedAt": "2026-05-13T12:41:08.000Z",
+    "createdAt": "2026-05-13T12:41:06.088Z",
+    "versionId": "e2d14abc-eb31-406c-82f4-ce27e23850fe",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -1021,7 +1021,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /volume1/illuminastorage/run_folder/backup  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -1621,7 +1621,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 991b038a",
+    "name": "Version e2d14abc",
     "description": "",
     "autosaved": false
   },
@@ -1633,6 +1633,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "13-05-2026/0:00",
+  "commitDate": "14-05-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
