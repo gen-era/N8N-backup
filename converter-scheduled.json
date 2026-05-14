@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-17T22:17:38.336Z",
+  "updatedAt": "2026-05-13T07:10:46.020Z",
   "createdAt": "2025-08-29T07:09:31.570Z",
   "id": "u3Gwkokw9EhG5M3O",
   "name": "converter-scheduled",
@@ -323,7 +323,9 @@
       "name": "mark Prcessing"
     },
     {
-      "parameters": {},
+      "parameters": {
+        "keep": "lastItems"
+      },
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
@@ -2278,7 +2280,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "aa47d864-afc5-4493-a785-cbfd117841ff",
+  "versionId": "e690953a-e653-4416-9d18-c113f998411b",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -2292,6 +2294,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "13-05-2026/0:00",
+  "commitDate": "14-05-2026/0:00",
   "fileName": "converter-scheduled.json"
 }
