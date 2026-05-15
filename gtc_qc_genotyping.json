@@ -1,0 +1,577 @@
+{
+  "updatedAt": "2026-05-14T14:27:53.541Z",
+  "createdAt": "2026-05-14T07:38:24.154Z",
+  "id": "y3uS2LAZLqVb8OjJ",
+  "name": "gtc_qc_genotyping",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "sentrix_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -480,
+        0
+      ],
+      "id": "e0c32a45-481c-4a92-879a-23c8afba9af9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        208
+      ],
+      "id": "1fad7bac-3b1c-49ac-bf20-96c00fcac221",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a0d465c-1023-43cc-a6de-ac7474437a60",
+              "name": "sentrix_id",
+              "value": "209789980189",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -208,
+        208
+      ],
+      "id": "1a266634-3e24-4fb3-960e-0e3b3b03e0e0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  s.uniqueref                   AS scan_ref,\n  s.sentrix_id,\n  s.chiptype_ref,\n  i.uniqueref                   AS idat_uniqueref,\n  i.position,\n  i.sample_id,\n  i.rescan_count,\n  i.gtc_file_path,\n  i.green_idat_path,\n  i.red_idat_path\nFROM scans s\nLEFT JOIN idats i ON i.scan_ref = s.uniqueref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nORDER BY i.position;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        32,
+        208
+      ],
+      "id": "b86d5c8c-f1a3-4ee0-ab77-162b7a212077",
+      "name": "fetch_scan_and_idats",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "process",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "05d1b98c-cd76-450a-9059-246b32dfc403"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "862f93e0-a00c-4453-9b7d-36245e8bd607",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "all_current",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f3b09166-07ac-4c4f-9d42-68ef8d783e73",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "unsupported_chiptype",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        192
+      ],
+      "id": "69e6f04c-b447-46ff-9d4e-b2ae377211ab",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Tüm satırları topla\nconst rows = $input.all().map(i => i.json);\n\nif (rows.length === 0) {\n  return [{ json: { status: 'no_rows', message: 'Sentrix bulunamadı' } }];\n}\n\n// Sentrix-level bilgi (ilk row'dan, hepsi aynı)\nconst first = rows[0];\nconst sentrix_id = first.sentrix_id;\nconst scan_ref = first.scan_ref;\nconst chiptype_ref = first.chiptype_ref;\n\n// Chip type kontrolü — şimdilik sadece 126 destekleniyor\nconst CHIPTYPE_FILES = {\n  126: {\n    bpm: 'GSACyto_20044998_A1.bpm',\n    bpm_concept_ref: 395,\n    csv: 'GSACyto_20044998_A1.csv',\n    csv_concept_ref: 396,\n    egt: '2003.egt',\n    egt_concept_ref: 397,\n    staging_subdir: 'GSA_Cyto',\n    label_prefix: 'GSA_Cyto',\n  },\n};\n\nif (!CHIPTYPE_FILES[chiptype_ref]) {\n  return [{ json: {\n    status: 'unsupported_chiptype',\n    sentrix_id,\n    chiptype_ref,\n    message: `chiptype_ref ${chiptype_ref} icin manifest tanimli degil`\n  } }];\n}\n\nconst chip_config = CHIPTYPE_FILES[chiptype_ref];\n\n// idat satırlarını ayıkla (LEFT JOIN sonucu idat null olabilir)\nconst idats = rows.filter(r => r.idat_uniqueref !== null);\n\nif (idats.length === 0) {\n  return [{ json: {\n    status: 'no_idats',\n    sentrix_id,\n    message: 'Bu scan icin idats kaydi yok'\n  } }];\n}\n\n// Şimdilik: gtc_file_path NULL olanları işle (ilk üretim)\n// Rescan mantığını sonraki adımda ekleyeceğiz\nconst to_process = idats.filter(r => {\n  return r.gtc_file_path === null;\n});\n\nif (to_process.length === 0) {\n  return [{ json: {\n    status: 'all_current',\n    sentrix_id,\n    message: 'Tum positionlar zaten islenmis'\n  } }];\n}\n\nreturn [{\n  json: {\n    status: 'process',\n    sentrix_id,\n    scan_ref,\n    chiptype_ref,\n    chip_config,\n    total_idats: idats.length,\n    to_process_count: to_process.length,\n    process_idats: to_process,\n    all_idats: idats,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        208
+      ],
+      "id": "6f83d1f5-c39a-4470-af9e-b9bc8469a9b4",
+      "name": "decide_processing"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.qc_xlsx }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "07e6393f-c934-4bf3-9bf4-f4d88ba5ef00",
+      "name": "read_qc_xlsx"
+    },
+    {
+      "parameters": {
+        "command": "=bash << 'BASH_SCRIPT'\nSENTRIX={{ $json.sentrix_id }}\nBPM={{ $json.chip_config.bpm }}\nEGT={{ $json.chip_config.egt }}\nSUBDIR={{ $json.chip_config.staging_subdir }}\nLABEL_PREFIX={{ $json.chip_config.label_prefix }}\n\nDRAGENA=/staging/tools/dragena-linux-x64-DAv1.4.0-rc2-sha.9b051a4be2c6ade41bfa804c3bccc41cdbdc1c5b/dragena/dragena\nSTAGING=/staging/array\nSCANS=/mnt/koza_alldata/Scans\nIDAT_DIR=$SCANS/$SENTRIX\nOUTPUT_DIR=$SCANS/GTCs/$SENTRIX\nGTC_DIR=$OUTPUT_DIR/gtc\nQC_DIR=$OUTPUT_DIR/qc_report\nLABEL=\"${LABEL_PREFIX}_${SENTRIX}\"\nLOCK=$OUTPUT_DIR/.dragena.lock\n\nmkdir -p \"$OUTPUT_DIR\"\n\nif [ -f \"$LOCK\" ]; then\n  PID=$(cat \"$LOCK\" 2>/dev/null)\n  if [ -n \"$PID\" ] && kill -0 \"$PID\" 2>/dev/null; then\n    echo \"{\\\"status\\\":\\\"locked\\\",\\\"pid\\\":\\\"$PID\\\",\\\"sentrix\\\":\\\"$SENTRIX\\\"}\"\n    exit 0\n  else\n    rm -f \"$LOCK\"\n  fi\nfi\n\necho $$ > \"$LOCK\"\ntrap 'rm -f \"$LOCK\"' EXIT INT TERM\n\nif [ ! -d \"$IDAT_DIR\" ]; then\n  echo \"{\\\"status\\\":\\\"idat_dir_missing\\\",\\\"path\\\":\\\"$IDAT_DIR\\\"}\"\n  exit 1\nfi\nif [ ! -f \"$STAGING/$SUBDIR/$BPM\" ]; then\n  echo \"{\\\"status\\\":\\\"bpm_missing\\\",\\\"path\\\":\\\"$STAGING/$SUBDIR/$BPM\\\"}\"\n  exit 1\nfi\nif [ ! -f \"$STAGING/$SUBDIR/$EGT\" ]; then\n  echo \"{\\\"status\\\":\\\"egt_missing\\\",\\\"path\\\":\\\"$STAGING/$SUBDIR/$EGT\\\"}\"\n  exit 1\nfi\n\nrm -rf \"$GTC_DIR\"\nmkdir -p \"$GTC_DIR\"\n\n\"$DRAGENA\" genotype call \\\n  --bpm-manifest \"$STAGING/$SUBDIR/$BPM\" \\\n  --cluster-file \"$STAGING/$SUBDIR/$EGT\" \\\n  --idat-folder \"$IDAT_DIR\" \\\n  --output-folder \"$GTC_DIR\" > \"$OUTPUT_DIR/dragena_gtc.log\" 2>&1\n\nGTC_RC=$?\nif [ \"$GTC_RC\" -ne 0 ]; then\n  TAIL=$(tail -5 \"$OUTPUT_DIR/dragena_gtc.log\" | tr '\\n' ' ' | tr -d '\"')\n  echo \"{\\\"status\\\":\\\"gtc_failed\\\",\\\"rc\\\":$GTC_RC,\\\"log_tail\\\":\\\"$TAIL\\\"}\"\n  exit 1\nfi\n\nrm -rf \"$QC_DIR\"\nmkdir -p \"$QC_DIR\"\n\n\"$DRAGENA\" qc report \\\n  --data \"$GTC_DIR\" \\\n  --output-folder \"$QC_DIR\" \\\n  --label \"$LABEL\" > \"$OUTPUT_DIR/dragena_qc.log\" 2>&1\n\nQC_RC=$?\nif [ \"$QC_RC\" -ne 0 ]; then\n  TAIL=$(tail -5 \"$OUTPUT_DIR/dragena_qc.log\" | tr '\\n' ' ' | tr -d '\"')\n  echo \"{\\\"status\\\":\\\"qc_failed\\\",\\\"rc\\\":$QC_RC,\\\"log_tail\\\":\\\"$TAIL\\\"}\"\n  exit 1\nfi\n\nGTC_COUNT=$(ls \"$GTC_DIR\"/*.gtc 2>/dev/null | wc -l)\nQC_XLSX=$(ls -t \"$QC_DIR\"/DRAGENArray_QC_table_*.xlsx 2>/dev/null | head -1)\nQC_XLSX_BASENAME=$(basename \"$QC_XLSX\")\n\nN8N_GTC_DIR=$(echo \"$GTC_DIR\" | sed 's|/mnt/koza_alldata|/volume1/ALLDATA|')\nN8N_QC_DIR=$(echo \"$QC_DIR\" | sed 's|/mnt/koza_alldata|/volume1/ALLDATA|')\nN8N_QC_XLSX=$(echo \"$QC_XLSX\" | sed 's|/mnt/koza_alldata|/volume1/ALLDATA|')\n\necho \"{\\\"status\\\":\\\"success\\\",\\\"sentrix\\\":\\\"$SENTRIX\\\",\\\"gtc_dir\\\":\\\"$N8N_GTC_DIR\\\",\\\"qc_dir\\\":\\\"$N8N_QC_DIR\\\",\\\"qc_xlsx\\\":\\\"$N8N_QC_XLSX\\\",\\\"qc_xlsx_basename\\\":\\\"$QC_XLSX_BASENAME\\\",\\\"label\\\":\\\"$LABEL\\\",\\\"gtc_count\\\":$GTC_COUNT}\"\nBASH_SCRIPT"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        624,
+        80
+      ],
+      "id": "ed5e29ff-a761-4155-ba0f-6e25169bba76",
+      "name": "run_dragena",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout;\nlet parsed;\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  return [{ json: { \n    status: 'parse_error', \n    raw_stdout: stdout, \n    error: e.message \n  } }];\n}\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        80
+      ],
+      "id": "cf1f3194-de1c-4c5f-8d68-cdacd12c775e",
+      "name": "parse_ssh_output"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": true,
+          "readAsString": true,
+          "sheetName": "QC Metrics"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        112
+      ],
+      "id": "a68075ac-9c1e-49be-8ca8-30ee7d116dde",
+      "name": "extract_qc_metrics"
+    },
+    {
+      "parameters": {
+        "jsCode": "const qcText = $('read_sentrix_qc_ssh').first().json.stdout || '';\n\nconst regByPos = {};\nfor (const line of qcText.split(/\\r?\\n/)) {\n  const parts = line.trim().split(/\\s+/);\n  if (parts.length < 2) continue;\n  const label = parts[0];\n  if (!label.endsWith('_1_Swath1_Channel1')) continue;\n  const pos = label.split('_')[0];\n  const val = parseFloat(parts[1]);\n  if (!isNaN(val)) regByPos[pos] = val;\n}\n\nconst items = $input.all();\nconst result = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n  const out = {\n    ...j,\n    RegistrationScore: regByPos[j.SentrixPosition] ?? null,\n  };\n  if (i === 0) {\n    out._debug_text_length = qcText.length;\n    out._debug_reg_positions_count = Object.keys(regByPos).length;\n    out._debug_first_pos_value = regByPos['R01C01'];\n  }\n  result.push({ json: out });\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        112
+      ],
+      "id": "d9bd671b-221d-4a45-83c0-71bbcba4f243",
+      "name": "parse_sentrix_qc"
+    },
+    {
+      "parameters": {
+        "command": "=cat /volume1/ALLDATA/Scans/{{ $json.sentrix }}/{{ $json.sentrix }}_qc.txt"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        240
+      ],
+      "id": "a1d656ff-5e88-4a6c-9591-462a463c718d",
+      "name": "read_sentrix_qc_ssh",
+      "credentials": {
+        "sshPassword": {
+          "id": "ygN0iMbDsZngxa5z",
+          "name": "alldata hande"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1328,
+        112
+      ],
+      "id": "8b17ab9c-734e-463b-aa54-c06b1228c191",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Concept mapping: xlsx kolon adi -> concept uniqueref\nconst CONCEPT_MAP = {\n  \"RegistrationScore\": 496,\n  \"AutosomalCallRate\": 497,        // GTC Call Rate concept'i; AutosomalCallRate degerini buraya yaziyoruz\n  \"NonPolymorphicGRed\": 498,\n  \"NonPolymorphicTRed\": 499,\n  \"HybridizationHighRed\": 500,\n  \"RestorationGreen\": 501,\n  \"NonSpecificBinding4BgndRed\": 502,\n  \"ExtensionTRed\": 503,\n  \"TargetRemovalIRed\": 504,\n  \"ExtensionTGreen\": 505,\n  \"NonSpecificBinding1BgndRed\": 506,\n  \"StringencyStringPMRed\": 507,\n  \"TargetRemovalIGreen\": 508,\n  \"StainingDNPBgndGreen\": 509,\n  \"HybridizationHighGreen\": 510,\n  \"NonPolymorphicCRed\": 511,\n  \"ExtensionCGreen\": 512,\n  \"StainingDNPHighGreen\": 513,\n  \"HybridizationMediumRed\": 514,\n  \"NonSpecificBinding2BgndRed\": 515,\n  \"StringencyStringMMRed\": 516,\n  \"NonPolymorphicAGreen\": 517,\n  \"ExtensionCRed\": 518,\n  \"StainingBiotinHighRed\": 519,\n  \"StainingDNPHighRed\": 520,\n  \"RestorationRed\": 521,\n  \"NonPolymorphicARed\": 522,\n  \"StainingBiotinHighGreen\": 523,\n  \"ExtensionARed\": 524,\n  \"ExtensionAGreen\": 525,\n  \"NonPolymorphicTGreen\": 526,\n  \"StringencyStringMMGreen\": 527,\n  \"StainingBiotinBgndGreen\": 528,\n  \"StainingBiotinBgndRed\": 529,\n  \"NonSpecificBinding4BgndGreen\": 530,\n  \"HybridizationLowGreen\": 531,\n  \"NonPolymorphicCGreen\": 532,\n  \"StringencyStringPMGreen\": 533,\n  \"StainingDNPBgndRed\": 534,\n  \"NonSpecificBinding2BgndGreen\": 535,\n  \"HybridizationMediumGreen\": 536,\n  \"NonPolymorphicGGreen\": 537,\n  \"HybridizationLowRed\": 538,\n  \"NonSpecificBinding3BgndGreen\": 539,\n  \"ExtensionGRed\": 540,\n  \"NonSpecificBinding3BgndRed\": 541,\n  \"NonSpecificBinding1BgndGreen\": 542,\n  \"ExtensionGGreen\": 543,\n  \"LogRDev\": 544,\n};\n\n// decide_processing'ten gelen idat_uniqueref bilgisi\n// process_idats: position -> idat_uniqueref eşleşmesi için\nconst decision = $('decide_processing').first().json;\nconst positionToIdatRef = {};\nfor (const idat of decision.process_idats) {\n  positionToIdatRef[idat.position] = idat.idat_uniqueref;\n}\n\n// GTC dizini\nconst gtcDir = $('parse_ssh_output').first().json.gtc_dir;\n\n// QC verisi (24 item)\nconst qcItems = $input.all().map(i => i.json);\n\nconst idatUpdates = [];\nconst measurementInserts = [];\n\nfor (const qc of qcItems) {\n  const position = qc.SentrixPosition;\n  const idatRef = positionToIdatRef[position];\n  \n  // Eğer bu position decide_processing'te işlenmiyorsa atla\n  if (!idatRef) continue;\n  \n  const sentrix = qc.SentrixBarcode;\n  const gtcFilePath = `${gtcDir}/${sentrix}_${position}.gtc`;\n  \n  // idats UPDATE satırı\nidatUpdates.push({\n  uniqueref: parseInt(idatRef),\n  gtc_file_path: gtcFilePath,\n  estimated_gender: qc.SexEstimate ?? null,\n  manifest_bpm_concept_ref: decision.chip_config.bpm_concept_ref,\n  manifest_csv_concept_ref: decision.chip_config.csv_concept_ref,\n  cluster_file_concept_ref: decision.chip_config.egt_concept_ref,\n});\n  \n  // Her metric için measurement_idats INSERT satırı\n  for (const [qcKey, conceptRef] of Object.entries(CONCEPT_MAP)) {\n    const value = qc[qcKey];\n    if (value === null || value === undefined) continue;\n    const numVal = parseFloat(value);\n    if (isNaN(numVal)) continue;\n    \n    measurementInserts.push({\n      idat_ref: parseInt(idatRef),\n      measurement_concept_ref: conceptRef,\n      value_as_number: numVal,\n    });\n  }\n}\n\nreturn [{\n  json: {\n    idat_updates: idatUpdates,\n    measurement_inserts: measurementInserts,\n    counts: {\n      idat_updates: idatUpdates.length,\n      measurement_inserts: measurementInserts.length,\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        112
+      ],
+      "id": "db6ec542-4d7d-47ab-a5bb-57ce9e44deeb",
+      "name": "build_payload"
+    },
+    {
+      "parameters": {
+        "jsCode": "return ($json.idat_updates || []).map(row => ({\n\n  json: row\n\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        -32
+      ],
+      "id": "a77355a2-9c21-42a1-88fe-48c8ec11fd72",
+      "name": "split_idat_updates"
+    },
+    {
+      "parameters": {
+        "jsCode": "return ($json.measurement_inserts || []).map(row => ({\n  json: row\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2208,
+        256
+      ],
+      "id": "ebf20d1f-fefe-4169-803e-3ae14d7a72bb",
+      "name": "split_measurement_inserts"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO measurement_idats (\n  idat_ref,\n  measurement_concept_ref,\n  value_as_number\n)\nVALUES (\n  {{ $json.idat_ref }},\n  {{ $json.measurement_concept_ref }},\n  {{ $json.value_as_number }}\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2432,
+        256
+      ],
+      "id": "4c1b739e-ec5d-4d2f-a85b-86a50548b2ff",
+      "name": "upsert_measurement_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE idats\nSET\n  gtc_file_path = '{{ $json.gtc_file_path }}',\n  estimated_gender = '{{ $json.estimated_gender }}',\n  manifest_bpm_concept_ref = {{ $json.manifest_bpm_concept_ref }},\n  manifest_csv_concept_ref = {{ $json.manifest_csv_concept_ref }},\n  cluster_file_concept_ref = {{ $json.cluster_file_concept_ref }},\n  updated_at = now()\nWHERE uniqueref = {{ $json.uniqueref }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2416,
+        -32
+      ],
+      "id": "252181cb-aa0b-46ce-9d0f-a7199f05b873",
+      "name": "update_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "fetch_scan_and_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fetch_scan_and_idats": {
+      "main": [
+        [
+          {
+            "node": "decide_processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "decide_processing": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "run_dragena",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "run_dragena": {
+      "main": [
+        [
+          {
+            "node": "parse_ssh_output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_ssh_output": {
+      "main": [
+        [
+          {
+            "node": "read_qc_xlsx",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "read_sentrix_qc_ssh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_qc_xlsx": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract_qc_metrics": {
+      "main": [
+        [
+          {
+            "node": "parse_sentrix_qc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_sentrix_qc_ssh": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "extract_qc_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_sentrix_qc": {
+      "main": [
+        [
+          {
+            "node": "build_payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_payload": {
+      "main": [
+        [
+          {
+            "node": "split_idat_updates",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "split_measurement_inserts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split_measurement_inserts": {
+      "main": [
+        [
+          {
+            "node": "upsert_measurement_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split_idat_updates": {
+      "main": [
+        [
+          {
+            "node": "update_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "95a396b5-f6d6-4c4e-8501-1bf20eb7a049",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T07:38:24.161Z",
+      "createdAt": "2026-05-14T07:38:24.161Z",
+      "role": "workflow:owner",
+      "workflowId": "y3uS2LAZLqVb8OjJ",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "15-05-2026/0:00",
+  "fileName": "gtc_qc_genotyping.json"
+}
