@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-12T13:44:28.959Z",
+  "updatedAt": "2026-05-14T14:06:11.159Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "auto_dataop_confirm",
@@ -631,6 +631,52 @@
         }
       },
       "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6fd23d82-1bd2-4551-b80c-7eab62dea7ff",
+              "leftValue": "={{ $json.required_se_reads }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "dca9d441-454c-4553-89f4-1e3bc6114ffc",
+      "name": "Has Threshold Defined",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        280,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Missing required_se_reads for kit '{{ $json.kit_name }}' (kit_ref={{ $json.kit_ref }}). Sample={{ $json.sample_id }}, read_ref={{ $json.read_ref }}, run={{ $json.run_id }}. Populate kits.required_se_reads in DB before re-running."
+      },
+      "id": "bb1e2dde-92ee-4e12-b8ec-e2440ac8ced3",
+      "name": "Stop and Error (Missing Threshold)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -288
+      ]
     }
   ],
   "connections": {
@@ -762,7 +808,7 @@
         ],
         [
           {
-            "node": "Is QC Passed",
+            "node": "Has Threshold Defined",
             "type": "main",
             "index": 0
           }
@@ -774,6 +820,24 @@
         [
           {
             "node": "Send QC Failure Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Threshold Defined": {
+      "main": [
+        [
+          {
+            "node": "Is QC Passed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop and Error (Missing Threshold)",
             "type": "main",
             "index": 0
           }
@@ -799,8 +863,8 @@
       }
     ]
   },
-  "versionId": "b1300cc2-cf87-4e13-8af3-2e26203185a3",
-  "activeVersionId": "0d52c1ec-15f8-4374-8283-90fd0f86374f",
+  "versionId": "10e83c48-d958-4576-b808-d130df850d07",
+  "activeVersionId": "10e83c48-d958-4576-b808-d130df850d07",
   "triggerCount": 0,
   "shared": [
     {
@@ -812,9 +876,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-12T12:19:47.000Z",
-    "createdAt": "2026-05-12T12:19:20.787Z",
-    "versionId": "0d52c1ec-15f8-4374-8283-90fd0f86374f",
+    "updatedAt": "2026-05-14T14:06:11.161Z",
+    "createdAt": "2026-05-14T14:06:11.161Z",
+    "versionId": "10e83c48-d958-4576-b808-d130df850d07",
     "workflowId": "oja1t4300qVhTLyb",
     "nodes": [
       {
@@ -831,8 +895,8 @@
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "typeVersion": 1.1,
         "position": [
-          -784,
-          -112
+          -768,
+          -336
         ],
         "id": "465875be-7c65-4dab-aece-958f72e8ac1a",
         "name": "When Executed by Another Workflow"
@@ -846,8 +910,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -576,
-          -112
+          -560,
+          -336
         ],
         "id": "768f4c2e-aaae-484b-b474-ab69a69c9892",
         "name": "Execute a SQL query",
@@ -886,8 +950,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -80,
-          -160
+          -96,
+          -336
         ],
         "id": "401d49f3-60b9-44e1-b313-0b81972ab3e0",
         "name": "Is Recipe Available"
@@ -919,8 +983,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          -368,
-          -112
+          -352,
+          -336
         ],
         "id": "20d61397-ef4b-4c94-9773-6012ce058a98",
         "name": "Is Archer"
@@ -954,7 +1018,7 @@
         "typeVersion": 2.3,
         "position": [
           400,
-          -368
+          -416
         ],
         "id": "3312c815-0eb5-4aca-b31c-4d977d5d738d",
         "name": "Is QC Passed"
@@ -970,8 +1034,8 @@
         "type": "n8n-nodes-base.removeDuplicates",
         "typeVersion": 2,
         "position": [
-          224,
-          16
+          160,
+          -240
         ],
         "id": "430bf295-22c9-4e60-b2cc-390adb464c7e",
         "name": "Missing Combinations"
@@ -1089,7 +1153,11 @@
             "attemptToConvertTypes": false,
             "convertFieldsToString": false
           },
-          "options": {}
+          "options": {
+            "outputColumns": [
+              "*"
+            ]
+          }
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -1245,7 +1313,7 @@
         "typeVersion": 2.3,
         "position": [
           160,
-          -368
+          -432
         ]
       },
       {
@@ -1258,7 +1326,7 @@
         "typeVersion": 1,
         "position": [
           400,
-          -768
+          -608
         ]
       },
       {
@@ -1417,7 +1485,11 @@
             "attemptToConvertTypes": false,
             "convertFieldsToString": false
           },
-          "options": {}
+          "options": {
+            "outputColumns": [
+              "*"
+            ]
+          }
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -1434,6 +1506,52 @@
           }
         },
         "disabled": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "6fd23d82-1bd2-4551-b80c-7eab62dea7ff",
+                "leftValue": "={{ $json.required_se_reads }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "dca9d441-454c-4553-89f4-1e3bc6114ffc",
+        "name": "Has Threshold Defined",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          280,
+          -432
+        ]
+      },
+      {
+        "parameters": {
+          "errorMessage": "=Missing required_se_reads for kit '{{ $json.kit_name }}' (kit_ref={{ $json.kit_ref }}). Sample={{ $json.sample_id }}, read_ref={{ $json.read_ref }}, run={{ $json.run_id }}. Populate kits.required_se_reads in DB before re-running."
+        },
+        "id": "bb1e2dde-92ee-4e12-b8ec-e2440ac8ced3",
+        "name": "Stop and Error (Missing Threshold)",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          400,
+          -288
+        ]
       }
     ],
     "connections": {
@@ -1565,7 +1683,7 @@
           ],
           [
             {
-              "node": "Is QC Passed",
+              "node": "Has Threshold Defined",
               "type": "main",
               "index": 0
             }
@@ -1582,14 +1700,32 @@
             }
           ]
         ]
+      },
+      "Has Threshold Defined": {
+        "main": [
+          [
+            {
+              "node": "Is QC Passed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error (Missing Threshold)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 0d52c1ec",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "14-05-2026/0:00",
+  "commitDate": "15-05-2026/0:00",
   "fileName": "auto_dataop_confirm.json"
 }
