@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T06:26:15.767Z",
+  "updatedAt": "2026-05-14T19:00:08.715Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -779,7 +779,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH inserted AS (\n  INSERT INTO reads (sample_id, lane, conversion_ref, sample_project, kit_ref) \n  VALUES (\n    '{{ $json.sample_id }}', \n    {{ $json.lane }}, \n    {{ $('Check and Update Conversion Record').item.json.conversion_ref }},\n    '{{ $json.batch_source_value }}',\n    {{ $json.kit_ref }}\n  ) \n  ON CONFLICT (sample_id, lane, conversion_ref) \n  DO NOTHING\n  RETURNING uniqueref\n)\nSELECT \n  '{{ $json.sample_id }}' as sample_id,\n  {{ $json.lane }} as lane,\n  '{{ $json.R1 }}' as R1,\n  '{{ $json.R2 }}' as R2,\n  '{{ $json.batch_source_value }}' as batch_source_value,\n  COALESCE(\n    (SELECT uniqueref FROM inserted),\n    (SELECT uniqueref FROM reads \n     WHERE sample_id = '{{ $json.sample_id }}' \n       AND lane = {{ $json.lane }} \n       AND conversion_ref = {{ $('Check and Update Conversion Record').item.json.conversion_ref }})\n  ) as read_ref\nFROM (SELECT 1) dummy;",
+        "query": "WITH inserted AS (\n  INSERT INTO reads (sample_id, lane, conversion_ref, sample_project, kit_ref) \n  VALUES (\n    '{{ $json.sample_id }}', \n    {{ $json.lane }}, \n    {{ $('Check and Update Conversion Record').item.json.conversion_ref }},\n    '{{ $json.batch_source_value }}',\n    {{ $json.kit_ref }}\n  ) \n  ON CONFLICT (sample_id, conversion_ref, lane, index_ref) \n  DO NOTHING\n  RETURNING uniqueref\n)\nSELECT \n  '{{ $json.sample_id }}' as sample_id,\n  {{ $json.lane }} as lane,\n  '{{ $json.R1 }}' as R1,\n  '{{ $json.R2 }}' as R2,\n  '{{ $json.batch_source_value }}' as batch_source_value,\n  COALESCE(\n    (SELECT uniqueref FROM inserted),\n    (SELECT uniqueref FROM reads \n     WHERE sample_id = '{{ $json.sample_id }}' \n       AND lane = {{ $json.lane }} \n       AND conversion_ref = {{ $('Check and Update Conversion Record').item.json.conversion_ref }})\n  ) as read_ref\nFROM (SELECT 1) dummy;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260422_A01228_0275_BHG5KJDMX2",
+              "value": "260504_A01228_0280_AHMMFFDRX7",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "VP26",
+              "value": "ZK26-YCES-5313\tM26-YCES-4512\tST26-YCES-743\tB26-YCES-1075\tB26-YCES-1079\tSE26-YCES-2521\tU26-YCES-8178\tU26-YCES-8181\tU26-YCES-8186",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "jale.yildiz@gen-era.com.tr",
+              "value": "can.holyavkin@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -1903,13 +1903,7 @@
     },
     "Add Bed Path": {
       "main": [
-        [
-          {
-            "node": "Custom Filter",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Bed Mapping": {
@@ -2133,7 +2127,13 @@
     },
     "Add Bed Path1": {
       "main": [
-        []
+        [
+          {
+            "node": "Custom Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Execute Command1": {
@@ -2187,7 +2187,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
@@ -2200,7 +2202,7 @@
       }
     ]
   },
-  "versionId": "85d71419-6952-46b4-b7d6-100e4bc7b820",
+  "versionId": "be639f9d-700f-411a-95e7-63d23c690d1a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2221,6 +2223,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "14-05-2026/0:00",
+  "commitDate": "15-05-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
