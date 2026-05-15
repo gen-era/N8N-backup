@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T21:34:11.956Z",
+  "updatedAt": "2026-05-14T13:36:50.595Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -102,7 +102,7 @@
     },
     {
       "parameters": {
-        "command": "=FOLDER=\"/volume1/ALLDATA/Scans/{{ $json.sentrix_id }}/\"; SENTRIX=\"{{ $json.sentrix_id }}\"; POSITION=\"{{ $json.position }}\"; GREEN=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Grn.idat\" 2>/dev/null | head -1); RED=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Red.idat\" 2>/dev/null | head -1); TOTAL_RESCAN=$(ls \"${FOLDER}\"Metrics_old*.txt 2>/dev/null | wc -l | tr -d ' '); POS_RESCAN=$(for f in \"${FOLDER}\"Metrics_old*.txt; do [[ \"$f\" == *\"Metrics_old0.txt\" ]] && continue; grep -q \"${POSITION}_\" \"$f\" && echo \"$f\"; done 2>/dev/null | wc -l | tr -d ' '); IS_RESCANNED=$(grep -q \"${POSITION}_\" \"${FOLDER}Metrics.txt\" 2>/dev/null && echo 1 || echo 0); if [ \"$IS_RESCANNED\" = \"1\" ]; then POS_RESCAN=$((POS_RESCAN + 1)); fi; echo \"{\\\"green_idat_path\\\":\\\"$GREEN\\\",\\\"red_idat_path\\\":\\\"$RED\\\",\\\"total_rescan_count\\\":$TOTAL_RESCAN,\\\"position_rescan_count\\\":$POS_RESCAN,\\\"is_rescanned\\\":$IS_RESCANNED}\""
+        "command": "=FOLDER=\"/volume1/ALLDATA/Scans/{{ $json.sentrix_id }}/\"; SENTRIX=\"{{ $json.sentrix_id }}\"; POSITION=\"{{ $json.position }}\"; GREEN=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Grn.idat\" 2>/dev/null | head -1); RED=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Red.idat\" 2>/dev/null | head -1); TOTAL_RESCAN=$(ls \"${FOLDER}\"Metrics_old*.txt 2>/dev/null | wc -l | tr -d ' '); POS_SCAN_COUNT=0; for f in \"${FOLDER}\"Metrics.txt \"${FOLDER}\"Metrics_old*.txt; do [ -f \"$f\" ] || continue; if grep -q \"${POSITION}_\" \"$f\" 2>/dev/null; then POS_SCAN_COUNT=$((POS_SCAN_COUNT + 1)); fi; done; if [ \"$POS_SCAN_COUNT\" -gt 0 ]; then POS_RESCAN=$((POS_SCAN_COUNT - 1)); else POS_RESCAN=0; fi; IS_RESCANNED=0; if [ \"$POS_SCAN_COUNT\" -gt 1 ]; then if grep -q \"${POSITION}_\" \"${FOLDER}Metrics.txt\" 2>/dev/null; then IS_RESCANNED=1; fi; fi; echo \"{\\\"green_idat_path\\\":\\\"$GREEN\\\",\\\"red_idat_path\\\":\\\"$RED\\\",\\\"total_rescan_count\\\":$TOTAL_RESCAN,\\\"position_rescan_count\\\":$POS_RESCAN,\\\"is_rescanned\\\":$IS_RESCANNED}\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -131,28 +131,6 @@
       ],
       "id": "eef25d12-d233-4f79-8845-313d630fdadb",
       "name": "Parse"
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "UPDATE scans \nSET total_rescan_count = {{ $json.total_rescan_count }},\n    updated_at = now()\nWHERE uniqueref = {{ $json.scan_ref }}\nAND (total_rescan_count IS NULL OR total_rescan_count != {{ $json.total_rescan_count }})",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        464,
-        -432
-      ],
-      "id": "b00ebffb-775d-4141-a7fb-e520fbfa2ba8",
-      "name": "Update rescan count",
-      "alwaysOutputData": true,
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
     },
     {
       "parameters": {
@@ -533,8 +511,17 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "b9645021-d665-46a9-8c2c-fdab81b29b90",
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {},
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "24e57b3d-3e03-47f7-8d6d-42d0e1a8571f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -548,6 +535,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "14-05-2026/0:00",
+  "commitDate": "15-05-2026/0:00",
   "fileName": "idats2Supa.json"
 }
