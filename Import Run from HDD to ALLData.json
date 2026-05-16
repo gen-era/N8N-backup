@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-07T13:48:14.785Z",
+  "updatedAt": "2026-05-15T07:19:57.490Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -24,7 +24,7 @@
             {
               "id": "761d1698-d730-4940-a9f5-ed756adedbcb",
               "name": "run_id",
-              "value": "260505_VH01138_3_AAJ2WLLM5",
+              "value": "260513_A01228_0284_AHG7CWDMX2",
               "type": "string"
             }
           ]
@@ -136,7 +136,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        288,
+        304,
         -16
       ],
       "id": "399f9461-51af-4f60-9752-fd47b6c5b1ec",
@@ -150,6 +150,34 @@
     },
     {
       "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "GgcoorkW5qEx86Uq",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/GgcoorkW5qEx86Uq",
+          "cachedResultName": "Monitor New Runs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
         "options": {}
       },
       "type": "n8n-nodes-base.executeWorkflow",
@@ -159,7 +187,7 @@
         -16
       ],
       "id": "9d219760-340b-4380-a5e1-75e39d481ae9",
-      "name": "Execute Workflow"
+      "name": "Call 'Monitor New Runs'"
     }
   ],
   "connections": {
@@ -233,7 +261,7 @@
       "main": [
         [
           {
-            "node": "Execute Workflow",
+            "node": "Call 'Monitor New Runs'",
             "type": "main",
             "index": 0
           }
@@ -250,7 +278,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7a7bf5aa-74be-460c-b402-0bd0dfa570fb",
+  "versionId": "7ab2f365-3ad3-491b-a772-3ff45f4df1d0",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -271,6 +299,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-05-2026/0:00",
+  "commitDate": "16-05-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
