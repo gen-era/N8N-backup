@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-14T19:04:06.142Z",
+  "updatedAt": "2026-05-15T07:29:50.153Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -886,7 +886,7 @@
             {
               "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
               "name": "sample_ids",
-              "value": "RP26-031-GB-WES-17\tRP26-031-GB-WES-182\tRP26-031-GB-WES-1111 T26-564\tT26-568\tT26-571 T26-547\tT26-551\tT26-554 VP26-010-2-2\tVP26-010-4-2\tVP26-010-6-2 VP26-010-1-1\tVP26-010-4-1\tVP26-010-6-1 VP26-010-1\tVP26-010-4\tVP26-010-6 VP26-008-108\tVP26-008-111\tVP26-008-115",
+              "value": "SG2026-08847\tSG2026-08896\tSG2026-08910 SG2026-07669\t26-2885\t26-2756 SG2026-07669",
               "type": "string"
             }
           ]
@@ -1220,12 +1220,12 @@
     "Trigger": [
       {
         "json": {
-          "run_id": "260506_A01978_0172_AHG5LGDMX2"
+          "run_id": "260506_A01978_0171_BHMKVYDRX7"
         }
       }
     ]
   },
-  "versionId": "0fd63bd3-97b0-4b49-97ac-dd4d0040d080",
+  "versionId": "67064d48-afa8-4912-93ed-8178534fd2e7",
   "activeVersionId": "06fd5b3a-4028-4218-933e-88fbd8d570e1",
   "triggerCount": 0,
   "shared": [
@@ -2452,6 +2452,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "15-05-2026/0:00",
+  "commitDate": "16-05-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
