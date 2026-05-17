@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-07T09:51:31.628Z",
+  "updatedAt": "2026-05-17T03:07:59.973Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -500,12 +500,15 @@
       "name": "Send email",
       "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
       "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
       "credentials": {
         "smtp": {
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -674,7 +677,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fa65429d-d8fd-495c-9e5e-2ee225c58ee6",
+  "versionId": "785a99a4-2976-4fd6-9889-2dcb71e03fa2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -695,6 +698,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "16-05-2026/0:00",
+  "commitDate": "17-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
