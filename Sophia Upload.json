@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T03:07:59.973Z",
+  "updatedAt": "2026-05-18T21:28:40.943Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -268,7 +268,7 @@
     },
     {
       "parameters": {
-        "command": "rm -rf /mnt/smb_share/Temp/sophia_launch_site/*"
+        "command": "find /mnt/smb_share/Temp/sophia_launch_site -mindepth 1 -delete"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -416,7 +416,7 @@
     },
     {
       "parameters": {
-        "command": "rm -rf /mnt/smb_share/Temp/sophia_launch_site/*"
+        "command": "find /mnt/smb_share/Temp/sophia_launch_site -mindepth 1 -delete"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -677,7 +677,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "785a99a4-2976-4fd6-9889-2dcb71e03fa2",
+  "versionId": "20eac738-d903-4536-988f-ca2299207d2f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -698,6 +698,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "18-05-2026/0:00",
+  "commitDate": "19-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
