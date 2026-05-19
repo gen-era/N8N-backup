@@ -1,0 +1,782 @@
+{
+  "updatedAt": "2026-05-18T10:12:38.180Z",
+  "createdAt": "2026-05-18T07:33:22.722Z",
+  "id": "ax7yGpHaIrokS6zO",
+  "name": "qc_gtc2_Supa",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "headerRow": true,
+          "readAsString": true,
+          "sheetName": "QC Metrics"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        336,
+        -304
+      ],
+      "id": "dd749cfb-99bb-4ef9-8f0f-179f534ee59f",
+      "name": "extract_qc_metrics"
+    },
+    {
+      "parameters": {
+        "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\n\nQC_TXT=$(find \"$IDAT_DIR\" -maxdepth 1 -type f \\( -name \"*.txt\" -o -name \"*.log\" \\) | head -1 || true)\n\nif [ -z \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\n\ncat \"$QC_TXT\"\nBASH_SCRIPT"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "e27a9156-9f22-4804-9403-4bb93f69770b",
+      "name": "read_sentrix_qc_ssh",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        752,
+        -112
+      ],
+      "id": "41d74625-b19f-4c52-aef1-876eab7be7cc",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input_json AS (\n    SELECT\n        $qc$ {{ JSON.stringify($json.raw_control_metrics) }} $qc$::jsonb AS qc\n),\nparams AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position\n),\ntarget_idat AS (\n    SELECT\n        i.uniqueref AS idat_ref,\n        s.uniqueref AS scan_ref,\n        s.sentrix_id,\n        i.position\n    FROM idats i\n    JOIN scans s\n      ON s.uniqueref = i.scan_ref\n    JOIN params p\n      ON p.sentrix_id = s.sentrix_id\n     AND p.position = i.position\n),\nqc_kv AS (\n    SELECT\n        kv.key AS qc_key,\n        kv.value AS qc_value\n    FROM input_json ij\n    CROSS JOIN LATERAL jsonb_each_text(ij.qc) AS kv(key, value)\n),\nmetric_values AS (\n    SELECT\n        ti.idat_ref,\n        c.uniqueref AS measurement_concept_ref,\n        NULLIF(q.qc_value, '')::numeric AS value_as_number\n    FROM qc_kv q\n    CROSS JOIN target_idat ti\n    JOIN concepts c\n      ON c.concept_name = q.qc_key\n     AND c.vocabulary_id = 'Illumina'\n    WHERE q.qc_key NOT IN (\n        'DatasetLabel',\n        'Row',\n        'Column',\n        'ImagingDate',\n        'SampleId',\n        'SampleName',\n        'SamplePlate',\n        'SampleWell',\n        'ScannerId',\n        'ScannerVersion',\n        'SentrixBarcode',\n        'SentrixPosition',\n        'SampleFolderPath',\n        'Functional QC Status',\n        'Control QC Flag Codes',\n        'SexEstimate',\n        '_debug_text_length',\n        '_debug_reg_positions_count',\n        '_debug_first_pos_value',\n        'qc_stdout',\n        'sentrix_id',\n        'qc_xlsx',\n        'qc_xlsx_server'\n    )\n      AND q.qc_value IS NOT NULL\n      AND q.qc_value <> ''\n      AND q.qc_value ~ '^-?[0-9]+(\\.[0-9]+)?$'\n),\nupserted AS (\n    INSERT INTO measurement_idats (\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    )\n    SELECT\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    FROM metric_values\n    ON CONFLICT (idat_ref, measurement_concept_ref)\n    DO UPDATE SET\n        value_as_number = EXCLUDED.value_as_number\n    RETURNING uniqueref\n)\nSELECT\n    p.sentrix_id,\n    p.position,\n    ti.scan_ref,\n    ti.idat_ref,\n    (SELECT COUNT(*) FROM metric_values) AS metric_value_count,\n    (SELECT COUNT(*) FROM upserted) AS upserted_measurement_count\nFROM params p\nLEFT JOIN target_idat ti ON TRUE;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1408,
+        -16
+      ],
+      "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
+      "name": "upsert_measurement_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1408,
+        -208
+      ],
+      "id": "482e0467-770f-429d-a161-93122b16e614",
+      "name": "update_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=bash << 'BASH_SCRIPT'\nTMP_ROOT=\"/mnt/koza_alldata/Scans/.tmp_dragena\"\n\nif [ -d \"$TMP_ROOT\" ]; then\n  rm -rf \"$TMP_ROOT\"\n  echo \"{\\\"status\\\":\\\"tmp_root_deleted\\\",\\\"tmp_root\\\":\\\"$TMP_ROOT\\\"}\"\nelse\n  echo \"{\\\"status\\\":\\\"tmp_root_not_found\\\",\\\"tmp_root\\\":\\\"$TMP_ROOT\\\"}\"\nfi\nBASH_SCRIPT"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        -16
+      ],
+      "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
+      "name": "clenaup_qc",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const r = item.json;\n\n  const sentrix_id = r.SentrixBarcode;\n  const position = r.SentrixPosition;\n\n  return {\n    json: {\n      sentrix_id,\n      position,\n      sample_id: r.SampleId,\n      sample_name: r.SampleName,\n\n      dataset_label: r.DatasetLabel,\n\n      row: r.Row,\n      column: r.Column,\n\n      scanner_id: r.ScannerId,\n      scanner_version: r.ScannerVersion,\n      imaging_date: r.ImagingDate,\n      sample_folder_path: r.SampleFolderPath,\n\n      gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n      gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n      functional_qc_status: r[\"Functional QC Status\"],\n      control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n      autosomal_call_rate: r.AutosomalCallRate,\n      call_rate: r.CallRate,\n      log_r_dev: r.LogRDev,\n      sex_estimate: r.SexEstimate,\n\n      registration_score: r.RegistrationScore,\n\n      qc_metrics: {\n        StainingGreenQC: r.StainingGreenQC,\n        StainingRedQC: r.StainingRedQC,\n        ExtensionGreenQC: r.ExtensionGreenQC,\n        ExtensionRedQC: r.ExtensionRedQC,\n        HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n        HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n        RestorationQC: r.RestorationQC,\n        TargetRemovalIQC: r.TargetRemovalIQC,\n        StringencyQC: r.StringencyQC,\n        NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n        NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n        NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n        NonPolymorphicRedQC: r.NonPolymorphicRedQC\n      },\n\n      raw_control_metrics: r\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        -112
+      ],
+      "id": "4c57fad0-b2bf-43c0-9aee-585bde42d36f",
+      "name": "pack_qc_rows"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cb56257e-966e-4e4e-b353-214b63f77495",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -880,
+        -64
+      ],
+      "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
+      "name": "Webhook",
+      "webhookId": "cb56257e-966e-4e4e-b353-214b63f77495"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.all();\nconst output = [];\n\nfor (const item of input) {\n  const body = item.json.body ?? item.json;\n\n  const runId = body.run_id;\n  const processed = body.processed_sentrix_ids || [];\n  const failed = body.failed_sentrix_ids || [];\n  const log = body.log || null;\n\n  if (!Array.isArray(processed) || processed.length === 0) {\n    output.push({\n      json: {\n        status: 'nothing_processed',\n        run_id: runId,\n        failed_sentrix_ids: failed,\n        log,\n        message: 'processed_sentrix_ids boş geldi'\n      }\n    });\n    continue;\n  }\n\n  for (const sentrix_id of processed) {\n    output.push({\n      json: {\n        status: 'process_qc',\n        run_id: runId,\n        sentrix_id: String(sentrix_id),\n        failed_sentrix_ids: failed,\n        log,\n\n        qc_dir: `/volume1/ALLDATA/Scans/.tmp_dragena/${sentrix_id}/qc_report`,\n        qc_dir_server: `/mnt/koza_alldata/Scans/.tmp_dragena/${sentrix_id}/qc_report`,\n        tmp_dir_server: `/mnt/koza_alldata/Scans/.tmp_dragena/${sentrix_id}`\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        -64
+      ],
+      "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
+      "name": "parse_webhook_payload"
+    },
+    {
+      "parameters": {
+        "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.sentrix_id }}\"\nQC_DIR=\"/mnt/koza_alldata/Scans/.tmp_dragena/$SENTRIX/qc_report\"\n\nQC_XLSX=$(ls -t \"$QC_DIR\"/DRAGENArray_QC_table_*.xlsx 2>/dev/null | head -1 || true)\n\nif [ -z \"$QC_XLSX\" ]; then\n  echo \"{\\\"status\\\":\\\"qc_xlsx_missing\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"qc_dir_server\\\":\\\"$QC_DIR\\\"}\"\n  exit 1\nfi\n\nN8N_QC_XLSX=$(echo \"$QC_XLSX\" | sed 's|/mnt/koza_alldata|/volume1/ALLDATA|')\n\necho \"{\\\"status\\\":\\\"qc_xlsx_found\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"qc_xlsx\\\":\\\"$N8N_QC_XLSX\\\",\\\"qc_xlsx_server\\\":\\\"$QC_XLSX\\\"}\"\nBASH_SCRIPT"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -176
+      ],
+      "id": "61067405-8848-42a0-b367-6740dc57c7fd",
+      "name": "find_qc_xlsx_ssh",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw =\n  $json.stdout ??\n  $json.data ??\n  $json.output ??\n  '';\n\nconst lines = String(raw)\n  .split('\\n')\n  .map(line => line.trim())\n  .filter(Boolean);\n\nconst jsonLine = [...lines]\n  .reverse()\n  .find(line => line.startsWith('{') && line.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      status: 'parse_failed',\n      message: 'find_qc_xlsx_ssh çıktısında JSON satırı bulunamadı',\n      raw_stdout: raw\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -176
+      ],
+      "id": "bd5afeab-999f-492d-bdcd-85400f46b98c",
+      "name": "parse_find_qc_xlsx"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.qc_xlsx }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        -304
+      ],
+      "id": "2cee72ba-84f3-4bbc-a354-6d1cf7e04969",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sentrixId =\n  $json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix ||\n  null;\n\nreturn [{\n  json: {\n    sentrix_id: sentrixId,\n    qc_stdout: $json.stdout ?? ''\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -64
+      ],
+      "id": "b28097e2-764d-4d9d-98d6-42e1b5ff2a72",
+      "name": "pack_sentrix_qc_stdout"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\n\n// qc_stdout itemlarını sentrix_id bazında tut\nconst qcBySentrix = {};\n\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\n// Excel QC row itemları\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  const regByPos = {};\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Her pozisyon için sadece 1. swath channel 1 alınacak\n    if (!imageName.endsWith('_1_Swath1_Channel1')) continue;\n\n    const pos = imageName.split('_')[0]; // R01C01\n    const regScore = parseFloat(parts[1]);\n\n    if (!isNaN(regScore)) {\n      regByPos[pos] = regScore;\n    }\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n\n      // test için geçici debug alanları\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -112
+      ],
+      "id": "a6060cb6-1239-4658-9dab-5686c6d73ec5",
+      "name": "parse_sentrix_qc"
+    }
+  ],
+  "connections": {
+    "extract_qc_metrics": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read_sentrix_qc_ssh": {
+      "main": [
+        [
+          {
+            "node": "pack_sentrix_qc_stdout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "parse_sentrix_qc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert_measurement_idats": {
+      "main": [
+        [
+          {
+            "node": "clenaup_qc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pack_qc_rows": {
+      "main": [
+        [
+          {
+            "node": "update_idats",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "upsert_measurement_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "parse_webhook_payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_webhook_payload": {
+      "main": [
+        [
+          {
+            "node": "find_qc_xlsx_ssh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find_qc_xlsx_ssh": {
+      "main": [
+        [
+          {
+            "node": "parse_find_qc_xlsx",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_find_qc_xlsx": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "read_sentrix_qc_ssh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "extract_qc_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pack_sentrix_qc_stdout": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "parse_sentrix_qc": {
+      "main": [
+        [
+          {
+            "node": "pack_qc_rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
+  "activeVersionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-18T07:33:22.735Z",
+      "createdAt": "2026-05-18T07:33:22.735Z",
+      "role": "workflow:owner",
+      "workflowId": "ax7yGpHaIrokS6zO",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-18T10:10:30.000Z",
+    "createdAt": "2026-05-18T10:06:34.805Z",
+    "versionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
+    "workflowId": "ax7yGpHaIrokS6zO",
+    "nodes": [
+      {
+        "parameters": {
+          "operation": "xlsx",
+          "options": {
+            "headerRow": true,
+            "readAsString": true,
+            "sheetName": "QC Metrics"
+          }
+        },
+        "type": "n8n-nodes-base.extractFromFile",
+        "typeVersion": 1.1,
+        "position": [
+          336,
+          -304
+        ],
+        "id": "dd749cfb-99bb-4ef9-8f0f-179f534ee59f",
+        "name": "extract_qc_metrics"
+      },
+      {
+        "parameters": {
+          "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\n\nQC_TXT=$(find \"$IDAT_DIR\" -maxdepth 1 -type f \\( -name \"*.txt\" -o -name \"*.log\" \\) | head -1 || true)\n\nif [ -z \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\n\ncat \"$QC_TXT\"\nBASH_SCRIPT"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          16,
+          -64
+        ],
+        "id": "e27a9156-9f22-4804-9403-4bb93f69770b",
+        "name": "read_sentrix_qc_ssh",
+        "credentials": {
+          "sshPassword": {
+            "id": "roUCz67T2VbHNQzo",
+            "name": "Koza DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          752,
+          -112
+        ],
+        "id": "41d74625-b19f-4c52-aef1-876eab7be7cc",
+        "name": "Merge1"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH input_json AS (\n    SELECT\n        $qc$ {{ JSON.stringify($json.raw_control_metrics) }} $qc$::jsonb AS qc\n),\nparams AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position\n),\ntarget_idat AS (\n    SELECT\n        i.uniqueref AS idat_ref,\n        s.uniqueref AS scan_ref,\n        s.sentrix_id,\n        i.position\n    FROM idats i\n    JOIN scans s\n      ON s.uniqueref = i.scan_ref\n    JOIN params p\n      ON p.sentrix_id = s.sentrix_id\n     AND p.position = i.position\n),\nqc_kv AS (\n    SELECT\n        kv.key AS qc_key,\n        kv.value AS qc_value\n    FROM input_json ij\n    CROSS JOIN LATERAL jsonb_each_text(ij.qc) AS kv(key, value)\n),\nmetric_values AS (\n    SELECT\n        ti.idat_ref,\n        c.uniqueref AS measurement_concept_ref,\n        NULLIF(q.qc_value, '')::numeric AS value_as_number\n    FROM qc_kv q\n    CROSS JOIN target_idat ti\n    JOIN concepts c\n      ON c.concept_name = q.qc_key\n     AND c.vocabulary_id = 'Illumina'\n    WHERE q.qc_key NOT IN (\n        'DatasetLabel',\n        'Row',\n        'Column',\n        'ImagingDate',\n        'SampleId',\n        'SampleName',\n        'SamplePlate',\n        'SampleWell',\n        'ScannerId',\n        'ScannerVersion',\n        'SentrixBarcode',\n        'SentrixPosition',\n        'SampleFolderPath',\n        'Functional QC Status',\n        'Control QC Flag Codes',\n        'SexEstimate',\n        '_debug_text_length',\n        '_debug_reg_positions_count',\n        '_debug_first_pos_value',\n        'qc_stdout',\n        'sentrix_id',\n        'qc_xlsx',\n        'qc_xlsx_server'\n    )\n      AND q.qc_value IS NOT NULL\n      AND q.qc_value <> ''\n      AND q.qc_value ~ '^-?[0-9]+(\\.[0-9]+)?$'\n),\nupserted AS (\n    INSERT INTO measurement_idats (\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    )\n    SELECT\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    FROM metric_values\n    ON CONFLICT (idat_ref, measurement_concept_ref)\n    DO UPDATE SET\n        value_as_number = EXCLUDED.value_as_number\n    RETURNING uniqueref\n)\nSELECT\n    p.sentrix_id,\n    p.position,\n    ti.scan_ref,\n    ti.idat_ref,\n    (SELECT COUNT(*) FROM metric_values) AS metric_value_count,\n    (SELECT COUNT(*) FROM upserted) AS upserted_measurement_count\nFROM params p\nLEFT JOIN target_idat ti ON TRUE;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1408,
+          -16
+        ],
+        "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
+        "name": "upsert_measurement_idats",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1408,
+          -208
+        ],
+        "id": "482e0467-770f-429d-a161-93122b16e614",
+        "name": "update_idats",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=bash << 'BASH_SCRIPT'\nTMP_ROOT=\"/mnt/koza_alldata/Scans/.tmp_dragena\"\n\nif [ -d \"$TMP_ROOT\" ]; then\n  rm -rf \"$TMP_ROOT\"\n  echo \"{\\\"status\\\":\\\"tmp_root_deleted\\\",\\\"tmp_root\\\":\\\"$TMP_ROOT\\\"}\"\nelse\n  echo \"{\\\"status\\\":\\\"tmp_root_not_found\\\",\\\"tmp_root\\\":\\\"$TMP_ROOT\\\"}\"\nfi\nBASH_SCRIPT"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          1712,
+          -16
+        ],
+        "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
+        "name": "clenaup_qc",
+        "credentials": {
+          "sshPassword": {
+            "id": "roUCz67T2VbHNQzo",
+            "name": "Koza DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const r = item.json;\n\n  const sentrix_id = r.SentrixBarcode;\n  const position = r.SentrixPosition;\n\n  return {\n    json: {\n      sentrix_id,\n      position,\n      sample_id: r.SampleId,\n      sample_name: r.SampleName,\n\n      dataset_label: r.DatasetLabel,\n\n      row: r.Row,\n      column: r.Column,\n\n      scanner_id: r.ScannerId,\n      scanner_version: r.ScannerVersion,\n      imaging_date: r.ImagingDate,\n      sample_folder_path: r.SampleFolderPath,\n\n      gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n      gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n      functional_qc_status: r[\"Functional QC Status\"],\n      control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n      autosomal_call_rate: r.AutosomalCallRate,\n      call_rate: r.CallRate,\n      log_r_dev: r.LogRDev,\n      sex_estimate: r.SexEstimate,\n\n      registration_score: r.RegistrationScore,\n\n      qc_metrics: {\n        StainingGreenQC: r.StainingGreenQC,\n        StainingRedQC: r.StainingRedQC,\n        ExtensionGreenQC: r.ExtensionGreenQC,\n        ExtensionRedQC: r.ExtensionRedQC,\n        HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n        HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n        RestorationQC: r.RestorationQC,\n        TargetRemovalIQC: r.TargetRemovalIQC,\n        StringencyQC: r.StringencyQC,\n        NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n        NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n        NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n        NonPolymorphicRedQC: r.NonPolymorphicRedQC\n      },\n\n      raw_control_metrics: r\n    }\n  };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1152,
+          -112
+        ],
+        "id": "4c57fad0-b2bf-43c0-9aee-585bde42d36f",
+        "name": "pack_qc_rows"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "cb56257e-966e-4e4e-b353-214b63f77495",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -880,
+          -64
+        ],
+        "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
+        "name": "Webhook",
+        "webhookId": "cb56257e-966e-4e4e-b353-214b63f77495"
+      },
+      {
+        "parameters": {
+          "jsCode": "const input = $input.all();\nconst output = [];\n\nfor (const item of input) {\n  const body = item.json.body ?? item.json;\n\n  const runId = body.run_id;\n  const processed = body.processed_sentrix_ids || [];\n  const failed = body.failed_sentrix_ids || [];\n  const log = body.log || null;\n\n  if (!Array.isArray(processed) || processed.length === 0) {\n    output.push({\n      json: {\n        status: 'nothing_processed',\n        run_id: runId,\n        failed_sentrix_ids: failed,\n        log,\n        message: 'processed_sentrix_ids boş geldi'\n      }\n    });\n    continue;\n  }\n\n  for (const sentrix_id of processed) {\n    output.push({\n      json: {\n        status: 'process_qc',\n        run_id: runId,\n        sentrix_id: String(sentrix_id),\n        failed_sentrix_ids: failed,\n        log,\n\n        qc_dir: `/volume1/ALLDATA/Scans/.tmp_dragena/${sentrix_id}/qc_report`,\n        qc_dir_server: `/mnt/koza_alldata/Scans/.tmp_dragena/${sentrix_id}/qc_report`,\n        tmp_dir_server: `/mnt/koza_alldata/Scans/.tmp_dragena/${sentrix_id}`\n      }\n    });\n  }\n}\n\nreturn output;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -640,
+          -64
+        ],
+        "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
+        "name": "parse_webhook_payload"
+      },
+      {
+        "parameters": {
+          "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.sentrix_id }}\"\nQC_DIR=\"/mnt/koza_alldata/Scans/.tmp_dragena/$SENTRIX/qc_report\"\n\nQC_XLSX=$(ls -t \"$QC_DIR\"/DRAGENArray_QC_table_*.xlsx 2>/dev/null | head -1 || true)\n\nif [ -z \"$QC_XLSX\" ]; then\n  echo \"{\\\"status\\\":\\\"qc_xlsx_missing\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"qc_dir_server\\\":\\\"$QC_DIR\\\"}\"\n  exit 1\nfi\n\nN8N_QC_XLSX=$(echo \"$QC_XLSX\" | sed 's|/mnt/koza_alldata|/volume1/ALLDATA|')\n\necho \"{\\\"status\\\":\\\"qc_xlsx_found\\\",\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"qc_xlsx\\\":\\\"$N8N_QC_XLSX\\\",\\\"qc_xlsx_server\\\":\\\"$QC_XLSX\\\"}\"\nBASH_SCRIPT"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -400,
+          -176
+        ],
+        "id": "61067405-8848-42a0-b367-6740dc57c7fd",
+        "name": "find_qc_xlsx_ssh",
+        "credentials": {
+          "sshPassword": {
+            "id": "roUCz67T2VbHNQzo",
+            "name": "Koza DRAGEN - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "const raw =\n  $json.stdout ??\n  $json.data ??\n  $json.output ??\n  '';\n\nconst lines = String(raw)\n  .split('\\n')\n  .map(line => line.trim())\n  .filter(Boolean);\n\nconst jsonLine = [...lines]\n  .reverse()\n  .find(line => line.startsWith('{') && line.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      status: 'parse_failed',\n      message: 'find_qc_xlsx_ssh çıktısında JSON satırı bulunamadı',\n      raw_stdout: raw\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -192,
+          -176
+        ],
+        "id": "bd5afeab-999f-492d-bdcd-85400f46b98c",
+        "name": "parse_find_qc_xlsx"
+      },
+      {
+        "parameters": {
+          "fileSelector": "={{ $json.qc_xlsx }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1.1,
+        "position": [
+          16,
+          -304
+        ],
+        "id": "2cee72ba-84f3-4bbc-a354-6d1cf7e04969",
+        "name": "Read/Write Files from Disk"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sentrixId =\n  $json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix ||\n  null;\n\nreturn [{\n  json: {\n    sentrix_id: sentrixId,\n    qc_stdout: $json.stdout ?? ''\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          352,
+          -64
+        ],
+        "id": "b28097e2-764d-4d9d-98d6-42e1b5ff2a72",
+        "name": "pack_sentrix_qc_stdout"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all().map(i => i.json);\n\n// qc_stdout itemlarını sentrix_id bazında tut\nconst qcBySentrix = {};\n\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\n// Excel QC row itemları\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  const regByPos = {};\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Her pozisyon için sadece 1. swath channel 1 alınacak\n    if (!imageName.endsWith('_1_Swath1_Channel1')) continue;\n\n    const pos = imageName.split('_')[0]; // R01C01\n    const regScore = parseFloat(parts[1]);\n\n    if (!isNaN(regScore)) {\n      regByPos[pos] = regScore;\n    }\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n\n      // test için geçici debug alanları\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          976,
+          -112
+        ],
+        "id": "a6060cb6-1239-4658-9dab-5686c6d73ec5",
+        "name": "parse_sentrix_qc"
+      }
+    ],
+    "connections": {
+      "extract_qc_metrics": {
+        "main": [
+          [
+            {
+              "node": "Merge1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "read_sentrix_qc_ssh": {
+        "main": [
+          [
+            {
+              "node": "pack_sentrix_qc_stdout",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge1": {
+        "main": [
+          [
+            {
+              "node": "parse_sentrix_qc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "upsert_measurement_idats": {
+        "main": [
+          [
+            {
+              "node": "clenaup_qc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "pack_qc_rows": {
+        "main": [
+          [
+            {
+              "node": "update_idats",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "upsert_measurement_idats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "parse_webhook_payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parse_webhook_payload": {
+        "main": [
+          [
+            {
+              "node": "find_qc_xlsx_ssh",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "find_qc_xlsx_ssh": {
+        "main": [
+          [
+            {
+              "node": "parse_find_qc_xlsx",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "parse_find_qc_xlsx": {
+        "main": [
+          [
+            {
+              "node": "Read/Write Files from Disk",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "read_sentrix_qc_ssh",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read/Write Files from Disk": {
+        "main": [
+          [
+            {
+              "node": "extract_qc_metrics",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "pack_sentrix_qc_stdout": {
+        "main": [
+          [
+            {
+              "node": "Merge1",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "parse_sentrix_qc": {
+        "main": [
+          [
+            {
+              "node": "pack_qc_rows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 87ea9d41",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "19-05-2026/0:00",
+  "fileName": "qc_gtc2_Supa.json"
+}
