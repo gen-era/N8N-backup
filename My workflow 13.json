@@ -1,0 +1,78 @@
+{
+  "updatedAt": "2026-05-18T10:10:17.514Z",
+  "createdAt": "2026-05-18T10:10:17.514Z",
+  "id": "81hS0qDOEfTbvOuQ",
+  "name": "My workflow 13",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "209acce1-1ff7-4696-819e-e46635275aa2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "command": "tmux ls"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8016c54f-0b2c-4323-aa81-52c855fb9327",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2cb4ff8e-a44d-465d-9fa7-d7f2fb9722d6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-18T10:10:17.520Z",
+      "createdAt": "2026-05-18T10:10:17.520Z",
+      "role": "workflow:owner",
+      "workflowId": "81hS0qDOEfTbvOuQ",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "19-05-2026/0:00",
+  "fileName": "My workflow 13.json"
+}
