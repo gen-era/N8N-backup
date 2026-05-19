@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-13T14:00:14.135Z",
+  "updatedAt": "2026-05-18T07:12:24.092Z",
   "createdAt": "2026-01-29T05:40:00.653Z",
   "id": "erir5LnAsqscCafr",
   "name": "BCL Convert - 04 Post-Copy (Finalization)",
@@ -341,7 +341,195 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
+  "pinData": {
+    "Post-Copy Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "10.20.0.30:5678",
+            "user-agent": "curl/7.61.1",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "content-length": "6967",
+            "expect": "100-continue"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "path": "/mnt/illuminastorage/run_folder/260511_A01978_0175_AHMHVJDRX7",
+            "run_id": "260511_A01978_0175_AHMHVJDRX7",
+            "is_xp": false,
+            "xmlData": {
+              "RunParameters": {
+                "xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+                "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "Surface": "Both",
+                "ReadType": "PairedEnd",
+                "Side": "A",
+                "Read1NumberOfCycles": "151",
+                "Read2NumberOfCycles": "151",
+                "IndexRead1NumberOfCycles": "10",
+                "IndexRead2NumberOfCycles": "10",
+                "PlannedRead1Cycles": "151",
+                "PlannedRead2Cycles": "151",
+                "PlannedIndex1ReadCycles": "10",
+                "PlannedIndex2ReadCycles": "10",
+                "RunNumber": "175",
+                "RtaVersion": "v3.4.4",
+                "RecipeVersion": "1.8.0",
+                "ExperimentName": "260511-NV-SP-STD-SAPIENS-APART",
+                "RfidsInfo": {
+                  "FlowCellSerialBarcode": "HMHVJDRX7",
+                  "FlowCellPartNumber": "20026406",
+                  "FlowCellLotNumber": "21036355",
+                  "FlowCellExpirationdate": "02/22/2027 00:00:00",
+                  "FlowCellStartDate": "05/11/2026 14:50:00",
+                  "FlowCellNumberOfReuseRemaining": "1",
+                  "FlowCellSupportedModes": "LTWashOnly;SP",
+                  "FlowCellMode": "SP",
+                  "FlowCellConsumableVersion": "1",
+                  "FlowCellRssi": "2",
+                  "LibraryTubeSerialBarcode": "NV1271229-LIB",
+                  "LibraryTubeSupportedModes": "Universal",
+                  "LibraryTubePartNumber": "20005221",
+                  "LibraryTubeLotNumber": "1000027975",
+                  "LibraryTubeExpirationdate": "12/31/2169 00:00:00",
+                  "LibraryTubeStartDate": "05/11/2026 14:50:00",
+                  "LibraryTubeRssi": "4",
+                  "SbsSerialBarcode": "NV5022274-RGSBS",
+                  "SbsSupportedModes": "S2;S1;SP",
+                  "SbsPartNumber": "20031054",
+                  "SbsLotNumber": "21036206",
+                  "SbsExpirationdate": "03/08/2027 00:00:00",
+                  "SbsStartDate": "05/11/2026 14:50:00",
+                  "SbsCycleKit": "338",
+                  "SbsNumberOfCyclesRemaining": "16",
+                  "SbsNumberOfCyclesSupported": "338",
+                  "SbsConsumableVersion": "3",
+                  "SbsRssi": "4",
+                  "ClusterSerialBarcode": "NV3892391-RGCPE",
+                  "ClusterSupportedModes": "SP",
+                  "ClusterPartNumber": "20031059",
+                  "ClusterLotNumber": "21032408",
+                  "ClusterExpirationdate": "02/27/2027 00:00:00",
+                  "ClusterStartDate": "05/11/2026 14:50:00",
+                  "ClusterCycleKit": "545",
+                  "ClusterNumberOfCyclesRemaining": "223",
+                  "ClusterRssi": "5",
+                  "BufferSerialBarcode": "NV2537689-BUFFR",
+                  "BufferSupportedModes": "S2;S1;SP",
+                  "BufferPartNumber": "20013524",
+                  "BufferLotNumber": "21030184",
+                  "BufferExpirationdate": "02/07/2027 00:00:00",
+                  "BufferNumberOfCyclesRemaining": "8",
+                  "BufferStartDate": "05/11/2026 14:50:00",
+                  "BufferRssi": "3"
+                },
+                "RecipeFilePath": "C:\\Program Files\\Illumina\\NovaSeq Control Software\\Recipe",
+                "SamplesheetFile": "",
+                "UsedLimsSetup": "false",
+                "CeLinuxRunFolder": "/ilmn/outputfolder/260511_A01978_0175_AHMHVJDRX7/",
+                "RtaRawRunFolder": "/ilmn/outputfolder",
+                "CeMountRunFolder": "Z:\\outputfolder\\260511_A01978_0175_AHMHVJDRX7\\",
+                "OutputRunFolder": "Y:\\run_folder\\260511_A01978_0175_AHMHVJDRX7\\",
+                "OutputRootFolder": "Y:\\run_folder",
+                "SbcRunFolder": "C:\\ProgramData\\Illumina\\NovaSeq\\NovaSeqTemp\\260511_A01978_0175_AHMHVJDRX7\\",
+                "PreRunFolder": "C:\\ProgramData\\Illumina\\NovaSeq\\NovaSeqTemp\\RunSetupLogs\\A01978_2026-05-11__14_20_10_SideA",
+                "RunStartDate": "260511",
+                "RunId": "260511_A01978_0175_AHMHVJDRX7",
+                "UseBaseSpace": "false",
+                "UseBaseSpaceMonitoringAndStorage": "true",
+                "Autocenter": "true",
+                "BiDirectionalScanning": "true",
+                "UseCustomRecipe": "false",
+                "UseCustomRead1Primer": "false",
+                "UseCustomRead2Primer": "false",
+                "UseCustomIndexRead1Primer": "false",
+                "IsRehyb": "false",
+                "InstrumentName": "A01978",
+                "PlatformType": "HighThroughput",
+                "Application": "NovaSeq Control Software",
+                "ApplicationVersion": "1.8.2",
+                "Build": "97",
+                "FirmwareVersions": {
+                  "FirmwareVersion": [
+                    {
+                      "Board": "Fluidics Board",
+                      "Version": "novaseq_flu@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Left Buffer Interface Board",
+                      "Version": "novaseq_bim@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Right Buffer Interface Board",
+                      "Version": "novaseq_bim@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Chassis Module Board",
+                      "Version": "novaseq_chm@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Camera Interface Board",
+                      "Version": "novaseq_cib_2@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Focus Interface Board",
+                      "Version": "novaseq_fib_2@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Flow Cell Holder Board",
+                      "Version": "novaseq_fch_2@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "System Thermal Board",
+                      "Version": "novaseq_syst@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Left Reagent Chiller Board",
+                      "Version": "novaseq_rca@NovaSeq_1.26.10"
+                    },
+                    {
+                      "Board": "Right Reagent Chiller Board",
+                      "Version": "novaseq_rca@NovaSeq_1.26.10"
+                    }
+                  ]
+                },
+                "SendIlluminaHealthData": "true",
+                "UcsRunId": "1D8D51B069523A93",
+                "UcsVersion": "2.7.3.4836",
+                "RunSetupMode": "Manual",
+                "WorkflowType": "NovaSeqStandard"
+              }
+            },
+            "outputDirectory": "/staging/tmp/260511_A01978_0175_AHMHVJDRX7-Fastq",
+            "logFile": "bcl_convert_2026-05-14T05-59-39-553Z.log",
+            "logPath": "/staging/tmp/260511_A01978_0175_AHMHVJDRX7-Fastq/bcl_convert_2026-05-14T05-59-39-553Z.log",
+            "fullRunPath": "/staging/tmp/260511_A01978_0175_AHMHVJDRX7",
+            "scriptDir": "/staging/n8n_tmp",
+            "bclConvertCommand": "mkdir -p \"/staging/tmp/260511_A01978_0175_AHMHVJDRX7-Fastq\" && dragen -f --bcl-conversion-only true --bcl-sampleproject-subdirectories true --bcl-input-directory \"/staging/tmp/260511_A01978_0175_AHMHVJDRX7\" --no-lane-splitting true --output-directory \"/staging/tmp/260511_A01978_0175_AHMHVJDRX7-Fastq\" --first-tile-only false --bcl-only-matched-reads true 2>&1 | tee \"/staging/tmp/260511_A01978_0175_AHMHVJDRX7-Fastq/bcl_convert_2026-05-14T05-59-39-553Z.log\"",
+            "startTime": "2026-05-14T05:59:39.553Z",
+            "executionId": "260511_A01978_0175_AHMHVJDRX7_2026-05-14T05-59-39-553Z",
+            "workflowType": "Standard",
+            "noLaneSplitting": true,
+            "webhooks": {
+              "postStaging": "http://10.20.0.30:5678/webhook/post-staging",
+              "postBclConvert": "http://10.20.0.30:5678/webhook/post-bclconvert",
+              "postCopy": "http://10.20.0.30:5678/webhook/post-copy",
+              "errorHandler": "http://10.20.0.30:5678/webhook/bcl-error"
+            },
+            "dragen_success": true,
+            "copy_success": true
+          },
+          "webhookUrl": "http://localhost:5678/webhook/post-copy",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "versionId": "5e012dcf-e1fe-4a67-b1c1-8bb4269d9761",
   "activeVersionId": "5e012dcf-e1fe-4a67-b1c1-8bb4269d9761",
   "triggerCount": 1,
@@ -695,6 +883,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "18-05-2026/0:00",
+  "commitDate": "19-05-2026/0:00",
   "fileName": "BCL Convert - 04 Post-Copy (Finalization).json"
 }
