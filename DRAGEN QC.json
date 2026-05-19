@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-14T19:00:08.715Z",
+  "updatedAt": "2026-05-18T12:24:52.057Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260504_A01228_0280_AHMMFFDRX7",
+              "value": "260515_A01228_0285_BHG7LWDMX2",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "ZK26-YCES-5313\tM26-YCES-4512\tST26-YCES-743\tB26-YCES-1075\tB26-YCES-1079\tSE26-YCES-2521\tU26-YCES-8178\tU26-YCES-8181\tU26-YCES-8186",
+              "value": "HCS",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "can.holyavkin@gen-era.com.tr",
+              "value": "betul.tunc@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2202,7 +2202,7 @@
       }
     ]
   },
-  "versionId": "be639f9d-700f-411a-95e7-63d23c690d1a",
+  "versionId": "b9f12dd0-c24d-47c6-a0eb-7843db4f306f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2223,6 +2223,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "18-05-2026/0:00",
+  "commitDate": "19-05-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
