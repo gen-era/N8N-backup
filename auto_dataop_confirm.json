@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-14T14:06:11.159Z",
+  "updatedAt": "2026-05-18T21:14:13.224Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "auto_dataop_confirm",
@@ -20,7 +20,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -768,
+        -976,
         -336
       ],
       "id": "465875be-7c65-4dab-aece-958f72e8ac1a",
@@ -29,13 +29,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
+        "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.r1_path,\n  r.r2_path,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -560,
+        -768,
         -336
       ],
       "id": "768f4c2e-aaae-484b-b474-ab69a69c9892",
@@ -75,7 +75,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -96,
+        -304,
         -336
       ],
       "id": "401d49f3-60b9-44e1-b313-0b81972ab3e0",
@@ -108,7 +108,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -352,
+        -560,
         -336
       ],
       "id": "20d61397-ef4b-4c94-9773-6012ce058a98",
@@ -159,146 +159,11 @@
       "type": "n8n-nodes-base.removeDuplicates",
       "typeVersion": 2,
       "position": [
-        160,
+        -48,
         -240
       ],
       "id": "430bf295-22c9-4e60-b2cc-390adb464c7e",
       "name": "Missing Combinations"
-    },
-    {
-      "parameters": {
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "data_operations",
-          "mode": "list",
-          "cachedResultName": "data_operations"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "read_ref": "={{ $json.read_ref }}",
-            "recipe_ref": "={{ $json.recipe_ref }}",
-            "status_concept_ref": 24
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "uniqueref",
-              "displayName": "uniqueref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "read_ref",
-              "displayName": "read_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "recipe_ref",
-              "displayName": "recipe_ref",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status_concept_ref",
-              "displayName": "status_concept_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "performed_at",
-              "displayName": "performed_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "batch_source_value",
-              "displayName": "batch_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "error_text",
-              "displayName": "error_text",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "operator_ref",
-              "displayName": "operator_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": true
-            },
-            {
-              "id": "analysis_source_value",
-              "displayName": "analysis_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
-        "options": {
-          "outputColumns": [
-            "*"
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        864,
-        -496
-      ],
-      "id": "1347c805-fd35-4473-818d-fcfea6f5f7dd",
-      "name": "Create Data Op",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      },
-      "disabled": true
     },
     {
       "parameters": {
@@ -327,7 +192,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        624,
+        832,
         -160
       ],
       "id": "5bb835fe-a2c1-47a0-aef6-53190a9bac88",
@@ -340,7 +205,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        864,
+        1072,
         -80
       ],
       "id": "e2873247-40e8-4f1b-a217-dee61bd29d80",
@@ -360,7 +225,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1120,
+        1328,
         -80
       ],
       "id": "8a20241e-a35f-4c46-abaf-b2810dbe70b7",
@@ -401,8 +266,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        624,
-        -576
+        1072,
+        -608
       ],
       "id": "54daf957-6fca-4b13-8b51-ca3e1cf47d14",
       "name": "Is Perf Umraniye1"
@@ -437,7 +302,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        160,
+        -48,
         -432
       ]
     },
@@ -450,8 +315,8 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        400,
-        -608
+        192,
+        -672
       ]
     },
     {
@@ -461,12 +326,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        864,
+        1072,
         -256
       ],
       "id": "81ce42d8-030d-47c2-a1f3-fad8400660c5",
-      "name": "Build Failure Email Body1",
-      "disabled": true
+      "name": "Build Failure Email Body1"
     },
     {
       "parameters": {
@@ -482,7 +346,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1120,
+        1328,
         -256
       ],
       "id": "5555ea24-2b22-41d0-8bc2-3a41143d3204",
@@ -494,8 +358,54 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6fd23d82-1bd2-4551-b80c-7eab62dea7ff",
+              "leftValue": "={{ $json.required_se_reads }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
       },
-      "disabled": true
+      "id": "dca9d441-454c-4553-89f4-1e3bc6114ffc",
+      "name": "Has Threshold Defined",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        176,
+        -432
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Missing required_se_reads for kit '{{ $json.kit_name }}' (kit_ref={{ $json.kit_ref }}). Sample={{ $json.sample_id }}, read_ref={{ $json.read_ref }}, run={{ $json.run_id }}. Populate kits.required_se_reads in DB before re-running."
+      },
+      "id": "bb1e2dde-92ee-4e12-b8ec-e2440ac8ced3",
+      "name": "Stop and Error (Missing Threshold)",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -224
+      ]
     },
     {
       "parameters": {
@@ -619,18 +529,151 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        864,
-        -672
+        1312,
+        -720
       ],
       "id": "8e118ee5-2745-479a-8fe3-73b0e98d9e62",
-      "name": "Create Data Op1",
+      "name": "Umraniye Auto Upload",
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.read_ref }}",
+            "recipe_ref": "={{ $json.recipe_ref }}",
+            "status_concept_ref": 24
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
       },
-      "disabled": true
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1312,
+        -512
+      ],
+      "id": "1347c805-fd35-4473-818d-fcfea6f5f7dd",
+      "name": "Non Umraniye Auto Upload",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     },
     {
       "parameters": {
@@ -643,12 +686,23 @@
           },
           "conditions": [
             {
-              "id": "6fd23d82-1bd2-4551-b80c-7eab62dea7ff",
-              "leftValue": "={{ $json.required_se_reads }}",
-              "rightValue": 0,
+              "id": "f7218e19-6bf5-4ca5-9012-2f4c4e0d1213",
+              "leftValue": "={{ $json.r1_path }}",
+              "rightValue": "",
               "operator": {
-                "type": "number",
-                "operation": "gt"
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "dac827a4-fbaa-4a27-8165-764615de8803",
+              "leftValue": "={{ $json.r2_path }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
               }
             }
           ],
@@ -656,27 +710,14 @@
         },
         "options": {}
       },
-      "id": "dca9d441-454c-4553-89f4-1e3bc6114ffc",
-      "name": "Has Threshold Defined",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        280,
-        -432
-      ]
-    },
-    {
-      "parameters": {
-        "errorMessage": "=Missing required_se_reads for kit '{{ $json.kit_name }}' (kit_ref={{ $json.kit_ref }}). Sample={{ $json.sample_id }}, read_ref={{ $json.read_ref }}, run={{ $json.run_id }}. Populate kits.required_se_reads in DB before re-running."
-      },
-      "id": "bb1e2dde-92ee-4e12-b8ec-e2440ac8ced3",
-      "name": "Stop and Error (Missing Threshold)",
-      "type": "n8n-nodes-base.stopAndError",
-      "typeVersion": 1,
-      "position": [
-        400,
-        -288
-      ]
+        608,
+        -512
+      ],
+      "id": "708b4e90-f2cd-4f8a-8206-3f93cf1d3ee5",
+      "name": "Is Path Given"
     }
   ],
   "connections": {
@@ -736,7 +777,7 @@
       "main": [
         [
           {
-            "node": "Is Perf Umraniye1",
+            "node": "Is Path Given",
             "type": "main",
             "index": 0
           }
@@ -783,14 +824,14 @@
       "main": [
         [
           {
-            "node": "Create Data Op1",
+            "node": "Umraniye Auto Upload",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Create Data Op",
+            "node": "Non Umraniye Auto Upload",
             "type": "main",
             "index": 0
           }
@@ -843,6 +884,17 @@
           }
         ]
       ]
+    },
+    "Is Path Given": {
+      "main": [
+        [
+          {
+            "node": "Is Perf Umraniye1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -858,12 +910,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": 993
+          "conversion_ref": 1013
         }
       }
     ]
   },
-  "versionId": "10e83c48-d958-4576-b808-d130df850d07",
+  "versionId": "e72c7e2d-8630-418b-ace8-2080b1ed080e",
   "activeVersionId": "10e83c48-d958-4576-b808-d130df850d07",
   "triggerCount": 0,
   "shared": [
@@ -1726,6 +1778,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "18-05-2026/0:00",
+  "commitDate": "19-05-2026/0:00",
   "fileName": "auto_dataop_confirm.json"
 }
