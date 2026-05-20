@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-09T11:25:49.647Z",
+  "updatedAt": "2026-05-19T15:20:52.147Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -1887,8 +1887,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1264,
-        816
+        1456,
+        880
       ],
       "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
       "name": "Extract Instrument ID5",
@@ -2588,7 +2588,7 @@
     },
     {
       "parameters": {
-        "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count → reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
+        "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback (original logic)\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count -> reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -3384,6 +3384,61 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "name": "Get Instrument Concept",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1120,
+        800
+      ],
+      "id": "a8b3e2f0-1c4d-4e5f-9a01-1234567890ab",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
+        "options": {}
+      }
+    },
+    {
+      "name": "Is NovaSeq X-Plus",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        720
+      ],
+      "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0d5e4f2-3e6f-4071-bc23-34567890cdef",
+              "leftValue": "={{ $json.instrument_concept_ref }}",
+              "rightValue": 246,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -3663,7 +3718,7 @@
       "main": [
         [
           {
-            "node": "Extract Instrument ID5",
+            "node": "Get Instrument Concept",
             "type": "main",
             "index": 0
           }
@@ -3936,10 +3991,41 @@
           }
         ]
       ]
+    },
+    "Get Instrument Concept": {
+      "main": [
+        [
+          {
+            "node": "Is NovaSeq X-Plus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is NovaSeq X-Plus": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Instrument ID5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
@@ -3955,8 +4041,8 @@
       }
     ]
   },
-  "versionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
-  "activeVersionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
+  "versionId": "4ef68f4e-4d5c-4e85-bf51-379ee3dac87c",
+  "activeVersionId": "4ef68f4e-4d5c-4e85-bf51-379ee3dac87c",
   "triggerCount": 0,
   "shared": [
     {
@@ -3968,9 +4054,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-09T11:25:51.000Z",
-    "createdAt": "2026-05-09T11:25:49.649Z",
-    "versionId": "e37554c2-ce30-4d06-9e37-783d76407d69",
+    "updatedAt": "2026-05-19T15:20:52.151Z",
+    "createdAt": "2026-05-19T15:20:52.151Z",
+    "versionId": "4ef68f4e-4d5c-4e85-bf51-379ee3dac87c",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -5854,8 +5940,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1264,
-          816
+          1456,
+          880
         ],
         "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
         "name": "Extract Instrument ID5",
@@ -6555,7 +6641,7 @@
       },
       {
         "parameters": {
-          "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count → reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
+          "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback (original logic)\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\n# NextSeq 1000/2000 reagent cartridge cycle count -> reagent kit nomenclature\ncase \"$cyc\" in\n  122) kit_cyc=\"100 Cycles\" ;;\n  222) kit_cyc=\"200 Cycles\" ;;\n  338) kit_cyc=\"300 Cycles\" ;;\n  638) kit_cyc=\"600 Cycles\" ;;\n  *)   kit_cyc=\"\" ;;\nesac\nif [ -n \"$kit_cyc\" ] && [ -n \"$fc\" ]; then\n  echo \"$fc ($kit_cyc)\"\nelse\n  echo \"$fc\"\nfi"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -7351,6 +7437,61 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "name": "Get Instrument Concept",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1120,
+          800
+        ],
+        "id": "a8b3e2f0-1c4d-4e5f-9a01-1234567890ab",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        },
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
+          "options": {}
+        }
+      },
+      {
+        "name": "Is NovaSeq X-Plus",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1264,
+          720
+        ],
+        "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd",
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c0d5e4f2-3e6f-4071-bc23-34567890cdef",
+                "leftValue": "={{ $json.instrument_concept_ref }}",
+                "rightValue": 246,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        }
       }
     ],
     "connections": {
@@ -7630,7 +7771,7 @@
         "main": [
           [
             {
-              "node": "Extract Instrument ID5",
+              "node": "Get Instrument Concept",
               "type": "main",
               "index": 0
             }
@@ -7903,14 +8044,43 @@
             }
           ]
         ]
+      },
+      "Get Instrument Concept": {
+        "main": [
+          [
+            {
+              "node": "Is NovaSeq X-Plus",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Is NovaSeq X-Plus": {
+        "main": [
+          [
+            {
+              "node": "Update Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Extract Instrument ID5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version e37554c2",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "19-05-2026/0:00",
+  "commitDate": "20-05-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
