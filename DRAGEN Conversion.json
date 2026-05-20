@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-18T21:33:34.570Z",
+  "updatedAt": "2026-05-19T19:32:12.245Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260513_VH01138_5_AACYVVVHV",
+              "value": "=20260515_LH00267_0169_A2327K3LT4",
               "type": "string"
             }
           ]
@@ -23,15 +23,15 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1456,
-        -320
+        -1696,
+        -336
       ],
       "id": "10c2d4f6-7a39-4927-bf5f-a5278122b4ff",
       "name": "Edit Fields"
     },
     {
       "parameters": {
-        "command": "=/opt/dragen/4.3.13/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').first().json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
+        "command": "=/opt/dragen/4.5.4/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').first().json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -86,8 +86,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -106,8 +105,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -141,8 +139,7 @@
         -464
       ],
       "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
-      "name": "Is it available for Transfer and Conversion",
-      "disabled": true
+      "name": "Is it available for Transfer and Conversion"
     },
     {
       "parameters": {
@@ -161,16 +158,15 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -1664,
-        -320
+        -1904,
+        -336
       ],
       "id": "c41b00f0-86c7-40e0-97cc-21f1d1cbacb8",
       "name": "When clicking ‘Execute workflow’"
@@ -192,8 +188,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -212,13 +207,12 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n    r.sample_id,\n    r.sample_project,\n    r.lane,\n    i.i7_sequence as Index,\n    i.i5_sequence as Index2\nFROM reads r\nLEFT JOIN indices i ON r.index_ref = i.uniqueref\nJOIN conversions c ON r.conversion_ref = c.uniqueref\nJOIN runs run ON c.run_ref = run.uniqueref\nWHERE run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND c.status_concept_ref = 24\nORDER BY r.sample_id",
+        "query": "SELECT \n    r.sample_id,\n    r.sample_project,\n    r.lane,\n    r.kit_ref,\n    k.name AS library_prep_kit,\n    i.i7_sequence as Index,\n    i.i5_sequence as Index2\nFROM reads r\nLEFT JOIN indices i ON r.index_ref = i.uniqueref\nLEFT JOIN kits k ON r.kit_ref = k.uniqueref\nJOIN conversions c ON r.conversion_ref = c.uniqueref\nJOIN runs run ON c.run_ref = run.uniqueref\nWHERE run.run_id = '{{ $('Edit Fields').item.json.run_id }}'\n  AND c.status_concept_ref = 24\nORDER BY r.sample_id",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -256,40 +250,6 @@
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\nconst instrumentModel = $('Get Run Ref').item.json.instrument_model;\n\n// Illumina i5 orientation taxonomy:\n// - Revcomp chemistry (NextSeq 1000/2000, NovaSeq X/X Plus, iSeq, NovaSeq 6000 v1.5 reagent):\n//   SampleSheet'e i5'in RC'sini yaz. DRAGEN RunInfo.xml IsReverseComplement=\"Y\" gorur ve\n//   demux'ta SS yazimini bir kez daha RC eder -> demux key = forward, raw forward ile match.\n// - Forward chemistry (NovaSeq 6000 v1.0 reagent, MiSeq, HiSeq, NextSeq 550):\n//   SampleSheet'e i5'i forward (kit dokumantasyonu) yaz.\n// Empirik dogrulama: 260508_VH01138_4 (NextSeq 2000) needsRC=true gerektirdi\n// (Top_Unknown'da SS forward i5 %85.5 oraninda direkt eslesti).\nconst RC_INSTRUMENTS = [\n  'Illumina NextSeq 1000',\n  'Illumina NextSeq 2000',\n  'Illumina NovaSeq X',\n  'Illumina NovaSeq X Plus',\n  'Illumina iSeq 100',\n];\nconst needsRC = RC_INSTRUMENTS.includes(instrumentModel);\n\n// Reverse complement helper\nfunction reverseComplement(seq) {\n  if (!seq) return seq;\n  const complement = { A: 'T', T: 'A', G: 'C', C: 'G', N: 'N' };\n  return seq.toUpperCase().split('').reverse().map(b => complement[b] ?? b).join('');\n}\n\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\nlet sampleSheet = '[Header]\\n';\nsampleSheet += 'FileFormatVersion,2\\n\\n';\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\nsampleSheet += '[Sequencing_Settings]\\n\\n';\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,2.2.2\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += 'CreateFastqForIndexReads,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex1,0\\n';\nsampleSheet += 'BarcodeMismatchesIndex2,0\\n\\n';\nsampleSheet += '[BCLConvert_Data]\\n';\n\nif (hasLanes) {\n  sampleSheet += 'Sample_ID,Sample_Project,Lane,Index,Index2,OverrideCycles\\n';\n} else {\n  sampleSheet += 'Sample_ID,Sample_Project,Index,Index2,OverrideCycles\\n';\n}\n\nfor (const sample of samples) {\n  const s = sample.json;\n\n  const i5Sequence = needsRC ? reverseComplement(s.index2) : s.index2;\n\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = i5Sequence ? i5Sequence.length : 0;\n\n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n\n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n\n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    // NextSeq 2000 / NovaSeq X / iSeq i5 ters yonden okur:\n    // 10 cycle'lik i5 okumada 8bp gercek adapter cycle 3-10'da, ilk 2 cycle template/linker artigi.\n    // Bu sequencer'lar icin mask N<n>I<i5> formatinda olmali (mask onde, indeks arkada).\n    // NovaSeq 6000 v1.0 / MiSeq / HiSeq forward okur -> I<i5>N<n> (mevcut sira).\n    // i7 her platformda forward; index1Part: I<n>N<m> dogru, dokunulmadi.\n    index2Part = needsRC ? `N${mask2}I${i5Length}` : `I${i5Length}N${mask2}`;\n  }\n\n  const overrideCycles = `Y${readsSettings.read1cycles};${index1Part};${index2Part};Y${readsSettings.read2cycles}`;\n\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${s.sample_id},${s.sample_project},${laneValue},${s.index},${i5Sequence},${overrideCycles}\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.sample_project},${s.index},${i5Sequence},${overrideCycles}\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        816,
-        -16
-      ],
-      "id": "09850efd-3983-4054-a05b-494442067590",
-      "name": "Generate SampleSheet",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=echo '{{ $json.sampleSheet }}' > /staging/run_folder/{{ $json.run_id }}/SampleSheet.csv"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        1072,
-        -16
-      ],
-      "id": "a66319e2-7e07-4617-be4b-1b849b921018",
-      "name": "Execute a command",
-      "credentials": {
-        "sshPassword": {
-          "id": "roUCz67T2VbHNQzo",
-          "name": "Koza DRAGEN - Root User"
         }
       },
       "disabled": true
@@ -336,8 +296,7 @@
         -320
       ],
       "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
-      "name": "Is Run absent on  DRAGEN",
-      "disabled": true
+      "name": "Is Run absent on  DRAGEN"
     },
     {
       "parameters": {
@@ -421,14 +380,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n  r.*,\n  c.concept_name as workflow_type,\n  ic.concept_name as instrument_model\nFROM runs r\nLEFT JOIN concepts c ON r.workflow_concept_ref = c.uniqueref\nLEFT JOIN instruments i ON r.instrument_ref = i.uniqueref\nLEFT JOIN concepts ic ON i.instrument_concept_ref = ic.uniqueref\nWHERE r.run_id = '{{ $json.run_id }}';",
+        "query": "SELECT\n  r.uniqueref::int          AS uniqueref,\n  r.run_id,\n  r.instrument_ref::int     AS instrument_ref,\n  r.flowcell_kit_ref::int   AS flowcell_kit_ref,\n  r.flowcell_lot,\n  r.date,\n  r.reads_settings_concept_ref::int AS reads_settings_concept_ref,\n  r.status_concept_ref::int AS status_concept_ref,\n  r.storage_instrument_ref::int     AS storage_instrument_ref,\n  r.updated_at,\n  r.workflow_concept_ref::int       AS workflow_concept_ref,\n  r.created_at,\n  r.care_site_ref::int      AS care_site_ref,\n  r.part,\n  c.concept_name  AS workflow_type,\n  ic.concept_name AS instrument_model\nFROM runs r\nLEFT JOIN concepts c    ON r.workflow_concept_ref = c.uniqueref\nLEFT JOIN instruments i ON r.instrument_ref       = i.uniqueref\nLEFT JOIN concepts ic   ON i.instrument_concept_ref = ic.uniqueref\nWHERE r.run_id = '{{ $json.run_id }}';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1264,
-        -320
+        -1504,
+        -336
       ],
       "id": "57ed4b27-b70e-4213-83c0-494b87fe529b",
       "name": "Get Run Ref",
@@ -501,11 +460,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1120,
-        -16
+        -1360,
+        -32
       ],
       "id": "0620d715-0659-43e1-9acb-0166e1751d62",
-      "name": "Code in JavaScript"
+      "name": "Code in JavaScript",
+      "disabled": true
     },
     {
       "parameters": {
@@ -514,11 +474,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -880,
-        -16
+        -1152,
+        -32
       ],
       "id": "6cc1789d-2993-4d94-b5e3-364603d27ebb",
-      "name": "Parse Demux"
+      "name": "Parse Demux",
+      "disabled": true
     },
     {
       "parameters": {
@@ -529,8 +490,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1536,
-        -16
+        -1776,
+        -32
       ],
       "id": "35b85927-2d3a-497f-94db-6e37a3ad1498",
       "name": "Get Conversion Ref",
@@ -539,7 +500,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -548,8 +510,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1344,
-        -16
+        -1552,
+        -32
       ],
       "id": "6792c8e0-a42a-456d-8ed9-638f4728cba5",
       "name": "Read Demux",
@@ -559,7 +521,8 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -759,8 +722,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -144,
-        -16
+        -160,
+        -32
       ],
       "id": "ac6449e5-80fc-4ca6-8f32-29b52cb684d4",
       "name": "Update rows in a table",
@@ -769,7 +732,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -779,11 +743,12 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -720,
-        144
+        -960,
+        128
       ],
       "id": "d9abe771-36b9-4d6c-be29-7d9ec4294e18",
-      "name": "Find R1R2 File Paths"
+      "name": "Find R1R2 File Paths",
+      "disabled": true
     },
     {
       "parameters": {
@@ -792,11 +757,12 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -512,
-        144
+        -752,
+        128
       ],
       "id": "b1610ae6-79e1-424e-8550-f39d7879b1c5",
-      "name": "Parse FASTQ Paths"
+      "name": "Parse FASTQ Paths",
+      "disabled": true
     },
     {
       "parameters": {
@@ -807,11 +773,12 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -352,
-        -16
+        -592,
+        -32
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
-      "name": "Merge"
+      "name": "Merge",
+      "disabled": true
     },
     {
       "parameters": {
@@ -822,8 +789,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1584,
-        272
+        -1888,
+        384
       ],
       "id": "337efc1e-77ad-4129-8554-43e71a7bd2ae",
       "name": "Check Measurement",
@@ -863,8 +830,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1344,
-        272
+        -1648,
+        384
       ],
       "id": "e6095f51-e7f4-499f-8f66-b18097af9023",
       "name": "Has No Measurement",
@@ -927,8 +894,8 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        -1072,
-        272
+        -1376,
+        384
       ],
       "id": "1522cd7b-ee8b-40b4-8b12-8fa1620e32cd",
       "name": "Call 'interop'",
@@ -939,7 +906,7 @@
     {
       "parameters": {
         "fromEmail": "bioinf.notify@gen-era.tech",
-        "toEmail": "deniz.ozturk@gen-era.com.tr",
+        "toEmail": "deniz.ozturk@gen-era.com.tr, burak.senay@gen-era.com.tr",
         "subject": "=Run Çevrimi Tamamlandı - {{ $json.run_id }}",
         "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"vertical-align:middle;\">\n                  <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n                </td>\n                <td align=\"right\" style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,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\" alt=\"Tamamlandı\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;outline:none;text-decoration:none;width:36px;height:36px;vertical-align:middle;\">\n                </td>\n              </tr>\n            </table>\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#102a43;\">Run Çevrimi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              <strong>{{ $json.run_id }}</strong> kodlu dizileme çalışmasının FASTQ çevrimi başarıyla tamamlandı.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;letter-spacing:0.7px;font-weight:600;\">RUN BİLGİLERİ</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.run_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kurum</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.care_site_name || '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Cihaz</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.instrument_model }}{{ $json.instrument_serial ? ' · ' + $json.instrument_serial : '' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Flowcell</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ [$json.flowcell_kit, $json.flowcell_lot ? 'Lot ' + $json.flowcell_lot : null, $json.part ? 'Part ' + $json.part : null].filter(x => x).join(' · ') || '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Workflow</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.workflow_type || '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Run Tarihi</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.run_date ? new Date($json.run_date).toLocaleDateString('tr-TR') : '—' }}</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;letter-spacing:0.7px;font-weight:600;\">KALİTE BİLGİLERİ</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">% Pass Filter</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.pct_pf != null ? Number($json.pct_pf).toFixed(1) + '%' : '—' }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">% ≥ Q30</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.avg_pct_q30 != null ? Number($json.avg_pct_q30).toFixed(1) + '%' : '—' }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">% Occupied</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.avg_pct_occupied != null ? Number($json.avg_pct_occupied).toFixed(1) + '%' : '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">% Aligned (PhiX)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.avg_pct_aligned != null ? Number($json.avg_pct_aligned).toFixed(2) + '%' : '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Error Rate</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.avg_error_rate != null ? Number($json.avg_error_rate).toFixed(2) + '%' : '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Reads PF</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.total_reads_pf != null ? Number($json.total_reads_pf).toLocaleString('tr-TR') : '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yield</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.total_yield_gb != null ? Number($json.total_yield_gb).toFixed(1) + ' Gb' : '—' }}</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;letter-spacing:0.7px;font-weight:600;\">ÖRNEK BİLGİLERİ</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Numune Sayısı</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.sample_count != null ? Number($json.sample_count).toLocaleString('tr-TR') : 0 }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Toplam Read (Demux)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.total_demux_reads != null ? Number($json.total_demux_reads).toLocaleString('tr-TR') : '—' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Conversion ID</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.conversion_id_source || '—' }}</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
         "options": {
@@ -950,8 +917,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -1392,
-        464
+        -1696,
+        576
       ],
       "id": "7ceaf67b-2558-47a3-92b2-12ddc75d99fc",
       "name": "Send email",
@@ -974,8 +941,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1616,
-        464
+        -1920,
+        576
       ],
       "id": "b1d4f7a2-9c3e-4f8a-b2e1-7d4f8e2a1b9c",
       "name": "Build Email Context",
@@ -1000,7 +967,74 @@
       ],
       "typeVersion": 1,
       "id": "6b23ef78-2bf4-4356-900e-4e8eb9118548",
-      "name": "Sticky Note",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\nconst instrumentModel = $('Get Run Ref').item.json.instrument_model;\n\n// Illumina i5 orientation taxonomy:\n// - Revcomp chemistry (NextSeq 1000/2000, NovaSeq X/X Plus, iSeq, NovaSeq 6000 v1.5 reagent):\n//   SampleSheet'e i5'in RC'sini yaz. DRAGEN RunInfo.xml IsReverseComplement=\"Y\" gorur ve\n//   demux'ta SS yazimini bir kez daha RC eder -> demux key = forward, raw forward ile match.\n// - Forward chemistry (NovaSeq 6000 v1.0 reagent, MiSeq, HiSeq, NextSeq 550):\n//   SampleSheet'e i5'i forward (kit dokumantasyonu) yaz.\n// Empirik dogrulama: 260508_VH01138_4 (NextSeq 2000) needsRC=true gerektirdi\n// (Top_Unknown'da SS forward i5 %85.5 oraninda direkt eslesti).\nconst RC_INSTRUMENTS = [\n  'Illumina NextSeq 1000',\n  'Illumina NextSeq 2000',\n  'Illumina NovaSeq X',\n  'Illumina NovaSeq X Plus',\n  'Illumina NovaSeq X-Plus',\n  'Illumina iSeq 100',\n];\nconst needsRC = RC_INSTRUMENTS.includes(instrumentModel);\n\n// Reverse complement helper (UMI fix 2026-05-19)\nfunction reverseComplement(seq) {\n  if (!seq) return seq;\n  const complement = { A: 'T', T: 'A', G: 'C', C: 'G', N: 'N' };\n  return seq.toUpperCase().split('').reverse().map(b => complement[b] ?? b).join('');\n}\n\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\nlet sampleSheet = '[Header],\\n';\nsampleSheet += 'FileFormatVersion,2\\n';\nsampleSheet += `RunName,${runId}\\n`;\nsampleSheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsampleSheet += 'IndexOrientation,Forward\\n\\n';\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,4.3.13\\n';\nsampleSheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsampleSheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += '[BCLConvert_Data]\\n';\n\nif (hasLanes) {\n  sampleSheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n} else {\n  sampleSheet += 'Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n}\n\nfor (const sample of samples) {\n  const s = sample.json;\n\n  const i5Sequence = needsRC ? reverseComplement(s.index2) : s.index2;\n\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = i5Sequence ? i5Sequence.length : 0;\n\n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n\n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n\n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    // NextSeq 2000 / NovaSeq X / iSeq i5 ters yonden okur:\n    // 10 cycle'lik i5 okumada 8bp gercek adapter cycle 3-10'da, ilk 2 cycle template/linker artigi.\n    // Bu sequencer'lar icin mask N<n>I<i5> formatinda olmali (mask onde, indeks arkada).\n    // NovaSeq 6000 v1.0 / MiSeq / HiSeq forward okur -> I<i5>N<n> (mevcut sira).\n    // i7 her platformda forward; index1Part: I<n>N<m> dogru, dokunulmadi.\n    index2Part = needsRC ? `N${mask2}I${i5Length}` : `I${i5Length}N${mask2}`;\n  }\n\n  // TSO500 (UMI) kit'leri için Read1/Read2 başında 7bp UMI + 1 mask:\n  // Detect with normalized substring (whitespace/dash/underscore stripped).\n  const libraryPrepKit = s.library_prep_kit || '';\n  const normalizedKit = libraryPrepKit.toLowerCase().replace(/[\\s\\-_]/g, '');\n  const isTSO = normalizedKit.includes('tso500') || normalizedKit.includes('trusightoncology500');\n  const read1Part = isTSO ? `U7N1Y${parseInt(readsSettings.read1cycles) - 8}` : `Y${readsSettings.read1cycles}`;\n  const read2Part = isTSO ? `U7N1Y${parseInt(readsSettings.read2cycles) - 8}` : `Y${readsSettings.read2cycles}`;\n  const overrideCycles = `${read1Part};${index1Part};${index2Part};${read2Part}`;\n\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${laneValue},${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -16
+      ],
+      "id": "09850efd-3983-4054-a05b-494442067590",
+      "name": "Generate SampleSheet Content",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "command": "=echo '{{ $json.sampleSheet }}' > /staging/run_folder/{{ $json.run_id }}/SampleSheet.csv"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        -16
+      ],
+      "id": "a66319e2-7e07-4617-be4b-1b849b921018",
+      "name": "Create SampleSheet.csv",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e058d52b-37f4-4532-a003-64bd962d06d1",
+              "leftValue": "={{ $json.SampleID }}",
+              "rightValue": "Undetermined",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -384,
+        -32
+      ],
+      "id": "8f453b48-abdc-4cb1-a023-f38096e27cb2",
+      "name": "Filter",
       "disabled": true
     }
   ],
@@ -1108,7 +1142,7 @@
       "main": [
         [
           {
-            "node": "Generate SampleSheet",
+            "node": "Generate SampleSheet Content",
             "type": "main",
             "index": 0
           }
@@ -1120,28 +1154,6 @@
         [
           {
             "node": "Get Planned Reads",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generate SampleSheet": {
-      "main": [
-        [
-          {
-            "node": "Execute a command",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute a command": {
-      "main": [
-        [
-          {
-            "node": "Update Conversion to In Progress",
             "type": "main",
             "index": 0
           }
@@ -1347,7 +1359,7 @@
       "main": [
         [
           {
-            "node": "Update rows in a table",
+            "node": "Filter",
             "type": "main",
             "index": 0
           }
@@ -1387,6 +1399,39 @@
           }
         ]
       ]
+    },
+    "Generate SampleSheet Content": {
+      "main": [
+        [
+          {
+            "node": "Create SampleSheet.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create SampleSheet.csv": {
+      "main": [
+        [
+          {
+            "node": "Update Conversion to In Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1399,7 +1444,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e16d181a-a167-4a3d-84f5-c27467810f16",
+  "versionId": "079ae24d-c03c-482b-8ee0-32ebc30fe3f2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1420,6 +1465,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "19-05-2026/0:00",
+  "commitDate": "20-05-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
