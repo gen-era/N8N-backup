@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T15:04:05.157Z",
+  "updatedAt": "2026-05-20T12:38:54.961Z",
   "createdAt": "2025-09-16T12:36:15.747Z",
   "id": "ZHgMRKYDgvkEHsu0",
   "name": "SampleSheet Generator",
@@ -315,7 +315,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Get all items from the input\nconst items = $input.all();\n\n// Track occurrences of each sample ID\nconst sampleIdCounts = {};\n\n// First pass: count occurrences (trimming whitespace)\nitems.forEach(item => {\n  const sampleId = String(item.json.Sample_ID || '').trim();\n  if (sampleId) {  // Only count if not empty\n    sampleIdCounts[sampleId] = (sampleIdCounts[sampleId] || 0) + 1;\n  }\n});\n\n// Track which occurrence we're on for each ID\nconst currentOccurrence = {};\n\n// Second pass: rename duplicates\nconst processedItems = items.map(item => {\n  const rawSampleId = item.json.Sample_ID;\n  \n  // Handle null, undefined, or non-string values\n  if (rawSampleId == null) {\n    return item;  // Skip items without Sample_ID\n  }\n  \n  const sampleId = String(rawSampleId).trim();\n  \n  if (!sampleId) {\n    return item;  // Skip empty Sample_IDs\n  }\n  \n  // Initialize counter if first time seeing this ID\n  if (!currentOccurrence[sampleId]) {\n    currentOccurrence[sampleId] = 1;\n  }\n  \n  // If this ID appears more than once\n  if (sampleIdCounts[sampleId] > 1) {\n    // First occurrence: no suffix\n    if (currentOccurrence[sampleId] === 1) {\n      item.json.Sample_ID = sampleId;\n    } else {\n      // Second and beyond: add suffix\n      item.json.Sample_ID = `${sampleId}-${currentOccurrence[sampleId]}`;\n    }\n    currentOccurrence[sampleId] += 1;\n  } else {\n    // Only one occurrence, clean up whitespace\n    item.json.Sample_ID = sampleId;\n  }\n  \n  return item;\n});\n\nreturn processedItems;"
+        "jsCode": "const items = $input.all();\n\n// Clean function: trim whitespace AND trailing hyphens\nconst clean = (id) => String(id || '').trim().replace(/-+$/, '');\n\n// First pass: count by CLEANED ID\nconst sampleIdCounts = {};\nitems.forEach(item => {\n  const cleaned = clean(item.json.Sample_ID);\n  if (cleaned) {\n    sampleIdCounts[cleaned] = (sampleIdCounts[cleaned] || 0) + 1;\n  }\n});\n\n// Second pass: rename duplicates\nconst currentOccurrence = {};\nconst processedItems = items.map(item => {\n  if (item.json.Sample_ID == null) return item;\n\n  const cleaned = clean(item.json.Sample_ID);\n  if (!cleaned) return item;\n\n  if (!currentOccurrence[cleaned]) {\n    currentOccurrence[cleaned] = 1;\n  }\n\n  if (sampleIdCounts[cleaned] > 1) {\n    item.json.Sample_ID = currentOccurrence[cleaned] === 1\n      ? cleaned\n      : `${cleaned}-${currentOccurrence[cleaned]}`;\n    currentOccurrence[cleaned]++;\n  } else {\n    item.json.Sample_ID = cleaned;\n  }\n\n  return item;\n});\n\nreturn processedItems;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1496,7 +1496,7 @@
       }
     ]
   },
-  "versionId": "3b987dd2-8958-4566-8213-99b6c5205870",
+  "versionId": "5dc53d80-c0d2-421f-bfb8-c15981fec14d",
   "activeVersionId": "3b987dd2-8958-4566-8213-99b6c5205870",
   "triggerCount": 0,
   "shared": [
@@ -2993,6 +2993,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "20-05-2026/0:00",
+  "commitDate": "21-05-2026/0:00",
   "fileName": "SampleSheet Generator.json"
 }
