@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-18T12:24:52.057Z",
+  "updatedAt": "2026-05-20T18:57:35.187Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -98,7 +98,7 @@
           "conditions": [
             {
               "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $json.Sample_ID}}",
+              "leftValue": "={{ $json.Institution}}",
               "rightValue": "={{ $('Set Run ID').item.json.input.replace(/\\s+/g, '|').replace(/\\//g, '-') }}",
               "operator": {
                 "type": "string",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "260515_A01228_0285_BHG7LWDMX2",
+              "value": "20260515_LH00267_0169_A2327K3LT4",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "HCS",
+              "value": "Ecegen",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "betul.tunc@gen-era.com.tr",
+              "value": "serap.aktas@sapiens.com.tr",
               "type": "string"
             }
           ]
@@ -1573,7 +1573,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \n    r.sample_id AS \"Sample_ID\",\n    r.lane AS \"Lane\",\n    r.sample_project AS \"Sample_Project\",\n    r.kit_ref AS \"kits_ref\",\n    REPLACE(k.name, ' ', '-') AS \"Library_Prep_Kit\"\nFROM reads r\nLEFT JOIN kits k ON r.kit_ref = k.uniqueref\nWHERE r.conversion_ref = {{ $('Check and Update Conversion Record').item.json.conversion_ref }}",
+        "query": "SELECT \n    r.sample_id AS \"Sample_ID\",\n    r.lane AS \"Lane\",\n    r.sample_project AS \"Sample_Project\",\n    r.kit_ref AS \"kits_ref\",\n    REPLACE(k.name, ' ', '-') AS \"Library_Prep_Kit\",\n    cs.care_site_name AS \"Institution\"\nFROM reads r\nLEFT JOIN kits k ON r.kit_ref = k.uniqueref\nLEFT JOIN care_site cs ON r.requesting_caresite_ref = cs.uniqueref\nWHERE r.conversion_ref = {{ $('Check and Update Conversion Record').item.json.conversion_ref }}",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -2200,9 +2200,59 @@
       {
         "json": {}
       }
+    ],
+    "Bed Mapping": [
+      {
+        "json": {
+          "Library_Prep_Kit": "Sophia-CES-v3",
+          "bed_file_path": "CES_v3_hg38_original_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "SOPHIA-CES-V3",
+          "bed_file_path": "CES_v3_hg38_original_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Twist-Human-Core-Exome-WES",
+          "bed_file_path": "Twist_Exome_hg38_original_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Sophia-Solution-Hereditary-Cancer-59-genes",
+          "bed_file_path": "CHCS_C_v2_target_hg38_liftover_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Sophia-HCS-v2",
+          "bed_file_path": "HCS_v2_0_1_hg38_target_normalized.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Twist-Human-Core-Exome-WES-mtDNA",
+          "bed_file_path": "Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Twist-Human-Core-Exome-WES+mtDNA",
+          "bed_file_path": "Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed"
+        }
+      },
+      {
+        "json": {
+          "Library_Prep_Kit": "Twist-Human-Core-Exome-+-mtDNA",
+          "bed_file_path": "Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed"
+        }
+      }
     ]
   },
-  "versionId": "b9f12dd0-c24d-47c6-a0eb-7843db4f306f",
+  "versionId": "8088644f-57fe-49ac-a174-66b325073574",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2223,6 +2273,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "20-05-2026/0:00",
+  "commitDate": "21-05-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
