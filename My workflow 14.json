@@ -1,0 +1,362 @@
+{
+  "updatedAt": "2026-05-20T13:12:56.802Z",
+  "createdAt": "2026-05-20T12:53:04.117Z",
+  "id": "fwqrzwAEJNfGUDSU",
+  "name": "My workflow 14",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        32
+      ],
+      "id": "a65e0228-41c4-4f64-9be2-49e5b2a2f891",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operation_recipes",
+          "mode": "list",
+          "cachedResultName": "data_operation_recipes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "type_concept_ref",
+              "value": "251"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -48,
+        32
+      ],
+      "id": "973e377e-4d5a-45bf-b1f9-20679d888a7a",
+      "name": "Find Possible Recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "recipe_ref",
+              "value": "={{ $json.uniqueref }}"
+            },
+            {
+              "column": "status_concept_ref",
+              "value": "24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        224,
+        32
+      ],
+      "id": "819d8dc4-0516-4482-bd3e-889c6bcc1dbf",
+      "name": "GET On-Hold Archer upload recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "uniqueref",
+              "field2": "read_ref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        576,
+        240
+      ],
+      "id": "11609ff1-ee3e-4feb-9721-29f6ee307407",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Group items by recipe_ref\nconst grouped = {};\n\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  \n  if (!grouped[recipeRef]) {\n    grouped[recipeRef] = [];\n  }\n  grouped[recipeRef].push(item.json);\n}\n\n// Return as array of groups\nreturn Object.entries(grouped).map(([recipeRef, items]) => ({\n  json: {\n    recipe_ref: recipeRef,\n    items: items,\n    count: items.length\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        240
+      ],
+      "id": "a808cc8e-2c36-4d24-b304-f18db3490e3d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "recipe_ref",
+              "field2": "uniqueref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        304,
+        256
+      ],
+      "id": "14597be7-9ece-4dae-9b59-963d7cbc7876",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "uniqueref",
+              "value": "={{ $json.read_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        448,
+        32
+      ],
+      "id": "b434632d-b633-4b5c-bd27-e107ea29432b",
+      "name": "Get read info",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "conversions",
+          "mode": "list",
+          "cachedResultName": "conversions"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "uniqueref",
+              "value": "={{ $json.items[0].conversion_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        944,
+        480
+      ],
+      "id": "02115a06-f172-4a55-a8cd-95338cf6ceb9",
+      "name": "Select rows from a table",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Possible Recipes": {
+      "main": [
+        [
+          {
+            "node": "GET On-Hold Archer upload recipes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET On-Hold Archer upload recipes": {
+      "main": [
+        [
+          {
+            "node": "Get read info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get read info": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "eb923121-85f3-4a7b-a5d2-de83bd70f52a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-20T12:53:04.123Z",
+      "createdAt": "2026-05-20T12:53:04.123Z",
+      "role": "workflow:owner",
+      "workflowId": "fwqrzwAEJNfGUDSU",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "21-05-2026/0:00",
+  "fileName": "My workflow 14.json"
+}
