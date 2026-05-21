@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-12T05:27:52.687Z",
+  "updatedAt": "2026-05-20T10:26:18.677Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -450,7 +450,7 @@
               }
             }
           ],
-          "combinator": "or"
+          "combinator": "and"
         },
         "options": {}
       },
@@ -719,7 +719,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ebb55da5-f4c1-4fed-aea5-4075e1ce92e0",
+  "versionId": "48d80e16-3990-49aa-9168-09b96cdca265",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -740,6 +740,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "20-05-2026/0:00",
+  "commitDate": "21-05-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
