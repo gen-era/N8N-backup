@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-19T12:30:46.477Z",
+  "updatedAt": "2026-05-20T09:49:15.175Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1488,
+        -1280,
         -288
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
@@ -45,7 +45,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -2528,
+        -2320,
         -288
       ],
       "id": "66bec76f-14a8-4dde-9397-074d3974da25",
@@ -79,7 +79,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -2240,
+        -2032,
         -288
       ],
       "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
@@ -113,7 +113,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -2016,
+        -1808,
         -288
       ],
       "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
@@ -126,7 +126,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -736,
+        -528,
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
@@ -254,7 +254,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1184,
+        -976,
         -496
       ],
       "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
@@ -273,7 +273,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -528,
+        -320,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -408,7 +408,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1184,
+        -976,
         -96
       ],
       "id": "261241cf-7b3a-41d5-a6d9-cfb27c1bf47b",
@@ -427,7 +427,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1744,
+        -1536,
         -288
       ],
       "id": "390e4411-abcf-4774-bbba-9f25809333f4",
@@ -446,7 +446,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1184,
+        -976,
         -288
       ],
       "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
@@ -463,7 +463,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -944,
+        -736,
         -288
       ],
       "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
@@ -479,7 +479,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -944,
+        -736,
         -96
       ],
       "id": "6ff4cb0b-f1dd-41f5-a88b-7dc2833a597a",
@@ -505,7 +505,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -736,
+        -528,
         -96
       ],
       "id": "4cb118e5-86b2-4add-9289-5cd02b9d3fed",
@@ -521,6 +521,39 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "10c66620-439e-4f0f-9986-c40a975485de",
+              "leftValue": "={{ $json.run_ids }}",
+              "rightValue": "20260515_LH00267_0169_A2327K3LT4",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -2592,
+        -288
+      ],
+      "id": "73ef0d86-d540-432d-94fb-9bac78f5dc0e",
+      "name": "Filter"
     }
   ],
   "connections": {
@@ -572,7 +605,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Filter",
             "type": "main",
             "index": 0
           }
@@ -677,6 +710,17 @@
           }
         ]
       ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -689,7 +733,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9f10bf4a-5a78-4311-9458-3d6af0404aac",
+  "versionId": "d4a36c40-58c3-47b1-94ee-dbab04c5f00a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -710,6 +754,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "20-05-2026/0:00",
+  "commitDate": "21-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
