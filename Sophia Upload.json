@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-20T09:49:15.175Z",
+  "updatedAt": "2026-05-21T11:38:11.741Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -126,7 +126,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -528,
+        -320,
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
@@ -273,7 +273,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -320,
+        -112,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -459,7 +459,9 @@
       }
     },
     {
-      "parameters": {},
+      "parameters": {
+        "amount": 30
+      },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -540,6 +542,15 @@
                 "type": "string",
                 "operation": "equals"
               }
+            },
+            {
+              "id": "18934143-1313-4dcd-b695-f79044c54b00",
+              "leftValue": "={{ $json.account_id }}",
+              "rightValue": "26766",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
             }
           ],
           "combinator": "and"
@@ -554,6 +565,25 @@
       ],
       "id": "73ef0d86-d540-432d-94fb-9bac78f5dc0e",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "command": "set -e\nDIR=/volume1/ALLDATA/Temp/sophia_launch_site\nEXPECTED_RAW=\"{{ $('Get On Hold Sophia Uploads').all().map(i => i.json.r1_path.split('/').pop() + ' ' + i.json.r2_path.split('/').pop()).join(' ') }}\"\nEXPECTED_LIST=$(printf '%s\\n' $EXPECTED_RAW | sort -u)\nEXPECTED_CNT=$(printf '%s\\n' \"$EXPECTED_LIST\" | grep -c . || true)\nACTUAL_LIST=$(cd \"$DIR\" && ls -1 *.fastq.gz 2>/dev/null | sort -u)\nACTUAL_CNT=$(printf '%s\\n' \"$ACTUAL_LIST\" | grep -c . || true)\necho \"expected=$EXPECTED_CNT actual=$ACTUAL_CNT\"\nls -la \"$DIR/\"\nif [ \"$ACTUAL_CNT\" -ne \"$EXPECTED_CNT\" ]; then\n  echo 'ERROR: file count mismatch' >&2\n  echo '--- Expected ---' >&2; printf '%s\\n' \"$EXPECTED_LIST\" >&2\n  echo '--- Actual ---' >&2;   printf '%s\\n' \"$ACTUAL_LIST\"   >&2\n  exit 1\nfi\nDIFF=$(diff <(printf '%s\\n' \"$EXPECTED_LIST\") <(printf '%s\\n' \"$ACTUAL_LIST\") || true)\nif [ -n \"$DIFF\" ]; then\n  echo 'ERROR: file set mismatch' >&2\n  echo \"$DIFF\" >&2\n  exit 2\nfi\nfor f in $EXPECTED_LIST; do\n  gzip -t \"$DIR/$f\" || { echo \"ERROR: corrupt $f\" >&2; exit 3; }\ndone\necho \"All $EXPECTED_CNT files validated\"\n"
+      },
+      "id": "a5225b67-1303-43f9-8ae2-58cb004e3511",
+      "name": "Validate Launch Site",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        -288
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     }
   ],
   "connections": {
@@ -682,7 +712,7 @@
       "main": [
         [
           {
-            "node": "Launch Files",
+            "node": "Validate Launch Site",
             "type": "main",
             "index": 0
           }
@@ -721,6 +751,17 @@
           }
         ]
       ]
+    },
+    "Validate Launch Site": {
+      "main": [
+        [
+          {
+            "node": "Launch Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -733,7 +774,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d4a36c40-58c3-47b1-94ee-dbab04c5f00a",
+  "versionId": "bd42de5b-5d79-4d3f-ad52-d3ea944eabc8",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -754,6 +795,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "21-05-2026/0:00",
+  "commitDate": "22-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
