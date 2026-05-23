@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-14T07:31:44.141Z",
+  "updatedAt": "2026-05-22T18:18:09.256Z",
   "createdAt": "2026-02-21T12:45:50.801Z",
   "id": "NdJI7DDLHO194xrO",
   "name": "Sub - Reads DB",
@@ -531,21 +531,8 @@
     },
     {
       "parameters": {
-        "mode": "combine",
-        "advanced": true,
-        "mergeByFields": {
-          "values": [
-            {
-              "field1": "i7_sequence",
-              "field2": "Index"
-            },
-            {
-              "field1": "i5_sequence",
-              "field2": "Index2"
-            }
-          ]
-        },
-        "joinMode": "enrichInput2",
+        "mode": "combineBySql",
+        "query": "SELECT input1.*,\n       agg.index_ref,\n       agg.index_match_count\nFROM input1\nLEFT JOIN LATERAL (\n  SELECT MIN(input2.index_ref)::int AS index_ref,\n         COUNT(*)::int            AS index_match_count\n  FROM input2\n  WHERE input2.i7_sequence = input1.\"Index\"\n    AND input2.i5_sequence = input1.\"Index2\"\n) agg ON TRUE",
         "options": {}
       },
       "type": "n8n-nodes-base.merge",
@@ -1049,6 +1036,120 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a1111111-1111-4111-8111-aaaaaaaaaaaa",
+              "leftValue": "={{ $json.index_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a2222222-2222-4222-8222-bbbbbbbbbbbb",
+              "leftValue": "={{ $json.requesting_caresite_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a3333333-3333-4333-8333-cccccccccccc",
+              "leftValue": "={{ $json.performing_care_site_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5328,
+        -800
+      ],
+      "id": "deadbeef-9111-4111-8111-c0debabe1111",
+      "name": "Has Valid Lookups?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log rows dropped because critical lookups failed.\n// These rows would have produced NULL-only \"shadow twin\" rows in the reads table.\n// Returning [] so nothing flows downstream; the structured log lives in the execution data.\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  const missing = [];\n  if (j.index_ref === undefined || j.index_ref === null || j.index_ref === '') missing.push('index_ref');\n  if (j.requesting_caresite_ref === undefined || j.requesting_caresite_ref === null || j.requesting_caresite_ref === '') missing.push('requesting_caresite_ref');\n  if (j.performing_care_site_ref === undefined || j.performing_care_site_ref === null || j.performing_care_site_ref === '') missing.push('performing_care_site_ref');\n  console.log(JSON.stringify({\n    event: 'subreads.lookup_failure',\n    sample_id: j.Sample_ID || j.sample_id || null,\n    conversion_ref: j.conversion_ref || null,\n    lane: j.Lane !== undefined ? j.Lane : (j.lane !== undefined ? j.lane : null),\n    sample_project: j.Sample_Project || j.sample_project || null,\n    kit_ref: j.kit_ref !== undefined ? j.kit_ref : (j.kits_ref !== undefined ? j.kits_ref : null),\n    missing_fields: missing,\n    index_seq_i7: j.Index || null,\n    index_seq_i5: j.Index2 || null,\n    requested_by: j.Requested_By || null,\n    prepared_by: j.Prepared_By || null\n  }));\n}\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5552,
+        -1056
+      ],
+      "id": "deadbeef-9222-4222-8222-c0debabe2222",
+      "name": "Log Lookup Failure"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b1111111-1111-4111-8111-aaaaaaaaaaaa",
+              "leftValue": "={{ $json.index_match_count }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4960,
+        -800
+      ],
+      "id": "deadbeef-9333-4333-8333-c0debabe3333",
+      "name": "Single Index Match?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Drop rows where the same (i7, i5) sequence pair matched MULTIPLE indices entries\n// (e.g. same UDP barcode under two kits). Logs structured JSON for downstream debugging.\n// Returning [] so nothing flows to the upsert path.\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  console.log(JSON.stringify({\n    event: 'subreads.multi_index_match',\n    sample_id: j.Sample_ID || j.sample_id || null,\n    conversion_ref: j.conversion_ref || null,\n    lane: j.Lane !== undefined ? j.Lane : (j.lane !== undefined ? j.lane : null),\n    sample_project: j.Sample_Project || j.sample_project || null,\n    library_prep_kit: j.Library_Prep_Kit || null,\n    index_i7: j.Index || null,\n    index_i5: j.Index2 || null,\n    index_match_count: j.index_match_count,\n    chosen_index_ref: j.index_ref || null\n  }));\n}\nreturn [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5104,
+        -1056
+      ],
+      "id": "deadbeef-9444-4444-8444-c0debabe4444",
+      "name": "Log Multi Index Match"
     }
   ],
   "connections": {
@@ -1201,14 +1302,9 @@
       "main": [
         [
           {
-            "node": "Pull Kits Mapping",
+            "node": "Single Index Match?",
             "type": "main",
             "index": 0
-          },
-          {
-            "node": "Add Kit Ref",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
@@ -1321,7 +1417,7 @@
       "main": [
         [
           {
-            "node": "Unvalidated Samples?",
+            "node": "Has Valid Lookups?",
             "type": "main",
             "index": 0
           }
@@ -1349,6 +1445,47 @@
           }
         ]
       ]
+    },
+    "Has Valid Lookups?": {
+      "main": [
+        [
+          {
+            "node": "Unvalidated Samples?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Lookup Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Single Index Match?": {
+      "main": [
+        [
+          {
+            "node": "Pull Kits Mapping",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Kit Ref",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Log Multi Index Match",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1369,8 +1506,8 @@
       }
     ]
   },
-  "versionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
-  "activeVersionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
+  "versionId": "cc20d97f-a683-4acb-a4c3-b58a50a44c0f",
+  "activeVersionId": "cc20d97f-a683-4acb-a4c3-b58a50a44c0f",
   "triggerCount": 0,
   "shared": [
     {
@@ -1382,9 +1519,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-12T07:27:33.913Z",
-    "createdAt": "2026-05-12T07:27:33.913Z",
-    "versionId": "6475d483-af4e-41bc-b3a8-fc5cb4a24a01",
+    "updatedAt": "2026-05-22T18:18:09.258Z",
+    "createdAt": "2026-05-22T18:18:09.258Z",
+    "versionId": "cc20d97f-a683-4acb-a4c3-b58a50a44c0f",
     "workflowId": "NdJI7DDLHO194xrO",
     "nodes": [
       {
@@ -1912,21 +2049,8 @@
       },
       {
         "parameters": {
-          "mode": "combine",
-          "advanced": true,
-          "mergeByFields": {
-            "values": [
-              {
-                "field1": "i7_sequence",
-                "field2": "Index"
-              },
-              {
-                "field1": "i5_sequence",
-                "field2": "Index2"
-              }
-            ]
-          },
-          "joinMode": "enrichInput2",
+          "mode": "combineBySql",
+          "query": "SELECT input1.*,\n       agg.index_ref,\n       agg.index_match_count\nFROM input1\nLEFT JOIN LATERAL (\n  SELECT MIN(input2.index_ref)::int AS index_ref,\n         COUNT(*)::int            AS index_match_count\n  FROM input2\n  WHERE input2.i7_sequence = input1.\"Index\"\n    AND input2.i5_sequence = input1.\"Index2\"\n) agg ON TRUE",
           "options": {}
         },
         "type": "n8n-nodes-base.merge",
@@ -2430,6 +2554,120 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a1111111-1111-4111-8111-aaaaaaaaaaaa",
+                "leftValue": "={{ $json.index_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "a2222222-2222-4222-8222-bbbbbbbbbbbb",
+                "leftValue": "={{ $json.requesting_caresite_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "a3333333-3333-4333-8333-cccccccccccc",
+                "leftValue": "={{ $json.performing_care_site_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "notEmpty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          5328,
+          -800
+        ],
+        "id": "deadbeef-9111-4111-8111-c0debabe1111",
+        "name": "Has Valid Lookups?"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Log rows dropped because critical lookups failed.\n// These rows would have produced NULL-only \"shadow twin\" rows in the reads table.\n// Returning [] so nothing flows downstream; the structured log lives in the execution data.\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  const missing = [];\n  if (j.index_ref === undefined || j.index_ref === null || j.index_ref === '') missing.push('index_ref');\n  if (j.requesting_caresite_ref === undefined || j.requesting_caresite_ref === null || j.requesting_caresite_ref === '') missing.push('requesting_caresite_ref');\n  if (j.performing_care_site_ref === undefined || j.performing_care_site_ref === null || j.performing_care_site_ref === '') missing.push('performing_care_site_ref');\n  console.log(JSON.stringify({\n    event: 'subreads.lookup_failure',\n    sample_id: j.Sample_ID || j.sample_id || null,\n    conversion_ref: j.conversion_ref || null,\n    lane: j.Lane !== undefined ? j.Lane : (j.lane !== undefined ? j.lane : null),\n    sample_project: j.Sample_Project || j.sample_project || null,\n    kit_ref: j.kit_ref !== undefined ? j.kit_ref : (j.kits_ref !== undefined ? j.kits_ref : null),\n    missing_fields: missing,\n    index_seq_i7: j.Index || null,\n    index_seq_i5: j.Index2 || null,\n    requested_by: j.Requested_By || null,\n    prepared_by: j.Prepared_By || null\n  }));\n}\nreturn [];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5552,
+          -1056
+        ],
+        "id": "deadbeef-9222-4222-8222-c0debabe2222",
+        "name": "Log Lookup Failure"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "b1111111-1111-4111-8111-aaaaaaaaaaaa",
+                "leftValue": "={{ $json.index_match_count }}",
+                "rightValue": 1,
+                "operator": {
+                  "type": "number",
+                  "operation": "lte"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          4960,
+          -800
+        ],
+        "id": "deadbeef-9333-4333-8333-c0debabe3333",
+        "name": "Single Index Match?"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Drop rows where the same (i7, i5) sequence pair matched MULTIPLE indices entries\n// (e.g. same UDP barcode under two kits). Logs structured JSON for downstream debugging.\n// Returning [] so nothing flows to the upsert path.\nconst items = $input.all();\nfor (const it of items) {\n  const j = it.json || {};\n  console.log(JSON.stringify({\n    event: 'subreads.multi_index_match',\n    sample_id: j.Sample_ID || j.sample_id || null,\n    conversion_ref: j.conversion_ref || null,\n    lane: j.Lane !== undefined ? j.Lane : (j.lane !== undefined ? j.lane : null),\n    sample_project: j.Sample_Project || j.sample_project || null,\n    library_prep_kit: j.Library_Prep_Kit || null,\n    index_i7: j.Index || null,\n    index_i5: j.Index2 || null,\n    index_match_count: j.index_match_count,\n    chosen_index_ref: j.index_ref || null\n  }));\n}\nreturn [];\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5104,
+          -1056
+        ],
+        "id": "deadbeef-9444-4444-8444-c0debabe4444",
+        "name": "Log Multi Index Match"
       }
     ],
     "connections": {
@@ -2582,14 +2820,9 @@
         "main": [
           [
             {
-              "node": "Pull Kits Mapping",
+              "node": "Single Index Match?",
               "type": "main",
               "index": 0
-            },
-            {
-              "node": "Add Kit Ref",
-              "type": "main",
-              "index": 1
             }
           ]
         ]
@@ -2702,7 +2935,7 @@
         "main": [
           [
             {
-              "node": "Unvalidated Samples?",
+              "node": "Has Valid Lookups?",
               "type": "main",
               "index": 0
             }
@@ -2730,6 +2963,47 @@
             }
           ]
         ]
+      },
+      "Has Valid Lookups?": {
+        "main": [
+          [
+            {
+              "node": "Unvalidated Samples?",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Log Lookup Failure",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Single Index Match?": {
+        "main": [
+          [
+            {
+              "node": "Pull Kits Mapping",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Add Kit Ref",
+              "type": "main",
+              "index": 1
+            }
+          ],
+          [
+            {
+              "node": "Log Multi Index Match",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
@@ -2738,6 +3012,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "22-05-2026/0:00",
+  "commitDate": "23-05-2026/0:00",
   "fileName": "Sub - Reads DB.json"
 }
