@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-21T11:38:11.741Z",
+  "updatedAt": "2026-05-22T05:29:21.118Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -535,18 +535,9 @@
           },
           "conditions": [
             {
-              "id": "10c66620-439e-4f0f-9986-c40a975485de",
-              "leftValue": "={{ $json.run_ids }}",
-              "rightValue": "20260515_LH00267_0169_A2327K3LT4",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "18934143-1313-4dcd-b695-f79044c54b00",
-              "leftValue": "={{ $json.account_id }}",
-              "rightValue": "26766",
+              "id": "02a18e42-b55e-4c3c-8295-13693d2479b5",
+              "leftValue": "={{ $json.sample_ids }}",
+              "rightValue": "SG2026-08930",
               "operator": {
                 "type": "string",
                 "operation": "notEquals"
@@ -774,7 +765,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "bd42de5b-5d79-4d3f-ad52-d3ea944eabc8",
+  "versionId": "ab99194f-a94a-4bbd-9ae3-bf16ee2d1b9b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -795,6 +786,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "22-05-2026/0:00",
+  "commitDate": "23-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
