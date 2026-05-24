@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-22T15:40:06.487Z",
+  "updatedAt": "2026-05-23T07:38:08.625Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -47,7 +47,7 @@
           "name": "Koza DRAGEN - Root User"
         }
       },
-      "disabled": true
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -66,8 +66,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -86,8 +85,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -106,8 +104,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -141,8 +138,7 @@
         -464
       ],
       "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
-      "name": "Is it available for Transfer and Conversion",
-      "disabled": true
+      "name": "Is it available for Transfer and Conversion"
     },
     {
       "parameters": {
@@ -161,8 +157,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {},
@@ -192,8 +187,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -212,8 +206,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -234,8 +227,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -257,8 +249,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -302,8 +293,7 @@
         -320
       ],
       "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
-      "name": "Is Run absent on  DRAGEN",
-      "disabled": true
+      "name": "Is Run absent on  DRAGEN"
     },
     {
       "parameters": {
@@ -337,8 +327,7 @@
         144
       ],
       "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
-      "name": "Is SampleSheet Absent",
-      "disabled": true
+      "name": "Is SampleSheet Absent"
     },
     {
       "parameters": {
@@ -359,13 +348,12 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE conversions\nSET status_concept_ref = 29,\n    conversion_time = NOW()\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
+        "query": "UPDATE conversions\nSET status_concept_ref = 29,\n    conversion_time = NOW(),\n    tool_concept_ref = 108,\n    storage_instrument_ref = 6\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -381,8 +369,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -422,8 +409,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -457,8 +443,7 @@
         576
       ],
       "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
-      "name": "Is Destination Folder Absent",
-      "disabled": true
+      "name": "Is Destination Folder Absent"
     },
     {
       "parameters": {
@@ -962,13 +947,13 @@
     {
       "parameters": {
         "content": "## BCl to Fastq Conversion",
-        "height": 1408,
+        "height": 80,
         "width": 1856
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        48,
-        -608
+        32,
+        -624
       ],
       "typeVersion": 1,
       "id": "6b23ef78-2bf4-4356-900e-4e8eb9118548",
@@ -986,8 +971,7 @@
         -16
       ],
       "id": "09850efd-3983-4054-a05b-494442067590",
-      "name": "Generate SampleSheet Content",
-      "disabled": true
+      "name": "Generate SampleSheet Content"
     },
     {
       "parameters": {
@@ -1006,8 +990,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -1042,6 +1025,27 @@
       "id": "8f453b48-abdc-4cb1-a023-f38096e27cb2",
       "name": "Filter",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE conversions\nSET status_concept_ref = 24,\n    conversion_time = NOW()\nFROM runs run\nWHERE conversions.run_ref = run.uniqueref\n  AND run.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n  AND conversions.status_concept_ref = 26;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        816,
+        736
+      ],
+      "id": "6ed9f621-ef32-4842-976f-f5b11dd553b4",
+      "name": "Update Conversion to On Hold",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -1061,6 +1065,13 @@
         [
           {
             "node": "Update Conversion to In Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Conversion to On Hold",
             "type": "main",
             "index": 0
           }
@@ -1450,7 +1461,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "a8808156-da2b-46d3-b08e-dd5c70b0cbee",
+  "versionId": "a19addaa-3f23-4ee9-a98f-79d59a052979",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1471,6 +1482,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "23-05-2026/0:00",
+  "commitDate": "24-05-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
