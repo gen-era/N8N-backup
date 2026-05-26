@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-23T05:11:22.684Z",
+  "updatedAt": "2026-05-26T03:48:28.495Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -130,7 +130,8 @@
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
-      "name": "Launch Files"
+      "name": "Launch Files",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -255,7 +256,7 @@
       "typeVersion": 2.6,
       "position": [
         -976,
-        -496
+        -512
       ],
       "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
       "name": "Update Records as In Progress",
@@ -264,7 +265,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -273,7 +275,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -112,
+        -96,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -470,7 +472,8 @@
       ],
       "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
       "name": "Wait",
-      "webhookId": "487eeb47-03aa-4272-83a6-355e29fa7cf5"
+      "webhookId": "487eeb47-03aa-4272-83a6-355e29fa7cf5",
+      "executeOnce": true
     },
     {
       "parameters": {
@@ -486,6 +489,7 @@
       ],
       "id": "6ff4cb0b-f1dd-41f5-a88b-7dc2833a597a",
       "name": "Get Provider",
+      "executeOnce": true,
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -536,11 +540,11 @@
           "conditions": [
             {
               "id": "02a18e42-b55e-4c3c-8295-13693d2479b5",
-              "leftValue": "={{ $json.sample_ids }}",
-              "rightValue": "SG2026-08930",
+              "leftValue": "={{ $json.run_ids }}",
+              "rightValue": "260522_A01228_0288_AHW77FDSXF",
               "operator": {
                 "type": "string",
-                "operation": "notEquals"
+                "operation": "equals"
               }
             }
           ],
@@ -590,6 +594,174 @@
       "typeVersion": 1,
       "id": "3f34e1e1-6da1-4b9b-b8b4-c573d90e77d0",
       "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 27,
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        128,
+        -80
+      ],
+      "id": "b198491e-4754-420a-b6f0-7329d41a085f",
+      "name": "Update Records as Failed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $('Get On Hold Sophia Uploads').all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -80
+      ],
+      "id": "d6b341d7-635b-48a9-b8c6-0cc934518153",
+      "name": "Expand Failed Batch"
+    },
+    {
+      "parameters": {
+        "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -80
+      ],
+      "id": "4bc2024f-1c9f-4331-9b9d-e91036fb357c",
+      "name": "Post Clean Up Launch Site - 2",
+      "executeOnce": true,
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     }
   ],
   "connections": {
@@ -675,6 +847,13 @@
         [
           {
             "node": "Post Clean Up Launch Site",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Expand Failed Batch",
             "type": "main",
             "index": 0
           }
@@ -768,6 +947,39 @@
           }
         ]
       ]
+    },
+    "Update Records as Failed": {
+      "main": [
+        [
+          {
+            "node": "Post Clean Up Launch Site - 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand Failed Batch": {
+      "main": [
+        [
+          {
+            "node": "Update Records as Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Clean Up Launch Site - 2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -780,7 +992,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c150c768-7e80-4e47-a88d-cd3a881b620f",
+  "versionId": "787e8739-2130-460c-923d-0a3bef8bf5df",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -801,6 +1013,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "25-05-2026/0:00",
+  "commitDate": "26-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
