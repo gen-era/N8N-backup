@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T03:45:20.691Z",
+  "updatedAt": "2026-05-25T11:04:51.111Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -17,16 +17,16 @@
           },
           "conditions": [
             {
-              "id": "395553c9-41c9-48c5-970e-34dbe7fb3fdc",
-              "leftValue": "={{ $('Edit Fields').first().json.sample_ids.split(/\\s+/).map(s => s.trim()).filter(Boolean).includes($json.sample_id) }}",
-              "rightValue": true,
+              "id": "7694a237-fe55-4f0a-8929-6dce0ab24702",
+              "leftValue": "={{ $json.requesting_care_site_name }}",
+              "rightValue": "Gelişim|Nesiller",
               "operator": {
-                "type": "boolean",
-                "operation": "equals"
+                "type": "string",
+                "operation": "regex"
               }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "looseTypeValidation": true,
         "options": {}
@@ -591,7 +591,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT c.uniqueref AS conversion_ref,\n       c.run_ref,\n       c.status_concept_ref,\n       c.tool_concept_ref,\n       r.run_id\n  FROM conversions c\n  JOIN runs r ON r.uniqueref = c.run_ref\n WHERE r.run_id = '{{ $('Trigger').item.json.run_id }}'\n   AND c.tool_concept_ref = 108      -- bcl-convert\n   AND c.status_concept_ref = 29     -- Completed\n ORDER BY c.uniqueref DESC\n LIMIT 1;",
+        "query": "SELECT c.uniqueref AS conversion_ref,\n       c.run_ref,\n       c.status_concept_ref,\n       c.tool_concept_ref,\n       r.run_id\n  FROM conversions c\n  JOIN runs r ON r.uniqueref = c.run_ref\n WHERE r.run_id = '{{ $('Trigger').item.json.run_id }}'\n   AND c.tool_concept_ref = 112      -- bcl-convert\n   AND c.status_concept_ref = 29     -- Completed\n ORDER BY c.uniqueref DESC\n LIMIT 1;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -613,7 +613,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT r.*\n  FROM reads r\n WHERE r.conversion_ref = {{ $('Resolve Conversion Ref').item.json.conversion_ref }}\n   AND NOT EXISTS (\n     SELECT 1\n       FROM data_operations dop\n      WHERE dop.read_ref = r.uniqueref\n        AND dop.recipe_ref = 6\n        AND dop.status_concept_ref = 29\n   );",
+        "query": "SELECT r.*,\n       cs.care_site_name AS requesting_care_site_name\n  FROM reads r\n  LEFT JOIN care_site cs ON cs.uniqueref = r.requesting_caresite_ref\n WHERE r.conversion_ref = {{ $('Resolve Conversion Ref').item.json.conversion_ref }}\n   AND NOT EXISTS (\n     SELECT 1\n       FROM data_operations dop\n      WHERE dop.read_ref = r.uniqueref\n        AND dop.recipe_ref = 6\n        AND dop.status_concept_ref = 29\n   );",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -886,7 +886,7 @@
             {
               "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
               "name": "sample_ids",
-              "value": "T26-595 T26-589 T26-567 T26-557 T26-556 T26-555 T26-530 T26-529 KLINIK-54-ELI-ETL-5392008 KLINIK-40-MUK-AKB-5392487 M-969-26 ISY26-256-IYK M-993-26 KLINIK-95-HAL-SAH KLINIK-96-SEL-DUR KLINIK-97-SAA-SIM KLINIK-98-DID-BOR KLINIK-99-FAT-ZAI KLINIK-100-MAK-KOZ KLINIK-101-SEV-OSM KLINIK-102-EMI-SEC KLINIK-103-FAD-ASK KLINIK-104-KAD-AYD KLINIK-105-HAT-EKM KLINIK-106-MER-YIL KLINIK-107-VEL-TUR KLINIK-108-SUL-SIK KLINIK-109-LUT-KIL KLINIK-110-FAD-ALI KLINIK-111-SUB-KAB KLINIK-112-NAZ-ERO KLINIK-113-SEN-GIR KLINIK-114-BED-MEY KLINIK-115-EBR-IYI KLINIK-116-GUL-ESE KLINIK-117-SAL-ODA KLINIK-118-MEH-TOP KLINIK-119-MUS-AKA KLINIK-120-SER-BAY KLINIK-121-MEH-BAY KLINIK-122-SAL-KAY KLINIK-123-CIC-DIK KLINIK-124-RUK-AKT KLINIK-125-CEM-YAH KLINIK-126-GUL-KAR KLINIK-127-NUR-TAN KLINIK-128-SEV-USL KLINIK-129-FUN-BOD KLINIK-130-CER-OZC KLINIK-131-DUD-POS KLINIK-132-FIL-DAG KLINIK-133-FIG-ELC KLINIK-134-AYS-CEB KLINIK-135-INC-AYK KLINIK-136-LAT-KAY KLINIK-137-MER-TUL ISY26-261-SMBAG 1420153-BY 1423812-GK 1420643-AO 1420633-HO 1420572-ST 1416493-DT 1416263-RC",
+              "value": "Nesiller Gelişim",
               "type": "string"
             }
           ]
@@ -1220,12 +1220,12 @@
     "Trigger": [
       {
         "json": {
-          "run_id": "260513_A01978_0176_BHGCH2DMX2"
+          "run_id": "260522_A01978_0180_BHG52WDMX2"
         }
       }
     ]
   },
-  "versionId": "fdd3b936-8809-45c6-984c-20349359438b",
+  "versionId": "af5b5035-bfc6-44b5-828b-bb01cce74910",
   "activeVersionId": "06fd5b3a-4028-4218-933e-88fbd8d570e1",
   "triggerCount": 0,
   "shared": [
@@ -2452,6 +2452,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "25-05-2026/0:00",
+  "commitDate": "26-05-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
