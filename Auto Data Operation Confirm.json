@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-23T07:57:50.113Z",
+  "updatedAt": "2026-05-25T12:47:30.570Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "Auto Data Operation Confirm",
@@ -176,7 +176,8 @@
         -128
       ],
       "id": "e2873247-40e8-4f1b-a217-dee61bd29d80",
-      "name": "Build Failure Email Body"
+      "name": "Build Failure Email Body",
+      "disabled": true
     },
     {
       "parameters": {
@@ -186,7 +187,7 @@
         "html": "={{ $json.html }}",
         "options": {
           "appendAttribution": false,
-          "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+          "ccEmail": "can.holyavkin@gen-era.com.tr"
         }
       },
       "type": "n8n-nodes-base.emailSend",
@@ -204,7 +205,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -676,7 +678,8 @@
         -240
       ],
       "id": "5bb835fe-a2c1-47a0-aef6-53190a9bac88",
-      "name": "Is Perf Umraniye"
+      "name": "Is Perf Umraniye",
+      "disabled": true
     },
     {
       "parameters": {
@@ -689,7 +692,8 @@
         -272
       ],
       "id": "81ce42d8-030d-47c2-a1f3-fad8400660c5",
-      "name": "Build Failure Email Body1"
+      "name": "Build Failure Email Body1",
+      "disabled": true
     },
     {
       "parameters": {
@@ -699,7 +703,7 @@
         "html": "={{ $json.html }}",
         "options": {
           "appendAttribution": false,
-          "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+          "ccEmail": "can.holyavkin@gen-era.com.tr"
         }
       },
       "type": "n8n-nodes-base.emailSend",
@@ -717,7 +721,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -909,12 +914,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": 1029
+          "conversion_ref": 1032
         }
       }
     ]
   },
-  "versionId": "2629a641-cf7f-47ae-b18e-06af9432efa3",
+  "versionId": "88285aff-221e-4a72-afb5-5ed6517c6351",
   "activeVersionId": "2629a641-cf7f-47ae-b18e-06af9432efa3",
   "triggerCount": 0,
   "shared": [
@@ -1828,6 +1833,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "25-05-2026/0:00",
+  "commitDate": "26-05-2026/0:00",
   "fileName": "Auto Data Operation Confirm.json"
 }
