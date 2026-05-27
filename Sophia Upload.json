@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-26T03:48:28.495Z",
+  "updatedAt": "2026-05-26T09:34:01.693Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -265,8 +265,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -992,7 +991,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "787e8739-2130-460c-923d-0a3bef8bf5df",
+  "versionId": "63fdef8b-38ee-432c-a0a0-291d6efc2a0f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1013,6 +1012,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "26-05-2026/0:00",
+  "commitDate": "27-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
