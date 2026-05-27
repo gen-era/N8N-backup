@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-22T12:32:06.525Z",
+  "updatedAt": "2026-05-26T07:01:25.871Z",
   "createdAt": "2025-12-29T14:18:49.525Z",
   "id": "OaLTopm8qW98Uf6u",
   "name": "Archer_auto_upload",
@@ -148,7 +148,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1632,
+        2048,
         208
       ],
       "id": "3cf15288-1174-4bef-a49b-cbbaeaae6699",
@@ -160,7 +160,7 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        5936,
+        6352,
         672
       ],
       "id": "ac2e5b0b-12ca-4413-a708-d5073499725b"
@@ -220,7 +220,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1936,
+        2352,
         336
       ],
       "id": "2acfe57d-cc14-4f2d-ba41-aebda59310f3",
@@ -239,7 +239,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1936,
+        2352,
         160
       ],
       "id": "2ef2ce8c-ba7e-4df4-8b2a-8c586f4bd649",
@@ -269,7 +269,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2144,
+        2560,
         336
       ],
       "id": "6c4e8da4-3d03-498a-9c6a-ce238729ee25",
@@ -284,7 +284,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2400,
+        2816,
         208
       ],
       "id": "37c4c2ab-b42d-4bd1-b876-7b278bfb2f1b",
@@ -297,7 +297,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        3776,
+        4192,
         240
       ],
       "id": "11676ab8-7ec7-4276-83db-b488ea7b8c5e",
@@ -313,7 +313,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        3360,
+        3776,
         240
       ],
       "id": "8906dd8c-90fa-455d-a057-9d09398b3224",
@@ -327,7 +327,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        2720,
+        3136,
         112
       ],
       "id": "63f2ced1-0e6b-4936-9bda-211c83469eb0",
@@ -340,7 +340,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4352,
+        4768,
         208
       ],
       "id": "837719ff-b019-49be-9ae5-b1538b96e90d",
@@ -355,7 +355,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4320,
+        4736,
         512
       ],
       "id": "817affe4-ebb3-459e-9932-d0c187d2051f",
@@ -369,7 +369,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        4528,
+        4944,
         512
       ],
       "id": "a1171edf-a49d-4650-97ed-388b245dd2a0",
@@ -384,7 +384,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        4736,
+        5152,
         512
       ],
       "id": "7278bc3c-894b-4a5d-8fb4-82687083564b",
@@ -397,7 +397,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        4944,
+        5360,
         512
       ],
       "id": "9bc4aa1e-45cc-4b86-8a6d-088632bc83b1",
@@ -569,7 +569,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        5440,
+        5856,
         512
       ],
       "id": "d802ae8b-48b1-40cf-9726-ab873ead2462",
@@ -589,7 +589,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5200,
+        5616,
         512
       ],
       "id": "e08a9331-c89e-4568-a6e5-7e74ccbe1c57",
@@ -717,7 +717,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        5648,
+        6064,
         512
       ],
       "id": "2be22206-f4cf-4d76-93b7-31cb3294afaa",
@@ -756,7 +756,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2992,
+        3408,
         112
       ],
       "id": "e06348d1-fbba-46e5-94a9-7ce277c3509b",
@@ -773,7 +773,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3376,
+        3792,
         64
       ],
       "id": "cd1fad1b-d16f-44d9-930e-dda1a10ee1fc",
@@ -792,7 +792,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3744,
+        4160,
         64
       ],
       "id": "fd49dd8b-3573-4081-8de9-cad4ec02f8de",
@@ -831,7 +831,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4576,
+        4992,
         208
       ],
       "id": "6b69f075-3633-4e48-80ba-f048933efb14",
@@ -842,7 +842,7 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        4816,
+        5232,
         224
       ],
       "id": "31b7f47c-ee6e-4d55-9f9d-1ad5aaacaee9",
@@ -875,7 +875,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1184,
+        1600,
         48
       ],
       "id": "0c6ce8c5-ada5-4d40-8538-f3a93954e1e9",
@@ -886,7 +886,22 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const SAMPLE_IDS = [\n  \"ALG-77133\", \"2966\",\"3070\"\n];\n\nreturn $input.all().map(item => {\n  const filtered = item.json.items.filter(s =>\n    s.r1_path && SAMPLE_IDS.some(run => s.r1_path.includes(run))\n  );\n  if (filtered.length === 0) return null;\n  return {\n    json: {\n      ...item.json,\n      items: filtered,\n      count: filtered.length\n    }\n  };\n}).filter(Boolean);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        480
+      ],
+      "id": "44da68dd-7a26-490c-9b4c-fda7483ebba2",
+      "name": "Code in JavaScript4",
+      "disabled": true
     }
   ],
   "connections": {
@@ -948,12 +963,17 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "get run info",
             "type": "main",
             "index": 0
           },
           {
-            "node": "get run info",
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -1237,6 +1257,17 @@
           }
         ]
       ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1247,7 +1278,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "591710e2-15c8-493d-a8c6-89a35e9b6285",
+  "versionId": "7d5806e7-a491-4dc5-a0c1-dcbef20ee5b4",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1261,6 +1292,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "25-05-2026/0:00",
+  "commitDate": "27-05-2026/0:00",
   "fileName": "Archer_auto_upload.json"
 }
