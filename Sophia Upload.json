@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-26T09:34:01.693Z",
+  "updatedAt": "2026-05-27T13:47:31.281Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -3024,
+        -2928,
         -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1280,
+        -1376,
         -288
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
@@ -45,7 +45,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -2320,
+        -2416,
         -288
       ],
       "id": "66bec76f-14a8-4dde-9397-074d3974da25",
@@ -54,13 +54,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    dop.batch_source_value AS batch,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name,\n         dop.batch_source_value\nORDER BY dor.account_id, dor.uniqueref, dop.batch_source_value;",
+        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    dop.batch_source_value AS batch,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT p.name, ', ' ORDER BY p.name) AS operators,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nLEFT JOIN  providers p                ON dop.operator_ref = p.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name,\n         dop.batch_source_value\nORDER BY dor.account_id, dor.uniqueref, dop.batch_source_value;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2800,
+        -2704,
         -288
       ],
       "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
@@ -79,7 +79,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -2032,
+        -2128,
         -288
       ],
       "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
@@ -113,7 +113,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1808,
+        -1904,
         -288
       ],
       "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
@@ -126,7 +126,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -320,
+        -64,
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
@@ -255,8 +255,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -976,
-        -512
+        -656,
+        -480
       ],
       "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
       "name": "Update Records as In Progress",
@@ -274,7 +274,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -96,
+        1056,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -409,8 +409,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -976,
-        -96
+        400,
+        -288
       ],
       "id": "261241cf-7b3a-41d5-a6d9-cfb27c1bf47b",
       "name": "Update Records as Completed",
@@ -423,31 +423,12 @@
     },
     {
       "parameters": {
-        "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        -1536,
-        -288
-      ],
-      "id": "390e4411-abcf-4774-bbba-9f25809333f4",
-      "name": "Pre Clean Up Launch Site",
-      "credentials": {
-        "sshPassword": {
-          "id": "afQJbS7bg7aYGdOW",
-          "name": "Koza ALLData - Can User"
-        }
-      }
-    },
-    {
-      "parameters": {
         "command": "=rsync -avu \"{{ $json.r1_path }}\" \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -976,
+        -656,
         -288
       ],
       "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
@@ -466,7 +447,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -736,
+        -480,
         -288
       ],
       "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
@@ -483,8 +464,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -736,
-        -96
+        640,
+        -288
       ],
       "id": "6ff4cb0b-f1dd-41f5-a88b-7dc2833a597a",
       "name": "Get Provider",
@@ -510,8 +491,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -528,
-        -96
+        848,
+        -288
       ],
       "id": "4cb118e5-86b2-4add-9289-5cd02b9d3fed",
       "name": "Send email",
@@ -529,39 +510,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "02a18e42-b55e-4c3c-8295-13693d2479b5",
-              "leftValue": "={{ $json.run_ids }}",
-              "rightValue": "260522_A01228_0288_AHW77FDSXF",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        -2592,
-        -288
-      ],
-      "id": "73ef0d86-d540-432d-94fb-9bac78f5dc0e",
-      "name": "Filter"
-    },
-    {
-      "parameters": {
         "command": "set -e\nDIR=/volume1/ALLDATA/Temp/sophia_launch_site\nEXPECTED_RAW=\"{{ $('Get On Hold Sophia Uploads').all().map(i => i.json.r1_path.split('/').pop() + ' ' + i.json.r2_path.split('/').pop()).join(' ') }}\"\nEXPECTED_LIST=$(printf '%s\\n' $EXPECTED_RAW | sort -u)\nEXPECTED_CNT=$(printf '%s\\n' \"$EXPECTED_LIST\" | grep -c . || true)\nACTUAL_LIST=$(cd \"$DIR\" && ls -1 *.fastq.gz 2>/dev/null | sort -u)\nACTUAL_CNT=$(printf '%s\\n' \"$ACTUAL_LIST\" | grep -c . || true)\necho \"expected=$EXPECTED_CNT actual=$ACTUAL_CNT\"\nls -la \"$DIR/\"\nif [ \"$ACTUAL_CNT\" -ne \"$EXPECTED_CNT\" ]; then\n  echo 'ERROR: file count mismatch' >&2\n  echo '--- Expected ---' >&2; printf '%s\\n' \"$EXPECTED_LIST\" >&2\n  echo '--- Actual ---' >&2;   printf '%s\\n' \"$ACTUAL_LIST\"   >&2\n  exit 1\nfi\nDIFF=$(diff <(printf '%s\\n' \"$EXPECTED_LIST\") <(printf '%s\\n' \"$ACTUAL_LIST\") || true)\nif [ -n \"$DIFF\" ]; then\n  echo 'ERROR: file set mismatch' >&2\n  echo \"$DIFF\" >&2\n  exit 2\nfi\nfor f in $EXPECTED_LIST; do\n  gzip -t \"$DIR/$f\" || { echo \"ERROR: corrupt $f\" >&2; exit 3; }\ndone\necho \"All $EXPECTED_CNT files validated\"\n"
       },
       "id": "a5225b67-1303-43f9-8ae2-58cb004e3511",
@@ -569,7 +517,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -528,
+        -272,
         -288
       ],
       "credentials": {
@@ -587,7 +535,7 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -2640,
+        -2944,
         -416
       ],
       "typeVersion": 1,
@@ -717,8 +665,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        128,
-        -80
+        368,
+        -16
       ],
       "id": "b198491e-4754-420a-b6f0-7329d41a085f",
       "name": "Update Records as Failed",
@@ -736,8 +684,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -96,
-        -80
+        128,
+        -16
       ],
       "id": "d6b341d7-635b-48a9-b8c6-0cc934518153",
       "name": "Expand Failed Batch"
@@ -749,8 +697,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        352,
-        -80
+        1024,
+        -16
       ],
       "id": "4bc2024f-1c9f-4331-9b9d-e91036fb357c",
       "name": "Post Clean Up Launch Site - 2",
@@ -759,6 +707,279 @@
         "sshPassword": {
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1632,
+        -288
+      ],
+      "id": "390e4411-abcf-4774-bbba-9f25809333f4",
+      "name": "Pre Clean Up Launch Site",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $('Get On Hold Sophia Uploads').all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -288
+      ],
+      "id": "dbbda793-df00-4a0c-b964-2c97a3fd3901",
+      "name": "Expand Batch"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "can.holyavkin@gen-era.com.tr",
+        "subject": "=Sophia DDM Yüklemesi BAŞARISIZ - {{ $('Loop Over Items').item.json.account_id }} - {{ $('Loop Over Items').item.json.batches }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid #c81e1e;background:#fef2f2;\">\n            <div style=\"font-size:13px;color:#991b1b;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Hata</div>\n            <div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:#7f1d1d;\">Sophia DDM Yüklemesi Başarısız</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Bir Sophia DDM yüklemesi <strong>Launch Files</strong> aşamasında hata aldı. Detaylar aşağıdadır.</p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batches }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Etkilenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Exit code</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Launch Files').item.json.code }}</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:20px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">stderr</div>\n            <pre style=\"margin:0;padding:14px 16px;background:#0f172a;color:#fca5a5;border-radius:8px;font-size:12px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;line-height:1.5;\">{{ $('Launch Files').item.json.stderr }}</pre>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:14px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">error</div>\n            <pre style=\"margin:0;padding:14px 16px;background:#0f172a;color:#fde68a;border-radius:8px;font-size:12px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;line-height:1.5;\">{{ $('Launch Files').item.json.error }}</pre>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:18px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Etkilenen örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $('Loop Over Items').item.json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir. DOP kayıtları status=Failed (27) olarak işaretlendi; örnekler Sophia'ya gönderilmedi.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        -16
+      ],
+      "id": "436d3962-8d76-49c5-bd37-2c2c60ea6488",
+      "name": "Send Failure Email",
+      "webhookId": "709d7b1d-b7fd-4293-b7a1-25777d448646",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst missing = items.filter(i => !i.json.r1_path || !i.json.r2_path);\nconst hasMissing = missing.length > 0;\nconst missingSampleIds = missing.map(i => i.json.sample_id).join(', ');\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    _missing_paths_detected: hasMissing,\n    _missing_samples: missingSampleIds,\n    _missing_count: missing.length,\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1136,
+        -288
+      ],
+      "id": "4e9d237c-db24-4a36-a5f1-5341f48b3a77",
+      "name": "Check Path Completeness"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c5ccb615-3e95-4065-a458-997535d13a4d",
+              "leftValue": "={{ $json._missing_paths_detected }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -944,
+        -288
+      ],
+      "id": "aa49a94b-e3b3-42c1-b7b1-7afed7fb8291",
+      "name": "Has Missing Paths?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $json.operation_uniqueref }}",
+            "status_concept_ref": 27,
+            "performed_at": "={{ $now.toISO() }}",
+            "error_text": "=Missing FASTQ path. Affected samples: {{ $json._missing_samples }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -656,
+        -64
+      ],
+      "id": "65bb5291-64b4-4e44-bcbe-ca40ed7c35a5",
+      "name": "Update Records as Failed (Missing Path)",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "can.holyavkin@gen-era.com.tr",
+        "subject": "=Sophia DDM Yüklemesi BAŞARISIZ - FASTQ Yolu Eksik - {{ $('Loop Over Items').item.json.account_id }} - {{ $('Loop Over Items').item.json.batch }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid #c81e1e;background:#fef2f2;\">\n            <div style=\"font-size:13px;color:#991b1b;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Hata · FASTQ Yolu Eksik</div>\n            <div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:#7f1d1d;\">Sophia DDM Yüklemesi Atlandı</div>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Bir veya birden fazla örneğin <strong>r1_path</strong> ya da <strong>r2_path</strong> alanı boş olduğu için bu batch Sophia'ya yüklenmeden iptal edildi.</p>\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Batch içindeki <strong>tüm</strong> DOP kayıtları <code>status=Failed (27)</code> olarak işaretlendi. Bir sonraki batch'e geçildi.</p>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:200px;\">Hesap (Account ID)</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batch }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Run ID(ler)</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.run_ids }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch toplam örnek</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td></tr>\n              <tr><td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yolu eksik örnek sayısı</td><td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#c81e1e;\"><strong>{{ $json._missing_count }}</strong></td></tr>\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:20px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yolu Eksik Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $json._missing_samples.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">FASTQ yolu populate adımı tamamlandıktan sonra DOP kayıtlarını manuel olarak tekrar <code>On Hold (24)</code> statüsüne çekebilirsiniz; bir sonraki workflow tetiklemesinde tekrar denenir.</p>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        -64
+      ],
+      "id": "4d9d770a-1768-43c2-935c-cefc75893bb6",
+      "name": "Send Missing Path Email",
+      "executeOnce": true,
+      "webhookId": "2eca46ee-9da1-45ec-92ac-57b35242309c",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
         }
       }
     }
@@ -779,17 +1000,7 @@
       "main": [
         [
           {
-            "node": "Update Records as In Progress",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Update Records as Completed",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Move Files to Launch Site",
+            "node": "Check Path Completeness",
             "type": "main",
             "index": 0
           }
@@ -812,7 +1023,7 @@
       "main": [
         [
           {
-            "node": "Filter",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -845,7 +1056,7 @@
       "main": [
         [
           {
-            "node": "Post Clean Up Launch Site",
+            "node": "Expand Batch",
             "type": "main",
             "index": 0
           }
@@ -853,17 +1064,6 @@
         [
           {
             "node": "Expand Failed Batch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Pre Clean Up Launch Site": {
-      "main": [
-        [
-          {
-            "node": "Get On Hold Sophia Uploads",
             "type": "main",
             "index": 0
           }
@@ -918,18 +1118,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filter": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
+            "node": "Post Clean Up Launch Site",
             "type": "main",
             "index": 0
           }
@@ -951,7 +1140,7 @@
       "main": [
         [
           {
-            "node": "Post Clean Up Launch Site - 2",
+            "node": "Send Failure Email",
             "type": "main",
             "index": 0
           }
@@ -979,6 +1168,106 @@
           }
         ]
       ]
+    },
+    "Pre Clean Up Launch Site": {
+      "main": [
+        [
+          {
+            "node": "Get On Hold Sophia Uploads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Expand Batch": {
+      "main": [
+        [
+          {
+            "node": "Update Records as Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Clean Up Launch Site": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Failure Email": {
+      "main": [
+        [
+          {
+            "node": "Post Clean Up Launch Site - 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Path Completeness": {
+      "main": [
+        [
+          {
+            "node": "Has Missing Paths?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Missing Paths?": {
+      "main": [
+        [
+          {
+            "node": "Update Records as Failed (Missing Path)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Records as In Progress",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Move Files to Launch Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Records as Failed (Missing Path)": {
+      "main": [
+        [
+          {
+            "node": "Send Missing Path Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Missing Path Email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -991,7 +1280,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "63fdef8b-38ee-432c-a0a0-291d6efc2a0f",
+  "versionId": "37648384-7417-4cf6-88b7-39d6ff04b6db",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1012,6 +1301,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "27-05-2026/0:00",
+  "commitDate": "28-05-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
