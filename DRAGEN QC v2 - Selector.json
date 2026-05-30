@@ -1,0 +1,271 @@
+{
+  "updatedAt": "2026-05-29T21:10:31.161Z",
+  "createdAt": "2026-05-29T21:10:31.161Z",
+  "id": "S2oU9ggilqJrFCxm",
+  "name": "DRAGEN QC v2 - Selector",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "DRAGEN QC v2 — Örnek Seçici",
+        "formDescription": "İşlenecek run_id'leri gir (birden çoksa virgülle ayır). Her batch (sample_project) için CES/WES/WES+mt/HCS v2 kitlerinden 3 rastgele örnek QC kuyruğuna eklenir.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "run_ids",
+              "fieldType": "text",
+              "requiredField": true,
+              "placeholder": "260522_A01228_0288_AHW77FDSXF, 260522_A01978_0180_..."
+            }
+          ]
+        },
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "Run Input Form",
+      "name": "Run Input Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -600,
+        0
+      ],
+      "webhookId": "a7c1f3e0-9b2d-4c55-8e10-2f6b1d4a7e90"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH eligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (\n          SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x\n        )\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (\n      SELECT 1 FROM data_operations dop\n      WHERE dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n        AND dop.status_concept_ref IN (24, 26, 29)\n    )\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT read_ref, 6, 24, sample_project\nFROM eligible\nWHERE rn <= 3\nRETURNING uniqueref, read_ref, batch_source_value;",
+        "options": {}
+      },
+      "id": "Select & Queue",
+      "name": "Select & Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -340,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/dragen-qc-v2-koza",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "Kick Koza",
+      "name": "Kick Koza",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -100,
+        -80
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/dragen-qc-v2-sapiens",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "Kick Sapiens",
+      "name": "Kick Sapiens",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -100,
+        80
+      ],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Run Input Form": {
+      "main": [
+        [
+          {
+            "node": "Select & Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select & Queue": {
+      "main": [
+        [
+          {
+            "node": "Kick Koza",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Kick Sapiens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "15a8bd5c-5db4-4bb2-8df6-b68d84eb7fa6",
+  "activeVersionId": "15a8bd5c-5db4-4bb2-8df6-b68d84eb7fa6",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T21:10:31.166Z",
+      "createdAt": "2026-05-29T21:10:31.166Z",
+      "role": "workflow:owner",
+      "workflowId": "S2oU9ggilqJrFCxm",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-29T21:12:51.000Z",
+    "createdAt": "2026-05-29T21:10:31.175Z",
+    "versionId": "15a8bd5c-5db4-4bb2-8df6-b68d84eb7fa6",
+    "workflowId": "S2oU9ggilqJrFCxm",
+    "nodes": [
+      {
+        "parameters": {
+          "formTitle": "DRAGEN QC v2 — Örnek Seçici",
+          "formDescription": "İşlenecek run_id'leri gir (birden çoksa virgülle ayır). Her batch (sample_project) için CES/WES/WES+mt/HCS v2 kitlerinden 3 rastgele örnek QC kuyruğuna eklenir.",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "run_ids",
+                "fieldType": "text",
+                "requiredField": true,
+                "placeholder": "260522_A01228_0288_AHW77FDSXF, 260522_A01978_0180_..."
+              }
+            ]
+          },
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "Run Input Form",
+        "name": "Run Input Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.3,
+        "position": [
+          -600,
+          0
+        ],
+        "webhookId": "a7c1f3e0-9b2d-4c55-8e10-2f6b1d4a7e90"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH eligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (\n          SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x\n        )\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (\n      SELECT 1 FROM data_operations dop\n      WHERE dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n        AND dop.status_concept_ref IN (24, 26, 29)\n    )\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT read_ref, 6, 24, sample_project\nFROM eligible\nWHERE rn <= 3\nRETURNING uniqueref, read_ref, batch_source_value;",
+          "options": {}
+        },
+        "id": "Select & Queue",
+        "name": "Select & Queue",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -340,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5678/webhook/dragen-qc-v2-koza",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "Kick Koza",
+        "name": "Kick Koza",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -100,
+          -80
+        ],
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5678/webhook/dragen-qc-v2-sapiens",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "Kick Sapiens",
+        "name": "Kick Sapiens",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          -100,
+          80
+        ],
+        "onError": "continueRegularOutput"
+      }
+    ],
+    "connections": {
+      "Run Input Form": {
+        "main": [
+          [
+            {
+              "node": "Select & Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select & Queue": {
+        "main": [
+          [
+            {
+              "node": "Kick Koza",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Kick Sapiens",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 15a8bd5c",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "30-05-2026/0:00",
+  "fileName": "DRAGEN QC v2 - Selector.json"
+}
