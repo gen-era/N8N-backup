@@ -1,0 +1,1785 @@
+{
+  "updatedAt": "2026-05-30T09:44:06.627Z",
+  "createdAt": "2026-05-30T05:53:43.483Z",
+  "id": "p8NYmUwJkEVaDlyp",
+  "name": "DRAGEN QC v2 - Sapiens",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "When Executed by Another Workflow",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+      },
+      "id": "Check DRAGEN Idle",
+      "name": "Check DRAGEN Idle",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        0
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "ibmyt2kAsGpHbe7o",
+          "name": "Sapiens DRAGEN 2 - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dabc8de2-b277-47dc-9ff3-e277c080c4ab",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "DRAGEN Idle?",
+      "name": "DRAGEN Idle?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -840,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref = 6\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref = 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nORDER BY cl.data_op_ref;",
+        "options": {}
+      },
+      "id": "Claim All Pending",
+      "name": "Claim All Pending",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -620,
+        0
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+      },
+      "id": "Attach BED",
+      "name": "Attach BED",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "Loop Samples",
+      "name": "Loop Samples",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -180,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=fdfind \"{{ $('Loop Samples').item.json.id_source_value }}\" /mnt/illuminastorage/fastq_folder/ --max-depth 1 | paste -sd ',' "
+      },
+      "id": "Find Conversion Path",
+      "name": "Find Conversion Path",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        60,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Loop Samples').item.json.lane == 0 ? \n   `fdfind \"${$('Loop Samples').item.json.sample_id}_\" ${$('Find Conversion Path').item.json.stdout}` : \n   `fdfind \"${$('Loop Samples').item.json.sample_id}_.*_L00${$('Loop Samples').item.json.lane}_\" ${$('Find Conversion Path').item.json.stdout}` \n}}"
+      },
+      "id": "Find FASTQ Paths",
+      "name": "Find FASTQ Paths",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        280,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1id",
+              "name": "r1",
+              "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R1_')) }}",
+              "type": "string"
+            },
+            {
+              "id": "r2id",
+              "name": "r2",
+              "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R2_')) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Set R1/R2 Paths",
+      "name": "Set R1/R2 Paths",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=export TERM=xterm\nOUT=\"/staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}\"\nmkdir -p \"$OUT\"\n\n/opt/dragen/4.5.4/bin/dragen \\\n-r /staging/human/reference/hg38_v12_linear \\\n--validate-pangenome-reference=false \\\n--output-directory \"$OUT\" \\\n--output-file-prefix \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Set R1/R2 Paths').item.json.r1 }}\" \\\n-2 \"{{ $('Set R1/R2 Paths').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/qc/beds/{{ $('Loop Samples').item.json.bed_file_path }}"
+      },
+      "id": "Run DRAGEN QC",
+      "name": "Run DRAGEN QC",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        720,
+        120
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "ibmyt2kAsGpHbe7o",
+          "name": "Sapiens DRAGEN 2 - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bb840f57-95b6-4289-87ab-e5849f99d603",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "syntax error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ceeb7c4e-c628-4bd6-b37f-787a45532514",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "ERROR",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "64a60ef3-4626-489b-a7d7-37128b1f66c3",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b72a9419-d6bb-4874-9938-392f32f8f34c",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "fatal error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "dda9df5b-dbad-4cfb-8070-bcc60457be76",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Caught signal Aborted",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "74c70d17-0e0b-4dcb-986e-5e0b881d4dc2",
+              "leftValue": "={{ $json.stderr }}",
+              "rightValue": "Please run sosreport",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "Errored?",
+      "name": "Errored?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        940,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "command": "=# Değişkenler\nOUTPUT_DIR=\"/staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}\"\nSAMPLE=\"{{ $('Loop Samples').item.json.sample_id }}\"\n\n# Önceki input değerlerini al\nLANE=\"{{ $('Loop Samples').item.json.lane }}\"\nR1=\"{{ $('Set R1/R2 Paths').item.json.r1 }}\"\nR2=\"{{ $('Set R1/R2 Paths').item.json.r2 }}\"\nBATCH_SOURCE=\"{{ $('Loop Samples').item.json.sample_project }}\"\nRUN_REF=\"{{ $('Loop Samples').item.json.run_ref }}\"\nCONVERSION_REF=\"{{ $('Loop Samples').item.json.conversion_ref }}\"\nCONVERSION_ID=\"{{ $('Loop Samples').item.json.id_source_value }}\"\n\n# Log Data Op node'undan data_op_ref al\nDATA_OP_REF=\"{{ $('Loop Samples').item.json.data_op_ref }}\"\n\n# Dosya yolları\nMAPPING_FILE=\"${OUTPUT_DIR}/${SAMPLE}.mapping_metrics.csv\"\nCOVERAGE_FILE=\"${OUTPUT_DIR}/${SAMPLE}.qc-coverage-region-1_coverage_metrics.csv\"\n\n# Mapping metrics\ntotal_reads=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Total input reads,/ {print int($4/2); exit}' \"$MAPPING_FILE\")\ndup_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Number of duplicate marked reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nmapped_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Mapped reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nq30_bases=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Q30 bases,/ {print $5; exit}' \"$MAPPING_FILE\")\ninsert_length_mean=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Insert length: mean,/ {print $4; exit}' \"$MAPPING_FILE\")\nhq_mapq_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Reads with MAPQ \\[40:inf\\),/ {print $5; exit}' \"$MAPPING_FILE\")\n\n# Coverage metrics\ncoverage_uniformity_20pct=$(awk -F',' '/^COVERAGE SUMMARY,,Uniformity of coverage \\(PCT > 0\\.2\\*mean\\) over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\nmean_coverage=$(awk -F',' '/^COVERAGE SUMMARY,,Average alignment coverage over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_20x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  20x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_50x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  50x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_100x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 100x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_500x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 500x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\n\n# JSON formatında çıktı\ncat <<EOF\n{\n  \"sample_id\": \"$SAMPLE\",\n  \"lane\": ${LANE:-null},\n  \"R1\": \"$R1\",\n  \"R2\": \"$R2\",\n  \"batch_source_value\": \"$BATCH_SOURCE\",\n  \"run_ref\": \"${RUN_REF}\",\n  \"conversion_ref\": \"${CONVERSION_REF}\",\n  \"conversion_id\": \"$CONVERSION_ID\",\n  \"data_op_ref\": \"${DATA_OP_REF}\",\n  \"total_reads\": ${total_reads:-null},\n  \"duplicate_pct\": ${dup_pct:-null},\n  \"mapped_pct\": ${mapped_pct:-null},\n  \"q30_bases_pct\": ${q30_bases:-null},\n  \"insert_length_mean\": ${insert_length_mean:-null},\n  \"hq_mapq_pct\": ${hq_mapq_pct:-null},\n  \"coverage_uniformity_20pct\": ${coverage_uniformity_20pct:-null},\n  \"aligned_bases_qc\": ${aligned_bases_qc:-null},\n  \"aligned_bases_qc_pct\": ${aligned_bases_qc_pct:-null},\n  \"aligned_reads_qc\": ${aligned_reads_qc:-null},\n  \"aligned_reads_qc_pct\": ${aligned_reads_qc_pct:-null},\n  \"mean_coverage\": ${mean_coverage:-null},\n  \"coverage_20x_pct\": ${coverage_20x:-null},\n  \"coverage_50x_pct\": ${coverage_50x:-null},\n  \"coverage_100x_pct\": ${coverage_100x:-null},\n  \"coverage_500x_pct\": ${coverage_500x:-null}\n}\nEOF"
+      },
+      "id": "Parse QC Metrics",
+      "name": "Parse QC Metrics",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        220
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "ibmyt2kAsGpHbe7o",
+          "name": "Sapiens DRAGEN 2 - Root User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "concepts",
+          "mode": "list",
+          "cachedResultName": "concepts"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "concept_class_id",
+              "value": "Analysis Metric"
+            },
+            {
+              "column": "vocabulary_id",
+              "value": "Illumina"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Get QC Concepts",
+      "name": "Get QC Concepts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1380,
+        120
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+      },
+      "id": "Flatten Metrics JSON",
+      "name": "Flatten Metrics JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "concept_name",
+              "field2": "parameter"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Merge By Concept Name",
+      "name": "Merge By Concept Name",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1600,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "measurement_reads",
+          "mode": "list",
+          "cachedResultName": "measurement_reads"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "measurement_concept_ref": "={{ $json.uniqueref }}",
+            "value_as_number": "={{ $json.value }}",
+            "data_operations_ref": "={{ $json.data_op_ref }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "measurement_concept_ref",
+              "displayName": "measurement_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "value_as_number",
+              "displayName": "value_as_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data_operations_ref",
+              "displayName": "data_operations_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "Insert Measurements",
+      "name": "Insert Measurements",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1820,
+        220
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Loop Samples').item.json.data_op_ref }}",
+            "status_concept_ref": 29,
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "Mark Data Op Completed",
+      "name": "Mark Data Op Completed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2040,
+        220
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uniqueref": "={{ $('Loop Samples').item.json.data_op_ref }}",
+            "status_concept_ref": 27,
+            "error_text": "={{ ($('Run DRAGEN QC').item.json.stderr || '').toString().slice(0, 1000) }}",
+            "performed_at": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "uniqueref"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "Mark Failed",
+      "name": "Mark Failed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1160,
+        -60
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=rm -rf /staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}"
+      },
+      "id": "Cleanup Output",
+      "name": "Cleanup Output",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        120
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "ibmyt2kAsGpHbe7o",
+          "name": "Sapiens DRAGEN 2 - Root User"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Check DRAGEN Idle": {
+      "main": [
+        [
+          {
+            "node": "DRAGEN Idle?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DRAGEN Idle?": {
+      "main": [
+        [
+          {
+            "node": "Claim All Pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Claim All Pending": {
+      "main": [
+        [
+          {
+            "node": "Attach BED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach BED": {
+      "main": [
+        [
+          {
+            "node": "Loop Samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Samples": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Find Conversion Path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Conversion Path": {
+      "main": [
+        [
+          {
+            "node": "Find FASTQ Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find FASTQ Paths": {
+      "main": [
+        [
+          {
+            "node": "Set R1/R2 Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set R1/R2 Paths": {
+      "main": [
+        [
+          {
+            "node": "Run DRAGEN QC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run DRAGEN QC": {
+      "main": [
+        [
+          {
+            "node": "Errored?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Errored?": {
+      "main": [
+        [
+          {
+            "node": "Mark Failed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse QC Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse QC Metrics": {
+      "main": [
+        [
+          {
+            "node": "Get QC Concepts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Flatten Metrics JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get QC Concepts": {
+      "main": [
+        [
+          {
+            "node": "Merge By Concept Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flatten Metrics JSON": {
+      "main": [
+        [
+          {
+            "node": "Merge By Concept Name",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge By Concept Name": {
+      "main": [
+        [
+          {
+            "node": "Insert Measurements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Measurements": {
+      "main": [
+        [
+          {
+            "node": "Mark Data Op Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Data Op Completed": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Failed": {
+      "main": [
+        [
+          {
+            "node": "Cleanup Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup Output": {
+      "main": [
+        [
+          {
+            "node": "Loop Samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Check DRAGEN Idle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
+  "activeVersionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-30T05:53:43.489Z",
+      "createdAt": "2026-05-30T05:53:43.489Z",
+      "role": "workflow:owner",
+      "workflowId": "p8NYmUwJkEVaDlyp",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-05-30T09:44:06.629Z",
+    "createdAt": "2026-05-30T09:44:06.629Z",
+    "versionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
+    "workflowId": "p8NYmUwJkEVaDlyp",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "When Executed by Another Workflow",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -1280,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "command": "ps aux | grep '/opt/dragen/.*/bin/dragen ' | grep -v grep | wc -l"
+        },
+        "id": "Check DRAGEN Idle",
+        "name": "Check DRAGEN Idle",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -1060,
+          0
+        ],
+        "credentials": {
+          "sshPassword": {
+            "id": "ibmyt2kAsGpHbe7o",
+            "name": "Sapiens DRAGEN 2 - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "dabc8de2-b277-47dc-9ff3-e277c080c4ab",
+                "leftValue": "={{ $json.stdout }}",
+                "rightValue": "0",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "DRAGEN Idle?",
+        "name": "DRAGEN Idle?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          -840,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref = 6\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref = 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nORDER BY cl.data_op_ref;",
+          "options": {}
+        },
+        "id": "Claim All Pending",
+        "name": "Claim All Pending",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -620,
+          0
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+        },
+        "id": "Attach BED",
+        "name": "Attach BED",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -400,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "id": "Loop Samples",
+        "name": "Loop Samples",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -180,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=fdfind \"{{ $('Loop Samples').item.json.id_source_value }}\" /mnt/illuminastorage/fastq_folder/ --max-depth 1 | paste -sd ',' "
+        },
+        "id": "Find Conversion Path",
+        "name": "Find Conversion Path",
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          60,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "command": "={{ $('Loop Samples').item.json.lane == 0 ? \n   `fdfind \"${$('Loop Samples').item.json.sample_id}_\" ${$('Find Conversion Path').item.json.stdout}` : \n   `fdfind \"${$('Loop Samples').item.json.sample_id}_.*_L00${$('Loop Samples').item.json.lane}_\" ${$('Find Conversion Path').item.json.stdout}` \n}}"
+        },
+        "id": "Find FASTQ Paths",
+        "name": "Find FASTQ Paths",
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          280,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "r1id",
+                "name": "r1",
+                "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R1_')) }}",
+                "type": "string"
+              },
+              {
+                "id": "r2id",
+                "name": "r2",
+                "value": "={{ $json.stdout.split('\\n').map(line => line.trim()).find(line => line.includes('_R2_')) }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "Set R1/R2 Paths",
+        "name": "Set R1/R2 Paths",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          500,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=export TERM=xterm\nOUT=\"/staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}\"\nmkdir -p \"$OUT\"\n\n/opt/dragen/4.5.4/bin/dragen \\\n-r /staging/human/reference/hg38_v12_linear \\\n--validate-pangenome-reference=false \\\n--output-directory \"$OUT\" \\\n--output-file-prefix \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--enable-duplicate-marking=true \\\n-1 \"{{ $('Set R1/R2 Paths').item.json.r1 }}\" \\\n-2 \"{{ $('Set R1/R2 Paths').item.json.r2 }}\" \\\n--RGSM \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--RGID \"{{ $('Loop Samples').item.json.sample_id }}\" \\\n--force \\\n--enable-map-align-output true \\\n--qc-coverage-region-1 /staging/qc/beds/{{ $('Loop Samples').item.json.bed_file_path }}"
+        },
+        "id": "Run DRAGEN QC",
+        "name": "Run DRAGEN QC",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          720,
+          120
+        ],
+        "credentials": {
+          "sshPassword": {
+            "id": "ibmyt2kAsGpHbe7o",
+            "name": "Sapiens DRAGEN 2 - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "bb840f57-95b6-4289-87ab-e5849f99d603",
+                "leftValue": "={{ $json.stderr }}",
+                "rightValue": "syntax error",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              },
+              {
+                "id": "ceeb7c4e-c628-4bd6-b37f-787a45532514",
+                "leftValue": "={{ $json.stderr }}",
+                "rightValue": "ERROR",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              },
+              {
+                "id": "64a60ef3-4626-489b-a7d7-37128b1f66c3",
+                "leftValue": "={{ $json.error }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "object",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "b72a9419-d6bb-4874-9938-392f32f8f34c",
+                "leftValue": "={{ $json.stderr }}",
+                "rightValue": "fatal error",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              },
+              {
+                "id": "dda9df5b-dbad-4cfb-8070-bcc60457be76",
+                "leftValue": "={{ $json.stderr }}",
+                "rightValue": "Caught signal Aborted",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              },
+              {
+                "id": "74c70d17-0e0b-4dcb-986e-5e0b881d4dc2",
+                "leftValue": "={{ $json.stderr }}",
+                "rightValue": "Please run sosreport",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "options": {}
+        },
+        "id": "Errored?",
+        "name": "Errored?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          940,
+          120
+        ]
+      },
+      {
+        "parameters": {
+          "command": "=# Değişkenler\nOUTPUT_DIR=\"/staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}\"\nSAMPLE=\"{{ $('Loop Samples').item.json.sample_id }}\"\n\n# Önceki input değerlerini al\nLANE=\"{{ $('Loop Samples').item.json.lane }}\"\nR1=\"{{ $('Set R1/R2 Paths').item.json.r1 }}\"\nR2=\"{{ $('Set R1/R2 Paths').item.json.r2 }}\"\nBATCH_SOURCE=\"{{ $('Loop Samples').item.json.sample_project }}\"\nRUN_REF=\"{{ $('Loop Samples').item.json.run_ref }}\"\nCONVERSION_REF=\"{{ $('Loop Samples').item.json.conversion_ref }}\"\nCONVERSION_ID=\"{{ $('Loop Samples').item.json.id_source_value }}\"\n\n# Log Data Op node'undan data_op_ref al\nDATA_OP_REF=\"{{ $('Loop Samples').item.json.data_op_ref }}\"\n\n# Dosya yolları\nMAPPING_FILE=\"${OUTPUT_DIR}/${SAMPLE}.mapping_metrics.csv\"\nCOVERAGE_FILE=\"${OUTPUT_DIR}/${SAMPLE}.qc-coverage-region-1_coverage_metrics.csv\"\n\n# Mapping metrics\ntotal_reads=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Total input reads,/ {print int($4/2); exit}' \"$MAPPING_FILE\")\ndup_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Number of duplicate marked reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nmapped_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Mapped reads,/ {print $5; exit}' \"$MAPPING_FILE\")\nq30_bases=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Q30 bases,/ {print $5; exit}' \"$MAPPING_FILE\")\ninsert_length_mean=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Insert length: mean,/ {print $4; exit}' \"$MAPPING_FILE\")\nhq_mapq_pct=$(awk -F',' '/^MAPPING\\/ALIGNING SUMMARY,,Reads with MAPQ \\[40:inf\\),/ {print $5; exit}' \"$MAPPING_FILE\")\n\n# Coverage metrics\ncoverage_uniformity_20pct=$(awk -F',' '/^COVERAGE SUMMARY,,Uniformity of coverage \\(PCT > 0\\.2\\*mean\\) over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_bases_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned bases in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\naligned_reads_qc_pct=$(awk -F',' '/^COVERAGE SUMMARY,,Aligned reads in QC coverage region,/ {print $5; exit}' \"$COVERAGE_FILE\")\nmean_coverage=$(awk -F',' '/^COVERAGE SUMMARY,,Average alignment coverage over QC coverage region,/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_20x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  20x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_50x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[  50x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_100x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 100x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\ncoverage_500x=$(awk -F',' '/^COVERAGE SUMMARY,,PCT of QC coverage region with coverage \\[ 500x: inf\\),/ {print $4; exit}' \"$COVERAGE_FILE\")\n\n# JSON formatında çıktı\ncat <<EOF\n{\n  \"sample_id\": \"$SAMPLE\",\n  \"lane\": ${LANE:-null},\n  \"R1\": \"$R1\",\n  \"R2\": \"$R2\",\n  \"batch_source_value\": \"$BATCH_SOURCE\",\n  \"run_ref\": \"${RUN_REF}\",\n  \"conversion_ref\": \"${CONVERSION_REF}\",\n  \"conversion_id\": \"$CONVERSION_ID\",\n  \"data_op_ref\": \"${DATA_OP_REF}\",\n  \"total_reads\": ${total_reads:-null},\n  \"duplicate_pct\": ${dup_pct:-null},\n  \"mapped_pct\": ${mapped_pct:-null},\n  \"q30_bases_pct\": ${q30_bases:-null},\n  \"insert_length_mean\": ${insert_length_mean:-null},\n  \"hq_mapq_pct\": ${hq_mapq_pct:-null},\n  \"coverage_uniformity_20pct\": ${coverage_uniformity_20pct:-null},\n  \"aligned_bases_qc\": ${aligned_bases_qc:-null},\n  \"aligned_bases_qc_pct\": ${aligned_bases_qc_pct:-null},\n  \"aligned_reads_qc\": ${aligned_reads_qc:-null},\n  \"aligned_reads_qc_pct\": ${aligned_reads_qc_pct:-null},\n  \"mean_coverage\": ${mean_coverage:-null},\n  \"coverage_20x_pct\": ${coverage_20x:-null},\n  \"coverage_50x_pct\": ${coverage_50x:-null},\n  \"coverage_100x_pct\": ${coverage_100x:-null},\n  \"coverage_500x_pct\": ${coverage_500x:-null}\n}\nEOF"
+        },
+        "id": "Parse QC Metrics",
+        "name": "Parse QC Metrics",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          1160,
+          220
+        ],
+        "credentials": {
+          "sshPassword": {
+            "id": "ibmyt2kAsGpHbe7o",
+            "name": "Sapiens DRAGEN 2 - Root User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "concepts",
+            "mode": "list",
+            "cachedResultName": "concepts"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "concept_class_id",
+                "value": "Analysis Metric"
+              },
+              {
+                "column": "vocabulary_id",
+                "value": "Illumina"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "Get QC Concepts",
+        "name": "Get QC Concepts",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1380,
+          120
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+        },
+        "id": "Flatten Metrics JSON",
+        "name": "Flatten Metrics JSON",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1380,
+          320
+        ]
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "concept_name",
+                "field2": "parameter"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "Merge By Concept Name",
+        "name": "Merge By Concept Name",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1600,
+          220
+        ]
+      },
+      {
+        "parameters": {
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "measurement_reads",
+            "mode": "list",
+            "cachedResultName": "measurement_reads"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "measurement_concept_ref": "={{ $json.uniqueref }}",
+              "value_as_number": "={{ $json.value }}",
+              "data_operations_ref": "={{ $json.data_op_ref }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "measurement_concept_ref",
+                "displayName": "measurement_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "value_as_number",
+                "displayName": "value_as_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "data_operations_ref",
+                "displayName": "data_operations_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "Insert Measurements",
+        "name": "Insert Measurements",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1820,
+          220
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $('Loop Samples').item.json.data_op_ref }}",
+              "status_concept_ref": 29,
+              "performed_at": "={{ $now.toISO() }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "Mark Data Op Completed",
+        "name": "Mark Data Op Completed",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2040,
+          220
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $('Loop Samples').item.json.data_op_ref }}",
+              "status_concept_ref": 27,
+              "error_text": "={{ ($('Run DRAGEN QC').item.json.stderr || '').toString().slice(0, 1000) }}",
+              "performed_at": "={{ $now.toISO() }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "Mark Failed",
+        "name": "Mark Failed",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1160,
+          -60
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=rm -rf /staging/qc/output/{{ $('Loop Samples').item.json.sample_id }}"
+        },
+        "id": "Cleanup Output",
+        "name": "Cleanup Output",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          2260,
+          120
+        ],
+        "credentials": {
+          "sshPassword": {
+            "id": "ibmyt2kAsGpHbe7o",
+            "name": "Sapiens DRAGEN 2 - Root User"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Check DRAGEN Idle": {
+        "main": [
+          [
+            {
+              "node": "DRAGEN Idle?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DRAGEN Idle?": {
+        "main": [
+          [
+            {
+              "node": "Claim All Pending",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Claim All Pending": {
+        "main": [
+          [
+            {
+              "node": "Attach BED",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Attach BED": {
+        "main": [
+          [
+            {
+              "node": "Loop Samples",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Samples": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Find Conversion Path",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Conversion Path": {
+        "main": [
+          [
+            {
+              "node": "Find FASTQ Paths",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find FASTQ Paths": {
+        "main": [
+          [
+            {
+              "node": "Set R1/R2 Paths",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set R1/R2 Paths": {
+        "main": [
+          [
+            {
+              "node": "Run DRAGEN QC",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Run DRAGEN QC": {
+        "main": [
+          [
+            {
+              "node": "Errored?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Errored?": {
+        "main": [
+          [
+            {
+              "node": "Mark Failed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Parse QC Metrics",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse QC Metrics": {
+        "main": [
+          [
+            {
+              "node": "Get QC Concepts",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Flatten Metrics JSON",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get QC Concepts": {
+        "main": [
+          [
+            {
+              "node": "Merge By Concept Name",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Flatten Metrics JSON": {
+        "main": [
+          [
+            {
+              "node": "Merge By Concept Name",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge By Concept Name": {
+        "main": [
+          [
+            {
+              "node": "Insert Measurements",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Insert Measurements": {
+        "main": [
+          [
+            {
+              "node": "Mark Data Op Completed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mark Data Op Completed": {
+        "main": [
+          [
+            {
+              "node": "Cleanup Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Mark Failed": {
+        "main": [
+          [
+            {
+              "node": "Cleanup Output",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cleanup Output": {
+        "main": [
+          [
+            {
+              "node": "Loop Samples",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Check DRAGEN Idle",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "31-05-2026/0:00",
+  "fileName": "DRAGEN QC v2 - Sapiens.json"
+}
