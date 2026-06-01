@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-30T10:58:50.927Z",
+  "updatedAt": "2026-05-31T13:45:42.840Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,7 +43,7 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260508_A01228_0283_AHG5GNDMX2",
+              "value": "260513_VH01138_5_AACYVVVHV, 260513_A01228_0284_AHG7CWDMX2",
               "type": "string"
             }
           ]
@@ -198,7 +198,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "42018320-cf14-4bee-8726-7a65ed622ce1",
+  "versionId": "c3c18b7a-4b8f-4318-a10a-b4fab6691bf3",
   "activeVersionId": "e17079d3-54ae-4cf9-a3ec-bd27f0ddceb2",
   "triggerCount": 0,
   "shared": [
@@ -406,6 +406,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "31-05-2026/0:00",
+  "commitDate": "01-06-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
