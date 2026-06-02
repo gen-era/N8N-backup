@@ -1,0 +1,106 @@
+{
+  "updatedAt": "2026-06-01T08:05:32.731Z",
+  "createdAt": "2026-06-01T08:05:32.731Z",
+  "id": "9z4hRpQRHcHn1c2K",
+  "name": "My workflow 16",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "path"
+            },
+            {
+              "name": "kit_ref"
+            },
+            {
+              "name": "performin_ref"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e6e7738e-f17c-48f0-b0a2-6c62ef0f06cb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -32
+      ],
+      "id": "77d3b9df-dbc8-474e-9b55-6e60e16bdddc",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "066bf570-732c-45ed-a4df-aa773f286595",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "727916d2-20d2-4b39-bd23-c6f2876f0ffc",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-01T08:05:32.736Z",
+      "createdAt": "2026-06-01T08:05:32.736Z",
+      "role": "workflow:owner",
+      "workflowId": "9z4hRpQRHcHn1c2K",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "02-06-2026/0:00",
+  "fileName": "My workflow 16.json"
+}
