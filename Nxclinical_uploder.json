@@ -1,0 +1,114 @@
+{
+  "updatedAt": "2026-06-02T15:54:42.408Z",
+  "createdAt": "2026-06-01T08:05:32.731Z",
+  "id": "9z4hRpQRHcHn1c2K",
+  "name": "Nxclinical_uploder",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "path"
+            },
+            {
+              "name": "server"
+            },
+            {
+              "name": "port"
+            },
+            {
+              "name": "user"
+            },
+            {
+              "name": "password"
+            },
+            {
+              "name": "overrideExisting",
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "e6e7738e-f17c-48f0-b0a2-6c62ef0f06cb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "command": "=export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/NxClinicalSampleImporter\" -server={{ $json.server }} -port={{ $json.port }} -user={{ $json.user }} -password={{ $json.password }} -descriptorFile=\"{{ $json.path }}\" -overrideExisting={{ $json.overrideExisting }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "4a40fe2d-1b17-49aa-837f-fbd6a451f2dd",
+      "name": "Execute Command"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "path": "/home/genera/nxclinical/batch.txt",
+          "server": "194.15.102.33",
+          "port": "8443",
+          "user": "handebeklen",
+          "password": "hande123",
+          "overrideExisting": "false"
+        }
+      }
+    ]
+  },
+  "versionId": "83c9064b-2a30-487d-b8af-4865d32c47ca",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-01T08:05:32.736Z",
+      "createdAt": "2026-06-01T08:05:32.736Z",
+      "role": "workflow:owner",
+      "workflowId": "9z4hRpQRHcHn1c2K",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "03-06-2026/0:00",
+  "fileName": "Nxclinical_uploder.json"
+}
