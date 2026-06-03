@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-30T05:16:29.581Z",
+  "updatedAt": "2026-06-02T11:54:15.385Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -591,7 +591,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT c.uniqueref AS conversion_ref,\n       c.run_ref,\n       c.status_concept_ref,\n       c.tool_concept_ref,\n       r.run_id\n  FROM conversions c\n  JOIN runs r ON r.uniqueref = c.run_ref\n WHERE r.run_id = '{{ $('Trigger').item.json.run_id }}'\n   AND c.tool_concept_ref = 108      -- bcl-convert\n   AND c.status_concept_ref = 29     -- Completed\n ORDER BY c.uniqueref DESC\n LIMIT 1;",
+        "query": "SELECT c.uniqueref AS conversion_ref,\n       c.run_ref,\n       c.status_concept_ref,\n       c.tool_concept_ref,\n       r.run_id\n  FROM conversions c\n  JOIN runs r ON r.uniqueref = c.run_ref\n WHERE r.run_id = '{{ $('Trigger').item.json.run_id }}'\n   AND c.tool_concept_ref = 112      -- bcl-convert\n   AND c.status_concept_ref = 29     -- Completed\n ORDER BY c.uniqueref DESC\n LIMIT 1;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -886,7 +886,7 @@
             {
               "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
               "name": "sample_ids",
-              "value": "M26-YCES-4532\tHP26-YCES-359\tIE26-YCES-1170\tSE26-YCES-2541\tSE26-YCES-2544\tSE26-YCES-2547\tU26-YCES-8209\tU26-YCES-8214\tU26-YCES-8219 KS26-YCES-1172\tKS26-YCES-1175\tSE26-YCES-2533\tU26-YCES-8191\tU26-YCES-8196\tU26-YCES-8203\tGU26-YCES-7443\tGU26-YCES-7448\tM26-YCES-4528 IE26-YTG-38\tK26-YTG-30\tM26-YTG-46\t\t\t\t\t\t M26-YBRCA-610\tIE26-YBRCA-77\tHP26-YBRCA-45\t\t\t\t\t\t U26-YTG-36\tO26-YTG-4\tGU26-YTG-17\t\t\t\t\t\t M26-YCES-4538\tM26-YCES-4542\tK26-YCES-97\tZK26-YCES-5456\tZK26-YCES-5461\tZK26-YCES-5466\t\t\t IE26-YHCS-2654\tIE26-YHCS-2660\tIE26-YHCS-2663\tSE26-YHCS-1100\tU26-YBRCA-334\tU26-YHCS-3308",
+              "value": "VP26",
               "type": "string"
             }
           ]
@@ -1220,12 +1220,12 @@
     "Trigger": [
       {
         "json": {
-          "run_id": "260506_A01228_0281_AHG5LVDMX2"
+          "run_id": "260522_A01978_0179_AHYJY2DSXF"
         }
       }
     ]
   },
-  "versionId": "281999dd-ecbb-4043-9eb7-4047cd4622f0",
+  "versionId": "30c32098-4ce2-4890-9eb1-27ef6c5dd9b3",
   "activeVersionId": "06fd5b3a-4028-4218-933e-88fbd8d570e1",
   "triggerCount": 0,
   "shared": [
@@ -2452,6 +2452,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "02-06-2026/0:00",
+  "commitDate": "03-06-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
