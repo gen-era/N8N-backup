@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-26T07:01:25.871Z",
+  "updatedAt": "2026-06-04T16:28:21.366Z",
   "createdAt": "2025-12-29T14:18:49.525Z",
   "id": "OaLTopm8qW98Uf6u",
   "name": "Archer_auto_upload",
@@ -160,7 +160,7 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        6352,
+        6560,
         672
       ],
       "id": "ac2e5b0b-12ca-4413-a708-d5073499725b"
@@ -239,7 +239,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2560,
         160
       ],
       "id": "2ef2ce8c-ba7e-4df4-8b2a-8c586f4bd649",
@@ -269,7 +269,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2560,
+        2768,
         336
       ],
       "id": "6c4e8da4-3d03-498a-9c6a-ce238729ee25",
@@ -284,7 +284,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2816,
+        3024,
         208
       ],
       "id": "37c4c2ab-b42d-4bd1-b876-7b278bfb2f1b",
@@ -297,7 +297,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        4192,
+        4400,
         240
       ],
       "id": "11676ab8-7ec7-4276-83db-b488ea7b8c5e",
@@ -313,7 +313,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        3776,
+        3984,
         240
       ],
       "id": "8906dd8c-90fa-455d-a057-9d09398b3224",
@@ -327,7 +327,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        3136,
+        3344,
         112
       ],
       "id": "63f2ced1-0e6b-4936-9bda-211c83469eb0",
@@ -340,7 +340,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4768,
+        4976,
         208
       ],
       "id": "837719ff-b019-49be-9ae5-b1538b96e90d",
@@ -355,7 +355,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4736,
+        4944,
         512
       ],
       "id": "817affe4-ebb3-459e-9932-d0c187d2051f",
@@ -369,7 +369,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        4944,
+        5152,
         512
       ],
       "id": "a1171edf-a49d-4650-97ed-388b245dd2a0",
@@ -384,7 +384,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        5152,
+        5360,
         512
       ],
       "id": "7278bc3c-894b-4a5d-8fb4-82687083564b",
@@ -397,7 +397,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        5360,
+        5568,
         512
       ],
       "id": "9bc4aa1e-45cc-4b86-8a6d-088632bc83b1",
@@ -569,7 +569,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        5856,
+        6064,
         512
       ],
       "id": "d802ae8b-48b1-40cf-9726-ab873ead2462",
@@ -589,7 +589,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5616,
+        5824,
         512
       ],
       "id": "e08a9331-c89e-4568-a6e5-7e74ccbe1c57",
@@ -717,7 +717,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        6064,
+        6272,
         512
       ],
       "id": "2be22206-f4cf-4d76-93b7-31cb3294afaa",
@@ -756,7 +756,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3408,
+        3616,
         112
       ],
       "id": "e06348d1-fbba-46e5-94a9-7ce277c3509b",
@@ -773,7 +773,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        3792,
+        4000,
         64
       ],
       "id": "cd1fad1b-d16f-44d9-930e-dda1a10ee1fc",
@@ -792,7 +792,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        4160,
+        4368,
         64
       ],
       "id": "fd49dd8b-3573-4081-8de9-cad4ec02f8de",
@@ -831,7 +831,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4992,
+        5200,
         208
       ],
       "id": "6b69f075-3633-4e48-80ba-f048933efb14",
@@ -842,7 +842,7 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        5232,
+        5440,
         224
       ],
       "id": "31b7f47c-ee6e-4d55-9f9d-1ad5aaacaee9",
@@ -902,6 +902,63 @@
       "id": "44da68dd-7a26-490c-9b4c-fda7483ebba2",
       "name": "Code in JavaScript4",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c126c9b5-ef5c-4cfc-a53d-837775b454df",
+              "leftValue": "={{ $json.platform_site_password }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2544,
+        336
+      ],
+      "id": "4152c9cb-2173-4a3d-8b7f-50abd7f7e000",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com",
+        "subject": "credential error",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2784,
+        544
+      ],
+      "id": "409d2147-0d0c-45e1-96e1-5fd41c3b2b0b",
+      "name": "Send email",
+      "webhookId": "94f0dd62-e3ab-443e-88c1-ccf9a113efc9",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
@@ -1023,7 +1080,7 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "If2",
             "type": "main",
             "index": 0
           }
@@ -1268,6 +1325,24 @@
           }
         ]
       ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1278,7 +1353,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "7d5806e7-a491-4dc5-a0c1-dcbef20ee5b4",
+  "versionId": "af3bb376-d538-470d-8769-3a6f183202d2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1292,6 +1367,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "04-06-2026/0:00",
+  "commitDate": "05-06-2026/0:00",
   "fileName": "Archer_auto_upload.json"
 }
