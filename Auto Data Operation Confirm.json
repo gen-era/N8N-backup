@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-25T12:47:30.570Z",
+  "updatedAt": "2026-06-04T16:25:15.660Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "Auto Data Operation Confirm",
@@ -172,8 +172,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        880,
-        -128
+        864,
+        -96
       ],
       "id": "e2873247-40e8-4f1b-a217-dee61bd29d80",
       "name": "Build Failure Email Body",
@@ -194,7 +194,7 @@
       "typeVersion": 2.1,
       "position": [
         1104,
-        -128
+        -96
       ],
       "id": "8a20241e-a35f-4c46-abaf-b2810dbe70b7",
       "name": "Send QC Failure Email",
@@ -710,7 +710,7 @@
       "typeVersion": 2.1,
       "position": [
         1104,
-        -288
+        -272
       ],
       "id": "5555ea24-2b22-41d0-8bc2-3a41143d3204",
       "name": "Send QC Failure Email1",
@@ -914,13 +914,13 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "conversion_ref": 1032
+          "conversion_ref": 1033
         }
       }
     ]
   },
-  "versionId": "88285aff-221e-4a72-afb5-5ed6517c6351",
-  "activeVersionId": "2629a641-cf7f-47ae-b18e-06af9432efa3",
+  "versionId": "5dd5afdb-9f41-406b-a7f8-932c3b369f3a",
+  "activeVersionId": "7ce1712b-659e-4175-8eb5-281c9b7ef1ac",
   "triggerCount": 0,
   "shared": [
     {
@@ -932,9 +932,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-23T07:57:50.115Z",
-    "createdAt": "2026-05-23T07:57:50.115Z",
-    "versionId": "2629a641-cf7f-47ae-b18e-06af9432efa3",
+    "updatedAt": "2026-06-04T10:27:47.399Z",
+    "createdAt": "2026-06-04T10:27:47.399Z",
+    "versionId": "7ce1712b-659e-4175-8eb5-281c9b7ef1ac",
     "workflowId": "oja1t4300qVhTLyb",
     "nodes": [
       {
@@ -960,7 +960,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.r1_path,\n  r.r2_path,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  cs_req.care_site_source_value AS requester_short_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  idx.i7_code,\n  idx.i5_code,\n  idx_kit.name           AS index_kit_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN indices idx\n  ON idx.uniqueref = r.index_ref\nLEFT JOIN kits idx_kit\n  ON idx_kit.uniqueref = idx.kit_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
+          "query": "SELECT\n  r.uniqueref            AS read_ref,\n  r.sample_id,\n  r.reads,\n  r.r1_path,\n  r.r2_path,\n  r.kit_ref,\n  k.name                 AS kit_name,\n  k.producer             AS kit_producer,\n  k.required_se_reads,\n  r.requesting_caresite_ref,\n  cs_req.care_site_name  AS requester_name,\n  cs_req.care_site_source_value AS requester_short_name,\n  r.performing_caresite_ref,\n  cs_perf.care_site_name AS performing_name,\n  idx.i7_code,\n  idx.i5_code,\n  idx_kit.name           AS index_kit_name,\n  rec.recipe_ref,\n  rec.pipeline_id,\n  rec.account_id,\n  rec.recipe_count,\n  rec.recipe_options,\n  cred.cred_ref,\n  cred.cred_has_password,\n  NULLIF(concat_ws(', ',\n    CASE WHEN rec.account_id IS NULL OR rec.account_id = '' THEN 'recipe.account_id eksik' END,\n    CASE WHEN rec.pipeline_id IS NULL OR rec.pipeline_id = '' THEN 'recipe.pipeline_id eksik' END,\n    CASE WHEN cred.cred_ref IS NULL THEN 'account_id ile eslesen Archer credential yok' END,\n    CASE WHEN cred.cred_ref IS NOT NULL AND NOT cred.cred_has_password THEN 'Archer credential sifresi eksik' END\n  ), '') AS archer_config_error,\n  ru.run_id              AS run_id\nFROM reads r\nLEFT JOIN kits k\n  ON k.uniqueref = r.kit_ref\nLEFT JOIN care_site cs_req\n  ON cs_req.uniqueref = r.requesting_caresite_ref\nLEFT JOIN care_site cs_perf\n  ON cs_perf.uniqueref = r.performing_caresite_ref\nLEFT JOIN indices idx\n  ON idx.uniqueref = r.index_ref\nLEFT JOIN kits idx_kit\n  ON idx_kit.uniqueref = idx.kit_ref\nLEFT JOIN conversions cv\n  ON cv.uniqueref = r.conversion_ref\nLEFT JOIN runs ru\n  ON ru.uniqueref = cv.run_ref\nLEFT JOIN LATERAL (\n  SELECT\n    COUNT(*)                              AS recipe_count,\n    MIN(dor.uniqueref)                    AS recipe_ref,\n    MIN(dor.pipeline_id)                  AS pipeline_id,\n    MIN(dor.account_id)                   AS account_id,\n    json_agg(json_build_object(\n      'recipe_ref',    dor.uniqueref,\n      'pipeline_id',   dor.pipeline_id,\n      'pipeline_name', dor.pipeline_name\n    ) ORDER BY dor.uniqueref)             AS recipe_options\n  FROM data_operation_recipes dor\n  WHERE dor.kit_ref                  = r.kit_ref\n    AND dor.requesting_caresite_ref  = r.requesting_caresite_ref\n    AND dor.performing_caresite_ref  = r.performing_caresite_ref\n    AND dor.platform_concept_ref     IN (11, 12, 109, 398)\n) rec ON TRUE\nLEFT JOIN LATERAL (\n  SELECT\n    csc.uniqueref AS cred_ref,\n    (csc.platform_site_password IS NOT NULL AND csc.platform_site_password <> '') AS cred_has_password\n  FROM care_site_credentials csc\n  WHERE csc.platform_concept_ref = 12\n    AND csc.platform_site_id     = rec.account_id\n  ORDER BY (csc.platform_site_password IS NOT NULL AND csc.platform_site_password <> '') DESC, csc.is_active DESC, csc.uniqueref\n  LIMIT 1\n) cred ON TRUE\nLEFT JOIN data_operations dop\n  ON dop.read_ref = r.uniqueref\nWHERE r.conversion_ref = {{ $json.conversion_ref }}\n  AND dop.uniqueref IS NULL\nORDER BY r.sample_id;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1107,7 +1107,8 @@
           -128
         ],
         "id": "e2873247-40e8-4f1b-a217-dee61bd29d80",
-        "name": "Build Failure Email Body"
+        "name": "Build Failure Email Body",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1117,7 +1118,7 @@
           "html": "={{ $json.html }}",
           "options": {
             "appendAttribution": false,
-            "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+            "ccEmail": "can.holyavkin@gen-era.com.tr"
           }
         },
         "type": "n8n-nodes-base.emailSend",
@@ -1135,7 +1136,8 @@
             "id": "clTmxNgA7AqNrh5h",
             "name": "bioinf.notify@gen-era.tech"
           }
-        }
+        },
+        "disabled": true
       },
       {
         "parameters": {
@@ -1607,7 +1609,8 @@
           -240
         ],
         "id": "5bb835fe-a2c1-47a0-aef6-53190a9bac88",
-        "name": "Is Perf Umraniye"
+        "name": "Is Perf Umraniye",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1620,7 +1623,8 @@
           -272
         ],
         "id": "81ce42d8-030d-47c2-a1f3-fad8400660c5",
-        "name": "Build Failure Email Body1"
+        "name": "Build Failure Email Body1",
+        "disabled": true
       },
       {
         "parameters": {
@@ -1630,7 +1634,7 @@
           "html": "={{ $json.html }}",
           "options": {
             "appendAttribution": false,
-            "ccEmail": "sinan.erdem@gen-era.com.tr, can.holyavkin@gen-era.com.tr"
+            "ccEmail": "can.holyavkin@gen-era.com.tr"
           }
         },
         "type": "n8n-nodes-base.emailSend",
@@ -1648,6 +1652,54 @@
             "id": "clTmxNgA7AqNrh5h",
             "name": "bioinf.notify@gen-era.tech"
           }
+        },
+        "disabled": true
+      },
+      {
+        "id": "6c8315a9-ec82-43f0-973c-0f6112b1072a",
+        "name": "Has Valid Archer Config",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          64,
+          -300
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "version": 3,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "a1b2c3d4-1111-2222-3333-444455556666",
+                "leftValue": "={{ $json.archer_config_error }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "2ad0e240-e17f-4127-b398-cff210e33823",
+        "name": "Stop and Error (Invalid Archer Config)",
+        "type": "n8n-nodes-base.stopAndError",
+        "typeVersion": 1,
+        "position": [
+          288,
+          -160
+        ],
+        "parameters": {
+          "errorMessage": "=Archer config eksik/hatali: {{ $json.archer_config_error }}. sample_id={{ $json.sample_id }}, read_ref={{ $json.read_ref }}, kit={{ $json.kit_name }}, requester={{ $json.requester_name }}, account_id={{ $json.account_id }}, pipeline_id={{ $json.pipeline_id }}, run={{ $json.run_id }}. data_operation_recipes (account_id/pipeline_id) ve/veya care_site_credentials (platform 12, account_id ile eslesen, aktif, sifreli) kaydini duzeltip tekrar calistirin."
         }
       }
     ],
@@ -1761,7 +1813,7 @@
           ],
           [
             {
-              "node": "Has Threshold Defined",
+              "node": "Has Valid Archer Config",
               "type": "main",
               "index": 0
             }
@@ -1825,6 +1877,24 @@
             }
           ]
         ]
+      },
+      "Has Valid Archer Config": {
+        "main": [
+          [
+            {
+              "node": "Has Threshold Defined",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Stop and Error (Invalid Archer Config)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
@@ -1833,6 +1903,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "04-06-2026/0:00",
+  "commitDate": "05-06-2026/0:00",
   "fileName": "Auto Data Operation Confirm.json"
 }
