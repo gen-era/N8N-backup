@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-02T11:54:15.385Z",
+  "updatedAt": "2026-06-08T19:22:09.051Z",
   "createdAt": "2026-04-30T09:47:34.155Z",
   "id": "8JwSVLSofaMYIZ5r",
   "name": "Sub - DRAGEN QC - Sapiens",
@@ -18,7 +18,7 @@
           "conditions": [
             {
               "id": "7694a237-fe55-4f0a-8929-6dce0ab24702",
-              "leftValue": "={{ $json.sample_id }}",
+              "leftValue": "={{ $json.lane }}",
               "rightValue": "={{ $('Edit Fields').item.json.sample_ids.replace(/\\s+/g, '|').replace(/\\//g, '-') }}",
               "operator": {
                 "type": "string",
@@ -886,7 +886,7 @@
             {
               "id": "c49cc6ff-b461-493a-851b-585b7278f5d0",
               "name": "sample_ids",
-              "value": "VP26",
+              "value": "4",
               "type": "string"
             }
           ]
@@ -1220,12 +1220,12 @@
     "Trigger": [
       {
         "json": {
-          "run_id": "260522_A01978_0179_AHYJY2DSXF"
+          "run_id": "260603_A01978_0181_AHYMCHDSXF"
         }
       }
     ]
   },
-  "versionId": "30c32098-4ce2-4890-9eb1-27ef6c5dd9b3",
+  "versionId": "65a20e96-80fd-48f2-8e36-7e2fba71c499",
   "activeVersionId": "06fd5b3a-4028-4218-933e-88fbd8d570e1",
   "triggerCount": 0,
   "shared": [
@@ -2452,6 +2452,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "08-06-2026/0:00",
+  "commitDate": "09-06-2026/0:00",
   "fileName": "Sub - DRAGEN QC - Sapiens.json"
 }
