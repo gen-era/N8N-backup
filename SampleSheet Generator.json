@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-20T12:38:54.961Z",
+  "updatedAt": "2026-06-09T09:26:03.000Z",
   "createdAt": "2025-09-16T12:36:15.747Z",
   "id": "ZHgMRKYDgvkEHsu0",
   "name": "SampleSheet Generator",
@@ -184,7 +184,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        464,
+        384,
         256
       ],
       "id": "452f8455-8455-4c02-9a1d-07d3901b9fa5",
@@ -235,7 +235,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        688,
+        608,
         256
       ],
       "id": "2ee09d51-0f28-43ff-8520-46f827b78a84",
@@ -249,7 +249,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1,
       "position": [
-        976,
+        816,
         256
       ],
       "id": "a4b1337a-6647-4d55-bdc2-d59cc78f8af7",
@@ -278,7 +278,7 @@
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        1232,
+        1024,
         256
       ],
       "id": "329b066c-f1cf-4448-ad68-d2fce126c777",
@@ -320,7 +320,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
+        1456,
         256
       ],
       "id": "49f0602d-52fe-4ace-96c8-ad8f3bd2a4ca",
@@ -747,7 +747,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1648,
+        1632,
         256
       ],
       "id": "0c0111f1-f8ac-4c1e-9bd8-81bd9006badd",
@@ -996,6 +996,19 @@
       ],
       "id": "85b9f82b-104a-4921-8f54-8053180f7db2",
       "name": "Read/Write Files from Disk5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to normalize text to ASCII\nfunction normalizeToAscii(text) {\n  if (typeof text !== 'string') {\n    return text;\n  }\n  \n  // Normalize Unicode characters (NFKD decomposition)\n  let normalized = text.normalize('NFKD');\n  \n  // Remove diacritical marks and non-ASCII characters\n  normalized = normalized.replace(/[\\u0300-\\u036f]/g, '');\n  \n  // Convert Turkish-specific characters manually\n  const turkishMap = {\n    'ı': 'i', 'İ': 'I',\n    'ğ': 'g', 'Ğ': 'G',\n    'ü': 'u', 'Ü': 'U',\n    'ş': 's', 'Ş': 'S',\n    'ö': 'o', 'Ö': 'O',\n    'ç': 'c', 'Ç': 'C'\n  };\n  \n  // Replace Turkish characters\n  Object.keys(turkishMap).forEach(char => {\n    normalized = normalized.replace(new RegExp(char, 'g'), turkishMap[char]);\n  });\n  \n  // Keep only ASCII characters\n  normalized = normalized.replace(/[^\\x00-\\x7F]/g, '');\n  \n  // Replace non-alphanumeric characters with dashes\n  normalized = normalized.replace(/[^a-zA-Z0-9]+/g, '-');\n  \n  // Remove leading/trailing dashes\n  normalized = normalized.replace(/^-+|-+$/g, '');\n  \n  return normalized;\n}\n\n// Process all items\nconst items = $input.all();\n\nconst processedItems = items.map(item => {\n  const processedJson = {};\n  \n  // Normalize all string fields\n  Object.keys(item.json).forEach(key => {\n    processedJson[key] = normalizeToAscii(item.json[key]);\n  });\n  \n  return { json: processedJson };\n});\n\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        256
+      ],
+      "id": "e11653a7-b657-4b15-a916-9caf86fd240c",
+      "name": "Normalize to ASCII1"
     }
   ],
   "connections": {
@@ -1102,7 +1115,7 @@
       "main": [
         [
           {
-            "node": "Rename Duplicates",
+            "node": "Normalize to ASCII1",
             "type": "main",
             "index": 0
           }
@@ -1477,6 +1490,17 @@
           }
         ]
       ]
+    },
+    "Normalize to ASCII1": {
+      "main": [
+        [
+          {
+            "node": "Rename Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1496,7 +1520,7 @@
       }
     ]
   },
-  "versionId": "5dc53d80-c0d2-421f-bfb8-c15981fec14d",
+  "versionId": "3081c12f-cc1a-4aa4-97f3-81e3121608a9",
   "activeVersionId": "3b987dd2-8958-4566-8213-99b6c5205870",
   "triggerCount": 0,
   "shared": [
@@ -2993,6 +3017,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "09-06-2026/0:00",
+  "commitDate": "10-06-2026/0:00",
   "fileName": "SampleSheet Generator.json"
 }
