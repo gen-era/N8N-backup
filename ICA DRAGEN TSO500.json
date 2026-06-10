@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-30T19:08:35.178Z",
+  "updatedAt": "2026-06-09T10:55:35.640Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -11,8 +11,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -976,
-        -16
+        -944,
+        -144
       ],
       "id": "2df2c1b4-3e10-47ba-be7d-6a8cfb0b1024",
       "name": "When clicking ‘Execute workflow’"
@@ -187,7 +187,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        864,
+        1072,
         0
       ],
       "id": "eb8b0c55-eed4-4f03-995f-166872e8995a",
@@ -200,7 +200,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1296,
+        1504,
         0
       ],
       "id": "851524dd-7cfc-44cc-bbea-926233a1c8a3",
@@ -214,60 +214,16 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\n\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst commands = items.map((item, index) => {\n  const files = item.LOCAL_FILES.split('\\n').filter(f => f.trim());\n\n  const firstFile = files[0].trim();\n  const parentDir = firstFile.substring(0, firstFile.lastIndexOf('/'));\n\n  const uploadCommands = files.map(file => {\n    const fileName = file.trim().substring(file.trim().lastIndexOf('/') + 1);\n    // cd sonrası sadece fileName kullan\n    const uploadCmd = `~/bin/icav2 projectdata upload \"${fileName}\" /input_folder/${item.SAMPLE_ID}/${fileName} --project-id ${item.PROJECT_ID} --num-workers 4`;\n\n    return `(${uploadCmd} || (echo \"Retry 1/3 for ${fileName}\" && sleep 5 && ${uploadCmd}) || (echo \"Retry 2/3 for ${fileName}\" && sleep 10 && ${uploadCmd}) || (echo \"Retry 3/3 for ${fileName}\" && sleep 15 && ${uploadCmd}))`;\n  });\n\n  // parentDir tırnak içinde - DÜZEN gibi Türkçe karakter koruması\n  const uploadCommand = `cd \"${parentDir}\" && ${uploadCommands.join(' && ')}`;\n\n  const itemWithBatch = { ...item, BATCH_HAS_UMI: batchHasUmi };\n  const itemJson = JSON.stringify(itemWithBatch);\n  const encodedJson = Buffer.from(itemJson).toString('base64');\n\n  return `${uploadCommand} && sleep 60 && echo \"[$(date '+%Y-%m-%d %H:%M:%S')] Sending webhook for ${item.SAMPLE_ID}\" && echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`;\n}).join(' && ');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\n\nreturn [{\n  json: {\n    command: `(${commands}) > ${logFile} 2>&1 &`,\n    logFile: logFile,\n    totalItems: items.length,\n    BATCH_HAS_UMI: batchHasUmi\n  }\n}];"
+        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst AWS_CONC = 32;        // test edilen\nconst AWS_CHUNK = '16MB';   // test edilen\n\nconst sampleBlocks = items.map((item) => {\n  const files = item.LOCAL_FILES.split('\\n').map(f => f.trim()).filter(Boolean);\n  const encodedJson = Buffer.from(JSON.stringify({ ...item, BATCH_HAS_UMI: batchHasUmi })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d)`,\n`printf '[awsup]\\\\naws_access_key_id=%s\\\\naws_secret_access_key=%s\\\\naws_session_token=%s\\\\n' \"$AK\" \"$SK\" \"$ST\" > \"$WD/creds\"`,\n`printf '[profile awsup]\\\\nregion=us-east-1\\\\ns3=\\\\n    max_concurrent_requests=${AWS_CONC}\\\\n    multipart_threshold=64MB\\\\n    multipart_chunksize=${AWS_CHUNK}\\\\n' > \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 60`,\n`  echo \"[$(date '+%F %T')] Sending webhook for ${item.SAMPLE_ID}\"`,\n`  echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED for ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\nconst scriptFile = `/tmp/awsup_${timestamp}.sh`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=~/bin/aws`,\n`ICAV2=~/bin/icav2`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1088,
+        1296,
         0
       ],
       "id": "6e7237e1-c23d-483b-b819-c8f8a51d0981",
       "name": "Prepare Upload Script"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.limit",
-      "typeVersion": 1,
-      "position": [
-        16,
-        288
-      ],
-      "id": "192be365-959d-43de-abe1-5b750e248d3c",
-      "name": "Limit"
-    },
-    {
-      "parameters": {
-        "command": "=~/bin/icav2 projectdata list /input_folder/{{ $json.SAMPLE_ID }}/ --project-id {{ $json.PROJECT_ID }} --data-type FILE --parent-folder -o json | jq -r '.items[]? | select(.details.name != null) | .details.name'"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        432,
-        288
-      ],
-      "id": "ee3f1711-0624-4c53-9002-eff30135b316",
-      "name": "List Remote Files1",
-      "credentials": {
-        "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "amount": 30
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        224,
-        288
-      ],
-      "id": "b18d80c6-8809-4423-adb1-c10032b2d771",
-      "name": "Wait",
-      "webhookId": "f715d0ae-07f1-461e-8cfc-e7a051656b4a"
     },
     {
       "parameters": {
@@ -286,6 +242,7 @@
           "cachedResultName": "Table 1",
           "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx/tblZHb0ztwV1UVUZh"
         },
+        "filterByFormula": "{Status} = 'On Hold'",
         "options": {},
         "sort": {
           "property": [
@@ -352,6 +309,38 @@
       ],
       "id": "b2c1de02-umi1-4abc-9def-000000000003",
       "name": "Edit UMI"
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "008d910b-be3d-4fef-864c-1f51d06b57e4",
+      "name": "Limit1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "dummy"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -944,
+        80
+      ],
+      "id": "3632cfd6-c3e8-4398-9dde-72580c1a5b17",
+      "name": "When Executed by Another Workflow"
     }
   ],
   "connections": {
@@ -370,7 +359,7 @@
       "main": [
         [
           {
-            "node": "Filter Files Present on Remote",
+            "node": "Limit1",
             "type": "main",
             "index": 0
           }
@@ -470,28 +459,6 @@
         []
       ]
     },
-    "Limit": {
-      "main": [
-        [
-          {
-            "node": "Wait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "List Remote Files1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Search records": {
       "main": [
         [
@@ -512,11 +479,6 @@
           },
           {
             "node": "Check UMI",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Limit",
             "type": "main",
             "index": 0
           },
@@ -549,6 +511,28 @@
           }
         ]
       ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Filter Files Present on Remote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -561,7 +545,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "bf497c0e-e7de-483b-92f5-4ed95b604af8",
+  "versionId": "8cd52029-5097-4015-957e-3df5f6500ed9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -582,6 +566,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "09-06-2026/0:00",
+  "commitDate": "10-06-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
