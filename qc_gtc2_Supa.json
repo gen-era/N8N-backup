@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-19T05:53:32.063Z",
+  "updatedAt": "2026-06-09T14:22:37.314Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -57,27 +57,6 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH input_json AS (\n    SELECT\n        $qc$ {{ JSON.stringify($json.raw_control_metrics) }} $qc$::jsonb AS qc\n),\nparams AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position\n),\ntarget_idat AS (\n    SELECT\n        i.uniqueref AS idat_ref,\n        s.uniqueref AS scan_ref,\n        s.sentrix_id,\n        i.position\n    FROM idats i\n    JOIN scans s\n      ON s.uniqueref = i.scan_ref\n    JOIN params p\n      ON p.sentrix_id = s.sentrix_id\n     AND p.position = i.position\n),\nqc_kv AS (\n    SELECT\n        kv.key AS qc_key,\n        kv.value AS qc_value\n    FROM input_json ij\n    CROSS JOIN LATERAL jsonb_each_text(ij.qc) AS kv(key, value)\n),\nmetric_values AS (\n    SELECT\n        ti.idat_ref,\n        c.uniqueref AS measurement_concept_ref,\n        NULLIF(q.qc_value, '')::numeric AS value_as_number\n    FROM qc_kv q\n    CROSS JOIN target_idat ti\n    JOIN concepts c\n      ON c.concept_name = q.qc_key\n     AND c.vocabulary_id = 'Illumina'\n    WHERE q.qc_key NOT IN (\n        'DatasetLabel',\n        'Row',\n        'Column',\n        'ImagingDate',\n        'SampleId',\n        'SampleName',\n        'SamplePlate',\n        'SampleWell',\n        'ScannerId',\n        'ScannerVersion',\n        'SentrixBarcode',\n        'SentrixPosition',\n        'SampleFolderPath',\n        'Functional QC Status',\n        'Control QC Flag Codes',\n        'SexEstimate',\n        '_debug_text_length',\n        '_debug_reg_positions_count',\n        '_debug_first_pos_value',\n        'qc_stdout',\n        'sentrix_id',\n        'qc_xlsx',\n        'qc_xlsx_server'\n    )\n      AND q.qc_value IS NOT NULL\n      AND q.qc_value <> ''\n      AND q.qc_value ~ '^-?[0-9]+(\\.[0-9]+)?$'\n),\nupserted AS (\n    INSERT INTO measurement_idats (\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    )\n    SELECT\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    FROM metric_values\n    ON CONFLICT (idat_ref, measurement_concept_ref)\n    DO UPDATE SET\n        value_as_number = EXCLUDED.value_as_number\n    RETURNING uniqueref\n)\nSELECT\n    p.sentrix_id,\n    p.position,\n    ti.scan_ref,\n    ti.idat_ref,\n    (SELECT COUNT(*) FROM metric_values) AS metric_value_count,\n    (SELECT COUNT(*) FROM upserted) AS upserted_measurement_count\nFROM params p\nLEFT JOIN target_idat ti ON TRUE;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        1408,
-        -16
-      ],
-      "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
-      "name": "upsert_measurement_idats",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
         "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
         "options": {}
       },
@@ -103,7 +82,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1712,
+        2400,
         -16
       ],
       "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -219,7 +198,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all().map(i => i.json);\n\n// qc_stdout itemlarını sentrix_id bazında tut\nconst qcBySentrix = {};\n\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\n// Excel QC row itemları\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  const regByPos = {};\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Her pozisyon için sadece 1. swath channel 1 alınacak\n    if (!imageName.endsWith('_1_Swath1_Channel1')) continue;\n\n    const pos = imageName.split('_')[0]; // R01C01\n    const regScore = parseFloat(parts[1]);\n\n    if (!isNaN(regScore)) {\n      regByPos[pos] = regScore;\n    }\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n\n      // test için geçici debug alanları\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
+        "jsCode": "const items = $input.all().map(i => i.json);\n\nconst qcBySentrix = {};\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  // Her pozisyon için tüm section score'larını topla\n  const scoresByPos = {}; // { R01C01: [1.51, 1.52, 1.52, 1.51, 1.52] }\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Sadece Swath1_Channel1 satırları — tüm section numaraları\n    if (!imageName.match(/_\\d+_Swath1_Channel1$/)) continue;\n\n    // R01C01 pozisyonunu çıkar\n    const pos = imageName.split('_')[0];\n\n    const regScore = parseFloat(parts[1]);\n    if (isNaN(regScore)) continue;\n\n    if (!scoresByPos[pos]) scoresByPos[pos] = [];\n    scoresByPos[pos].push(regScore);\n  }\n\n  // Her pozisyon için minimum score al\n  const regByPos = {};\n  for (const [pos, scores] of Object.entries(scoresByPos)) {\n    regByPos[pos] = Math.min(...scores);\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -229,6 +208,103 @@
       ],
       "id": "a6060cb6-1239-4658-9dab-5686c6d73ec5",
       "name": "parse_sentrix_qc"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT uniqueref \nFROM idats \nWHERE sentrix_id = '{{ $json.sentrix_id }}'\nAND sentrix_position = '{{ $json.position }}'\nLIMIT 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1408,
+        -16
+      ],
+      "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
+      "name": "get_idat_ref",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.uniqueref }}, 489, 24, NOW())\nRETURNING uniqueref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1600,
+        -16
+      ],
+      "id": "edf04863-721c-4200-be3b-25f9cd4f5a62",
+      "name": "insert_data_operation",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $('pack_qc_rows').item.json;\nconst data_operations_ref = $('insert_data_operation').item.json.uniqueref;\n\nreturn [{\n  json: {\n    metrics: JSON.stringify({ ...item.raw_control_metrics, data_operations_ref }),\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        -16
+      ],
+      "id": "ed751b86-1ab2-433a-864b-9d95e0377bac",
+      "name": "build_measurement_payload"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  (r.data_operations_ref)::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2016,
+        -16
+      ],
+      "id": "ae15e0d8-e983-4701-b60c-8f81c756914a",
+      "name": "upsert_measurement_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').item.json.uniqueref }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2208,
+        -16
+      ],
+      "id": "96063ef9-9dac-4051-9557-a91aa92eace6",
+      "name": "update_data_operation_completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -265,17 +341,6 @@
         ]
       ]
     },
-    "upsert_measurement_idats": {
-      "main": [
-        [
-          {
-            "node": "clenaup_qc",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "pack_qc_rows": {
       "main": [
         [
@@ -285,7 +350,7 @@
             "index": 0
           },
           {
-            "node": "upsert_measurement_idats",
+            "node": "get_idat_ref",
             "type": "main",
             "index": 0
           }
@@ -368,6 +433,61 @@
         [
           {
             "node": "pack_qc_rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_idat_ref": {
+      "main": [
+        [
+          {
+            "node": "insert_data_operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "insert_data_operation": {
+      "main": [
+        [
+          {
+            "node": "build_measurement_payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_measurement_payload": {
+      "main": [
+        [
+          {
+            "node": "upsert_measurement_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert_measurement_idats": {
+      "main": [
+        [
+          {
+            "node": "update_data_operation_completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_data_operation_completed": {
+      "main": [
+        [
+          {
+            "node": "clenaup_qc",
             "type": "main",
             "index": 0
           }
@@ -815,7 +935,7 @@
       }
     ]
   },
-  "versionId": "ad12ccde-7157-4593-8555-c613b39c3731",
+  "versionId": "21fc2917-37a0-45e8-a613-ff15d5f2634e",
   "activeVersionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
   "triggerCount": 1,
   "shared": [
@@ -1208,6 +1328,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "09-06-2026/0:00",
+  "commitDate": "10-06-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
