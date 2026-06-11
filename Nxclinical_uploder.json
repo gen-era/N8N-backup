@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T13:33:55.521Z",
+  "updatedAt": "2026-06-10T13:35:13.105Z",
   "createdAt": "2026-06-01T08:05:32.731Z",
   "id": "9z4hRpQRHcHn1c2K",
   "name": "Nxclinical_uploder",
@@ -35,8 +35,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -32,
-        -16
+        -448,
+        -320
       ],
       "id": "e6e7738e-f17c-48f0-b0a2-6c62ef0f06cb",
       "name": "When Executed by Another Workflow"
@@ -48,28 +48,285 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        176,
-        -16
+        -240,
+        -320
       ],
       "id": "4a40fe2d-1b17-49aa-837f-fbd6a451f2dd",
       "name": "Execute Command"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -80
+      ],
+      "id": "d564bb05-b118-4bc3-af13-14b7f5936ad1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  doa.uniqueref AS operation_ref,\n  doa.idat_ref,\n  dor.uniqueref AS recipe_ref,\n  dor.account_id,\n  dor.pipeline_id\nFROM data_operations_array doa\nJOIN data_operation_recipes dor ON dor.uniqueref = doa.recipe_ref\nWHERE doa.status_concept_ref = 24\nAND dor.type_concept_ref = 251\nORDER BY dor.uniqueref, doa.uniqueref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "ab8373ee-c826-496f-aaeb-1ad0000789b2",
+      "name": "get_upload_operations",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\n\nconst groups = {};\nfor (const item of items) {\n  const key = item.recipe_ref;\n  if (!groups[key]) {\n    const [server, port] = item.account_id.split(',');\n    const [sampleType, processingSetting] = item.pipeline_id.split(',');\n    groups[key] = {\n      recipe_ref: item.recipe_ref,\n      server: server.trim(),\n      port: port.trim(),\n      sample_type: sampleType.trim(),\n      processing_setting: processingSetting.trim(),\n      operations: []\n    };\n  }\n  groups[key].operations.push({\n    operation_ref: item.operation_ref,\n    idat_ref: item.idat_ref\n  });\n}\n\nreturn Object.values(groups).map(g => ({ \n  json: {\n    ...g,\n    operations: JSON.stringify(g.operations)\n  } \n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        -80
+      ],
+      "id": "3231deab-8dcc-49ea-93fb-705528a89fa8",
+      "name": "group_by_recipe"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  i.uniqueref AS idat_ref,\n  i.sample_id,\n  i.position,\n  s.sentrix_id\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE i.uniqueref IN (\n  SELECT (value->>'idat_ref')::bigint\n  FROM jsonb_array_elements(('{{ $json.operations }}'::text)::jsonb) AS value\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        496,
+        -64
+      ],
+      "id": "c5ff6bfc-e6ea-4acf-93f5-2ee9d7d30993",
+      "name": "get_idats",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const idats = $input.all().map(i => i.json);\nconst loopItem = $('group_by_recipe').item.json;\n\nconst sampleType = loopItem.sample_type;\nconst processingSetting = loopItem.processing_setting;\n\nconst header = 'Sample Name\\tFilename\\tSample Type\\tProcessing Setting\\tDisplay Name';\n\nconst rows = idats.map(idat => {\n  const sampleName = `${idat.sentrix_id}_${idat.position}`;\n  const filename = `/volume1/ALLDATA/Scans/GTCs/${idat.sentrix_id}_${idat.position}.gtc`;\n  return `${sampleName}\\t${filename}\\t${sampleType}\\t${processingSetting}\\t${idat.sample_id}`;\n});\n\nconst batchContent = [header, ...rows].join('\\n');\n\nreturn [{\n  json: {\n    batch_content: batchContent,\n    server: loopItem.server,\n    port: loopItem.port,\n    recipe_ref: loopItem.recipe_ref,\n    operations: loopItem.operations\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -64
+      ],
+      "id": "f060e1bd-c41d-4cbe-b97f-e9d1437d1df9",
+      "name": "build_batch_txt"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        192,
+        -80
+      ],
+      "id": "08ef0dfd-686c-4187-9111-b05766aa4307",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "command": "=cat > /home/genera/nxclinical/batch.txt << 'BATCHEOF'\n{{ $json.batch_content }}\nBATCHEOF"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -64
+      ],
+      "id": "e9a1bf68-4cc8-4f20-bf87-318456295bb0",
+      "name": "write_batch_file"
+    },
+    {
+      "parameters": {
+        "command": "=export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/NxClinicalSampleImporter\" -server={{ $('build_batch_txt').item.json.server }} -port={{ $('build_batch_txt').item.json.port }} -user=gulsahsimsir -password=gulsah123 -descriptorFile=\"/home/genera/nxclinical/batch.txt\" -overrideExisting=true"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -64
+      ],
+      "id": "1a98b8d0-4468-491c-9baa-2c5022131db4",
+      "name": "run_nxclinical"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref IN (\n  SELECT (value->>'operation_ref')::bigint\n  FROM jsonb_array_elements(('{{ $('build_batch_txt').item.json.operations }}'::text)::jsonb) AS value\n);",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1280,
+        -64
+      ],
+      "id": "c4bf8a00-dd2e-4d17-a9b6-a3911d246323",
+      "name": "update_operations_completed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "rm /home/genera/nxclinical/batch.txt"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -64
+      ],
+      "id": "0cfcb9a8-4498-4fb5-8cbd-02b95f176e3e",
+      "name": "delete_batch_file"
     }
   ],
   "connections": {
     "When Executed by Another Workflow": {
       "main": [
+        []
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        []
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
         [
           {
-            "node": "Execute Command",
+            "node": "get_upload_operations",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Execute Command": {
+    "get_upload_operations": {
       "main": [
-        []
+        [
+          {
+            "node": "group_by_recipe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "group_by_recipe": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_idats": {
+      "main": [
+        [
+          {
+            "node": "build_batch_txt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "get_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_batch_txt": {
+      "main": [
+        [
+          {
+            "node": "write_batch_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_batch_file": {
+      "main": [
+        [
+          {
+            "node": "run_nxclinical",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "run_nxclinical": {
+      "main": [
+        [
+          {
+            "node": "update_operations_completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_operations_completed": {
+      "main": [
+        [
+          {
+            "node": "delete_batch_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete_batch_file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -95,7 +352,7 @@
       }
     ]
   },
-  "versionId": "83c9064b-2a30-487d-b8af-4865d32c47ca",
+  "versionId": "e3142012-aafc-48f4-93bc-34b5c60d0624",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -109,6 +366,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "10-06-2026/0:00",
+  "commitDate": "11-06-2026/0:00",
   "fileName": "Nxclinical_uploder.json"
 }
