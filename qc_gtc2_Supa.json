@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T14:22:37.314Z",
+  "updatedAt": "2026-06-10T13:27:18.830Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -82,7 +82,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2400,
+        2768,
         -16
       ],
       "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -212,7 +212,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT uniqueref \nFROM idats \nWHERE sentrix_id = '{{ $json.sentrix_id }}'\nAND sentrix_position = '{{ $json.position }}'\nLIMIT 1;",
+        "query": "SELECT i.uniqueref\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -233,13 +233,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.uniqueref }}, 489, 24, NOW())\nRETURNING uniqueref;",
+        "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref) \nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1600,
+        1888,
         -16
       ],
       "id": "edf04863-721c-4200-be3b-25f9cd4f5a62",
@@ -253,12 +253,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $('pack_qc_rows').item.json;\nconst data_operations_ref = $('insert_data_operation').item.json.uniqueref;\n\nreturn [{\n  json: {\n    metrics: JSON.stringify({ ...item.raw_control_metrics, data_operations_ref }),\n  }\n}];"
+        "jsCode": "const items = $input.all();\nconst prepareItems = $('prepare_insert').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    metrics: JSON.stringify({\n      ...prepareItems[index].json.raw_control_metrics,\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1808,
+        2112,
         -16
       ],
       "id": "ed751b86-1ab2-433a-864b-9d95e0377bac",
@@ -267,13 +267,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  (r.data_operations_ref)::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
+        "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  ('{{ $json.metrics }}'::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2016,
+        2352,
         -16
       ],
       "id": "ae15e0d8-e983-4701-b60c-8f81c756914a",
@@ -288,13 +288,13 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').item.json.uniqueref }};",
+        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').all()[$itemIndex].json.uniqueref }};",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2208,
+        2560,
         -16
       ],
       "id": "96063ef9-9dac-4051-9557-a91aa92eace6",
@@ -305,6 +305,19 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst packItems = $('pack_qc_rows').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    idat_ref: item.json.uniqueref,\n    raw_control_metrics: packItems[index].json.raw_control_metrics\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1664,
+        -16
+      ],
+      "id": "562a5915-391e-453b-a7d7-88ca0577a410",
+      "name": "prepare_insert"
     }
   ],
   "connections": {
@@ -345,12 +358,12 @@
       "main": [
         [
           {
-            "node": "update_idats",
+            "node": "get_idat_ref",
             "type": "main",
             "index": 0
           },
           {
-            "node": "get_idat_ref",
+            "node": "update_idats",
             "type": "main",
             "index": 0
           }
@@ -443,7 +456,7 @@
       "main": [
         [
           {
-            "node": "insert_data_operation",
+            "node": "prepare_insert",
             "type": "main",
             "index": 0
           }
@@ -493,6 +506,17 @@
           }
         ]
       ]
+    },
+    "prepare_insert": {
+      "main": [
+        [
+          {
+            "node": "insert_data_operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -512,419 +536,306 @@
             "user-agent": "curl/7.61.1",
             "accept": "*/*",
             "content-type": "application/json",
-            "content-length": "6599",
+            "content-length": "4773",
             "expect": "100-continue"
           },
           "params": {},
           "query": {},
           "body": {
             "status": "dragena_batch_finished",
-            "run_id": "20260518_131105",
+            "run_id": "20260609_225626",
             "processed_sentrix_ids": [
-              "209298310008",
-              "209298310009",
-              "209298310014",
-              "209308520015",
-              "209308520030",
-              "209308520038",
-              "209308520040",
-              "209308520041",
-              "209308520042",
-              "209308520048",
-              "209308520072",
-              "209308520077",
-              "209308520092",
-              "209308520093",
-              "209308520094",
-              "209308520096",
-              "209308520098",
-              "209308520099",
-              "209308520100",
-              "209308520102",
-              "209308520103",
-              "209308520106",
-              "209308520108",
-              "209308520110",
-              "209308520113",
-              "209308520114",
-              "209308520125",
-              "209308520131",
-              "209308520149",
-              "209308520158",
-              "209522100046",
-              "209522100047",
-              "209522100048",
-              "209522100052",
-              "209522100053",
-              "209522100054",
-              "209522100055",
-              "209522100056",
-              "209522100057",
-              "209522100074",
-              "209522100077",
-              "209522100080",
-              "209522100087",
-              "209522100091",
-              "209522100098",
-              "209522100099",
-              "209522100100",
-              "209522100104",
-              "209522100106",
-              "209522100108",
-              "209522100140",
-              "209522100141",
-              "209536540001",
-              "209548880006",
-              "209548880043",
-              "209548880044",
-              "209548880045",
-              "209548880049",
-              "209548880053",
-              "209548880054",
-              "209548880059",
-              "209548880063",
-              "209548880066",
-              "209548880067",
-              "209548880068",
-              "209548880069",
-              "209548880070",
-              "209548880071",
-              "209548880072",
-              "209548880085",
-              "209548880093",
-              "209548880100",
-              "209548880103",
-              "209548880104",
-              "209548880105",
-              "209548880110",
-              "209548880111",
-              "209548880114",
-              "209548880115",
-              "209548880116",
-              "209548880117",
-              "209548880118",
-              "209548880120",
-              "209548880121",
-              "209548880123",
-              "209548880125",
-              "209548880126",
-              "209548880127",
-              "209548880128",
-              "209548880132",
-              "209548880133",
-              "209548880134",
-              "209548880135",
-              "209548880146",
-              "209548880147",
-              "209548880150",
-              "209548880155",
-              "209548880156",
-              "209548880157",
-              "209548880158",
-              "209548880159",
-              "209548880160",
-              "209548880162",
-              "209548890005",
-              "209548890006",
-              "209548890007",
-              "209548890008",
-              "209548890009",
-              "209548890011",
-              "209548890012",
-              "209548890013",
-              "209548890014",
-              "209548890015",
-              "209548890019",
-              "209548890020",
-              "209548890025",
-              "209548890026",
-              "209548890027",
-              "209548890028",
-              "209548890030",
-              "209548890035",
-              "209548890036",
-              "209548890038",
-              "209548890052",
-              "209548890057",
-              "209548890059",
-              "209548890060",
-              "209548890073",
-              "209548890074",
-              "209548890075",
-              "209548890080",
-              "209548890081",
-              "209548890082",
-              "209548890085",
-              "209548890086",
-              "209548890090",
-              "209548890092",
-              "209548890093",
-              "209548890097",
-              "209548890098",
-              "209548890099",
-              "209548890106",
-              "209548890109",
-              "209548890110",
-              "209548890111",
-              "209548890113",
-              "209548890117",
-              "209548890129",
-              "209548890133",
-              "209548890134",
-              "209548890141",
-              "209548890142",
-              "209548890143",
-              "209548890144",
-              "209548890156",
-              "209548890158",
-              "209694250013",
-              "209694250015",
-              "209694250032",
-              "209694250037",
-              "209694250060",
-              "209694250065",
-              "209694250079",
-              "209694250095",
-              "209694250103",
-              "209694250133",
-              "209694250134",
-              "209694250139",
-              "209694250140",
-              "209694250141",
-              "209694250152",
-              "209694250160",
-              "209694660001",
-              "209694660003",
-              "209694660008",
-              "209694660009",
-              "209694660011",
-              "209694660012",
-              "209694660014",
-              "209694660017",
-              "209694660020",
-              "209694660024",
-              "209694660025",
-              "209694660029",
-              "209694660030",
-              "209694660032",
-              "209694660033",
-              "209694660035",
-              "209694660036",
-              "209694660038",
-              "209694660040",
-              "209694660041",
-              "209694660042",
-              "209694660045",
-              "209694660049",
-              "209694660051",
-              "209694660056",
-              "209694660057",
-              "209694660058",
-              "209694660060",
-              "209694660064",
-              "209694660066",
-              "209694660068",
-              "209694660069",
-              "209694660072",
-              "209694660077",
-              "209694660078",
-              "209694660079",
-              "209694660081",
-              "209694660082",
-              "209694660083",
-              "209694660087",
-              "209694660090",
-              "209694660091",
-              "209694660097",
-              "209694660098",
-              "209694660099",
-              "209694660101",
-              "209694660103",
-              "209694660108",
-              "209694660111",
-              "209694660114",
-              "209694660115",
-              "209694660121",
-              "209694660123",
-              "209694660136",
-              "209694660137",
-              "209694660144",
-              "209694660147",
-              "209694660149",
-              "209694660151",
-              "209694660152",
-              "209694660154",
-              "209694660158",
-              "209694660159",
-              "209694660160",
-              "209694660161",
-              "209694660162",
-              "209694660164",
-              "209694660165",
-              "209694660166",
-              "209694660168",
-              "209694660171",
-              "209694660172",
-              "209694660173",
-              "209694660174",
-              "209694660175",
-              "209694670022",
-              "209694670028",
-              "209694670029",
-              "209694670041",
-              "209694670054",
-              "209694670142",
-              "209694670145",
-              "209694670146",
-              "209694670151",
-              "209694670153",
-              "209694670164",
-              "209694670165",
-              "209694670167",
-              "209694670170",
-              "209694670171",
-              "209694670174",
-              "209787760010",
-              "209787760012",
-              "209787760052",
-              "209787760054",
-              "209787760061",
-              "209787760062",
-              "209787760063",
-              "209787760064",
-              "209787760065",
-              "209787760066",
-              "209787760067",
-              "209787760068",
-              "209787760069",
-              "209787760070",
-              "209787760071",
-              "209787760073",
-              "209787760075",
-              "209787760076",
-              "209787760081",
-              "209787760085",
-              "209787760086",
-              "209787760087",
-              "209787760091",
-              "209787760092",
-              "209787760096",
-              "209787760099",
-              "209787760100",
-              "209787760103",
+              "208073050074",
+              "208087830008",
+              "208418850007",
+              "208418850010",
+              "208418850011",
+              "208590440021",
+              "208590440027",
+              "208590440115",
+              "208590440116",
+              "208767520092",
+              "208767520125",
+              "208767520162",
+              "208767520184",
+              "208767520185",
+              "208767520189",
+              "208804480045",
+              "208844100009",
+              "208862700084",
+              "208862700093",
+              "208862700124",
+              "208896380102",
+              "208970340032",
+              "208970340039",
+              "208970340041",
+              "208970340043",
+              "208970340048",
+              "208970340058",
+              "208977750084",
+              "208977750145",
+              "209031550045",
+              "209031550063",
+              "209031550096",
+              "209046140004",
+              "209046140007",
+              "209046140008",
+              "209046140009",
+              "209046140010",
+              "209071770017",
+              "209071770019",
+              "209071770020",
+              "209071770022",
+              "209076120007",
+              "209076120028",
+              "209076120029",
+              "209076120030",
+              "209076120032",
+              "209076120036",
+              "209106670001",
+              "209106670002",
+              "209106670004",
+              "209114410013",
+              "209114410016",
+              "209114410020",
+              "209114410050",
+              "209204180001",
+              "209204180041",
+              "209208700004",
+              "209208700005",
+              "209208700014",
+              "209208700015",
+              "209208700016",
+              "209208700019",
+              "209208700023",
+              "209208700024",
+              "209208700029",
+              "209208700030",
+              "209208700031",
+              "209208700032",
+              "209208700042",
+              "209208700045",
+              "209208700046",
+              "209208700047",
+              "209208700049",
+              "209208700050",
+              "209208700053",
+              "209208700054",
+              "209208700055",
+              "209208700056",
+              "209208700057",
+              "209208700066",
+              "209208700067",
+              "209208700070",
+              "209208700074",
+              "209208700075",
+              "209208700076",
+              "209208700077",
+              "209208700079",
+              "209208700081",
+              "209208700082",
+              "209208700086",
+              "209208700087",
+              "209208700090",
+              "209208700091",
+              "209208700092",
+              "209208700093",
+              "209208700103",
+              "209208700104",
+              "209208700105",
+              "209208700109",
+              "209251490001",
+              "209251490002",
+              "209251490003",
+              "209251490005",
+              "209259540002",
+              "209259540005",
+              "209259540006",
+              "209263530001",
+              "209263530002",
+              "209263530003",
+              "209263530004",
+              "209263530005",
+              "209263530006",
+              "209263530007",
+              "209263530008",
+              "209263530010",
+              "209263530011",
+              "209263530012",
+              "209263530014",
+              "209263530016",
+              "209263530017",
+              "209263530018",
+              "209263530019",
+              "209263530020",
+              "209263530021",
+              "209263530024",
+              "209263530026",
+              "209263530027",
+              "209263530029",
+              "209263530032",
+              "209263530033",
+              "209263530034",
+              "209263530035",
+              "209263530036",
+              "209263530037",
+              "209263530038",
+              "209263530039",
+              "209263530040",
+              "209263530041",
+              "209263530042",
+              "209263530043",
+              "209263530045",
+              "209263530046",
+              "209263530047",
+              "209263530050",
+              "209263530051",
+              "209263530052",
+              "209263530053",
+              "209263530054",
+              "209263530055",
+              "209263530056",
+              "209263530057",
+              "209263530058",
+              "209263530059",
+              "209263530060",
+              "209263530061",
+              "209263530062",
+              "209263530063",
+              "209263530064",
+              "209263530065",
+              "209263530066",
+              "209263530067",
+              "209263530068",
+              "209263530069",
+              "209263530070",
+              "209263530071",
+              "209263530072",
+              "209263530073",
+              "209263530074",
+              "209263530075",
+              "209263530077",
+              "209263530078",
+              "209263530079",
+              "209263530080",
+              "209263530081",
+              "209263530082",
+              "209263530083",
+              "209263530084",
+              "209263530085",
+              "209263530086",
+              "209263530087",
+              "209263530088",
+              "209263530089",
+              "209263530090",
+              "209263530091",
+              "209263530092",
+              "209263530093",
+              "209263530094",
+              "209263530095",
+              "209263530096",
+              "209263530097",
+              "209263530098",
+              "209263530099",
+              "209263530100",
+              "209263530102",
+              "209263530104",
+              "209263530105",
+              "209263530106",
+              "209263530107",
+              "209263530108",
+              "209296660112",
+              "209296660135",
+              "209298310002",
+              "209298310005",
+              "209298310010",
+              "209298310011",
+              "209298310012",
+              "209298310013",
+              "209298310015",
+              "209298310016",
+              "209298310017",
+              "209308520010",
+              "209308520011",
+              "209308520012",
+              "209308520013",
+              "209308520014",
+              "209308520017",
+              "209308520019",
+              "209308520020",
+              "209308520021",
+              "209308520023",
+              "209308520024",
+              "209308520025",
+              "209308520026",
+              "209308520027",
+              "209308520028",
+              "209308520031",
+              "209308520033",
+              "209308520034",
+              "209308520036",
+              "209308520046",
+              "209308520058",
+              "209308520059",
+              "209308520061",
+              "209308520062",
+              "209308520063",
+              "209308520068",
+              "209308520071",
+              "209308520078",
+              "209308520082",
+              "209308520083",
+              "209308520084",
+              "209308520088",
+              "209308520095",
+              "209308520097",
+              "209308520101",
+              "209308520104",
+              "209308520105",
+              "209308520107",
+              "209308520109",
+              "209308520112",
+              "209308520128",
+              "209308520129",
+              "209308520130",
+              "209308520132",
+              "209308520141",
+              "209308520143",
+              "209308520144",
+              "209308520150",
+              "209308520154",
+              "209308520157",
+              "209308520159",
+              "209380950001",
+              "209380950003",
+              "209503260026",
+              "209660580006",
+              "209660580007",
+              "209660580011",
+              "209660580012",
+              "209660580073",
+              "209660580077",
+              "209660580078",
+              "209660580085",
               "209787760104",
-              "209787760105",
-              "209787760106",
-              "209787760108",
-              "209787760115",
-              "209787760116",
-              "209787760118",
-              "209787760119",
-              "209787760121",
-              "209787760123",
-              "209787760140",
-              "209787760145",
-              "209787760146",
-              "209787760147",
-              "209787760156",
-              "209787760160",
-              "209787760161",
-              "209787760163",
-              "209787770002",
-              "209787770006",
-              "209787770012",
-              "209787770016",
-              "209787770017",
-              "209787770018",
-              "209787770019",
-              "209787770020",
-              "209787770021",
-              "209787770022",
-              "209787770024",
-              "209787770026",
-              "209787770028",
-              "209787770029",
-              "209787770030",
-              "209787770031",
-              "209787770032",
-              "209787770033",
-              "209787770035",
-              "209787770036",
-              "209787770039",
-              "209787770044",
-              "209787770045",
-              "209787770048",
-              "209787770051",
-              "209787770052",
-              "209787770053",
-              "209787770055",
-              "209787770056",
-              "209787770057",
-              "209787770058",
-              "209787770060",
-              "209787770061",
-              "209787770063",
-              "209787770066",
-              "209787770067",
-              "209787770078",
-              "209787770084",
-              "209787770087",
-              "209787770091",
-              "209787770092",
-              "209787770093",
-              "209787770094",
-              "209787770096",
               "209787770098",
-              "209787770099",
-              "209787770100",
-              "209787770101",
-              "209787770105",
-              "209787770106",
-              "209787770109",
-              "209787770115",
-              "209787770117",
-              "209787770122",
-              "209787770124",
-              "209787770133",
-              "209787770134",
-              "209787770139",
-              "209787770145",
-              "209787770146",
-              "209787770148",
-              "209787770149",
-              "209787770155",
-              "209787770158",
-              "209787770161",
-              "209787770162",
-              "209787770163",
-              "209787770164",
-              "209787770165",
-              "209787770171",
-              "209789980004",
-              "209789980005",
-              "209789980006",
-              "209789980040",
-              "209789980041",
-              "209789980052",
-              "209789980053",
-              "209789980074",
-              "209789980094",
-              "209789980095",
-              "209789980096",
-              "209789980097",
-              "209789980098",
-              "209789980099",
-              "209789980106",
-              "209789980107",
-              "209789980112",
-              "209789980114",
-              "209789980127",
-              "209789980128",
-              "209789980129",
-              "209789980188"
+              "209789910005",
+              "209789910010",
+              "209789910043",
+              "209789910102",
+              "210107890008",
+              "210107890074"
             ],
-            "failed_sentrix_ids": [],
-            "log": "/mnt/koza_alldata/Scans/.logs/dragena_batch_20260518_131105.log"
+            "failed_sentrix_ids": [
+              "207986550007",
+              "207986550008",
+              "207986550009",
+              "208100620038",
+              "209789940002",
+              "209789940005",
+              "209789940006"
+            ],
+            "log": "/mnt/koza_alldata/Scans/.logs/dragena_batch_20260609_225626.log"
           },
           "webhookUrl": "http://localhost:5678/webhook/cb56257e-966e-4e4e-b353-214b63f77495",
           "executionMode": "production"
@@ -935,8 +846,8 @@
       }
     ]
   },
-  "versionId": "21fc2917-37a0-45e8-a613-ff15d5f2634e",
-  "activeVersionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
+  "versionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
+  "activeVersionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
   "triggerCount": 1,
   "shared": [
     {
@@ -948,9 +859,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-18T10:10:30.000Z",
-    "createdAt": "2026-05-18T10:06:34.805Z",
-    "versionId": "87ea9d41-fa7d-48af-b988-043f130bffbb",
+    "updatedAt": "2026-06-10T13:27:20.000Z",
+    "createdAt": "2026-06-10T13:27:18.832Z",
+    "versionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -1004,27 +915,6 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH input_json AS (\n    SELECT\n        $qc$ {{ JSON.stringify($json.raw_control_metrics) }} $qc$::jsonb AS qc\n),\nparams AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position\n),\ntarget_idat AS (\n    SELECT\n        i.uniqueref AS idat_ref,\n        s.uniqueref AS scan_ref,\n        s.sentrix_id,\n        i.position\n    FROM idats i\n    JOIN scans s\n      ON s.uniqueref = i.scan_ref\n    JOIN params p\n      ON p.sentrix_id = s.sentrix_id\n     AND p.position = i.position\n),\nqc_kv AS (\n    SELECT\n        kv.key AS qc_key,\n        kv.value AS qc_value\n    FROM input_json ij\n    CROSS JOIN LATERAL jsonb_each_text(ij.qc) AS kv(key, value)\n),\nmetric_values AS (\n    SELECT\n        ti.idat_ref,\n        c.uniqueref AS measurement_concept_ref,\n        NULLIF(q.qc_value, '')::numeric AS value_as_number\n    FROM qc_kv q\n    CROSS JOIN target_idat ti\n    JOIN concepts c\n      ON c.concept_name = q.qc_key\n     AND c.vocabulary_id = 'Illumina'\n    WHERE q.qc_key NOT IN (\n        'DatasetLabel',\n        'Row',\n        'Column',\n        'ImagingDate',\n        'SampleId',\n        'SampleName',\n        'SamplePlate',\n        'SampleWell',\n        'ScannerId',\n        'ScannerVersion',\n        'SentrixBarcode',\n        'SentrixPosition',\n        'SampleFolderPath',\n        'Functional QC Status',\n        'Control QC Flag Codes',\n        'SexEstimate',\n        '_debug_text_length',\n        '_debug_reg_positions_count',\n        '_debug_first_pos_value',\n        'qc_stdout',\n        'sentrix_id',\n        'qc_xlsx',\n        'qc_xlsx_server'\n    )\n      AND q.qc_value IS NOT NULL\n      AND q.qc_value <> ''\n      AND q.qc_value ~ '^-?[0-9]+(\\.[0-9]+)?$'\n),\nupserted AS (\n    INSERT INTO measurement_idats (\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    )\n    SELECT\n        idat_ref,\n        measurement_concept_ref,\n        value_as_number\n    FROM metric_values\n    ON CONFLICT (idat_ref, measurement_concept_ref)\n    DO UPDATE SET\n        value_as_number = EXCLUDED.value_as_number\n    RETURNING uniqueref\n)\nSELECT\n    p.sentrix_id,\n    p.position,\n    ti.scan_ref,\n    ti.idat_ref,\n    (SELECT COUNT(*) FROM metric_values) AS metric_value_count,\n    (SELECT COUNT(*) FROM upserted) AS upserted_measurement_count\nFROM params p\nLEFT JOIN target_idat ti ON TRUE;",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.postgres",
-        "typeVersion": 2.6,
-        "position": [
-          1408,
-          -16
-        ],
-        "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
-        "name": "upsert_measurement_idats",
-        "credentials": {
-          "postgres": {
-            "id": "vvzB2Z8ymgMiekHW",
-            "name": "PG-ALB-1.5"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "operation": "executeQuery",
           "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
           "options": {}
         },
@@ -1050,7 +940,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          1712,
+          2768,
           -16
         ],
         "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -1153,7 +1043,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const sentrixId =\n  $json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix_id ||\n  $('parse_find_qc_xlsx').first().json.sentrix ||\n  null;\n\nreturn [{\n  json: {\n    sentrix_id: sentrixId,\n    qc_stdout: $json.stdout ?? ''\n  }\n}];"
+          "jsCode": "const input = $input.all();\n\nreturn input.map(item => {\n  const source =\n    $('parse_find_qc_xlsx').item.json ||\n    $('parse_sentrix_qc').item.json ||\n    {};\n\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1166,7 +1056,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all().map(i => i.json);\n\n// qc_stdout itemlarını sentrix_id bazında tut\nconst qcBySentrix = {};\n\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\n// Excel QC row itemları\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  const regByPos = {};\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Her pozisyon için sadece 1. swath channel 1 alınacak\n    if (!imageName.endsWith('_1_Swath1_Channel1')) continue;\n\n    const pos = imageName.split('_')[0]; // R01C01\n    const regScore = parseFloat(parts[1]);\n\n    if (!isNaN(regScore)) {\n      regByPos[pos] = regScore;\n    }\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n\n      // test için geçici debug alanları\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
+          "jsCode": "const items = $input.all().map(i => i.json);\n\nconst qcBySentrix = {};\nfor (const item of items) {\n  if (item.qc_stdout && item.sentrix_id) {\n    qcBySentrix[String(item.sentrix_id)] = item.qc_stdout;\n  }\n}\n\nconst qcRows = items.filter(item =>\n  item.SentrixBarcode &&\n  item.SentrixPosition\n);\n\nconst output = [];\n\nfor (const row of qcRows) {\n  const sentrixId = String(row.SentrixBarcode);\n  const qcText = qcBySentrix[sentrixId] || '';\n\n  // Her pozisyon için tüm section score'larını topla\n  const scoresByPos = {}; // { R01C01: [1.51, 1.52, 1.52, 1.51, 1.52] }\n\n  for (const line of qcText.split(/\\r?\\n/)) {\n    const parts = line.trim().split(/\\s+/);\n    if (parts.length < 2) continue;\n\n    const imageName = parts[0];\n\n    // Sadece Swath1_Channel1 satırları — tüm section numaraları\n    if (!imageName.match(/_\\d+_Swath1_Channel1$/)) continue;\n\n    // R01C01 pozisyonunu çıkar\n    const pos = imageName.split('_')[0];\n\n    const regScore = parseFloat(parts[1]);\n    if (isNaN(regScore)) continue;\n\n    if (!scoresByPos[pos]) scoresByPos[pos] = [];\n    scoresByPos[pos].push(regScore);\n  }\n\n  // Her pozisyon için minimum score al\n  const regByPos = {};\n  for (const [pos, scores] of Object.entries(scoresByPos)) {\n    regByPos[pos] = Math.min(...scores);\n  }\n\n  output.push({\n    json: {\n      ...row,\n      RegistrationScore: regByPos[row.SentrixPosition] ?? null,\n      _debug_text_length: qcText.length,\n      _debug_reg_positions_count: Object.keys(regByPos).length,\n      _debug_first_pos_value: regByPos['R01C01'] ?? null\n    }\n  });\n}\n\nreturn output;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1176,6 +1066,116 @@
         ],
         "id": "a6060cb6-1239-4658-9dab-5686c6d73ec5",
         "name": "parse_sentrix_qc"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT i.uniqueref\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1408,
+          -16
+        ],
+        "id": "dc4db9ea-d0f7-4202-b878-b0ebca4c3a61",
+        "name": "get_idat_ref",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref) \nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1888,
+          -16
+        ],
+        "id": "edf04863-721c-4200-be3b-25f9cd4f5a62",
+        "name": "insert_data_operation",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst prepareItems = $('prepare_insert').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    metrics: JSON.stringify({\n      ...prepareItems[index].json.raw_control_metrics,\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2112,
+          -16
+        ],
+        "id": "ed751b86-1ab2-433a-864b-9d95e0377bac",
+        "name": "build_measurement_payload"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  ('{{ $json.metrics }}'::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2352,
+          -16
+        ],
+        "id": "ae15e0d8-e983-4701-b60c-8f81c756914a",
+        "name": "upsert_measurement_idats",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').all()[$itemIndex].json.uniqueref }};",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2560,
+          -16
+        ],
+        "id": "96063ef9-9dac-4051-9557-a91aa92eace6",
+        "name": "update_data_operation_completed",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst packItems = $('pack_qc_rows').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    idat_ref: item.json.uniqueref,\n    raw_control_metrics: packItems[index].json.raw_control_metrics\n  }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1664,
+          -16
+        ],
+        "id": "562a5915-391e-453b-a7d7-88ca0577a410",
+        "name": "prepare_insert"
       }
     ],
     "connections": {
@@ -1212,27 +1212,16 @@
           ]
         ]
       },
-      "upsert_measurement_idats": {
-        "main": [
-          [
-            {
-              "node": "clenaup_qc",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "pack_qc_rows": {
         "main": [
           [
             {
-              "node": "update_idats",
+              "node": "get_idat_ref",
               "type": "main",
               "index": 0
             },
             {
-              "node": "upsert_measurement_idats",
+              "node": "update_idats",
               "type": "main",
               "index": 0
             }
@@ -1320,14 +1309,80 @@
             }
           ]
         ]
+      },
+      "get_idat_ref": {
+        "main": [
+          [
+            {
+              "node": "prepare_insert",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "insert_data_operation": {
+        "main": [
+          [
+            {
+              "node": "build_measurement_payload",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "build_measurement_payload": {
+        "main": [
+          [
+            {
+              "node": "upsert_measurement_idats",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "upsert_measurement_idats": {
+        "main": [
+          [
+            {
+              "node": "update_data_operation_completed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "update_data_operation_completed": {
+        "main": [
+          [
+            {
+              "node": "clenaup_qc",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "prepare_insert": {
+        "main": [
+          [
+            {
+              "node": "insert_data_operation",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 87ea9d41",
+    "name": "Version f43628a5",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "10-06-2026/0:00",
+  "commitDate": "11-06-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
