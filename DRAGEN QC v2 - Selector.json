@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-06T23:17:47.343Z",
+  "updatedAt": "2026-06-12T09:54:46.933Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,7 +43,13 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260513_VH01138_5_AACYVVVHV, 260513_A01228_0284_AHG7CWDMX2",
+              "value": "260605_VH01138_6_22253NJNX",
+              "type": "string"
+            },
+            {
+              "id": "perbatch",
+              "name": "per_batch",
+              "value": "999",
               "type": "string"
             }
           ]
@@ -62,7 +68,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH batch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= (3 - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+        "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
         "options": {}
       },
       "id": "Select & Queue",
@@ -198,8 +204,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "c3c18b7a-4b8f-4318-a10a-b4fab6691bf3",
-  "activeVersionId": "e17079d3-54ae-4cf9-a3ec-bd27f0ddceb2",
+  "versionId": "b4b4f739-d528-4a99-8f5e-1b379f25e8fd",
+  "activeVersionId": "aa770e48-9378-4fa8-9e56-12276150650e",
   "triggerCount": 0,
   "shared": [
     {
@@ -211,9 +217,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-30T06:59:35.625Z",
-    "createdAt": "2026-05-30T06:59:35.625Z",
-    "versionId": "e17079d3-54ae-4cf9-a3ec-bd27f0ddceb2",
+    "updatedAt": "2026-06-12T09:53:28.464Z",
+    "createdAt": "2026-06-12T09:53:28.464Z",
+    "versionId": "aa770e48-9378-4fa8-9e56-12276150650e",
     "workflowId": "S2oU9ggilqJrFCxm",
     "nodes": [
       {
@@ -253,7 +259,13 @@
               {
                 "id": "runids",
                 "name": "run_ids",
-                "value": "20260515_LH00267_0169_A2327K3LT4,260513_A01978_0176_BHGCH2DMX2",
+                "value": "260513_VH01138_5_AACYVVVHV, 260513_A01228_0284_AHG7CWDMX2",
+                "type": "string"
+              },
+              {
+                "id": "perbatch",
+                "name": "per_batch",
+                "value": "",
                 "type": "string"
               }
             ]
@@ -272,7 +284,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH batch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= (3 - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+          "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(string_to_array('{{ $json.run_ids }}', ',')) AS x)\n    AND rd.kit_ref IN (1, 40, 73, 97)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
           "options": {}
         },
         "id": "Select & Queue",
@@ -406,6 +418,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "12-06-2026/0:00",
+  "commitDate": "13-06-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
