@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-06T17:53:29.704Z",
+  "updatedAt": "2026-06-12T12:16:57.826Z",
   "createdAt": "2026-05-06T16:48:16.301Z",
   "id": "dJilxhhB8eITosxU",
   "name": "pre_plan_samplesheet",
@@ -461,7 +461,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1376,
+        -1216,
         -992
       ],
       "id": "032f3904-efb1-48d3-8599-37a11b43eecb",
@@ -654,6 +654,19 @@
       ],
       "id": "63d4a8f5-a61f-4502-9e9f-7124dcb7b23e",
       "name": "Samplesheet full REV"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to normalize text to ASCII\nfunction normalizeToAscii(text) {\n  if (typeof text !== 'string') {\n    return text;\n  }\n  \n  // Normalize Unicode characters (NFKD decomposition)\n  let normalized = text.normalize('NFKD');\n  \n  // Remove diacritical marks and non-ASCII characters\n  normalized = normalized.replace(/[\\u0300-\\u036f]/g, '');\n  \n  // Convert Turkish-specific characters manually\n  const turkishMap = {\n    'ı': 'i', 'İ': 'I',\n    'ğ': 'g', 'Ğ': 'G',\n    'ü': 'u', 'Ü': 'U',\n    'ş': 's', 'Ş': 'S',\n    'ö': 'o', 'Ö': 'O',\n    'ç': 'c', 'Ç': 'C'\n  };\n  \n  // Replace Turkish characters\n  Object.keys(turkishMap).forEach(char => {\n    normalized = normalized.replace(new RegExp(char, 'g'), turkishMap[char]);\n  });\n  \n  // Keep only ASCII characters\n  normalized = normalized.replace(/[^\\x00-\\x7F]/g, '');\n  \n  // Replace non-alphanumeric characters with dashes\n  normalized = normalized.replace(/[^a-zA-Z0-9]+/g, '-');\n  \n  // Remove leading/trailing dashes\n  normalized = normalized.replace(/^-+|-+$/g, '');\n  \n  return normalized;\n}\n\n// Process all items\nconst items = $input.all();\n\nconst processedItems = items.map(item => {\n  const processedJson = {};\n  \n  // Normalize all string fields\n  Object.keys(item.json).forEach(key => {\n    processedJson[key] = normalizeToAscii(item.json[key]);\n  });\n  \n  return { json: processedJson };\n});\n\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1392,
+        -992
+      ],
+      "id": "688749cb-775a-4af1-b130-c6b5e9acb058",
+      "name": "Normalize to ASCII1"
     }
   ],
   "connections": {
@@ -738,7 +751,7 @@
       "main": [
         [
           {
-            "node": "If1",
+            "node": "Normalize to ASCII1",
             "type": "main",
             "index": 0
           }
@@ -986,6 +999,17 @@
           }
         ]
       ]
+    },
+    "Normalize to ASCII1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -998,16 +1022,16 @@
     "When clicking ‘Execute workflow’": [
       {
         "json": {
-          "date": "260506",
-          "instrument": "A01978",
-          "part": "B",
+          "date": "260609",
+          "instrument": "A01228",
+          "part": "A",
           "numCycles": "12",
           "isRevComp": false
         }
       }
     ]
   },
-  "versionId": "906446a7-3b85-4d6d-b72d-386dcddbbc00",
+  "versionId": "e8721ead-f6a3-4764-9e5b-ebf91fa28707",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1021,6 +1045,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "12-06-2026/0:00",
+  "commitDate": "13-06-2026/0:00",
   "fileName": "pre_plan_samplesheet.json"
 }
