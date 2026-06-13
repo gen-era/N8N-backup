@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-20T18:57:35.187Z",
+  "updatedAt": "2026-06-12T07:48:48.261Z",
   "createdAt": "2025-11-12T10:18:24.019Z",
   "id": "zcGxvMxxtK7tysUT",
   "name": "DRAGEN QC",
@@ -1036,19 +1036,19 @@
             {
               "id": "75e73f52-d764-45b9-b626-5a3a37e0bbcb",
               "name": "run_id",
-              "value": "20260515_LH00267_0169_A2327K3LT4",
+              "value": "260605_VH01138_6_22253NJNX",
               "type": "string"
             },
             {
               "id": "529100bf-3869-454c-80e0-6017fe7f998d",
               "name": "input",
-              "value": "Ecegen",
+              "value": "",
               "type": "string"
             },
             {
               "id": "e3afe521-fde9-419f-8aa2-74dcd15cd516",
               "name": "notify_target",
-              "value": "serap.aktas@sapiens.com.tr",
+              "value": "deniz.ozturk@gen-era.com.tr",
               "type": "string"
             }
           ]
@@ -2252,7 +2252,7 @@
       }
     ]
   },
-  "versionId": "8088644f-57fe-49ac-a174-66b325073574",
+  "versionId": "11d1affd-ca1a-42bd-bb0e-c5efa76398e6",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2273,6 +2273,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "12-06-2026/0:00",
+  "commitDate": "13-06-2026/0:00",
   "fileName": "DRAGEN QC.json"
 }
