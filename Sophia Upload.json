@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12T06:10:08.549Z",
+  "updatedAt": "2026-06-15T18:53:05.244Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -2928,
+        -2944,
         -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1376,
+        -1168,
         -288
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
@@ -45,7 +45,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -2416,
+        -2208,
         -288
       ],
       "id": "66bec76f-14a8-4dde-9397-074d3974da25",
@@ -60,7 +60,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2704,
+        -2720,
         -288
       ],
       "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
@@ -79,7 +79,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -2128,
+        -1920,
         -288
       ],
       "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
@@ -113,7 +113,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1904,
+        -1696,
         -288
       ],
       "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
@@ -126,7 +126,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -64,
+        144,
         -288
       ],
       "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
@@ -255,7 +255,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
+        -448,
         -480
       ],
       "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
@@ -274,7 +274,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1056,
+        1264,
         -288
       ],
       "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
@@ -409,7 +409,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        400,
+        608,
         -288
       ],
       "id": "261241cf-7b3a-41d5-a6d9-cfb27c1bf47b",
@@ -428,7 +428,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -656,
+        -448,
         -288
       ],
       "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
@@ -447,7 +447,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -480,
+        -272,
         -288
       ],
       "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
@@ -464,7 +464,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        640,
+        848,
         -288
       ],
       "id": "6ff4cb0b-f1dd-41f5-a88b-7dc2833a597a",
@@ -491,7 +491,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        848,
+        1056,
         -288
       ],
       "id": "4cb118e5-86b2-4add-9289-5cd02b9d3fed",
@@ -517,7 +517,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -272,
+        -64,
         -288
       ],
       "credentials": {
@@ -665,7 +665,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        368,
+        576,
         -16
       ],
       "id": "b198491e-4754-420a-b6f0-7329d41a085f",
@@ -684,7 +684,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        128,
+        336,
         -16
       ],
       "id": "d6b341d7-635b-48a9-b8c6-0cc934518153",
@@ -697,7 +697,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1024,
+        1232,
         -16
       ],
       "id": "4bc2024f-1c9f-4331-9b9d-e91036fb357c",
@@ -717,7 +717,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1632,
+        -1424,
         -288
       ],
       "id": "390e4411-abcf-4774-bbba-9f25809333f4",
@@ -736,7 +736,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        176,
+        384,
         -288
       ],
       "id": "dbbda793-df00-4a0c-b964-2c97a3fd3901",
@@ -755,7 +755,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        800,
+        1008,
         -16
       ],
       "id": "436d3962-8d76-49c5-bd37-2c2c60ea6488",
@@ -779,7 +779,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1136,
+        -928,
         -288
       ],
       "id": "4e9d237c-db24-4a36-a5f1-5341f48b3a77",
@@ -814,7 +814,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -944,
+        -736,
         -288
       ],
       "id": "aa49a94b-e3b3-42c1-b7b1-7afed7fb8291",
@@ -944,7 +944,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -656,
+        -448,
         -64
       ],
       "id": "65bb5291-64b4-4e44-bcbe-ca40ed7c35a5",
@@ -969,7 +969,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -448,
+        -240,
         -64
       ],
       "id": "4d9d770a-1768-43c2-935c-cefc75893bb6",
@@ -982,6 +982,39 @@
           "name": "bioinf.notify@gen-era.tech"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1c4c849a-670c-4a07-9c97-163da18f7829",
+              "leftValue": "={{ $json.run_ids }}",
+              "rightValue": "asdsad",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -2512,
+        -288
+      ],
+      "id": "5f907176-2494-4426-a74f-8515ad229333",
+      "name": "Filter"
     }
   ],
   "connections": {
@@ -1023,7 +1056,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items",
+            "node": "Filter",
             "type": "main",
             "index": 0
           }
@@ -1268,6 +1301,17 @@
           }
         ]
       ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1280,7 +1324,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "83a8c65c-3d49-4f36-bf4f-34451cb214b5",
+  "versionId": "31cb0061-19e7-4d04-9ab0-67941e94b719",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1301,6 +1345,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-06-2026/0:00",
+  "commitDate": "16-06-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
