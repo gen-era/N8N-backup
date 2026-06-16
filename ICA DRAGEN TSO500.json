@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T10:55:35.640Z",
+  "updatedAt": "2026-06-15T16:03:09.892Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -312,7 +312,7 @@
     },
     {
       "parameters": {
-        "maxItems": 3
+        "maxItems": 4
       },
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
@@ -545,7 +545,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8cd52029-5097-4015-957e-3df5f6500ed9",
+  "versionId": "2b7081fa-1534-40ae-8e8a-3cc30d574d6b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -566,6 +566,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-06-2026/0:00",
+  "commitDate": "16-06-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
