@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-10T13:27:18.830Z",
+  "updatedAt": "2026-06-15T11:30:50.746Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -498,13 +498,7 @@
     },
     "update_data_operation_completed": {
       "main": [
-        [
-          {
-            "node": "clenaup_qc",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "prepare_insert": {
@@ -846,8 +840,8 @@
       }
     ]
   },
-  "versionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
-  "activeVersionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
+  "versionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
+  "activeVersionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
   "triggerCount": 1,
   "shared": [
     {
@@ -859,9 +853,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-10T13:27:20.000Z",
-    "createdAt": "2026-06-10T13:27:18.832Z",
-    "versionId": "f43628a5-d137-4387-8aa0-9e6fae6cd4bb",
+    "updatedAt": "2026-06-15T11:30:53.000Z",
+    "createdAt": "2026-06-15T11:30:50.748Z",
+    "versionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -1356,13 +1350,7 @@
       },
       "update_data_operation_completed": {
         "main": [
-          [
-            {
-              "node": "clenaup_qc",
-              "type": "main",
-              "index": 0
-            }
-          ]
+          []
         ]
       },
       "prepare_insert": {
@@ -1378,11 +1366,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version f43628a5",
+    "name": "Version 1b06887a",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "15-06-2026/0:00",
+  "commitDate": "16-06-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
