@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T16:42:37.146Z",
+  "updatedAt": "2026-06-15T18:01:39.472Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260605_VH01138_6_22253NJNX",
+              "value": "=260612_VH01138_8_AACNKLJHV",
               "type": "string"
             }
           ]
@@ -477,7 +477,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Workflow kontrolü\nconst workflowType = $('Get Run Ref').first().json.workflow_type;\n\n\n// Gelen JSON verisini al (artık CSV parse etmiyoruz)\nconst parsedData = $input.all().map(item => item.json);\n\nlet result;\n\nif (workflowType === \"Standard Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item['SampleID'];\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // Normal workflow - olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
+        "jsCode": "// Workflow kontrolü\nconst workflowType = $('Get Run Ref').first().json.workflow_type;\n\n\n// Gelen JSON verisini al (artık CSV parse etmiyoruz)\nconst parsedData = $input.all().map(item => item.json);\n\nlet result;\n\n// Lane'leri ayrı tutması gereken tek durum gerçek XP run'ları.\n// Boş / Standard / NextSeq / MiSeq vb. hepsinde lane 0'a toplanır.\nif (workflowType !== \"XP Workflow\") {\n  // SampleID'ye göre grupla ve reads'leri topla\n  const grouped = {};\n  \n  parsedData.forEach(item => {\n    const sampleId = item['SampleID'];\n    \n    if (!grouped[sampleId]) {\n      // İlk kez görülen sample - kopyala\n      grouped[sampleId] = { ...item };\n      grouped[sampleId]['# Reads'] = parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n      grouped[sampleId]['Lane'] = '0';  // Lane'i 0 yap\n    } else {\n      // Zaten var - reads'i ekle\n      grouped[sampleId]['# Reads'] += parseInt(item['# Reads'].replace(/,/g, '')) || 0;\n    }\n  });\n  \n  // Objeyi array'e çevir\n  result = Object.values(grouped);\n  \n} else {\n  // XP workflow - lane'leri olduğu gibi bırak\n  result = parsedData;\n}\n\nreturn result.map(item => ({ json: item }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -498,7 +498,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1776,
+        -1712,
         -32
       ],
       "id": "35b85927-2d3a-497f-94db-6e37a3ad1498",
@@ -528,26 +528,6 @@
         "sshPassword": {
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "command": "=rm -rf /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq"
-      },
-      "type": "n8n-nodes-base.ssh",
-      "typeVersion": 1,
-      "position": [
-        1392,
-        592
-      ],
-      "id": "a0289a63-6934-45ee-bcd4-3e4f4f9959f0",
-      "name": "Cleanup DRAGEN",
-      "credentials": {
-        "sshPassword": {
-          "id": "roUCz67T2VbHNQzo",
-          "name": "Koza DRAGEN - Root User"
         }
       },
       "disabled": true
@@ -730,8 +710,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -160,
-        -32
+        -144,
+        -16
       ],
       "id": "ac6449e5-80fc-4ca6-8f32-29b52cb684d4",
       "name": "Update rows in a table",
@@ -781,135 +761,12 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -592,
-        -32
+        -576,
+        -16
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
       "name": "Merge",
       "disabled": true
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements\nFROM runs\nWHERE run_id = '{{ $json.run_id }}'\n  AND status_concept_ref = 29",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        -1888,
-        384
-      ],
-      "id": "337efc1e-77ad-4129-8554-43e71a7bd2ae",
-      "name": "Check Measurement",
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
-              "leftValue": "={{ $json.has_measurements }}",
-              "rightValue": false,
-              "operator": {
-                "type": "boolean",
-                "operation": "false",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        -1648,
-        384
-      ],
-      "id": "e6095f51-e7f4-499f-8f66-b18097af9023",
-      "name": "Has No Measurement",
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "SeGWQ7ai2D66eUSG",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
-          "cachedResultName": "interop"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "folder": "={{ $json.run_id }}",
-            "path": "=/mnt/dragen_staging/run_folder/{{ $json.run_id }}"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "folder",
-              "displayName": "folder",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "path",
-              "displayName": "path",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
-        "mode": "each",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        -1376,
-        384
-      ],
-      "id": "1522cd7b-ee8b-40b4-8b12-8fa1620e32cd",
-      "name": "Call 'interop'",
-      "alwaysOutputData": true,
-      "disabled": true,
-      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -926,8 +783,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -1376,
-        576
+        -1536,
+        352
       ],
       "id": "7ceaf67b-2558-47a3-92b2-12ddc75d99fc",
       "name": "Send email",
@@ -943,14 +800,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH\nrun_info AS (\n  SELECT r.uniqueref AS run_ref, r.run_id, r.date AS run_date, r.flowcell_lot, r.part,\n    cw.concept_name AS workflow_type,\n    i.serial_number AS instrument_serial,\n    ic.concept_name AS instrument_model,\n    fk.name AS flowcell_kit,\n    cs.care_site_name AS care_site_name\n  FROM runs r\n  LEFT JOIN concepts cw ON r.workflow_concept_ref = cw.uniqueref\n  LEFT JOIN instruments i ON r.instrument_ref = i.uniqueref\n  LEFT JOIN concepts ic ON i.instrument_concept_ref = ic.uniqueref\n  LEFT JOIN kits fk ON r.flowcell_kit_ref = fk.uniqueref\n  LEFT JOIN care_site cs ON r.care_site_ref = cs.uniqueref\n  WHERE r.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n),\nconversion_info AS (\n  SELECT c.uniqueref AS conversion_ref, c.id_source_value AS conversion_id_source,\n    c.conversion_time, c.operator_ref, cs.concept_name AS conversion_status\n  FROM conversions c\n  JOIN run_info ri ON c.run_ref = ri.run_ref\n  LEFT JOIN concepts cs ON c.status_concept_ref = cs.uniqueref\n  ORDER BY c.uniqueref DESC LIMIT 1\n),\nsample_stats AS (\n  SELECT COUNT(DISTINCT rd.sample_id)::bigint AS sample_count,\n    SUM(rd.reads)::bigint AS total_demux_reads\n  FROM reads rd\n  WHERE rd.conversion_ref = (SELECT conversion_ref FROM conversion_info)\n),\nprovider_info AS (\n  SELECT id AS operator_email, name AS operator_name\n  FROM providers WHERE uniqueref = (SELECT operator_ref FROM conversion_info)\n),\nlm AS (\n  SELECT (substring(c.concept_name FROM 'L(\\d+)'))::int AS lane,\n    (substring(c.concept_name FROM ' R(\\d)$'))::int AS read_num,\n    regexp_replace(c.concept_name, ' L\\d+ R\\d$', '') AS metric_root,\n    mr.value_as_number AS val\n  FROM measurement_run mr\n  JOIN concepts c ON mr.measurement_concept_ref = c.uniqueref\n  WHERE mr.run_ref = (SELECT run_ref FROM run_info)\n    AND c.concept_class_id = 'Lane Metric'\n),\nlane_summary AS (\n  SELECT lane,\n    SUM(val) FILTER (WHERE metric_root='Cluster Count' AND read_num=1) AS cluster_count,\n    SUM(val) FILTER (WHERE metric_root='Cluster Count Pf' AND read_num=1) AS cluster_count_pf,\n    AVG(val) FILTER (WHERE metric_root='% >= Q30') AS pct_q30,\n    AVG(val) FILTER (WHERE metric_root='% Occupied') AS pct_occupied,\n    AVG(val) FILTER (WHERE metric_root='% Aligned') AS pct_aligned,\n    AVG(val) FILTER (WHERE metric_root='Error Rate') AS error_rate,\n    SUM(val) FILTER (WHERE metric_root='Reads Pf') AS reads_pf,\n    SUM(val) FILTER (WHERE metric_root='Yield G') AS yield_gb\n  FROM lm GROUP BY lane\n),\nqc AS (\n  SELECT json_agg(row_to_json(ls) ORDER BY ls.lane) AS lanes,\n    SUM(cluster_count) AS total_cluster_count,\n    SUM(cluster_count_pf) AS total_cluster_count_pf,\n    CASE WHEN SUM(cluster_count)>0 THEN SUM(cluster_count_pf)/SUM(cluster_count)*100 END AS pct_pf,\n    AVG(pct_q30) AS avg_pct_q30,\n    AVG(pct_occupied) AS avg_pct_occupied,\n    AVG(pct_aligned) AS avg_pct_aligned,\n    AVG(error_rate) AS avg_error_rate,\n    SUM(reads_pf) AS total_reads_pf,\n    SUM(yield_gb) AS total_yield_gb\n  FROM lane_summary ls\n)\nSELECT ri.*, ci.*, ss.*, pi.*, qc.*\nFROM run_info ri\nLEFT JOIN conversion_info ci ON TRUE\nLEFT JOIN sample_stats ss ON TRUE\nLEFT JOIN provider_info pi ON TRUE\nLEFT JOIN qc ON TRUE;",
+        "query": "WITH\nrun_info AS (\n  SELECT r.uniqueref AS run_ref, r.run_id, r.date AS run_date, r.flowcell_lot, r.part,\n    cw.concept_name AS workflow_type,\n    i.serial_number AS instrument_serial,\n    ic.concept_name AS instrument_model,\n    fk.name AS flowcell_kit,\n    cs.care_site_name AS care_site_name\n  FROM runs r\n  LEFT JOIN concepts cw ON r.workflow_concept_ref = cw.uniqueref\n  LEFT JOIN instruments i ON r.instrument_ref = i.uniqueref\n  LEFT JOIN concepts ic ON i.instrument_concept_ref = ic.uniqueref\n  LEFT JOIN kits fk ON r.flowcell_kit_ref = fk.uniqueref\n  LEFT JOIN care_site cs ON r.care_site_ref = cs.uniqueref\n  WHERE r.run_id = '{{ $('Edit Fields').first().json.run_id }}'\n),\nconversion_info AS (\n  SELECT c.uniqueref AS conversion_ref, c.id_source_value AS conversion_id_source,\n    c.conversion_time, cs.concept_name AS conversion_status\n  FROM conversions c\n  JOIN run_info ri ON c.run_ref = ri.run_ref\n  LEFT JOIN concepts cs ON c.status_concept_ref = cs.uniqueref\n  ORDER BY c.uniqueref DESC LIMIT 1\n),\nsample_stats AS (\n  SELECT COUNT(DISTINCT rd.sample_id)::bigint AS sample_count,\n    SUM(rd.reads)::bigint AS total_demux_reads\n  FROM reads rd\n  WHERE rd.conversion_ref = (SELECT conversion_ref FROM conversion_info)\n),\nlm AS (\n  SELECT (substring(c.concept_name FROM 'L(\\d+)'))::int AS lane,\n    (substring(c.concept_name FROM ' R(\\d)$'))::int AS read_num,\n    regexp_replace(c.concept_name, ' L\\d+ R\\d$', '') AS metric_root,\n    mr.value_as_number AS val\n  FROM measurement_run mr\n  JOIN concepts c ON mr.measurement_concept_ref = c.uniqueref\n  WHERE mr.run_ref = (SELECT run_ref FROM run_info)\n    AND c.concept_class_id = 'Lane Metric'\n),\nlane_summary AS (\n  SELECT lane,\n    SUM(val) FILTER (WHERE metric_root='Cluster Count' AND read_num=1) AS cluster_count,\n    SUM(val) FILTER (WHERE metric_root='Cluster Count Pf' AND read_num=1) AS cluster_count_pf,\n    AVG(val) FILTER (WHERE metric_root='% >= Q30') AS pct_q30,\n    AVG(val) FILTER (WHERE metric_root='% Occupied') AS pct_occupied,\n    AVG(val) FILTER (WHERE metric_root='% Aligned') AS pct_aligned,\n    AVG(val) FILTER (WHERE metric_root='Error Rate') AS error_rate,\n    SUM(val) FILTER (WHERE metric_root='Reads Pf') AS reads_pf,\n    SUM(val) FILTER (WHERE metric_root='Yield G') AS yield_gb\n  FROM lm GROUP BY lane\n),\nqc AS (\n  SELECT json_agg(row_to_json(ls) ORDER BY ls.lane) AS lanes,\n    SUM(cluster_count) AS total_cluster_count,\n    SUM(cluster_count_pf) AS total_cluster_count_pf,\n    CASE WHEN SUM(cluster_count)>0 THEN SUM(cluster_count_pf)/SUM(cluster_count)*100 END AS pct_pf,\n    AVG(pct_q30) AS avg_pct_q30,\n    AVG(pct_occupied) AS avg_pct_occupied,\n    AVG(pct_aligned) AS avg_pct_aligned,\n    AVG(error_rate) AS avg_error_rate,\n    SUM(reads_pf) AS total_reads_pf,\n    SUM(yield_gb) AS total_yield_gb\n  FROM lane_summary ls\n)\nSELECT ri.*, ci.*, ss.*, qc.*\nFROM run_info ri\nLEFT JOIN conversion_info ci ON TRUE\nLEFT JOIN sample_stats ss ON TRUE\nLEFT JOIN qc ON TRUE;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1920,
-        576
+        -1712,
+        352
       ],
       "id": "b1d4f7a2-9c3e-4f8a-b2e1-7d4f8e2a1b9c",
       "name": "Build Email Context",
@@ -965,12 +822,12 @@
       "parameters": {
         "content": "## BCl to Fastq Conversion",
         "height": 80,
-        "width": 1856
+        "width": 1840
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
         32,
-        -624
+        -864
       ],
       "typeVersion": 1,
       "id": "6b23ef78-2bf4-4356-900e-4e8eb9118548",
@@ -1038,8 +895,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        -384,
-        -32
+        -368,
+        -16
       ],
       "id": "8f453b48-abdc-4cb1-a023-f38096e27cb2",
       "name": "Filter",
@@ -1063,6 +920,26 @@
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "command": "=rm -rf /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -1712,
+        608
+      ],
+      "id": "6ab70d05-64fb-40c4-955c-5b695eeca015",
+      "name": "Cleanup DRAGEN",
+      "credentials": {
+        "sshPassword": {
+          "id": "roUCz67T2VbHNQzo",
+          "name": "Koza DRAGEN - Root User"
         }
       },
       "disabled": true
@@ -1269,12 +1146,12 @@
             "index": 0
           },
           {
-            "node": "Check Measurement",
+            "node": "Build Email Context",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Build Email Context",
+            "node": "Cleanup DRAGEN",
             "type": "main",
             "index": 0
           }
@@ -1301,24 +1178,12 @@
             "index": 0
           }
         ],
-        [
-          {
-            "node": "Cleanup DRAGEN",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Push Conversion to AllData": {
       "main": [
-        [
-          {
-            "node": "Cleanup DRAGEN",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Parse Demux": {
@@ -1403,29 +1268,6 @@
         ]
       ]
     },
-    "Check Measurement": {
-      "main": [
-        [
-          {
-            "node": "Has No Measurement",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Has No Measurement": {
-      "main": [
-        [
-          {
-            "node": "Call 'interop'",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
-      ]
-    },
     "Build Email Context": {
       "main": [
         [
@@ -1469,6 +1311,11 @@
           }
         ]
       ]
+    },
+    "Send email": {
+      "main": [
+        []
+      ]
     }
   },
   "settings": {
@@ -1480,16 +1327,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "Edit Fields": [
-      {
-        "json": {
-          "run_id": "260609_A01228_0293_AHWFC7DSXF"
-        }
-      }
-    ]
-  },
-  "versionId": "68f17a77-b865-4298-beb9-d32fcb4e0095",
+  "pinData": {},
+  "versionId": "be3772f7-20df-4b5e-bdbf-e4f717444d63",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1510,6 +1349,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "15-06-2026/0:00",
+  "commitDate": "16-06-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
