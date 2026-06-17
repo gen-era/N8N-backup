@@ -1,0 +1,78 @@
+{
+  "updatedAt": "2026-06-16T12:27:13.725Z",
+  "createdAt": "2026-06-16T12:26:59.228Z",
+  "id": "38Oo3EHmnGDNmbDD",
+  "name": "test_flow",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9ed0b4ec-aaa4-413f-8bad-80a0223f8c6d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f48322eb-7023-4b42-9186-75ba5f9aefb8",
+      "name": "Webhook",
+      "webhookId": "9ed0b4ec-aaa4-413f-8bad-80a0223f8c6d"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "d41a4f98-2902-4824-a531-c6647de4dc97",
+  "activeVersionId": "d41a4f98-2902-4824-a531-c6647de4dc97",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-16T12:26:59.238Z",
+      "createdAt": "2026-06-16T12:26:59.238Z",
+      "role": "workflow:owner",
+      "workflowId": "38Oo3EHmnGDNmbDD",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-06-16T12:27:21.000Z",
+    "createdAt": "2026-06-16T12:26:59.241Z",
+    "versionId": "d41a4f98-2902-4824-a531-c6647de4dc97",
+    "workflowId": "38Oo3EHmnGDNmbDD",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "9ed0b4ec-aaa4-413f-8bad-80a0223f8c6d",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "f48322eb-7023-4b42-9186-75ba5f9aefb8",
+        "name": "Webhook",
+        "webhookId": "9ed0b4ec-aaa4-413f-8bad-80a0223f8c6d"
+      }
+    ],
+    "connections": {},
+    "authors": "Bio Solutions",
+    "name": "Version d41a4f98",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "17-06-2026/0:00",
+  "fileName": "test_flow.json"
+}
