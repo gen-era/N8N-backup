@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-15T11:30:50.746Z",
+  "updatedAt": "2026-06-16T14:13:14.445Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -288,7 +288,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').all()[$itemIndex].json.uniqueref }};",
+        "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE recipe_ref = 489\nAND status_concept_ref = 24\nAND uniqueref IN (\n  SELECT DISTINCT data_operations_ref FROM measurement_idats\n);",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -840,8 +840,8 @@
       }
     ]
   },
-  "versionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
-  "activeVersionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
+  "versionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
+  "activeVersionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
   "triggerCount": 1,
   "shared": [
     {
@@ -853,9 +853,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-15T11:30:53.000Z",
-    "createdAt": "2026-06-15T11:30:50.748Z",
-    "versionId": "1b06887a-3a6b-4686-82cb-ce2cf88c03cd",
+    "updatedAt": "2026-06-16T14:13:16.000Z",
+    "createdAt": "2026-06-16T14:13:14.448Z",
+    "versionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -1140,7 +1140,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE uniqueref = {{ $('insert_data_operation').all()[$itemIndex].json.uniqueref }};",
+          "query": "UPDATE data_operations_array\nSET status_concept_ref = 29,\n    performed_at = NOW(),\n    updated_at = NOW()\nWHERE recipe_ref = 489\nAND status_concept_ref = 24\nAND uniqueref IN (\n  SELECT DISTINCT data_operations_ref FROM measurement_idats\n);",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1366,11 +1366,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1b06887a",
+    "name": "Version 70700e3c",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "16-06-2026/0:00",
+  "commitDate": "17-06-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
