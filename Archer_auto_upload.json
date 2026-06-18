@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-04T16:28:21.366Z",
+  "updatedAt": "2026-06-17T07:19:21.456Z",
   "createdAt": "2025-12-29T14:18:49.525Z",
   "id": "OaLTopm8qW98Uf6u",
   "name": "Archer_auto_upload",
@@ -130,7 +130,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Group items by recipe_ref\nconst grouped = {};\n\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  \n  if (!grouped[recipeRef]) {\n    grouped[recipeRef] = [];\n  }\n  grouped[recipeRef].push(item.json);\n}\n\n// Return as array of groups\nreturn Object.entries(grouped).map(([recipeRef, items]) => ({\n  json: {\n    recipe_ref: recipeRef,\n    items: items,\n    count: items.length\n  }\n}));"
+        "jsCode": "// Group items by recipe_ref AND storage location (derived from r1_path)\nconst getLocation = (r1Path) => {\n  if (!r1Path) return 'unknown';\n  if (r1Path.startsWith('/mnt/illuminastorage/')) return 'illuminastorage';\n  if (r1Path.startsWith('/volume1/ALLDATA/')) return 'alldata';\n  return 'other';\n};\n\nconst grouped = {};\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  const location = getLocation(item.json.r1_path);\n  const groupKey = `${recipeRef}__${location}`;\n\n  if (!grouped[groupKey]) {\n    grouped[groupKey] = {\n      recipe_ref: recipeRef,\n      location: location,\n      items: []\n    };\n  }\n  grouped[groupKey].items.push(item.json);\n}\n\n// Return as array of groups\nreturn Object.values(grouped).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    location: group.location,\n    items: group.items,\n    count: group.items.length\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -148,7 +148,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2048,
+        2256,
         208
       ],
       "id": "3cf15288-1174-4bef-a49b-cbbaeaae6699",
@@ -160,7 +160,7 @@
       "name": "Replace Me",
       "typeVersion": 1,
       "position": [
-        6560,
+        6768,
         672
       ],
       "id": "ac2e5b0b-12ca-4413-a708-d5073499725b"
@@ -220,7 +220,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2352,
+        2560,
         336
       ],
       "id": "2acfe57d-cc14-4f2d-ba41-aebda59310f3",
@@ -239,7 +239,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2560,
+        2768,
         160
       ],
       "id": "2ef2ce8c-ba7e-4df4-8b2a-8c586f4bd649",
@@ -269,7 +269,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2768,
+        2976,
         336
       ],
       "id": "6c4e8da4-3d03-498a-9c6a-ce238729ee25",
@@ -284,7 +284,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3024,
+        3232,
         208
       ],
       "id": "37c4c2ab-b42d-4bd1-b876-7b278bfb2f1b",
@@ -297,7 +297,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        4400,
+        4608,
         240
       ],
       "id": "11676ab8-7ec7-4276-83db-b488ea7b8c5e",
@@ -313,7 +313,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        3984,
+        4192,
         240
       ],
       "id": "8906dd8c-90fa-455d-a057-9d09398b3224",
@@ -327,7 +327,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        3344,
+        3552,
         112
       ],
       "id": "63f2ced1-0e6b-4936-9bda-211c83469eb0",
@@ -340,7 +340,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        4976,
+        5184,
         208
       ],
       "id": "837719ff-b019-49be-9ae5-b1538b96e90d",
@@ -355,7 +355,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4944,
+        5152,
         512
       ],
       "id": "817affe4-ebb3-459e-9932-d0c187d2051f",
@@ -369,7 +369,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        5152,
+        5360,
         512
       ],
       "id": "a1171edf-a49d-4650-97ed-388b245dd2a0",
@@ -384,7 +384,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        5360,
+        5568,
         512
       ],
       "id": "7278bc3c-894b-4a5d-8fb4-82687083564b",
@@ -397,7 +397,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        5568,
+        5776,
         512
       ],
       "id": "9bc4aa1e-45cc-4b86-8a6d-088632bc83b1",
@@ -569,7 +569,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        6064,
+        6272,
         512
       ],
       "id": "d802ae8b-48b1-40cf-9726-ab873ead2462",
@@ -589,7 +589,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5824,
+        6032,
         512
       ],
       "id": "e08a9331-c89e-4568-a6e5-7e74ccbe1c57",
@@ -717,7 +717,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        6272,
+        6480,
         512
       ],
       "id": "2be22206-f4cf-4d76-93b7-31cb3294afaa",
@@ -756,7 +756,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3616,
+        3824,
         112
       ],
       "id": "e06348d1-fbba-46e5-94a9-7ce277c3509b",
@@ -773,7 +773,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        4000,
+        4208,
         64
       ],
       "id": "cd1fad1b-d16f-44d9-930e-dda1a10ee1fc",
@@ -792,7 +792,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        4368,
+        4576,
         64
       ],
       "id": "fd49dd8b-3573-4081-8de9-cad4ec02f8de",
@@ -831,7 +831,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5200,
+        5408,
         208
       ],
       "id": "6b69f075-3633-4e48-80ba-f048933efb14",
@@ -842,7 +842,7 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        5440,
+        5648,
         224
       ],
       "id": "31b7f47c-ee6e-4d55-9f9d-1ad5aaacaee9",
@@ -875,7 +875,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1600,
+        1808,
         48
       ],
       "id": "0c6ce8c5-ada5-4d40-8538-f3a93954e1e9",
@@ -896,7 +896,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1488,
+        1696,
         480
       ],
       "id": "44da68dd-7a26-490c-9b4c-fda7483ebba2",
@@ -931,7 +931,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2544,
+        2752,
         336
       ],
       "id": "4152c9cb-2173-4a3d-8b7f-50abd7f7e000",
@@ -947,7 +947,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2784,
+        2992,
         544
       ],
       "id": "409d2147-0d0c-45e1-96e1-5fd41c3b2b0b",
@@ -959,6 +959,58 @@
           "name": "bioinf.notify@gen-era.tech"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a59257d7-8277-4072-a252-97277fdf1245",
+              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
+              "rightValue": 155,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b05cb429-e156-4c4a-a7c4-e99e396a08e5",
+              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
+              "rightValue": "221",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "9677eea0-90db-460c-ab58-e84a1861d578",
+              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
+              "rightValue": "213",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1600,
+        208
+      ],
+      "id": "7920b587-1cc5-49c1-a9b4-3b493bcbba38",
+      "name": "Filter"
     }
   ],
   "connections": {
@@ -1030,7 +1082,7 @@
             "index": 0
           },
           {
-            "node": "Loop Over Items",
+            "node": "Filter",
             "type": "main",
             "index": 0
           }
@@ -1343,6 +1395,17 @@
           }
         ]
       ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1353,7 +1416,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "af3bb376-d538-470d-8769-3a6f183202d2",
+  "versionId": "275c25f8-e53e-4544-92da-07d60aca804e",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1367,6 +1430,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "17-06-2026/0:00",
+  "commitDate": "18-06-2026/0:00",
   "fileName": "Archer_auto_upload.json"
 }
