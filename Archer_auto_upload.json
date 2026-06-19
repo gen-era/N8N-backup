@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T07:19:21.456Z",
+  "updatedAt": "2026-06-18T09:15:48.471Z",
   "createdAt": "2025-12-29T14:18:49.525Z",
   "id": "OaLTopm8qW98Uf6u",
   "name": "Archer_auto_upload",
@@ -559,6 +559,26 @@
               "type": "string",
               "canBeUsedToMatch": true,
               "removed": false
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -962,55 +982,18 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "a59257d7-8277-4072-a252-97277fdf1245",
-              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
-              "rightValue": 155,
-              "operator": {
-                "type": "number",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "b05cb429-e156-4c4a-a7c4-e99e396a08e5",
-              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
-              "rightValue": "221",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
-              "id": "9677eea0-90db-460c-ab58-e84a1861d578",
-              "leftValue": "={{ $json.items[0].requesting_caresite_ref }}",
-              "rightValue": "213",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "or"
-        },
-        "looseTypeValidation": true,
+        "fieldToSplitOut": "batches[0].samples",
+        "include": "allOtherFields",
         "options": {}
       },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
       "position": [
-        1600,
-        208
+        5648,
+        80
       ],
-      "id": "7920b587-1cc5-49c1-a9b4-3b493bcbba38",
-      "name": "Filter"
+      "id": "f019bacd-05b3-474a-819f-ccd7e99b6c7a",
+      "name": "Split Out"
     }
   ],
   "connections": {
@@ -1082,7 +1065,7 @@
             "index": 0
           },
           {
-            "node": "Filter",
+            "node": "Loop Over Items",
             "type": "main",
             "index": 0
           }
@@ -1356,6 +1339,11 @@
             "node": "Merge3",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
           }
         ],
         [
@@ -1395,17 +1383,6 @@
           }
         ]
       ]
-    },
-    "Filter": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -1416,7 +1393,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "275c25f8-e53e-4544-92da-07d60aca804e",
+  "versionId": "7d8ed976-fb6a-4828-afb7-dda2d2cf6835",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1430,6 +1407,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "18-06-2026/0:00",
+  "commitDate": "19-06-2026/0:00",
   "fileName": "Archer_auto_upload.json"
 }
