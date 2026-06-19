@@ -1,59 +1,11 @@
 {
-  "updatedAt": "2026-06-11T06:30:21.216Z",
+  "updatedAt": "2026-06-18T08:03:23.099Z",
   "createdAt": "2026-06-01T08:05:32.731Z",
   "id": "9z4hRpQRHcHn1c2K",
   "name": "Nxclinical_uploder",
   "active": false,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "path"
-            },
-            {
-              "name": "server"
-            },
-            {
-              "name": "port"
-            },
-            {
-              "name": "user"
-            },
-            {
-              "name": "password"
-            },
-            {
-              "name": "overrideExisting",
-              "type": "boolean"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -448,
-        -320
-      ],
-      "id": "e6e7738e-f17c-48f0-b0a2-6c62ef0f06cb",
-      "name": "When Executed by Another Workflow"
-    },
-    {
-      "parameters": {
-        "command": "=export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/NxClinicalSampleImporter\" -server={{ $json.server }} -port={{ $json.port }} -user={{ $json.user }} -password={{ $json.password }} -descriptorFile=\"{{ $json.path }}\" -overrideExisting={{ $json.overrideExisting }}"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -240,
-        -320
-      ],
-      "id": "4a40fe2d-1b17-49aa-837f-fbd6a451f2dd",
-      "name": "Execute Command"
-    },
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
@@ -161,7 +113,7 @@
     },
     {
       "parameters": {
-        "command": "=export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/NxClinicalSampleImporter\" -server={{ $('build_batch_txt').item.json.server }} -port={{ $('build_batch_txt').item.json.port }} -user=gulsahsimsir -password=gulsah123 -descriptorFile=\"/home/genera/nxclinical/batch.txt\" -overrideExisting=false"
+        "command": "=export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH && \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/NxClinicalSampleImporter\" -server={{ $('build_batch_txt').item.json.server }} -port={{ $('build_batch_txt').item.json.port }} -user=gulsahsimsir -password=gulsah123 -descriptorFile=\"/home/genera/nxclinical/batch.txt\" -overrideExisting=true"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -200,7 +152,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1488,
+        1904,
         -64
       ],
       "id": "0cfcb9a8-4498-4fb5-8cbd-02b95f176e3e",
@@ -264,19 +216,54 @@
       ],
       "id": "02081272-447d-4cec-b006-01082170b98a",
       "name": "build_email_content"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n    p.id AS operator_email,\n    p.name AS operator_name,\n\n    doa.recipe_ref,\n\n    STRING_AGG(DISTINCT s.sentrix_id, ', ' ORDER BY s.sentrix_id) AS run_ids,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n\n    STRING_AGG(DISTINCT dor.account_id, ', ' ORDER BY dor.account_id) AS account_id,\n\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n\n    STRING_AGG(\n        DISTINCT COALESCE(\n            NULLIF(dor.pipeline_name, ''),\n            NULLIF(split_part(dor.pipeline_id, ',', 2), ''),\n            NULLIF(split_part(dor.pipeline_id, ',', 1), ''),\n            '-'\n        ),\n        ', '\n        ORDER BY COALESCE(\n            NULLIF(dor.pipeline_name, ''),\n            NULLIF(split_part(dor.pipeline_id, ',', 2), ''),\n            NULLIF(split_part(dor.pipeline_id, ',', 1), ''),\n            '-'\n        )\n    ) AS pipeline_name,\n\n    COUNT(DISTINCT doa.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT i.sample_id, ', ' ORDER BY i.sample_id) AS sample_ids\n\nFROM data_operations_array doa\n\nJOIN providers p\n    ON p.uniqueref = doa.operator_ref\n\nJOIN idats i\n    ON i.uniqueref = doa.idat_ref\n\nJOIN scans s\n    ON s.uniqueref = i.scan_ref\n\nJOIN data_operation_recipes dor\n    ON dor.uniqueref = doa.recipe_ref\n\nLEFT JOIN kits k\n    ON k.uniqueref = dor.kit_ref\n\nLEFT JOIN care_site cs\n    ON cs.uniqueref = i.requesting_caresite_ref\n\nWHERE doa.recipe_ref = {{ $('build_batch_txt').first().json.recipe_ref }}\n  AND doa.uniqueref IN (\n    {{ JSON.parse($('build_batch_txt').first().json.operations).map(o => o.operation_ref).join(',') }}\n  )\n  AND doa.status_concept_ref = 29\n  AND p.id IS NOT NULL\n\nGROUP BY\n    p.id,\n    p.name,\n    doa.recipe_ref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1488,
+        -64
+      ],
+      "id": "e3ae38c9-f305-445d-8006-f1beef719c69",
+      "name": "get_operator_mail_and_upload_summary",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "={{ $json.operator_email }}",
+        "subject": "=NxClinical yüklemesi tamamlandı - {{ $json.run_ids }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKoAAAA5CAYAAACmhLBvAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAqqADAAQAAAABAAAAOQAAAABJ1oOxAAAXf0lEQVR4Ae2dCXAeRXbHn+7TlmTjG5/4wsb3jYu1MBBzZM21VKCK29kCQoojqaIoki0WSBVsqsJupYpUEcBcyUIorniDA+H0gvElY2NjG2yDEQKMfOqydUvp30gttfrrmW8+afRhkF6VNDP99XT3zPzn9Xv/ft2T0qpE+qX/DpzidyCd9n3//fc/ejNHjhwZ04bDhw9LY2NjTHqiCRkZGd4pubm5kpeXl+jpScm/f//+mHrSM7Nk3JjRMel2wtHaVjlW19KR3Kh2h+WmyuCclI40c4f8tvjl1flONMaek5fhLl+fE+U2HTBceuml0tDQIJmZmd6WCoYMGSKFhYVSV1cXZX0xZWVnZ0tpaam88MILMnHixC6/v/XWW3LdddfJ/PnzpaKiwvsNsI0ePVo4L2zbyAtA8wcMkOHDhsmIESNk3LhxMm3aNHG9IF0akYQDFMWkSZNk8ODB3nU1taRK6qEyOXju38vBP94nw4cMCmwFIP1zeaPkprUB52Rzq4zMSZWLxmY6z6tTv1fWdwKvrrlF6prTZFR+qjM/iQ0K/C3qL1VlYYvktb3/bQe9/N/TqAUFBR1ApT5AC0j5i0KjBV0D2s4PcFlZWd6pwxS4aKMWHijn0TatLfVv5tZue011tXz6ww+yadMmqaqqkoEDB8qcOXNkyZIlsmDBAu/lNM9P1v769eu9qoqLizteyLxFc2VN7pmy8bNv5bJzg4E6qShNPq9o8sBEQZmpKVLR0Crf1bQ4wVeYldIFqNlpqXLSoTHN689UANVKG7AiaNlkaVUPqG3Vdv2vu8ggIHQ9o3tHWUrbofHCiNb6uk1663eu63dePmT48OHeds+ePbJu3TqZPHmyXHHFFbJs2bKkmwf0HGav0Vp/VI6cNoNGyqubv1FAnem1NejfGQPT5ZOjjZLTrlWbletxoKrZCVTAlaOefG1TZ4mYC5gEfiYA5zS0dGphzkTLJsuQcgIVE+Do0aO+mq7z8nq+B0i3b98etyANUjJ+/fXXcfPbGQAoL58Gr9a2Zs9x//33y4UXXih33HFH0rTrrl275KmnnpJLLrnE0/Lc+1RpliMFE2VEVqY8v7dS7vuyTKaeEWyrjlDddk5Fp80IYMtrW3y13kClImub2vvw9ptVpZA3OCfNvnUdx55WVeDWGhUTIFla1QnUyspKmT17tkydOrWjkb25c9FFFwm2Z5Bo+5nu+uqrrxZtFgSdU19f7/3M9fyguvyDBw92gFwDlAzahJg1a5Zs27ZNfvvAA/IP992XFPt1w4YNHZfANbY01klj3gQ5mD9MRirAHlS/fryjNC5Qi1R3PkzZpV/XNHdo1Vpli5ZWtci0wbHgQ3MeU+4HmlQLGjYIeLZWBbDJ0qoxQEXDvfvuu/Lwww/L+eefr6/hlNgCuPHjx8u1116bcHtOnDjhnYM23r17t2enbt682SsPLas1LCZBqcrz6KOPygMKsNoESrjCECfgyL7++utyzjnneL0XDz2rpUqqBy+TaslRGq9BpDBHVm85JH/1FyfitmX8wDQPqLpqtOqXVU1OoJInV3XnplNFWoVysoLsTrQq7dSSLK3abhbraju3dLWnqmjQJdI+AMff9OnT5aqrrvJAyMsIE4C2NU0CwAqI165dm0gVCefdu3evvPHGG55Tx8MHBCeaMuVA/mgZlFIvx5sb5KyMOllfWiOf7fs2bvl47QUKfKZUKofnQGWzmdSxj1Nliw1c+3cbxNoMsPNFfewL1KgrOtXKA7RLly6V3yq7FM/fBivO1bPPPturHPN7773nUVLcGw+kNdUyafJ0mTV4gFQpxyUjJVV52sqBycuUt0v2h7qFOFV0+VrSUlLkK+VUuQTQ4VTZ4uJZ7TzmsalhzfQo9/ssUPVNhC++9957PXscrlZrVn6HNgNMvSFwpy+//LLnC1APJtfGTZvl16tulNuWT5Wm8hMyKLVFyhXGBg3MlN9sr5AfDh+L25SxA5VT1e75k5kX4FBdq+fRu04uzI6FgDl44DqHMjWXyu+6+3fljSottpVRlfwTKgfteuutt3ZhObBZR40a5TES3TE14l0+TMeOHTs6qDnAetbM2TJn3kJZPB0Pv21ErrY1RUamKw15vFlKdn0dr1jPvjw9T3n0hlaFqtpfqTwlh+CEZVgo0FSVI7uXhCY2u3ztVPnljyLdamIURf40y2BUDPbBNAHQrp9//rngxEUtbyj7d+bMmR0vB4MQN91wnWdHnz5iqPx6dqHsP1kv4xRIve5fkfprthwI1YyJBelCl68FDfvtiTaqSqeZ20EOrQpVFSTJ1qr9QDWeBpScPUrGMbRWlAJ3+m+PPdbB1dLt19TUeIMNup7LF41TWlSZBGqUqbqpXsarMZEndh+TfQe+0Vl8t1BPQ7Mh6DuzaKqqM6Vzz0Xya6qqM1fXvWRr1X6gGvefoVpAY8vx48ftpB4da+5U11VeXi7XX399F956/pljlHGaKqWKfclQ2jEfBdmQKh9ujw9UGjcmP03o8rVoqkof29sCBwMAVRUkaFVTTLvVTI9i36oqiiJ/umUw6EAcgeZU9ZVESdVh77755pvekKl2okpKSuSCCy7owpPi5D00a6hUH6+RotRWqQEzRdnyn1tKJYzNPJKRKsOp4lqipqoo0wQntqoryop8PZV+oBp30PT4jeRId3GiXnnlFUF7I4CVl2Px4sUx9SyfM1Zp0TanqrqpWWbkiLxXWilffFUak9dOoGseP6CrUxWPqrKdKsoMoqrs7p/8prnBcVTSD1TjTqJJiXGwAWtGbhnZu7UL3QWboG1hRqduvPHGmBBHCp81dbz8YlS27KxrkNzWdq89M0PWbjoQqu6xA7o6VfGoKpdTlShVRcN6Q6v2A9V45NiiGkBGshfuaB53dx/udM2aNZ4tijmBjQpFtXz5cmeR0GbXLlC26rFaGaK8/8qGehmjhkl/v61MAHg8wUkaragqU8sFUVUupwqq6niArZosrdoPVONpE5BiC8ErRUVFdnK3jun2sUcBKAEovBSE98E2+Enx/Mnqp1pRI6GeANhjh05KyZ5v/E7pks74v+1UBVFVTqdKB6J2KbnzwOVURa1V+4Hafr/RUG+//bbXLZNE989IFRFVUc0CgDuFrwWggBXudOXKlYHlTxo/RlZNGyI7Ktu0qtdcNVL15uY97S0P3rjG/4OoKtf4fzyqihbYTpWpxYNbGO7XfqC236fnn3++wz7VXv+hQ4e86P9wtzI4F3Oi4E7HjlUOUrvAnV588cX60He7ctEkkaq2IKGqxiaZWZAj/7qtPBSnSqH2+D9sQKkKB3QJXblr/D+IquKcbCtmwASuq55E0/qBqu7Yk08+6Y3pEzUFSNGmbAlMQaNGIR988IFXjMmdXnnllV24U7965k4/Q6QgVQAponCh3OsU2bJzn3cc7589/k/+o/Ut3lQV17kEVdsSL6qK/CY4o6aqYltkt/BnfIyWe+ihh+TFF1/0pqZoTcolE7NKgDZ8Zk9Fc6c67hSwYqsymwCHKZ4wpPqbOaNk3wk11SQ9XYUCNkn20Dx5ccOXoThVNB5B1eb4P3UyVcUlOFWnGlX1kwRqmIfregCkYYtu3bpVHlPd8F133SWffvqpjBs3roPkR5sSXA1lFFXgOPECcKfMTsDb18wCkwrDyoWLz1Tdf5UaoaqXRhVQPSurRf60/0goTpU6cKrs8f8yNf7vx5MSVG1LGKrKPAcNG5VTZVkWbQQ0b/6rr77qPVBuLB5qbwjBHtdcc43MmzcvVPG0A+3EWDlTUZhq4jclhd8ABH+1tbVesAk2J5qSgGVAoyf4aU2qQQqAAGpUwuRBSH3awjXwsvzN7bd7Qdxh64BTXToiS36oa1bTotvPUvP+3y/ZK3NnTItbDE5VYWbb7FTds8MGlFY3qXlSsfOe7ZmqVABVBfDQ0C4hvcGgsnRUVfw+w1Va17QYoOqfiSLSc+l1WpRbtCJ0zeWXXx6qWF4YiHfadOedd3asPxDqZJUJgNDlAhhsT0Tbo9omBcCXXXaZ3HLLLaG6ZK+QOP/gTpluwhoCCG2AO2V2QSLicapLpshtr+6Qs8cUqunNjXJGYaY8t2W/XP+Xh0OZKBOVVt10mJGuNqDhVB2obpEpRbHgA3RQVbZteuhki4wv0G9K7BXwEpgev9aqfuCOLcGd4gtUbigcYm9Kovaf1u501VGIBuh3333n0VIEUIfxwhOpm5fxww8/9GaZag1PeF8Qd+pX/rJ5U0Re3iwpjbWSprTb6Zlpsu6r47Jz7wFZHsKW9sb/j3XVhtit36v5/6wNYItLq2qqKgh4gBNtikSlVX2BSiW6S2Q/agEkAK+3xK/tOqADzUz9aFc0aHFxcSitlGh7GTI1udONGzd6PUJ3uNkzJ0+Sm2cOl6dLq+Ts/AxpalbOUEG2rN2wS5YvXRi3aYCL8f/dFZ0zVbFb9yunygVU8uNU0eWbEjQBkHPs+f8mG2CWk8h+IFC1xkmkwETyJmr76vw4O0EgJx/j6S5BG2NCMBV8woQJ3rYnzpmrDp0Gq/D444/LokWLdJLH1foNmXZkCti5ZMEUWb1jnUh+gYpTbZWlhbnyL5+Uyt9+UxZqnSrG/7+o7EQeXXXQqiqM/5er7t4UzIFR+WZK133KrFNMmqlVg2zbrme7j2KASpfPdGkIcOzHkydPus+MKDXefH5dDeADnDhBN9xwQ6ANidZk9RFTq/LSYXffc889CTkxuv7ubNGekPrcU7p9lhFioQltI3enzMWzlfef93HH8jpeGYoT/Xj73lBAhXoiqJp5VNqpogy/VVXIX+6AQLJXVYkBqr55eMRomt7SNrqeRLawBDxkpjvHE9r9yCOPePlNwAJgpkz3tvCymHP2tQJ44oknemRiYDL849zR8k+flHnalOsYW5Ql/7Nhh1x63uJQz2uCcqoO1nY6VQBWU1WuwBSXUwVVFW9VlSidKtVEtwR1re4zkpMK6LSdGVQja0gtXLjQYwm0CcPLx6qBelGyoPN7+pvNneryEuFO9Tn29oLFal0qZWNnpzRLXUOdnJ6bLS/s+jY8p6q8dnv+v6aq7Lo4do3/a6rKlZ80bFXTNtVOlV/+eOm+QI134qn+OxoVjhbu1BRooqeffjpUmJx5XqL7cKdaMFvKyspk1apVEgVjMWPqRDl/7GC1qokaqVLR/zmtauki5fVs3L5bVxl36xr/h6pyEfSAzjX+D1UVJNpG1Xk0VaWPE9n+bIHKTWAgAV5UzyxFG6NdccYwAXpLIPTtbh/udMWKFaG65njtKioskMsXTpath5VWVUtGsr7p4iED5MWPdoZ+Ab1F1RSPaoqmqsw0ve8a/9dUlc5jbzEpbK1q5wl7/LMGKjeB8XpTACta7ZlnnvFGuMzfotpnWBbuFMcPwZGComJllqhk2VzlVBmSn5EuHx6s8ThVI9l3Vy+qZtqRmqpyneSyXckXL6rK1qqwAd2Rnz1QcT5gCdCiaFMtDGYQjNIbwuQ9zZ1SPvYqL0x3uFO/9vGy/fXU0+SIYhVy1GIVKc0q+l8Nk76/cavfKTHpdlA1GjAoqsoVVG2PXNmVmMwCvwFcl3lhn2cf/+yBygUz2sSD1V0/W4CKHfnOO+/Y96RHx3CnaGviTnFI8fYZ+cK5i1KwwVcsninbj1YomqlVmlRE1RTFqf7Xls9Dr5fF+P/grFgI+EVVuZwqrskvsIXfbKeKNFOLcxxGYlsZ5qyfWB4e6k033SQHDnROigOsLGEJX4xNGZXAnTJBEIDiRMGdnnfeeZHFtZrtPHveLLXYb7p68G22JoDdd7JROVXhov8pa6ya/2+G/zH+zwLALvD5OVXxVlWxu//uOFV9Aqg8EOxD5s5rx4o0TAFA9dJLL3HYY4E2YzoL86CwSwErtioDJ4nGNYRpDKbEKhX+90XFSclV4/4AdkZhvvzv+hKpV/WHEVdQNcC1R6N0WVE5VYlq1T4DVG40dJUpaFW41ddeey0Sxwpb9LnnnuuYs6/rKi4u1ruRb5cvnCVlSmsjdP9jBmbLU59+JfsPlIaqCy1pL6qGVmUBYJctiVPlCqpO1KlKVqGfmxrWqJIsrT3Vr6kTw76W9ZRMQvPruyF5n4FkuaaeXFBBQVF3vJmZWk3g1lg1lfnoKqY9wUAYFWv6Bna4LhDDG1B34JqxX6ksKHg8PM1Nzdx67vL8w/jq1U11aiGjj7KDJB7XVJQMjKqfEJ3h3yqys1FZxqor1b/IS3Zqno3Uh8jLrESq1X5h+GHq2ZT76Pu3r3bWYtndTWiqgwAUFVfPbPQxYwWYpEbGvpNvf0Ct0pluEYiy8SJVTj2BS1UQpV6nzVG+tKlS4ORR3Cl49U8Y1vSSX+Wz+orqKpCITMjFGGrqwy3URQdEHMhOlqzoRXt3HlnbBQAUl39mr7CgDNUoxZi4jp0YuZMzQTc07Y4IDjp2R1UEoRU6UJdr7+Ai8MwmvY+TiyP1COZ8+1sBjLsJoqD1+Uyk1+wB3gVLqOtsqz68pznKGF9KZ98js/fmqnjS0VbVN3gMP9rshN1Wpl0udMbNh0X48t9N1Pm5Lv+GP5SDrmyt/6qVtmk/NzdZTvRzWMR1SxTJgXpRPch8TuG7TE/yycmNcybSXpxCcUw3HTttS7paShOwlppDDxDozk1oZqu7ZCzIhZGVVeKl1a7nr9H6xSTCA74Zlcfe7obJ+Xbd9sqOGe1vcNWvwKm4HDY77yzUOBFsNmmrFBQ1LF9tZPdJjqop1lR1j6Lro6FE5cFjGik1ea+yKr8Vdz8op1K2e2XxE3dYfwUn5jZVaqqjV5/roLFC9uq+p2nYgNp1J0+53gcyOn4nQSP0umzZreNhWIiu4mDLaue7lniKsCV4Zh1cPc75Hj2KHf6aCgAJpJ4KDq4vD/Lulh2Hu6CwAx+Go61vfQPMd2KP/39V5L6bNcRe8h4c0b4a1U7rsbw14dXfWMM1x36K3JUhwBJVZRr4wJVt3i8bKlhB/8QGgBQ8bG+tQnPxNJ5drsRXpbGaGd24uTdJJ2KhsCd9sXNLlpcJkErKBNEe1YscKqoe0uo4YMXVv27wc5NOUs5POdy8TLBwJxTpN7Lc5Jbd97i0WJAPy24UXtRNSIHmMvfv8s0MAa9apXH2ld1T9epqLbEk38N0+4QslMAfqtnbBXXB80T1Cv6hPWktpbeajJeBx4qdAVDtqlq11zpKTHuS8fAJSkH7WbrULmtAQ/wOwvjofPbWKbtCI0B5F2/sy8WHAclNmrd1JNC1aAy0+nm3Q/LvWTyik2VmW/5BcpA3v/lyfNhKpsIFlKNc36ZqwY/gql8BVCRHsJ4E5At3Yh5qQhtDwSJ4nNbtzrGiWBYBVs9Mdq6rJUV79iP7yMhx6PkV61aOXcLRHsJNVl7NfXpo0JdvB6utqlndxqrLlQc99QfAh9rwiCk8BKsowJRRVh2gcVWuzbOTqFK9cGH6+YFkc1XVFDHYuq2orooIGPV3eJ/MlQvq3NuMTMm87QrMX6wlqEHgER/55MJ8wPcFlZWV6vG5/5pizS0yWMBpPaOCocp0ijCo0k7GRqgmO0vQ2waDP3RIpcKmT7kIHCL+6+FBV3h8N6RKqiiDlU9uH5/fJfmiKIGazjssEgA9Ko9kdmg7u7xopn6HFRFiawFv33Kp3GppUdZOf/qhiCDaezdhq7paXbpeMZU1c4S+QYrSkURQc+egM4VBU95j8AIZUBtwY+R7N5zfkdaHEkpSPTYNpqamp8vDDD8vixYulqKjIWwtsDoVVP2XrYIjVqn0CAJXAdP5nAEr2yJEj8vrrr3dwpvnz58vMmTPliiuu8LPms1VKbksL6pbsoQO6hb6Ukh6jvIgFf//996pvXV2dLF68WOLi4rLC/l09eXnKed0O1Yu2XslQpTwAgNUrYz5w4IA8+OCDPsacqQhoTsFawOo7d15eXsybN09KS0u9WaHFy5cv+7TB27dv71ywXHzxxTJ37ly54YYb+or/YpVkmdsyGoMw8ZuhvYnHFQgquO2222T06NHNmgnQpgFJbXtyAABWr3///vLSSy/5/89//rMhM9O3b1+3HL7//nvPa4pRGv0PA71D8Mq+G8QAAAAASUVORK5CYII=\" alt=\"ERA\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n                </td>\n                <td align=\"right\" style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAI5klEQVR4nK2Ya2xcxRXH/2dm7r7Xu34ktpMoQEpBqQm0TWgRD0FaaCRaJa1U8wHa5oEMBNpEQaH9QIUdESFUkQIlFMnkgaCiYERbUV5SVdbQ0OIkRAWSEkIgPJIQP/Brd727996ZU821Hdsb23GAI+2uNHtn5jfnNedcwgyljdsk0IjriPT48fv7MukEhYUHzU6qkprogt7x/zMztaBdbqKl/kz2odM9wMz0DCBGQVrzb80Lk/6+YHmFAp2jDBYSwWGABQl44MMe6aPM2MVS/mNlZNG7Y2CgTURmuv3U6bRCwyB6e//uq8Ox6Mq4L1fMidYnKxFDHAoh8IQ5PmjWEDQGUGr8zO3RTw69k3GhnyCixy1XG7Ms1/KMNDQ6cVv3rjnheGJzjZNY/XVVjyQYYS00kWAGk2YjxiNJEsYuSgC7MCovGEeRw1G355/5YvHOG1NLOpqZxSYQg8pOMxVQcyajNi1d6rf2dyxLReI7F4Xn18/W0jgkjc9aGuKReXTKAjzum0CsIAwY3Cu1ets95ve5Q3esTn7rAWYW9kEi4mmBmDkw07a+jqZ5qdmtC6kaae34HhnFsIc6rduVAdr9rJMJXWBPfKRcei/38aOrkotvmgxKlZtpFOacdH3rhajRSoNcMmrYDGcGM6Kl4NcjI0OQ/A0T9yKJBU2PZd+EEOKmp42R1kdHnxflPvNoz3+umZeubb3Q1GihWfjE4swxJgMDDIE8GGeBjniLEl9rau1/o8XumeGMmgDUzM3iAMA7OzvqKmKJJxaiihWD7AJfBcx4KGsba/752vHnxmrustG7lJb6w3luBKgBDUF+MFG6d1H07Nq0cfRXpRltTPApgyIFEg2qlsJSPdzG+0MH0Mg2V4lhU12nt/fuvnJutObntVpqD8M+82XFsEGFigefcih74LSR/sLEWeflBoY2WoW0t7dLcaC9PdibpLjlXFUrFBGfkhy+gPhGo1ImsO3V5/HMngxmqwQE2cQztroGi3pEOSxDTVs++Xe0vb09yGHYmuuomyMShy+LnhWTmr5YOJXBpFUCuw6/g6vvWheM3X19E5quXg7Hkda5T/qTZJgDckAcHDz2w6bUxS8GPuRovmZudFY8rIXhLwmjjUFKxXGo6yiu+91vEQlFbHLDzsxL8H0fZMPkpA0YiqSpRQUrQT+xIwFQmOT37N00nKD4S/lMSCh05/qx6qHN6MsNBuM1yRT+vKEF1YkUPKOHoQIhaBgRg6CQkZft5CMRYT1bslxgL0rr/TMoACYVZoa9UaIijFUP34N9B99BLBpHsZDHtvV3YvG8c9Hv5yHFydQX7KSZKQxCWKj6gc4TKXHvwK50hOR5Dhg+mylD3TBPiJTJ/k+rOG597H688uYbSKSqkM/n8Ie1d+Dahu+ix8vCEfLUgxBIaeZUOFYRi1ODCEHa9OdMpxdtNKIyhEqVCDYuF09rVKsEtmb+hh0vPItkqhK5/l7ctrwRv7pqOXr9LJQ8FWa8SCEENDmj+jPTmWK2SuLtTz/A5uceR0JGg7ExGB91ThJP7slgwyP3BTDZ3h78+MprsOX6W9Hl5SBpephgn8CExqgSSascMRWMJImn9r6KdTseRPfxT1FdkcLaq1ag18sGTpB24njtyP+wvnULIrE48kN5LG64CFvXbEDRuCAxs/vHOrqGkKL6fTnosf+BD4LAxKTIthiDg7/seQ3dnx1Fxaw6rH/kPrx4oANVThIOKfTks0FEDQzlobVGTboSbRvvRjqeQMn4QTKcFoTBWhBli/ksszkobl6yxHOJP7ZlpygLewLBhYc/rrkdF1+0BLl8DtFoHDc+sBn/PX7YRgZW3PtrfHTiOEJOGCGl8PTGu1FfUYWcX5gQUVMCAXCJkffd3lxxsDuY4Rv9+gBKQdlZrkaXfUTCITx1+6bg9L7W+Dw7gHXbH8Qt23+Pfe/uRyKWQLE4hPtuXIcrFzRg0B+CmiSiysVawJa8BTB7Qu+9o35ZPgBy4b58vNStXRgbchMmSRLI+8Xg1Pb0ISURCkew5/2D+NMrLyNRWYVsbzfuWX0bbrn8WnR6gzOCGdWP9dM+FMkl/N2OiLa2Nrm24rJDn5ey/7J4CkKXB7YSMji1Pb3VgnZdGKMBIZDr78PKH/0UG5Y1otvPwZHTNjITcRhcIhZHCsc/NwYv2CE1q7GR7JWxvX9P6zHkrkojOendoYQMTm+1cPizo3i+YxdmV1Wj6JawdfV6FExp3JVwegkChqTuEp7KeaW/3pxa0pPJZIbLHltst6NdfJqreOXyxPlXVNmaiKz5ThXr9q72odkgFgpjsDCEdCQOl4OgwEzEnlgw2CXw66WPBgqm0PCz+OITLS0tdBKIiMyOvr3fro4md1/izLMlrJyshA0Wo2FPs1nbRpItN86kSLBrKCbvXZlz9g98+Mub0pc8bEtYWygGTm1hbOW4pnLJvs5C38YjoqgUiaAXL7cfld1rNurOFCbMwuuUxjmY++RZC2OLfAszuv7YwyNt0GPZN1svSixost2BT0YZyzzjLacGwQhMl9TO7sKHe9jFskOpRQMt43qz8sxlrPlsE/dW7sNHD8uSo5mNYjL26S9aKVkHtj5jzXRsBKbfHVh2Q/rCPqBlpA6bunMNesLAp3L7mmujFS0XiDqktfQ1sbB18OhVOJXWxtppGgaB1HnpqyPI44PiibZSd35t0/xLe0d9d/zcU5JGQMu2V2OxhmjTjv69b2QjhS3nhusb5iCGqCEtIdlWera4Ki957WxJxAK29mOUJMtOuOo973jXoJffvDK++KHRXrAcZlINjZdmzij7oqlt//5Q4Wz3N7Fw5IY6lT6/FknEIGErPWks1dgcI4lcMIYQZGB8UuzsypH7nMkNtayqufTYVC8ZZgSEkXdEoxHw4KEXw5Xz5/yADa8IQ30nDFkfV+EaW3wFJSwRsqWhwSJ0jwe9jyU9zy6/9IvkN7uG15r+3dCMgAJhUHN7RtpXNCeHmOUzeL+qp793kXSgjM/shB1ChN6bjbru5TR3aOxQLBttaz+FVsbL/wHA6mM7WukUNwAAAABJRU5ErkJggg==\" alt=\"Tamamlandı\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;outline:none;text-decoration:none;width:36px;height:36px;vertical-align:middle;\">\n                </td>\n              </tr>\n            </table>\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#102a43;\">NxClinical Yüklemesi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba {{ $json.operator_name }},</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Başlatmış olduğunuz NxClinical yüklemesi başarıyla tamamlandı. Detaylar aşağıdadır.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.run_ids }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Numune Sahibi</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.sample_owners }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kit</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.kit_names }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $json.pipeline_name || '-' }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yüklenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $json.total_data_operations }}</strong></td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yüklenen Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ ($json.sample_ids || '').split(', ').filter(Boolean).map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">hande.beklen@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1696,
+        -64
+      ],
+      "id": "abb3b239-a605-49b1-a513-c3a9becc6e84",
+      "name": "Send upload completed email",
+      "webhookId": "b0cf20d4-fc2f-4cbe-a2d8-e3f0a8e1f8b9",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
-    "When Executed by Another Workflow": {
-      "main": [
-        []
-      ]
-    },
-    "Execute Command": {
-      "main": [
-        []
-      ]
-    },
     "When clicking ‘Execute workflow’": {
       "main": [
         [
@@ -376,7 +363,7 @@
       "main": [
         [
           {
-            "node": "delete_batch_file",
+            "node": "get_operator_mail_and_upload_summary",
             "type": "main",
             "index": 0
           }
@@ -415,6 +402,28 @@
           }
         ]
       ]
+    },
+    "get_operator_mail_and_upload_summary": {
+      "main": [
+        [
+          {
+            "node": "Send upload completed email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send upload completed email": {
+      "main": [
+        [
+          {
+            "node": "delete_batch_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -425,21 +434,8 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "When Executed by Another Workflow": [
-      {
-        "json": {
-          "path": "/home/genera/nxclinical/batch.txt",
-          "server": "194.15.102.33",
-          "port": "8443",
-          "user": "handebeklen",
-          "password": "hande123",
-          "overrideExisting": "false"
-        }
-      }
-    ]
-  },
-  "versionId": "d1794cf1-a5fa-4e45-983a-6e52f967627b",
+  "pinData": {},
+  "versionId": "787f670b-5abd-4966-8e55-efb8c184b8f9",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -453,6 +449,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "18-06-2026/0:00",
+  "commitDate": "19-06-2026/0:00",
   "fileName": "Nxclinical_uploder.json"
 }
