@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-06T23:17:50.594Z",
+  "updatedAt": "2026-06-20T12:14:52.569Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
       },
       "id": "Attach BED",
       "name": "Attach BED",
@@ -885,8 +885,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
-  "activeVersionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
+  "versionId": "14156c52-1eb7-48fb-9f86-bea4278e7566",
+  "activeVersionId": "14156c52-1eb7-48fb-9f86-bea4278e7566",
   "triggerCount": 0,
   "shared": [
     {
@@ -898,9 +898,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-30T09:44:06.629Z",
-    "createdAt": "2026-05-30T09:44:06.629Z",
-    "versionId": "1d9ea0a6-e8dc-46dc-a200-e1dec05fd60b",
+    "updatedAt": "2026-06-20T12:14:52.571Z",
+    "createdAt": "2026-06-20T12:14:52.571Z",
+    "versionId": "14156c52-1eb7-48fb-9f86-bea4278e7566",
     "workflowId": "p8NYmUwJkEVaDlyp",
     "nodes": [
       {
@@ -992,7 +992,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
         },
         "id": "Attach BED",
         "name": "Attach BED",
@@ -1780,6 +1780,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "20-06-2026/0:00",
+  "commitDate": "21-06-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
