@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-06-15T18:53:05.244Z",
+  "updatedAt": "2026-06-21T05:13:48.947Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -2944,
+        -3152,
         -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -1015,6 +1015,174 @@
       ],
       "id": "5f907176-2494-4426-a74f-8515ad229333",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "fde53fa5-16d4-4b19-8fd3-b120a352d6d5",
+      "name": "Restart Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3152,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4ac46ee-7231-4c42-9c43-5dd09390cee9",
+              "name": "round",
+              "value": "={{ $json.round || 0 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40ce6251-6067-4ea2-9203-ffb0c4707ebd",
+      "name": "Init Round",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2896,
+        -288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(DISTINCT dop.uniqueref)::int AS pending_count\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nWHERE dop.status_concept_ref = 24\n  AND dor.platform_concept_ref = 11\n  AND dor.type_concept_ref = 251\n  AND dor.account_id IS NOT NULL;",
+        "options": {}
+      },
+      "id": "84eefb7d-4768-4e0e-8994-2344f7318ab9",
+      "name": "Count Pending Sophia",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1936,
+        -560
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1978ef00-d889-4e1e-ad36-f96f533c8cde",
+              "leftValue": "={{ $json.pending_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "7019904e-67bb-4b80-976e-35566e5cfc71",
+              "leftValue": "={{ $('Init Round').first().json.round }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b7f0e8bc-3e15-44a3-9e06-9cc73423b758",
+      "name": "Queue Has More?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1712,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3999a2d0-f72e-43b8-b827-79f5d8eb0294",
+              "name": "round",
+              "value": "={{ $('Init Round').first().json.round + 1 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "de92f67e-7831-483a-9b7d-7511a6e783e8",
+      "name": "Next Round",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1488,
+        -704
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "p5v6HfuZ2iO5nnbC",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "0f88dff9-1245-4dfe-b4c4-c732abfdff80",
+      "name": "Restart Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -1280,
+        -704
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "can.holyavkin@gen-era.com.tr",
+        "subject": "={{ $json.pending_count == 0 ? 'Sophia DDM Yukleme Kuyrugu Tamamlandi' : 'Sophia DDM Kuyrugu Guvenlik Sinirinda Durdu' }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\"><head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n<tr><td align=\"center\">\n<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n<tr>\n<td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid {{ $json.pending_count == 0 ? '#0e9f6e' : '#d97706' }};background:{{ $json.pending_count == 0 ? '#f3faf7' : '#fffbeb' }};\">\n<div style=\"font-size:13px;color:{{ $json.pending_count == 0 ? '#057a55' : '#b45309' }};text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">{{ $json.pending_count == 0 ? 'Tamamlandi' : 'Guvenlik Siniri' }}</div>\n<div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:{{ $json.pending_count == 0 ? '#03543f' : '#92400e' }};\">{{ $json.pending_count == 0 ? 'Sophia DDM Yukleme Kuyrugu Tamamlandi' : 'Sophia DDM Kuyrugu Guvenlik Sinirinda Durdu' }}</div>\n</td>\n</tr>\n<tr>\n<td style=\"padding:24px 32px 4px 32px;\">\n<p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">{{ $json.pending_count == 0 ? 'Sirada bekleyen yukleme kalmadi. Tum Sophia DDM yuklemeleri islendi.' : 'Toplam ' + $('Init Round').first().json.round + ' tur calistirildi ve guvenlik ust siniri olan 10 tura ulasildi. Kuyrukta hala bekleyen yukleme var; bunlar otomatik olarak baslatilmadi. Lutfen elle kontrol edin.' }}</p>\n</td>\n</tr>\n<tr>\n<td style=\"padding:0 32px 8px 32px;\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;\">\n<tr><td style=\"padding:12px 16px;font-size:14px;border-bottom:1px solid #e4e7eb;\"><strong>Kalan bekleyen yukleme:</strong> {{ $json.pending_count }}</td></tr>\n<tr><td style=\"padding:12px 16px;font-size:14px;\"><strong>Calisan tur sayisi:</strong> {{ $('Init Round').first().json.round }}</td></tr>\n</table>\n</td>\n</tr>\n<tr>\n<td style=\"padding:8px 32px 28px 32px;\">\n<p style=\"margin:0;font-size:12px;color:#9aa5b1;\">Bu bildirim Sophia Upload otomasyonu tarafindan gonderildi.</p>\n</td>\n</tr>\n</table>\n</td></tr>\n</table>\n</body></html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b832768d-a120-4bbb-8ab9-ec6f788d1177",
+      "name": "Send Queue Done Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -1488,
+        -544
+      ],
+      "webhookId": "fb66f18d-c6c4-4255-bb5d-31afd75e8d03",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
@@ -1022,7 +1190,7 @@
       "main": [
         [
           {
-            "node": "Get Unique Upload Ready Accounts",
+            "node": "Init Round",
             "type": "main",
             "index": 0
           }
@@ -1042,7 +1210,13 @@
     },
     "Loop Over Items": {
       "main": [
-        [],
+        [
+          {
+            "node": "Count Pending Sophia",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Login Sophia",
@@ -1312,6 +1486,68 @@
           }
         ]
       ]
+    },
+    "Restart Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init Round",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init Round": {
+      "main": [
+        [
+          {
+            "node": "Get Unique Upload Ready Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Pending Sophia": {
+      "main": [
+        [
+          {
+            "node": "Queue Has More?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue Has More?": {
+      "main": [
+        [
+          {
+            "node": "Next Round",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Queue Done Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Next Round": {
+      "main": [
+        [
+          {
+            "node": "Restart Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1324,8 +1560,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "31cb0061-19e7-4d04-9ab0-67941e94b719",
-  "activeVersionId": null,
+  "versionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
+  "activeVersionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
   "triggerCount": 0,
   "shared": [
     {
@@ -1336,7 +1572,1561 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-06-21T05:14:04.000Z",
+    "createdAt": "2026-06-21T05:13:48.950Z",
+    "versionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
+    "workflowId": "p5v6HfuZ2iO5nnbC",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -3152,
+          -288
+        ],
+        "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n    data_operations.uniqueref as operation_uniqueref,\n    data_operations.read_ref,\n    data_operations.recipe_ref,\n    data_operations.status_concept_ref,\n    data_operations.performed_at,\n    data_operations.batch_source_value,\n    data_operations.error_text,\n    data_operations.operator_ref,\n    data_operations.analysis_source_value,\n    \n    data_operation_recipes.uniqueref as recipe_uniqueref,\n    data_operation_recipes.requesting_caresite_ref,\n    data_operation_recipes.performing_caresite_ref,\n    data_operation_recipes.kit_ref,\n    data_operation_recipes.platform_concept_ref,\n    data_operation_recipes.account_id,\n    data_operation_recipes.pipeline_id,\n    data_operation_recipes.type_concept_ref,\n    \n    care_site_credentials.uniqueref as credentials_uniqueref,\n    care_site_credentials.care_site_ref,\n    care_site_credentials.platform_site_id,\n    care_site_credentials.platform_site_password,\n    care_site_credentials.platform_site_meta,\n    care_site_credentials.is_active,\n    \n    reads.uniqueref as read_uniqueref,\n    reads.conversion_ref,\n    reads.sample_id,\n    reads.index_ref,\n    reads.lane,\n    reads.reads_target,\n    reads.bdsnumber,\n    reads.kit_ref as read_kit_ref,\n    reads.requesting_caresite_ref as read_requesting_caresite_ref,\n    reads.performing_caresite_ref as read_performing_caresite_ref,\n    reads.reads,\n    reads.sample_project,\n    reads.r1_path,\n    reads.r2_path,\n    \n    conversions.uniqueref as conversion_uniqueref,\n    conversions.run_ref,\n    conversions.conversion_time,\n    conversions.tool_concept_ref,\n    conversions.id_source_value,\n    conversions.status_concept_ref as conversion_status_concept_ref,\n    conversions.error_text as conversion_error_text,\n    conversions.storage_instrument_ref\nFROM data_operations\nINNER JOIN data_operation_recipes\n    ON data_operations.recipe_ref = data_operation_recipes.uniqueref\nLEFT JOIN care_site_credentials\n    ON care_site_credentials.platform_concept_ref = data_operation_recipes.platform_concept_ref\n    AND care_site_credentials.care_site_ref = data_operation_recipes.requesting_caresite_ref\nLEFT JOIN reads\n    ON data_operations.read_ref = reads.uniqueref\nLEFT JOIN conversions\n    ON reads.conversion_ref = conversions.uniqueref\nWHERE data_operations.status_concept_ref = 24\n    AND data_operation_recipes.platform_concept_ref = 11\n    AND data_operation_recipes.type_concept_ref = 251\n    AND data_operation_recipes.account_id = '{{ $('Loop Over Items').item.json.account_id }}'\n    AND data_operations.recipe_ref = {{ $('Loop Over Items').item.json.recipe_ref }}\n    AND data_operations.batch_source_value = '{{ $('Loop Over Items').item.json.batch }}';",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -1168,
+          -288
+        ],
+        "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
+        "name": "Get On Hold Sophia Uploads",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          -2208,
+          -288
+        ],
+        "id": "66bec76f-14a8-4dde-9397-074d3974da25",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    dop.batch_source_value AS batch,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT p.name, ', ' ORDER BY p.name) AS operators,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nLEFT JOIN  providers p                ON dop.operator_ref = p.uniqueref\nWHERE dop.status_concept_ref = 24\n    AND dor.platform_concept_ref = 11\n    AND dor.type_concept_ref = 251\n    AND dor.account_id IS NOT NULL\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name,\n         dop.batch_source_value\nORDER BY dor.account_id, dor.uniqueref, dop.batch_source_value;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -2720,
+          -288
+        ],
+        "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
+        "name": "Get Unique Upload Ready Accounts",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py login-iam --client-id {{ $json.account_id }} --force-platform\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -1920,
+          -288
+        ],
+        "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
+        "name": "Login Sophia"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "667f43be-8dcb-461c-a100-36042adaeaf8",
+                "leftValue": "={{ $json.stdout.match(/client id:\\s*(\\d+)/)[1] }}",
+                "rightValue": "={{ $('Loop Over Items').item.json.account_id }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -1696,
+          -288
+        ],
+        "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
+        "name": "Login Verification"
+      },
+      {
+        "parameters": {
+          "command": "=su - genera -c \"cd /home/genera/sophia && python3 sg-upload-v2-wrapper.py new --folder /mnt/smb_share/Temp/sophia_launch_site --ref {{ $('Get On Hold Sophia Uploads').item.json.batch_source_value }} --pipeline {{ $('Get On Hold Sophia Uploads').item.json.pipeline_id }} --upload{{ $('Get On Hold Sophia Uploads').item.json.bdsnumber ? ' --bdsNumber ' + $('Get On Hold Sophia Uploads').item.json.bdsnumber : '' }} --force-platform\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          144,
+          -288
+        ],
+        "id": "e60dd4fb-bfa3-42f9-a86e-dad86ea6cdad",
+        "name": "Launch Files",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $json.operation_uniqueref }}",
+              "status_concept_ref": 26
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -448,
+          -480
+        ],
+        "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
+        "name": "Update Records as In Progress",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          1264,
+          -288
+        ],
+        "id": "fe9a0316-56f4-4c58-9e9c-b2dc3c2c0c64",
+        "name": "Post Clean Up Launch Site",
+        "credentials": {
+          "sshPassword": {
+            "id": "afQJbS7bg7aYGdOW",
+            "name": "Koza ALLData - Can User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $json.operation_uniqueref }}",
+              "status_concept_ref": 29,
+              "performed_at": "={{ $now.toISO() }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          608,
+          -288
+        ],
+        "id": "261241cf-7b3a-41d5-a6d9-cfb27c1bf47b",
+        "name": "Update Records as Completed",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=rsync -avu \"{{ $json.r1_path }}\" \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -448,
+          -288
+        ],
+        "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
+        "name": "Move Files to Launch Site",
+        "credentials": {
+          "sshPassword": {
+            "id": "afQJbS7bg7aYGdOW",
+            "name": "Koza ALLData - Can User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "amount": 30
+        },
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          -272,
+          -288
+        ],
+        "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
+        "name": "Wait",
+        "webhookId": "487eeb47-03aa-4272-83a6-355e29fa7cf5",
+        "executeOnce": true
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT *\nFROM providers\nWHERE uniqueref = {{ $json.operator_ref }};",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          848,
+          -288
+        ],
+        "id": "6ff4cb0b-f1dd-41f5-a88b-7dc2833a597a",
+        "name": "Get Provider",
+        "executeOnce": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "={{ $json.id }}",
+          "subject": "=Sophia DDM Yüklemesi Tamamlandı - {{ $('Loop Over Items').item.json.account_id }}",
+          "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"vertical-align:middle;\">\n                  <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n                </td>\n                <td align=\"right\" style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,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\" alt=\"Tamamlandı\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;outline:none;text-decoration:none;width:36px;height:36px;vertical-align:middle;\">\n                </td>\n              </tr>\n            </table>\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#102a43;\">Sophia DDM Yüklemesi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba {{ $json.name }},</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Başlatmış olduğunuz Sophia DDM yüklemesi başarıyla tamamlandı. Detaylar aşağıdadır.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.run_ids }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Numune Sahibi</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.sample_owners }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kit</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.kit_names }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batches }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yüklenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yüklenen Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $('Loop Over Items').item.json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+          "options": {
+            "appendAttribution": false,
+            "ccEmail": "can.holyavkin@gen-era.com.tr"
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1056,
+          -288
+        ],
+        "id": "4cb118e5-86b2-4add-9289-5cd02b9d3fed",
+        "name": "Send email",
+        "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
+        "executeOnce": true,
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "command": "set -e\nDIR=/volume1/ALLDATA/Temp/sophia_launch_site\nEXPECTED_RAW=\"{{ $('Get On Hold Sophia Uploads').all().map(i => i.json.r1_path.split('/').pop() + ' ' + i.json.r2_path.split('/').pop()).join(' ') }}\"\nEXPECTED_LIST=$(printf '%s\\n' $EXPECTED_RAW | sort -u)\nEXPECTED_CNT=$(printf '%s\\n' \"$EXPECTED_LIST\" | grep -c . || true)\nACTUAL_LIST=$(cd \"$DIR\" && ls -1 *.fastq.gz 2>/dev/null | sort -u)\nACTUAL_CNT=$(printf '%s\\n' \"$ACTUAL_LIST\" | grep -c . || true)\necho \"expected=$EXPECTED_CNT actual=$ACTUAL_CNT\"\nls -la \"$DIR/\"\nif [ \"$ACTUAL_CNT\" -ne \"$EXPECTED_CNT\" ]; then\n  echo 'ERROR: file count mismatch' >&2\n  echo '--- Expected ---' >&2; printf '%s\\n' \"$EXPECTED_LIST\" >&2\n  echo '--- Actual ---' >&2;   printf '%s\\n' \"$ACTUAL_LIST\"   >&2\n  exit 1\nfi\nDIFF=$(diff <(printf '%s\\n' \"$EXPECTED_LIST\") <(printf '%s\\n' \"$ACTUAL_LIST\") || true)\nif [ -n \"$DIFF\" ]; then\n  echo 'ERROR: file set mismatch' >&2\n  echo \"$DIFF\" >&2\n  exit 2\nfi\nfor f in $EXPECTED_LIST; do\n  gzip -t \"$DIR/$f\" || { echo \"ERROR: corrupt $f\" >&2; exit 3; }\ndone\necho \"All $EXPECTED_CNT files validated\"\n"
+        },
+        "id": "a5225b67-1303-43f9-8ae2-58cb004e3511",
+        "name": "Validate Launch Site",
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -64,
+          -288
+        ],
+        "credentials": {
+          "sshPassword": {
+            "id": "afQJbS7bg7aYGdOW",
+            "name": "Koza ALLData - Can User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "#### Akış, batch_name değerine göre gruplanacak şekilde düzenlendi.",
+          "height": 80,
+          "width": 1472
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          -2944,
+          -416
+        ],
+        "typeVersion": 1,
+        "id": "3f34e1e1-6da1-4b9b-b8b4-c573d90e77d0",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $json.operation_uniqueref }}",
+              "status_concept_ref": 27,
+              "performed_at": "={{ $now.toISO() }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          576,
+          -16
+        ],
+        "id": "b198491e-4754-420a-b6f0-7329d41a085f",
+        "name": "Update Records as Failed",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "return $('Get On Hold Sophia Uploads').all();"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          336,
+          -16
+        ],
+        "id": "d6b341d7-635b-48a9-b8c6-0cc934518153",
+        "name": "Expand Failed Batch"
+      },
+      {
+        "parameters": {
+          "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          1232,
+          -16
+        ],
+        "id": "4bc2024f-1c9f-4331-9b9d-e91036fb357c",
+        "name": "Post Clean Up Launch Site - 2",
+        "executeOnce": true,
+        "credentials": {
+          "sshPassword": {
+            "id": "afQJbS7bg7aYGdOW",
+            "name": "Koza ALLData - Can User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "find /volume1/ALLDATA/Temp/sophia_launch_site -mindepth 1 -delete"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -1424,
+          -288
+        ],
+        "id": "390e4411-abcf-4774-bbba-9f25809333f4",
+        "name": "Pre Clean Up Launch Site",
+        "credentials": {
+          "sshPassword": {
+            "id": "afQJbS7bg7aYGdOW",
+            "name": "Koza ALLData - Can User"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "return $('Get On Hold Sophia Uploads').all();"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          384,
+          -288
+        ],
+        "id": "dbbda793-df00-4a0c-b964-2c97a3fd3901",
+        "name": "Expand Batch"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "can.holyavkin@gen-era.com.tr",
+          "subject": "=Sophia DDM Yüklemesi BAŞARISIZ - {{ $('Loop Over Items').item.json.account_id }} - {{ $('Loop Over Items').item.json.batches }}",
+          "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid #c81e1e;background:#fef2f2;\">\n            <div style=\"font-size:13px;color:#991b1b;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Hata</div>\n            <div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:#7f1d1d;\">Sophia DDM Yüklemesi Başarısız</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Bir Sophia DDM yüklemesi <strong>Launch Files</strong> aşamasında hata aldı. Detaylar aşağıdadır.</p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batches }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Etkilenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Exit code</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Launch Files').item.json.code }}</td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:20px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">stderr</div>\n            <pre style=\"margin:0;padding:14px 16px;background:#0f172a;color:#fca5a5;border-radius:8px;font-size:12px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;line-height:1.5;\">{{ $('Launch Files').item.json.stderr }}</pre>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:14px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">error</div>\n            <pre style=\"margin:0;padding:14px 16px;background:#0f172a;color:#fde68a;border-radius:8px;font-size:12px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;line-height:1.5;\">{{ $('Launch Files').item.json.error }}</pre>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:18px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Etkilenen örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $('Loop Over Items').item.json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir. DOP kayıtları status=Failed (27) olarak işaretlendi; örnekler Sophia'ya gönderilmedi.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1008,
+          -16
+        ],
+        "id": "436d3962-8d76-49c5-bd37-2c2c60ea6488",
+        "name": "Send Failure Email",
+        "webhookId": "709d7b1d-b7fd-4293-b7a1-25777d448646",
+        "executeOnce": true,
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst missing = items.filter(i => !i.json.r1_path || !i.json.r2_path);\nconst hasMissing = missing.length > 0;\nconst missingSampleIds = missing.map(i => i.json.sample_id).join(', ');\nreturn items.map(item => ({\n  json: {\n    ...item.json,\n    _missing_paths_detected: hasMissing,\n    _missing_samples: missingSampleIds,\n    _missing_count: missing.length,\n  }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -928,
+          -288
+        ],
+        "id": "4e9d237c-db24-4a36-a5f1-5341f48b3a77",
+        "name": "Check Path Completeness"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "c5ccb615-3e95-4065-a458-997535d13a4d",
+                "leftValue": "={{ $json._missing_paths_detected }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -736,
+          -288
+        ],
+        "id": "aa49a94b-e3b3-42c1-b7b1-7afed7fb8291",
+        "name": "Has Missing Paths?"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "uniqueref": "={{ $json.operation_uniqueref }}",
+              "status_concept_ref": 27,
+              "performed_at": "={{ $now.toISO() }}",
+              "error_text": "=Missing FASTQ path. Affected samples: {{ $json._missing_samples }}"
+            },
+            "matchingColumns": [
+              "uniqueref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -448,
+          -64
+        ],
+        "id": "65bb5291-64b4-4e44-bcbe-ca40ed7c35a5",
+        "name": "Update Records as Failed (Missing Path)",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "can.holyavkin@gen-era.com.tr",
+          "subject": "=Sophia DDM Yüklemesi BAŞARISIZ - FASTQ Yolu Eksik - {{ $('Loop Over Items').item.json.account_id }} - {{ $('Loop Over Items').item.json.batch }}",
+          "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid #c81e1e;background:#fef2f2;\">\n            <div style=\"font-size:13px;color:#991b1b;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Hata · FASTQ Yolu Eksik</div>\n            <div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:#7f1d1d;\">Sophia DDM Yüklemesi Atlandı</div>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Bir veya birden fazla örneğin <strong>r1_path</strong> ya da <strong>r2_path</strong> alanı boş olduğu için bu batch Sophia'ya yüklenmeden iptal edildi.</p>\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Batch içindeki <strong>tüm</strong> DOP kayıtları <code>status=Failed (27)</code> olarak işaretlendi. Bir sonraki batch'e geçildi.</p>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:200px;\">Hesap (Account ID)</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batch }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Run ID(ler)</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.run_ids }}</td></tr>\n              <tr><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch toplam örnek</td><td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td></tr>\n              <tr><td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yolu eksik örnek sayısı</td><td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#c81e1e;\"><strong>{{ $json._missing_count }}</strong></td></tr>\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:20px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yolu Eksik Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $json._missing_samples.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">FASTQ yolu populate adımı tamamlandıktan sonra DOP kayıtlarını manuel olarak tekrar <code>On Hold (24)</code> statüsüne çekebilirsiniz; bir sonraki workflow tetiklemesinde tekrar denenir.</p>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          -240,
+          -64
+        ],
+        "id": "4d9d770a-1768-43c2-935c-cefc75893bb6",
+        "name": "Send Missing Path Email",
+        "executeOnce": true,
+        "webhookId": "2eca46ee-9da1-45ec-92ac-57b35242309c",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "1c4c849a-670c-4a07-9c97-163da18f7829",
+                "leftValue": "={{ $json.run_ids }}",
+                "rightValue": "asdsad",
+                "operator": {
+                  "type": "string",
+                  "operation": "notContains"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          -2512,
+          -288
+        ],
+        "id": "5f907176-2494-4426-a74f-8515ad229333",
+        "name": "Filter"
+      },
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "id": "fde53fa5-16d4-4b19-8fd3-b120a352d6d5",
+        "name": "Restart Trigger",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -3152,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "e4ac46ee-7231-4c42-9c43-5dd09390cee9",
+                "name": "round",
+                "value": "={{ $json.round || 0 }}",
+                "type": "number"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "40ce6251-6067-4ea2-9203-ffb0c4707ebd",
+        "name": "Init Round",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -2896,
+          -288
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT COUNT(DISTINCT dop.uniqueref)::int AS pending_count\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nWHERE dop.status_concept_ref = 24\n  AND dor.platform_concept_ref = 11\n  AND dor.type_concept_ref = 251\n  AND dor.account_id IS NOT NULL;",
+          "options": {}
+        },
+        "id": "84eefb7d-4768-4e0e-8994-2344f7318ab9",
+        "name": "Count Pending Sophia",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -1936,
+          -560
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "1978ef00-d889-4e1e-ad36-f96f533c8cde",
+                "leftValue": "={{ $json.pending_count }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              },
+              {
+                "id": "7019904e-67bb-4b80-976e-35566e5cfc71",
+                "leftValue": "={{ $('Init Round').first().json.round }}",
+                "rightValue": 10,
+                "operator": {
+                  "type": "number",
+                  "operation": "lt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "b7f0e8bc-3e15-44a3-9e06-9cc73423b758",
+        "name": "Queue Has More?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -1712,
+          -560
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "3999a2d0-f72e-43b8-b827-79f5d8eb0294",
+                "name": "round",
+                "value": "={{ $('Init Round').first().json.round + 1 }}",
+                "type": "number"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "de92f67e-7831-483a-9b7d-7511a6e783e8",
+        "name": "Next Round",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -1488,
+          -704
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "p5v6HfuZ2iO5nnbC",
+            "mode": "id"
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "0f88dff9-1245-4dfe-b4c4-c732abfdff80",
+        "name": "Restart Workflow",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.2,
+        "position": [
+          -1280,
+          -704
+        ]
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "can.holyavkin@gen-era.com.tr",
+          "subject": "={{ $json.pending_count == 0 ? 'Sophia DDM Yukleme Kuyrugu Tamamlandi' : 'Sophia DDM Kuyrugu Guvenlik Sinirinda Durdu' }}",
+          "html": "=<!DOCTYPE html>\n<html lang=\"tr\"><head><meta charset=\"UTF-8\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n<tr><td align=\"center\">\n<table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n<tr>\n<td style=\"padding:24px 32px 20px 32px;border-bottom:4px solid {{ $json.pending_count == 0 ? '#0e9f6e' : '#d97706' }};background:{{ $json.pending_count == 0 ? '#f3faf7' : '#fffbeb' }};\">\n<div style=\"font-size:13px;color:{{ $json.pending_count == 0 ? '#057a55' : '#b45309' }};text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">{{ $json.pending_count == 0 ? 'Tamamlandi' : 'Guvenlik Siniri' }}</div>\n<div style=\"font-size:20px;font-weight:600;margin-top:8px;line-height:1.3;color:{{ $json.pending_count == 0 ? '#03543f' : '#92400e' }};\">{{ $json.pending_count == 0 ? 'Sophia DDM Yukleme Kuyrugu Tamamlandi' : 'Sophia DDM Kuyrugu Guvenlik Sinirinda Durdu' }}</div>\n</td>\n</tr>\n<tr>\n<td style=\"padding:24px 32px 4px 32px;\">\n<p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">{{ $json.pending_count == 0 ? 'Sirada bekleyen yukleme kalmadi. Tum Sophia DDM yuklemeleri islendi.' : 'Toplam ' + $('Init Round').first().json.round + ' tur calistirildi ve guvenlik ust siniri olan 10 tura ulasildi. Kuyrukta hala bekleyen yukleme var; bunlar otomatik olarak baslatilmadi. Lutfen elle kontrol edin.' }}</p>\n</td>\n</tr>\n<tr>\n<td style=\"padding:0 32px 8px 32px;\">\n<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;\">\n<tr><td style=\"padding:12px 16px;font-size:14px;border-bottom:1px solid #e4e7eb;\"><strong>Kalan bekleyen yukleme:</strong> {{ $json.pending_count }}</td></tr>\n<tr><td style=\"padding:12px 16px;font-size:14px;\"><strong>Calisan tur sayisi:</strong> {{ $('Init Round').first().json.round }}</td></tr>\n</table>\n</td>\n</tr>\n<tr>\n<td style=\"padding:8px 32px 28px 32px;\">\n<p style=\"margin:0;font-size:12px;color:#9aa5b1;\">Bu bildirim Sophia Upload otomasyonu tarafindan gonderildi.</p>\n</td>\n</tr>\n</table>\n</td></tr>\n</table>\n</body></html>",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "b832768d-a120-4bbb-8ab9-ec6f788d1177",
+        "name": "Send Queue Done Email",
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          -1488,
+          -544
+        ],
+        "webhookId": "fb66f18d-c6c4-4255-bb5d-31afd75e8d03",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Init Round",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get On Hold Sophia Uploads": {
+        "main": [
+          [
+            {
+              "node": "Check Path Completeness",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [
+            {
+              "node": "Count Pending Sophia",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Login Sophia",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Unique Upload Ready Accounts": {
+        "main": [
+          [
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login Sophia": {
+        "main": [
+          [
+            {
+              "node": "Login Verification",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Login Verification": {
+        "main": [
+          [
+            {
+              "node": "Pre Clean Up Launch Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Launch Files": {
+        "main": [
+          [
+            {
+              "node": "Expand Batch",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Expand Failed Batch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Move Files to Launch Site": {
+        "main": [
+          [
+            {
+              "node": "Wait",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Records as Completed": {
+        "main": [
+          [
+            {
+              "node": "Get Provider",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Wait": {
+        "main": [
+          [
+            {
+              "node": "Validate Launch Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Provider": {
+        "main": [
+          [
+            {
+              "node": "Send email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send email": {
+        "main": [
+          [
+            {
+              "node": "Post Clean Up Launch Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Launch Site": {
+        "main": [
+          [
+            {
+              "node": "Launch Files",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Records as Failed": {
+        "main": [
+          [
+            {
+              "node": "Send Failure Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Expand Failed Batch": {
+        "main": [
+          [
+            {
+              "node": "Update Records as Failed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Post Clean Up Launch Site - 2": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pre Clean Up Launch Site": {
+        "main": [
+          [
+            {
+              "node": "Get On Hold Sophia Uploads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Expand Batch": {
+        "main": [
+          [
+            {
+              "node": "Update Records as Completed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Post Clean Up Launch Site": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Failure Email": {
+        "main": [
+          [
+            {
+              "node": "Post Clean Up Launch Site - 2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Path Completeness": {
+        "main": [
+          [
+            {
+              "node": "Has Missing Paths?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has Missing Paths?": {
+        "main": [
+          [
+            {
+              "node": "Update Records as Failed (Missing Path)",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Update Records as In Progress",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Move Files to Launch Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Records as Failed (Missing Path)": {
+        "main": [
+          [
+            {
+              "node": "Send Missing Path Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Missing Path Email": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Restart Trigger": {
+        "main": [
+          [
+            {
+              "node": "Init Round",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Init Round": {
+        "main": [
+          [
+            {
+              "node": "Get Unique Upload Ready Accounts",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Count Pending Sophia": {
+        "main": [
+          [
+            {
+              "node": "Queue Has More?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Queue Has More?": {
+        "main": [
+          [
+            {
+              "node": "Next Round",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send Queue Done Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Next Round": {
+        "main": [
+          [
+            {
+              "node": "Restart Workflow",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version e566b253",
+    "description": "",
+    "autosaved": false
+  },
   "tags": [
     {
       "updatedAt": "2026-02-25T08:58:40.172Z",
@@ -1345,6 +3135,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "21-06-2026/0:00",
+  "commitDate": "22-06-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
