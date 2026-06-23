@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-21T05:13:48.947Z",
+  "updatedAt": "2026-06-22T13:54:13.404Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -526,21 +526,6 @@
           "name": "Koza ALLData - Can User"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "#### Akış, batch_name değerine göre gruplanacak şekilde düzenlendi.",
-        "height": 80,
-        "width": 1472
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -2944,
-        -416
-      ],
-      "typeVersion": 1,
-      "id": "3f34e1e1-6da1-4b9b-b8b4-c573d90e77d0",
-      "name": "Sticky Note"
     },
     {
       "parameters": {
@@ -1177,6 +1162,7 @@
         -544
       ],
       "webhookId": "fb66f18d-c6c4-4255-bb5d-31afd75e8d03",
+      "executeOnce": true,
       "credentials": {
         "smtp": {
           "id": "clTmxNgA7AqNrh5h",
@@ -1560,7 +1546,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
+  "versionId": "5e9ef3fe-8357-4386-aeb1-9ab4f608b5d7",
   "activeVersionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
   "triggerCount": 0,
   "shared": [
@@ -3135,6 +3121,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "22-06-2026/0:00",
+  "commitDate": "23-06-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
