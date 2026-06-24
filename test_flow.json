@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T12:27:13.725Z",
+  "updatedAt": "2026-06-23T11:55:38.726Z",
   "createdAt": "2026-06-16T12:26:59.228Z",
   "id": "38Oo3EHmnGDNmbDD",
   "name": "test_flow",
@@ -30,7 +30,287 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": {},
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "10.20.0.30:5678",
+            "user-agent": "curl/8.19.0",
+            "accept": "*/*",
+            "content-type": "application/json",
+            "content-length": "8410"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "meta": {
+              "status": "success",
+              "schema": "mock_vcf_request_examples",
+              "schema_version": "1.0.0",
+              "submitted_at": "2026-06-16T13:30:00Z",
+              "note": "VCF files are not uploaded in the request. The JSON body only sends path metadata; file names and paths are the source of truth for these mock requests."
+            },
+            "request_examples": [
+              {
+                "example_id": "example_1_samples_with_datasets",
+                "description": "Three sample records, each carrying one annotated VCF dataset.",
+                "body": {
+                  "batch_id": "mock-batch-517984-A",
+                  "request_type": "annotated_vcf_import",
+                  "transport": {
+                    "content_type": "application/json",
+                    "files_attached": false
+                  },
+                  "samples": [
+                    {
+                      "id": "517984-1",
+                      "external_sample_id": "517984.annotated_1",
+                      "type": "germline",
+                      "status": "ready",
+                      "metadata": {
+                        "patient_id": "MOCK-517984-001",
+                        "assay": "annotated_vcf",
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "snv_indel",
+                        "source": "mock_vcf"
+                      },
+                      "datasets": [
+                        {
+                          "id": "517984.annotated_1.vcf",
+                          "name": "517984 annotated VCF 1",
+                          "type": "annotated_vcf",
+                          "role": "primary",
+                          "status": "ready",
+                          "file_name": "517984.annotated_1.vcf",
+                          "file_path": "data/517984.annotated_1.vcf",
+                          "mime_type": "text/vcf",
+                          "upload_required": false,
+                          "metadata": {
+                            "file_index": 1,
+                            "is_mock": true,
+                            "content_required": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "517984-2",
+                      "external_sample_id": "517984.annotated_2",
+                      "type": "tumor_normal",
+                      "status": "ready",
+                      "metadata": {
+                        "patient_id": "MOCK-517984-002",
+                        "assay": "annotated_vcf",
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "cnv",
+                        "source": "mock_vcf"
+                      },
+                      "datasets": [
+                        {
+                          "id": "517984.annotated_2.vcf",
+                          "name": "517984 annotated VCF 2",
+                          "type": "annotated_vcf",
+                          "role": "primary",
+                          "status": "ready",
+                          "file_name": "517984.annotated_2.vcf",
+                          "file_path": "data/517984.annotated_2.vcf",
+                          "mime_type": "text/vcf",
+                          "upload_required": false,
+                          "metadata": {
+                            "file_index": 2,
+                            "is_mock": true,
+                            "content_required": false
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "517984-3",
+                      "external_sample_id": "517984.annotated_3",
+                      "type": "germline",
+                      "status": "ready",
+                      "metadata": {
+                        "patient_id": "MOCK-517984-003",
+                        "assay": "annotated_vcf",
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "sv",
+                        "source": "mock_vcf"
+                      },
+                      "datasets": [
+                        {
+                          "id": "517984.annotated_3.vcf",
+                          "name": "517984 annotated VCF 3",
+                          "type": "annotated_vcf",
+                          "role": "primary",
+                          "status": "ready",
+                          "file_name": "517984.annotated_3.vcf",
+                          "file_path": "data/517984.annotated_3.vcf",
+                          "mime_type": "text/vcf",
+                          "upload_required": false,
+                          "metadata": {
+                            "file_index": 3,
+                            "is_mock": true,
+                            "content_required": false
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "example_id": "example_2_flat_file_manifest",
+                "description": "One batch-level metadata object plus a flat file path manifest. No file bytes are attached.",
+                "body": {
+                  "batch_id": "mock-batch-517984-B",
+                  "request_type": "vcf_file_manifest",
+                  "transport": {
+                    "content_type": "application/json",
+                    "files_attached": false
+                  },
+                  "metadata": {
+                    "project_id": "mock-vcf",
+                    "case_id": "517984",
+                    "reference_genome": "GRCh38",
+                    "created_by": "codex",
+                    "content_required": false
+                  },
+                  "files": [
+                    {
+                      "field_name": "vcf_1",
+                      "file_name": "517984.annotated_1.vcf",
+                      "file_path": "data/517984.annotated_1.vcf",
+                      "mime_type": "text/vcf",
+                      "upload_required": false,
+                      "sample_id": "517984-1",
+                      "variant_scope": "snv_indel",
+                      "metadata": {
+                        "order": 1,
+                        "label": "SNV and INDEL annotated VCF"
+                      }
+                    },
+                    {
+                      "field_name": "vcf_2",
+                      "file_name": "517984.annotated_2.vcf",
+                      "file_path": "data/517984.annotated_2.vcf",
+                      "mime_type": "text/vcf",
+                      "upload_required": false,
+                      "sample_id": "517984-2",
+                      "variant_scope": "cnv",
+                      "metadata": {
+                        "order": 2,
+                        "label": "CNV annotated VCF"
+                      }
+                    },
+                    {
+                      "field_name": "vcf_3",
+                      "file_name": "517984.annotated_3.vcf",
+                      "file_path": "data/517984.annotated_3.vcf",
+                      "mime_type": "text/vcf",
+                      "upload_required": false,
+                      "sample_id": "517984-3",
+                      "variant_scope": "sv",
+                      "metadata": {
+                        "order": 3,
+                        "label": "SV annotated VCF"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "example_id": "example_3_analysis_batch",
+                "description": "Analysis-oriented payload where each input maps to one file path and one metadata block.",
+                "body": {
+                  "analysis_id": "mock-analysis-517984-C",
+                  "workflow": "vcf_annotation_ingest",
+                  "priority": "normal",
+                  "transport": {
+                    "content_type": "application/json",
+                    "files_attached": false
+                  },
+                  "inputs": [
+                    {
+                      "input_id": "input-517984-1",
+                      "sample": {
+                        "id": "517984-1",
+                        "case_id": "517984",
+                        "phenotype": "mock"
+                      },
+                      "file": {
+                        "name": "517984.annotated_1.vcf",
+                        "path": "data/517984.annotated_1.vcf",
+                        "type": "vcf",
+                        "subtype": "annotated",
+                        "mime_type": "text/vcf",
+                        "upload_required": false
+                      },
+                      "metadata": {
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "snv_indel",
+                        "content_required": false,
+                        "mock_index": 1
+                      }
+                    },
+                    {
+                      "input_id": "input-517984-2",
+                      "sample": {
+                        "id": "517984-2",
+                        "case_id": "517984",
+                        "phenotype": "mock"
+                      },
+                      "file": {
+                        "name": "517984.annotated_2.vcf",
+                        "path": "data/517984.annotated_2.vcf",
+                        "type": "vcf",
+                        "subtype": "annotated",
+                        "mime_type": "text/vcf",
+                        "upload_required": false
+                      },
+                      "metadata": {
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "cnv",
+                        "content_required": false,
+                        "mock_index": 2
+                      }
+                    },
+                    {
+                      "input_id": "input-517984-3",
+                      "sample": {
+                        "id": "517984-3",
+                        "case_id": "517984",
+                        "phenotype": "mock"
+                      },
+                      "file": {
+                        "name": "517984.annotated_3.vcf",
+                        "path": "data/517984.annotated_3.vcf",
+                        "type": "vcf",
+                        "subtype": "annotated",
+                        "mime_type": "text/vcf",
+                        "upload_required": false
+                      },
+                      "metadata": {
+                        "reference_genome": "GRCh38",
+                        "variant_scope": "sv",
+                        "content_required": false,
+                        "mock_index": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "webhookUrl": "http://localhost:5678/webhook/9ed0b4ec-aaa4-413f-8bad-80a0223f8c6d",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
   "versionId": "d41a4f98-2902-4824-a531-c6647de4dc97",
   "activeVersionId": "d41a4f98-2902-4824-a531-c6647de4dc97",
   "triggerCount": 1,
@@ -73,6 +353,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "23-06-2026/0:00",
+  "commitDate": "24-06-2026/0:00",
   "fileName": "test_flow.json"
 }
