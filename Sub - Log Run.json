@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T18:27:17.713Z",
+  "updatedAt": "2026-06-24T19:37:48.588Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -1887,8 +1887,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1456,
-        880
+        1408,
+        912
       ],
       "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
       "name": "Extract Instrument ID5",
@@ -1984,8 +1984,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.3,
       "position": [
-        1472,
-        816
+        1600,
+        1088
       ],
       "id": "dae27ba8-5db9-4c37-9434-350774762f13",
       "name": "Switch1"
@@ -2153,8 +2153,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
-        896
+        1776,
+        880
       ],
       "id": "5b8a10c3-caaa-493f-bd53-a039dfd7b1d9",
       "name": "Update Workflow",
@@ -2328,8 +2328,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1680,
-        1104
+        1824,
+        1088
       ],
       "id": "669c06dc-fb18-4d49-ac7a-4575cff0dfb0",
       "name": "Update Workflow1",
@@ -3386,6 +3386,11 @@
       }
     },
     {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
+        "options": {}
+      },
       "name": "Get Instrument Concept",
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -3399,22 +3404,9 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
-        "options": {}
       }
     },
     {
-      "name": "Is NovaSeq X-Plus",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1264,
-        720
-      ],
-      "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd",
       "parameters": {
         "conditions": {
           "options": {
@@ -3438,6 +3430,48 @@
         },
         "looseTypeValidation": true,
         "options": {}
+      },
+      "name": "Is NovaSeq X-Plus",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        768
+      ],
+      "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd"
+    },
+    {
+      "parameters": {
+        "command": "=P='{{ $('Start').item.json.path }}'\nP=\"${P%/}/\"\nRP=\"${P}RunParameters.xml\"; RCS=\"${P}RunCompletionStatus.xml\"\ns=\"\"; e=\"\"\nif [ -f \"$RCS\" ]; then\n  s=$(grep -oP '(?<=<RunStartTime>)[^<]+' \"$RCS\" 2>/dev/null | head -1)\n  e=$(grep -oP '(?<=<RunEndTime>)[^<]+' \"$RCS\" 2>/dev/null | head -1)\nfi\n[ -z \"$s\" ] && s=$(grep -oP '(?<=<RunStartTime>)[^<]+' \"$RP\" 2>/dev/null | head -1)\n[ -z \"$e\" ] && e=$(grep -oP '(?<=<RunEndTime>)[^<]+' \"$RP\" 2>/dev/null | head -1)\nif [ -z \"$s\" ]; then\n  fcs=$(grep -oP '(?<=<FlowCellStartDate>)[^<]+' \"$RP\" 2>/dev/null | head -1)\n  [ -n \"$fcs\" ] && s=$(printf '%s' \"$fcs\" | awk '{split($1,d,\"/\"); printf \"%s-%s-%sT%s+03:00\", d[3],d[1],d[2],$2}')\nfi\nif [ -z \"$e\" ]; then\n  log=$(ls \"${P}Logs/\"info_*.log 2>/dev/null | head -1)\n  [ -n \"$log\" ] && e=$(grep 'RTAComplete.txt' \"$log\" 2>/dev/null | tail -1 | awk -F', ' '{printf \"%sT%s+03:00\",$1,$2}')\nfi\ncase \"$s\" in 20[0-9][0-9]-*) ;; *) s=\"\" ;; esac\ncase \"$e\" in 20[0-9][0-9]-*) ;; *) e=\"\" ;; esac\nprintf '%s|%s' \"$s\" \"$e\""
+      },
+      "name": "Extract Seq Times",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        512,
+        208
+      ],
+      "id": "581bbf8a-e369-4220-b079-4a168d2adfe1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE runs\nSET seq_started_at = COALESCE(NULLIF(split_part('{{ $json.stdout }}', '|', 1), '')::timestamptz, seq_started_at),\n    seq_ended_at   = COALESCE(NULLIF(split_part('{{ $json.stdout }}', '|', 2), '')::timestamptz, seq_ended_at)\nWHERE run_id = '{{ $('Start').item.json.run_id }}'\n  AND (seq_started_at IS NULL OR seq_ended_at IS NULL);",
+        "options": {}
+      },
+      "name": "Update Seq Times",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        768,
+        208
+      ],
+      "id": "c1986331-9e62-4229-9cac-f158d3c529c4",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
       }
     }
   ],
@@ -3799,6 +3833,11 @@
             "node": "Get DB Record",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Extract Seq Times",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -4020,6 +4059,17 @@
           }
         ]
       ]
+    },
+    "Extract Seq Times": {
+      "main": [
+        [
+          {
+            "node": "Update Seq Times",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -4041,8 +4091,8 @@
       }
     ]
   },
-  "versionId": "dff8b0a2-1be8-448b-bb54-7dd83547f96f",
-  "activeVersionId": "dff8b0a2-1be8-448b-bb54-7dd83547f96f",
+  "versionId": "c80046de-5320-4987-b37e-78b8b497976b",
+  "activeVersionId": "c80046de-5320-4987-b37e-78b8b497976b",
   "triggerCount": 0,
   "shared": [
     {
@@ -4054,9 +4104,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-08T18:27:17.715Z",
-    "createdAt": "2026-06-08T18:27:17.715Z",
-    "versionId": "dff8b0a2-1be8-448b-bb54-7dd83547f96f",
+    "updatedAt": "2026-06-24T19:37:48.590Z",
+    "createdAt": "2026-06-24T19:37:48.590Z",
+    "versionId": "c80046de-5320-4987-b37e-78b8b497976b",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -5940,8 +5990,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1456,
-          880
+          1408,
+          912
         ],
         "id": "a0c44ce8-1cad-41c5-bf53-99fc81044977",
         "name": "Extract Instrument ID5",
@@ -6037,8 +6087,8 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3.3,
         "position": [
-          1472,
-          816
+          1600,
+          1088
         ],
         "id": "dae27ba8-5db9-4c37-9434-350774762f13",
         "name": "Switch1"
@@ -6206,8 +6256,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1680,
-          896
+          1776,
+          880
         ],
         "id": "5b8a10c3-caaa-493f-bd53-a039dfd7b1d9",
         "name": "Update Workflow",
@@ -6381,8 +6431,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1680,
-          1104
+          1824,
+          1088
         ],
         "id": "669c06dc-fb18-4d49-ac7a-4575cff0dfb0",
         "name": "Update Workflow1",
@@ -7439,6 +7489,11 @@
         }
       },
       {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
+          "options": {}
+        },
         "name": "Get Instrument Concept",
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -7452,22 +7507,9 @@
             "id": "vvzB2Z8ymgMiekHW",
             "name": "PG-ALB-1.5"
           }
-        },
-        "parameters": {
-          "operation": "executeQuery",
-          "query": "SELECT i.instrument_concept_ref\nFROM runs r\nJOIN instruments i ON i.uniqueref = r.instrument_ref\nWHERE r.uniqueref = {{ $('Get DB Record').item.json.uniqueref }}",
-          "options": {}
         }
       },
       {
-        "name": "Is NovaSeq X-Plus",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          1264,
-          720
-        ],
-        "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd",
         "parameters": {
           "conditions": {
             "options": {
@@ -7491,6 +7533,48 @@
           },
           "looseTypeValidation": true,
           "options": {}
+        },
+        "name": "Is NovaSeq X-Plus",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1280,
+          768
+        ],
+        "id": "b9c4f3e1-2d5e-4f60-ab12-234567890bcd"
+      },
+      {
+        "parameters": {
+          "command": "=P='{{ $('Start').item.json.path }}'\nP=\"${P%/}/\"\nRP=\"${P}RunParameters.xml\"; RCS=\"${P}RunCompletionStatus.xml\"\ns=\"\"; e=\"\"\nif [ -f \"$RCS\" ]; then\n  s=$(grep -oP '(?<=<RunStartTime>)[^<]+' \"$RCS\" 2>/dev/null | head -1)\n  e=$(grep -oP '(?<=<RunEndTime>)[^<]+' \"$RCS\" 2>/dev/null | head -1)\nfi\n[ -z \"$s\" ] && s=$(grep -oP '(?<=<RunStartTime>)[^<]+' \"$RP\" 2>/dev/null | head -1)\n[ -z \"$e\" ] && e=$(grep -oP '(?<=<RunEndTime>)[^<]+' \"$RP\" 2>/dev/null | head -1)\nif [ -z \"$s\" ]; then\n  fcs=$(grep -oP '(?<=<FlowCellStartDate>)[^<]+' \"$RP\" 2>/dev/null | head -1)\n  [ -n \"$fcs\" ] && s=$(printf '%s' \"$fcs\" | awk '{split($1,d,\"/\"); printf \"%s-%s-%sT%s+03:00\", d[3],d[1],d[2],$2}')\nfi\nif [ -z \"$e\" ]; then\n  log=$(ls \"${P}Logs/\"info_*.log 2>/dev/null | head -1)\n  [ -n \"$log\" ] && e=$(grep 'RTAComplete.txt' \"$log\" 2>/dev/null | tail -1 | awk -F', ' '{printf \"%sT%s+03:00\",$1,$2}')\nfi\ncase \"$s\" in 20[0-9][0-9]-*) ;; *) s=\"\" ;; esac\ncase \"$e\" in 20[0-9][0-9]-*) ;; *) e=\"\" ;; esac\nprintf '%s|%s' \"$s\" \"$e\""
+        },
+        "name": "Extract Seq Times",
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          512,
+          208
+        ],
+        "id": "581bbf8a-e369-4220-b079-4a168d2adfe1"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE runs\nSET seq_started_at = COALESCE(NULLIF(split_part('{{ $json.stdout }}', '|', 1), '')::timestamptz, seq_started_at),\n    seq_ended_at   = COALESCE(NULLIF(split_part('{{ $json.stdout }}', '|', 2), '')::timestamptz, seq_ended_at)\nWHERE run_id = '{{ $('Start').item.json.run_id }}'\n  AND (seq_started_at IS NULL OR seq_ended_at IS NULL);",
+          "options": {}
+        },
+        "name": "Update Seq Times",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          768,
+          208
+        ],
+        "id": "c1986331-9e62-4229-9cac-f158d3c529c4",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
         }
       }
     ],
@@ -7852,6 +7936,11 @@
               "node": "Get DB Record",
               "type": "main",
               "index": 0
+            },
+            {
+              "node": "Extract Seq Times",
+              "type": "main",
+              "index": 0
             }
           ]
         ]
@@ -8073,6 +8162,17 @@
             }
           ]
         ]
+      },
+      "Extract Seq Times": {
+        "main": [
+          [
+            {
+              "node": "Update Seq Times",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
@@ -8081,6 +8181,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "24-06-2026/0:00",
+  "commitDate": "25-06-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
