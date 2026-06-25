@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-19T11:53:25.986Z",
+  "updatedAt": "2026-06-24T08:39:30.950Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -131,7 +131,7 @@
     },
     {
       "parameters": {
-        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; mkdir -p \"$DEST\" && rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}\" \"$DEST/\" && chgrp -R users \"$DEST\" 2>/dev/null"
+        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; mkdir -p \"$DEST\" && rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}\" \"$DEST/\" && chgrp -R users \"$DEST\" 2>/dev/null; chmod -R a+rX \"$DEST\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -271,14 +271,15 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
   },
   "staticData": null,
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "4bd344f8-5291-4ffd-93a7-49d40d050809",
+  "versionId": "45379276-64d8-4a3a-ba50-c138ca9f77d4",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -299,6 +300,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "24-06-2026/0:00",
+  "commitDate": "25-06-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
