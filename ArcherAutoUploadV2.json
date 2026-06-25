@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-10T06:25:27.602Z",
+  "updatedAt": "2026-06-24T06:18:14.054Z",
   "createdAt": "2026-06-10T06:07:49.804Z",
   "id": "365MNVcdopNK6zo7",
   "name": "ArcherAutoUploadV2",
@@ -151,7 +151,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Group items by recipe_ref\nconst grouped = {};\n\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  \n  if (!grouped[recipeRef]) {\n    grouped[recipeRef] = [];\n  }\n  grouped[recipeRef].push(item.json);\n}\n\n// Return as array of groups\nreturn Object.entries(grouped).map(([recipeRef, items]) => ({\n  json: {\n    recipe_ref: recipeRef,\n    items: items,\n    count: items.length\n  }\n}));"
+        "jsCode": "// Group items by recipe_ref AND storage location (derived from r1_path)\nconst getLocation = (r1Path) => {\n  if (!r1Path) return 'unknown';\n  if (r1Path.startsWith('/mnt/illuminastorage/')) return 'illuminastorage';\n  if (r1Path.startsWith('/volume1/ALLDATA/')) return 'alldata';\n  return 'other';\n};\n\nconst grouped = {};\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  const location = getLocation(item.json.r1_path);\n  const groupKey = `${recipeRef}__${location}`;\n\n  if (!grouped[groupKey]) {\n    grouped[groupKey] = {\n      recipe_ref: recipeRef,\n      location: location,\n      items: []\n    };\n  }\n  grouped[groupKey].items.push(item.json);\n}\n\n// Return as array of groups\nreturn Object.values(grouped).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    location: group.location,\n    items: group.items,\n    count: group.items.length\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -425,7 +425,8 @@
         448
       ],
       "id": "29278e58-bf78-4b71-9ae5-f54e65d031c7",
-      "name": "Execute Command1"
+      "name": "Execute Command1",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -447,11 +448,13 @@
             "status_concept_ref": 24,
             "recipe_ref": "={{ $('Merge3').item.json.batches[0].recipe_ref }}",
             "performed_at": "={{ $now }}",
-            "analysis_source_value": "={{ $json.job_id }}"
+            "analysis_source_value": "={{ $json.job_id }}",
+            "read_ref": "={{ $('Split out') }}"
           },
           "matchingColumns": [
             "recipe_ref",
-            "status_concept_ref"
+            "status_concept_ref",
+            "read_ref"
           ],
           "schema": [
             {
@@ -472,7 +475,7 @@
               "display": true,
               "type": "number",
               "canBeUsedToMatch": true,
-              "removed": true
+              "removed": false
             },
             {
               "id": "recipe_ref",
@@ -1078,63 +1081,72 @@
     },
     {
       "parameters": {
-        "workflowInputs": {
-          "values": [
-            {
-              "name": "cycle",
-              "type": "any"
-            }
-          ]
-        }
+        "httpMethod": "POST",
+        "path": "2dca8eea-a347-48f5-b8f2-61a81af000c2",
+        "options": {}
       },
-      "type": "n8n-nodes-base.executeWorkflowTrigger",
-      "typeVersion": 1.1,
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
       "position": [
         -64,
-        80
+        96
       ],
-      "id": "9c874b4a-e37e-456a-a71f-d3ace4099862",
-      "name": "When Executed by Another Workflow"
+      "id": "11866a7c-2276-479e-a9af-3b321d58cbda",
+      "name": "Webhook",
+      "webhookId": "2dca8eea-a347-48f5-b8f2-61a81af000c2"
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "365MNVcdopNK6zo7",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/365MNVcdopNK6zo7",
-          "cachedResultName": "ArcherAutoUploadV2"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {},
-          "matchingColumns": [
-            "cycle"
-          ],
-          "schema": [
-            {
-              "id": "cycle",
-              "displayName": "cycle",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
-        },
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/2dca8eea-a347-48f5-b8f2-61a81af000c2",
         "options": {}
       },
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
       "position": [
-        6752,
+        6784,
         432
       ],
-      "id": "fe63dd3f-d673-4c9b-bdb1-686651795775",
-      "name": "Call 'ArcherAutoUploadV2'"
+      "id": "44023d9f-8d3f-4bde-a354-4a19c76e2cb9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com.tr",
+        "subject": "Archer Job Submission Fail",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        5200,
+        720
+      ],
+      "id": "bfad0dc6-ff79-499b-a86f-728f2c167819",
+      "name": "Send email2",
+      "webhookId": "0a2c781d-b28c-48bc-802f-0d363dbaac82",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "batches[0].samples",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4752,
+        -32
+      ],
+      "id": "f5aea5ac-1a10-445a-bfe7-fbb620c4dcee",
+      "name": "Split Out"
     }
   ],
   "connections": {
@@ -1348,6 +1360,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "Send email2",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -1429,6 +1448,11 @@
         [
           {
             "node": "Merge3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
             "type": "main",
             "index": 0
           }
@@ -1535,14 +1559,14 @@
       "main": [
         [
           {
-            "node": "Call 'ArcherAutoUploadV2'",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "When Executed by Another Workflow": {
+    "Webhook": {
       "main": [
         [
           {
@@ -1567,7 +1591,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f45e508a-f204-458c-8b4f-14e45616997e",
+  "versionId": "277d4a21-6bff-4809-b350-56dbb09ac48d",
   "activeVersionId": "f45e508a-f204-458c-8b4f-14e45616997e",
   "triggerCount": 0,
   "shared": [
@@ -3139,6 +3163,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "24-06-2026/0:00",
+  "commitDate": "25-06-2026/0:00",
   "fileName": "ArcherAutoUploadV2.json"
 }
