@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-08T08:24:52.030Z",
+  "updatedAt": "2026-06-25T06:26:59.960Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -v diag | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
+        "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -vE '/(diag|RAWDATA|GTCs)/$' | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -585,8 +585,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
-  "activeVersionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
+  "versionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
+  "activeVersionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
   "triggerCount": 1,
   "shared": [
     {
@@ -598,9 +598,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-15T09:37:19.000Z",
-    "createdAt": "2026-04-15T09:37:18.051Z",
-    "versionId": "2521878e-2551-4770-8e74-d5a1efff1ab6",
+    "updatedAt": "2026-06-25T06:27:01.000Z",
+    "createdAt": "2026-06-25T06:26:59.962Z",
+    "versionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
       {
@@ -624,7 +624,7 @@
       },
       {
         "parameters": {
-          "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -v diag | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
+          "command": "ls -d /volume1/ALLDATA/Scans/*/ | grep -vE '/(diag|RAWDATA|GTCs)/$' | while read FOLDER; do SENTRIX=$(basename \"$FOLDER\" | tr -d ' /'); METRICS=$(ls \"${FOLDER}\"Metrics*.txt 2>/dev/null | grep -v old | head -1); HAS_CFG=$([ -f \"${FOLDER}Effective.cfg\" ] && echo \"true\" || echo \"false\"); HAS_QC=$([ -f \"${FOLDER}${SENTRIX}_qc.txt\" ] && echo \"true\" || echo \"false\"); HAS_SDF=$([ -f \"${FOLDER}${SENTRIX}.sdf\" ] && echo \"true\" || echo \"false\"); if [ -n \"$METRICS\" ] && [ \"$HAS_CFG\" = \"true\" ] && ([ \"$HAS_QC\" = \"true\" ] || [ \"$HAS_SDF\" = \"true\" ]); then RAW_DATE=$(sed -n '2p' \"$METRICS\" | awk '{print $1}'); SCAN_DATE=$(python3 -c \"from datetime import datetime; print(datetime.strptime('$RAW_DATE', '%m/%d/%Y').strftime('%Y-%m-%d'))\"); INSTRUMENT=$(grep -m1 \"^name = \" \"${FOLDER}Effective.cfg\" | awk '{print $3}'); DESCRIPTOR=$(grep -m1 \"Descriptor:\" \"${FOLDER}${SENTRIX}_qc.txt\" 2>/dev/null | sed 's/.*Descriptor:[[:space:]]*//' | awk -F'   ' '{print $1}' | xargs); [ -z \"$DESCRIPTOR\" ] && DESCRIPTOR=$(grep -m1 \"<Name>\" \"${FOLDER}${SENTRIX}.sdf\" 2>/dev/null | sed 's/.*<Name>\\(.*\\)<\\/Name>.*/\\1/' | xargs); echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"completed\\\",\\\"scan_date\\\":\\\"$SCAN_DATE\\\",\\\"instrument_serial\\\":\\\"$INSTRUMENT\\\",\\\"descriptor\\\":\\\"$DESCRIPTOR\\\"}\"; else echo \"{\\\"sentrix_id\\\":\\\"$SENTRIX\\\",\\\"status\\\":\\\"in_progress\\\"}\"; fi; done"
         },
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
@@ -1170,11 +1170,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 2521878e",
+    "name": "Version 2b98592f",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "25-06-2026/0:00",
+  "commitDate": "27-06-2026/0:00",
   "fileName": "Scans2Sup.json"
 }
