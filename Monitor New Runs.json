@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-24T19:20:00.001Z",
+  "updatedAt": "2026-06-26T15:15:36.831Z",
   "createdAt": "2025-12-19T08:46:42.937Z",
   "id": "GgcoorkW5qEx86Uq",
   "name": "Monitor New Runs",
@@ -218,7 +218,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -833,7 +833,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "3a901071-8321-465b-a302-04f641a0ef39",
+  "versionId": "f3ea626a-fd3e-4a28-98d2-d9c69e6de21d",
   "activeVersionId": "3a901071-8321-465b-a302-04f641a0ef39",
   "triggerCount": 1,
   "shared": [
@@ -1675,6 +1675,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "26-06-2026/0:00",
+  "commitDate": "27-06-2026/0:00",
   "fileName": "Monitor New Runs.json"
 }
