@@ -1,0 +1,1642 @@
+{
+  "updatedAt": "2026-06-27T18:16:42.168Z",
+  "createdAt": "2025-12-19T08:46:42.937Z",
+  "id": "GgcoorkW5qEx86Uq",
+  "name": "Monitor New Runs Legacy",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "run_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -192
+      ],
+      "id": "ac3745d4-8403-4bd7-843a-a4e7c76c96e2",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM runs\nWHERE run_id = ANY(string_to_array('{{ $json.run_ids_str }}', ',')) ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        816,
+        -176
+      ],
+      "id": "15f0c21e-f575-4e27-b478-f7a2c085b872",
+      "name": "Get Recorded Runs",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "adfc3d9d-c345-438a-9572-cb0253f1027d",
+              "name": "run_id",
+              "value": "={{ $json.path.match(/([^\\/]+)\\/?$/)[1] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -192
+      ],
+      "id": "d34c72b5-5f8d-4afc-9126-2a3454829133",
+      "name": "Get Run IDs"
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "query": "SELECT input2.* \nFROM input2 \nLEFT JOIN input1 ON input2.run_id = input1.run_id\nWHERE input1.run_id IS NULL",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1056,
+        128
+      ],
+      "id": "69cdd13c-38c3-4ec5-8081-6948a895329b",
+      "name": "Absent on DB"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7df31dbe-5c56-4cf5-898d-cf45c871de39",
+              "leftValue": "={{ $json.instrument_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8f99aa45-1948-4564-969a-9bdb1cb21432",
+              "leftValue": "={{ $json.flowcell_kit_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "141cf049-2d87-40d7-9d6f-f82e6ea5e65a",
+              "leftValue": "={{ $json.flowcell_lot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "620da1eb-5454-4ef0-8523-55327d5f2f65",
+              "leftValue": "={{ $json.date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "1bca691c-492d-4a95-9665-d991d6ea34c7",
+              "leftValue": "={{ $json.reads_settings_concept_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "350441ae-64b7-4c3f-b9c5-d34010cd13b0",
+              "leftValue": "={{ $json.workflow_concept_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f109afa9-a9b5-4ad0-9b4e-9c848ed465dd",
+              "leftValue": "={{ $json.status_concept_ref }}",
+              "rightValue": "26",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "0f811c00-c907-46f9-be7c-df0c8cb1a268",
+              "leftValue": "={{ $json.status_concept_ref }}",
+              "rightValue": "24",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "010035ee-e869-41f4-abf1-1498b75cab07",
+              "leftValue": "={{ $json.care_site_ref }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5f0e3be8-6190-4f9b-93a9-07491572d9c2",
+              "leftValue": "={{ $json.seq_started_at }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cf1047c3-f94d-42ae-9d7e-9f9f344df042",
+              "leftValue": "={{ $json.seq_ended_at }}",
+              "rightValue": "",
+              "operator": {
+                "type": "dateTime",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        -432
+      ],
+      "id": "d64b3289-68b6-4f8f-a10b-1124268a664d",
+      "name": "Present on DB with Missing Info"
+    },
+    {
+      "parameters": {
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -192
+      ],
+      "id": "07dd78c4-70f5-4196-bbe9-ca43c755c455",
+      "name": "Find Runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const paths = $input.item.json.stdout.trim().split(',').filter(p => p.length > 0);\nreturn paths.map(path => ({ json: { path: path.trim() } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        -192
+      ],
+      "id": "a621cd54-969c-47d9-b4a0-e1b71f0fe5c5",
+      "name": "Split Runs"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FAYzdm9tCCVfsNlo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FAYzdm9tCCVfsNlo",
+          "cachedResultName": "Sub - Log Run"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2096,
+        -224
+      ],
+      "id": "31d4adbe-644d-4c0c-a560-75d540c87ece",
+      "name": "Call 'Log Run - Sub'"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "run_id",
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1248,
+        -544
+      ],
+      "id": "982f3026-56c6-4e55-9362-1c8071704df1",
+      "name": "Add Paths"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allIds = $input.all().map(i => i.json.run_id).join(',');\nreturn [{ json: { run_ids_str: allIds } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -176
+      ],
+      "id": "b0c697bf-3ddf-4ae2-b900-b8cc39a393f8",
+      "name": "Aggregate Run IDs"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements\nFROM runs\nWHERE run_id = '{{ $json.run_id }}'\n  AND status_concept_ref = 29",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1056,
+        -176
+      ],
+      "id": "54811ec9-94d6-48fc-afa3-dce2e9276d54",
+      "name": "Check Measurement",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SeGWQ7ai2D66eUSG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+          "cachedResultName": "interop"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "folder": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "folder",
+              "displayName": "folder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2688,
+        -400
+      ],
+      "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
+      "name": "Call 'interop'",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+              "leftValue": "={{ $json.has_measurements }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        -176
+      ],
+      "id": "9b78b958-d0b7-46e6-acb0-6411e3c3aa60",
+      "name": "Has No Measurement"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "run_id",
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        -336
+      ],
+      "id": "c8b590f8-9ffb-43c8-a5be-41b48eadf1ba",
+      "name": "Add Paths1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2448,
+        -496
+      ],
+      "id": "2abcad21-c986-49f4-83df-d030579121f6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "executeOnce": false,
+        "command": "=test -f {{ $json.path }}RunInfo.xml && test -d {{ $json.path }}InterOp && echo \"EXISTS\" || echo \"MISSING\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        -624
+      ],
+      "id": "b1365e9d-4fb1-459c-8e97-42457df7d22b",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1952,
+        -496
+      ],
+      "id": "8b1e786e-5846-4a84-a475-058202582860",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5bc65677-43b7-4c93-ada8-0d1b0ee6ca84",
+              "leftValue": "={{ $json.stdout }}",
+              "rightValue": "EXISTS",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2160,
+        -496
+      ],
+      "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        -96
+      ],
+      "id": "166dea44-b2b0-4c11-8104-dec86bc80a42",
+      "name": "When Executed by Another Workflow"
+    }
+  ],
+  "connections": {
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Absent on DB",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Add Paths",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Aggregate Run IDs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Paths1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recorded Runs": {
+      "main": [
+        [
+          {
+            "node": "Present on DB with Missing Info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Absent on DB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check Measurement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Run IDs": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Absent on DB": {
+      "main": [
+        [
+          {
+            "node": "Call 'Log Run - Sub'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Runs": {
+      "main": [
+        [
+          {
+            "node": "Split Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Runs": {
+      "main": [
+        [
+          {
+            "node": "Get Run IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Present on DB with Missing Info": {
+      "main": [
+        [
+          {
+            "node": "Add Paths",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Paths": {
+      "main": [
+        [
+          {
+            "node": "Call 'Log Run - Sub'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Run IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Recorded Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Measurement": {
+      "main": [
+        [
+          {
+            "node": "Has No Measurement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has No Measurement": {
+      "main": [
+        [
+          {
+            "node": "Add Paths1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Paths1": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'interop'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'interop'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Find Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        20
+      ]
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "dd480c0a-79e7-46d4-b2da-922aac5194df",
+  "activeVersionId": "3a901071-8321-465b-a302-04f641a0ef39",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-19T08:46:42.944Z",
+      "createdAt": "2025-12-19T08:46:42.944Z",
+      "role": "workflow:owner",
+      "workflowId": "GgcoorkW5qEx86Uq",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-06-24T19:20:00.003Z",
+    "createdAt": "2026-06-24T19:20:00.003Z",
+    "versionId": "3a901071-8321-465b-a302-04f641a0ef39",
+    "workflowId": "GgcoorkW5qEx86Uq",
+    "nodes": [
+      {
+        "parameters": {
+          "compare": "selectedFields",
+          "fieldsToCompare": "run_id",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.removeDuplicates",
+        "typeVersion": 2,
+        "position": [
+          192,
+          -192
+        ],
+        "id": "ac3745d4-8403-4bd7-843a-a4e7c76c96e2",
+        "name": "Remove Duplicates"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT * FROM runs\nWHERE run_id = ANY(string_to_array('{{ $json.run_ids_str }}', ',')) ",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          816,
+          -176
+        ],
+        "id": "15f0c21e-f575-4e27-b478-f7a2c085b872",
+        "name": "Get Recorded Runs",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "adfc3d9d-c345-438a-9572-cb0253f1027d",
+                "name": "run_id",
+                "value": "={{ $json.path.match(/([^\\/]+)\\/?$/)[1] }}",
+                "type": "string"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -16,
+          -192
+        ],
+        "id": "d34c72b5-5f8d-4afc-9126-2a3454829133",
+        "name": "Get Run IDs"
+      },
+      {
+        "parameters": {
+          "mode": "combineBySql",
+          "query": "SELECT input2.* \nFROM input2 \nLEFT JOIN input1 ON input2.run_id = input1.run_id\nWHERE input1.run_id IS NULL",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1056,
+          128
+        ],
+        "id": "69cdd13c-38c3-4ec5-8081-6948a895329b",
+        "name": "Absent on DB"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "7df31dbe-5c56-4cf5-898d-cf45c871de39",
+                "leftValue": "={{ $json.instrument_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "8f99aa45-1948-4564-969a-9bdb1cb21432",
+                "leftValue": "={{ $json.flowcell_kit_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "141cf049-2d87-40d7-9d6f-f82e6ea5e65a",
+                "leftValue": "={{ $json.flowcell_lot }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "620da1eb-5454-4ef0-8523-55327d5f2f65",
+                "leftValue": "={{ $json.date }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "1bca691c-492d-4a95-9665-d991d6ea34c7",
+                "leftValue": "={{ $json.reads_settings_concept_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "350441ae-64b7-4c3f-b9c5-d34010cd13b0",
+                "leftValue": "={{ $json.workflow_concept_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "number",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "f109afa9-a9b5-4ad0-9b4e-9c848ed465dd",
+                "leftValue": "={{ $json.status_concept_ref }}",
+                "rightValue": "26",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              },
+              {
+                "id": "0f811c00-c907-46f9-be7c-df0c8cb1a268",
+                "leftValue": "={{ $json.status_concept_ref }}",
+                "rightValue": "24",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals",
+                  "name": "filter.operator.equals"
+                }
+              },
+              {
+                "id": "010035ee-e869-41f4-abf1-1498b75cab07",
+                "leftValue": "={{ $json.care_site_ref }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "5f0e3be8-6190-4f9b-93a9-07491572d9c2",
+                "leftValue": "={{ $json.seq_started_at }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              },
+              {
+                "id": "cf1047c3-f94d-42ae-9d7e-9f9f344df042",
+                "leftValue": "={{ $json.seq_ended_at }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "dateTime",
+                  "operation": "empty",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.2,
+        "position": [
+          1056,
+          -432
+        ],
+        "id": "d64b3289-68b6-4f8f-a10b-1124268a664d",
+        "name": "Present on DB with Missing Info"
+      },
+      {
+        "parameters": {
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -416,
+          -192
+        ],
+        "id": "07dd78c4-70f5-4196-bbe9-ca43c755c455",
+        "name": "Find Runs"
+      },
+      {
+        "parameters": {
+          "jsCode": "const paths = $input.item.json.stdout.trim().split(',').filter(p => p.length > 0);\nreturn paths.map(path => ({ json: { path: path.trim() } }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -224,
+          -192
+        ],
+        "id": "a621cd54-969c-47d9-b4a0-e1b71f0fe5c5",
+        "name": "Split Runs"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "FAYzdm9tCCVfsNlo",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/FAYzdm9tCCVfsNlo",
+            "cachedResultName": "Sub - Log Run"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "run_id": "={{ $json.run_id }}",
+              "path": "={{ $json.path }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "run_id",
+                "displayName": "run_id",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "path",
+                "displayName": "path",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "mode": "each",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2096,
+          -224
+        ],
+        "id": "31d4adbe-644d-4c0c-a560-75d540c87ece",
+        "name": "Call 'Log Run - Sub'"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "fieldsToMatchString": "run_id",
+          "joinMode": "enrichInput2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1248,
+          -544
+        ],
+        "id": "982f3026-56c6-4e55-9362-1c8071704df1",
+        "name": "Add Paths"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 4
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -608,
+          -288
+        ],
+        "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "jsCode": "const allIds = $input.all().map(i => i.json.run_id).join(',');\nreturn [{ json: { run_ids_str: allIds } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          608,
+          -176
+        ],
+        "id": "b0c697bf-3ddf-4ae2-b900-b8cc39a393f8",
+        "name": "Aggregate Run IDs"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT \n  '{{ $json.run_id }}' AS run_id,\n  EXISTS (\n    SELECT 1\n    FROM measurement_run mr\n    JOIN runs r ON r.uniqueref = mr.run_ref\n    WHERE r.run_id = '{{ $json.run_id }}'\n  ) AS has_measurements\nFROM runs\nWHERE run_id = '{{ $json.run_id }}'\n  AND status_concept_ref = 29",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1056,
+          -176
+        ],
+        "id": "54811ec9-94d6-48fc-afa3-dce2e9276d54",
+        "name": "Check Measurement",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "SeGWQ7ai2D66eUSG",
+            "mode": "list",
+            "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+            "cachedResultName": "interop"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "folder": "={{ $json.run_id }}",
+              "path": "={{ $json.path }}"
+            },
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "folder",
+                "displayName": "folder",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "path",
+                "displayName": "path",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": false
+              },
+              {
+                "id": "status",
+                "displayName": "status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "canBeUsedToMatch": true,
+                "type": "string",
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "mode": "each",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2688,
+          -400
+        ],
+        "id": "4da1e24d-9d18-4c32-936d-0e0b2b6d79fc",
+        "name": "Call 'interop'",
+        "alwaysOutputData": true,
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "0c2b57a8-9ccd-4d3d-a082-1b83c5b1b1d4",
+                "leftValue": "={{ $json.has_measurements }}",
+                "rightValue": false,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          1264,
+          -176
+        ],
+        "id": "9b78b958-d0b7-46e6-acb0-6411e3c3aa60",
+        "name": "Has No Measurement"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "fieldsToMatchString": "run_id",
+          "joinMode": "enrichInput2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1440,
+          -336
+        ],
+        "id": "c8b590f8-9ffb-43c8-a5be-41b48eadf1ba",
+        "name": "Add Paths1"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [
+          2448,
+          -496
+        ],
+        "id": "2abcad21-c986-49f4-83df-d030579121f6",
+        "name": "Loop Over Items"
+      },
+      {
+        "parameters": {
+          "executeOnce": false,
+          "command": "=test -f {{ $json.path }}RunInfo.xml && test -d {{ $json.path }}InterOp && echo \"EXISTS\" || echo \"MISSING\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1776,
+          -624
+        ],
+        "id": "b1365e9d-4fb1-459c-8e97-42457df7d22b",
+        "name": "Execute Command"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1952,
+          -496
+        ],
+        "id": "8b1e786e-5846-4a84-a475-058202582860",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "5bc65677-43b7-4c93-ada8-0d1b0ee6ca84",
+                "leftValue": "={{ $json.stdout }}",
+                "rightValue": "EXISTS",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          2160,
+          -496
+        ],
+        "id": "648f6e37-4365-4630-94c5-7bfb99a0dc67",
+        "name": "Filter"
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "id"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -608,
+          -96
+        ],
+        "id": "166dea44-b2b0-4c11-8104-dec86bc80a42",
+        "name": "When Executed by Another Workflow"
+      }
+    ],
+    "connections": {
+      "Remove Duplicates": {
+        "main": [
+          [
+            {
+              "node": "Absent on DB",
+              "type": "main",
+              "index": 1
+            },
+            {
+              "node": "Add Paths",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Aggregate Run IDs",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Add Paths1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Recorded Runs": {
+        "main": [
+          [
+            {
+              "node": "Present on DB with Missing Info",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Absent on DB",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Check Measurement",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Run IDs": {
+        "main": [
+          [
+            {
+              "node": "Remove Duplicates",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Absent on DB": {
+        "main": [
+          [
+            {
+              "node": "Call 'Log Run - Sub'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Runs": {
+        "main": [
+          [
+            {
+              "node": "Split Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Split Runs": {
+        "main": [
+          [
+            {
+              "node": "Get Run IDs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Present on DB with Missing Info": {
+        "main": [
+          [
+            {
+              "node": "Add Paths",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Add Paths": {
+        "main": [
+          [
+            {
+              "node": "Call 'Log Run - Sub'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Find Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Aggregate Run IDs": {
+        "main": [
+          [
+            {
+              "node": "Get Recorded Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Measurement": {
+        "main": [
+          [
+            {
+              "node": "Has No Measurement",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Has No Measurement": {
+        "main": [
+          [
+            {
+              "node": "Add Paths1",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Add Paths1": {
+        "main": [
+          [
+            {
+              "node": "Execute Command",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Loop Over Items": {
+        "main": [
+          [],
+          [
+            {
+              "node": "Call 'interop'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Call 'interop'": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Command": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Find Runs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "28-06-2026/0:00",
+  "fileName": "Monitor New Runs Legacy.json"
+}
