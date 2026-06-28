@@ -1,0 +1,469 @@
+{
+  "updatedAt": "2026-06-27T18:22:30.166Z",
+  "createdAt": "2026-06-27T15:47:24.761Z",
+  "id": "JNMNKgR7ChTZhvdv",
+  "name": "Monitor New Runs (clean)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -560,
+        -120
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "id": "984c9b69-6b08-4baf-9760-231829f2cb47"
+    },
+    {
+      "name": "Manual / Sub Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        80
+      ],
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "id"
+            }
+          ]
+        }
+      },
+      "id": "c75302c1-38fe-4356-8805-1385955378b4"
+    },
+    {
+      "name": "Find Runs",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        -20
+      ],
+      "parameters": {
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+      },
+      "id": "ad264d0e-3ab4-4814-9d0b-c3a7a96f9644"
+    },
+    {
+      "name": "Parse Runs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        -20
+      ],
+      "parameters": {
+        "jsCode": "// Diskte bulunan run klasörlerini {run_id, path} listesine çevir, tekilleştir,\n// tek SQL sorgusu için VALUES dizesi üret.\nconst raw = ($input.first().json.stdout || '').trim();\nconst seen = new Set();\nconst rows = [];\nfor (const part of raw.split(',')) {\n  const path = part.trim();\n  if (!path) continue;\n  const m = path.match(/([^\\/]+)\\/?$/);\n  if (!m) continue;\n  const run_id = m[1];\n  if (seen.has(run_id)) continue;\n  seen.add(run_id);\n  rows.push({ run_id, path });\n}\nif (rows.length === 0) return [];\nconst esc = s => String(s).replace(/'/g, \"''\");\nconst values = rows.map(r => `('${esc(r.run_id)}','${esc(r.path)}')`).join(',');\nreturn [{ json: { values, count: rows.length } }];\n"
+      },
+      "id": "b57358ca-d37a-435f-a675-7326c3c1d262"
+    },
+    {
+      "name": "Classify Runs",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        100,
+        -20
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD'),\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
+        "options": {}
+      },
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      },
+      "id": "c43dd7b4-4870-414f-bdb8-2a3b9bd44821"
+    },
+    {
+      "name": "Route",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        -20
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "r1",
+              "leftValue": "={{ $json.reason }}",
+              "rightValue": "needs_interop",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "eb420c9a-4fff-49db-a31b-7de2bf5d3200"
+    },
+    {
+      "name": "Call 'Sub - Log Run'",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        160
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "FAYzdm9tCCVfsNlo",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/FAYzdm9tCCVfsNlo",
+          "cachedResultName": "Sub - Log Run"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "id": "3704a8a1-26fb-463b-bef0-bcf5462de86c"
+    },
+    {
+      "name": "Check Interop Files",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        540,
+        -200
+      ],
+      "parameters": {
+        "command": "=echo \"{{ $json.run_id }}|{{ $json.path }}|$(test -f '{{ $json.path }}RunInfo.xml' && test -d '{{ $json.path }}InterOp' && echo OK || echo MISSING)\""
+      },
+      "id": "51f07373-601e-4ba7-a5a7-106ff7aff403"
+    },
+    {
+      "name": "Parse Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "return $input.all().map(it => {\n  const p = String(it.json.stdout || '').trim().split('|');\n  return { json: { run_id: p[0] || '', path: p[1] || '', ok: (p[2] || '') === 'OK' } };\n});"
+      },
+      "id": "4ebd97db-d509-4802-962a-45f352f7c097"
+    },
+    {
+      "name": "Has Interop Files",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        900,
+        -200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        }
+      },
+      "id": "b7227f0f-65b5-45ba-a72d-89c0c4f860ac"
+    },
+    {
+      "name": "Loop Interop",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1080,
+        -200
+      ],
+      "parameters": {
+        "options": {}
+      },
+      "id": "c1701c9c-a46c-4534-a074-f590e3e6def8"
+    },
+    {
+      "name": "Call 'interop'",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1280,
+        -160
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SeGWQ7ai2D66eUSG",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SeGWQ7ai2D66eUSG",
+          "cachedResultName": "interop"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "folder": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "folder",
+              "displayName": "folder",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "path",
+              "displayName": "path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {}
+      },
+      "id": "7fcaa045-74c8-460f-84f3-e6c7112ee18a"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual / Sub Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Runs": {
+      "main": [
+        [
+          {
+            "node": "Parse Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Runs": {
+      "main": [
+        [
+          {
+            "node": "Classify Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Runs": {
+      "main": [
+        [
+          {
+            "node": "Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route": {
+      "main": [
+        [
+          {
+            "node": "Check Interop Files",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call 'Sub - Log Run'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Interop Files": {
+      "main": [
+        [
+          {
+            "node": "Parse Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Check": {
+      "main": [
+        [
+          {
+            "node": "Has Interop Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Interop Files": {
+      "main": [
+        [
+          {
+            "node": "Loop Interop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Interop": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call 'interop'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'interop'": {
+      "main": [
+        [
+          {
+            "node": "Loop Interop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "2a56c7a8-7857-47be-a901-701a691ec856",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-06-27T15:47:24.773Z",
+      "createdAt": "2026-06-27T15:47:24.773Z",
+      "role": "workflow:owner",
+      "workflowId": "JNMNKgR7ChTZhvdv",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "28-06-2026/0:00",
+  "fileName": "Monitor New Runs (clean).json"
+}
