@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-24T08:39:30.950Z",
+  "updatedAt": "2026-06-29T08:09:01.242Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -23,8 +23,8 @@
           "assignments": [
             {
               "id": "761d1698-d730-4940-a9f5-ed756adedbcb",
-              "name": "run_id",
-              "value": "260617_A01228_0297_BHG7YKDMX2",
+              "name": "run_ids",
+              "value": "260626_A01228_0303_BHTKYCDRX7,260626_A01228_0304_AHTLTJDRX7",
               "type": "string"
             }
           ]
@@ -108,11 +108,12 @@
           "conditions": [
             {
               "id": "977bc97a-473a-4f9b-a530-e623ed45e365",
-              "leftValue": "={{ $json.run_id }}",
-              "rightValue": "={{ $('Edit Fields').item.json.run_id }}",
+              "leftValue": "={{ $('Edit Fields').first().json.run_ids.split(',').map(s => s.trim()).includes($json.run_id) }}",
+              "rightValue": "",
               "operator": {
-                "type": "string",
-                "operation": "equals"
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
               }
             }
           ],
@@ -131,7 +132,7 @@
     },
     {
       "parameters": {
-        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; mkdir -p \"$DEST\" && rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}\" \"$DEST/\" && chgrp -R users \"$DEST\" 2>/dev/null; chmod -R a+rX \"$DEST\""
+        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; sudo mkdir -p \"$DEST\" && sudo rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}\" \"$DEST/\" && sudo chgrp -R users \"$DEST\" 2>/dev/null; sudo chmod -R a+rX \"$DEST\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -152,10 +153,10 @@
       "parameters": {
         "workflowId": {
           "__rl": true,
-          "value": "GgcoorkW5qEx86Uq",
+          "value": "JNMNKgR7ChTZhvdv",
           "mode": "list",
-          "cachedResultUrl": "/workflow/GgcoorkW5qEx86Uq",
-          "cachedResultName": "Monitor New Runs"
+          "cachedResultUrl": "/workflow/JNMNKgR7ChTZhvdv",
+          "cachedResultName": "Monitor New Runs v2"
         },
         "workflowInputs": {
           "mappingMode": "defineBelow",
@@ -183,11 +184,24 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        496,
+        744,
         -16
       ],
       "id": "9d219760-340b-4380-a5e1-75e39d481ae9",
       "name": "Call 'Monitor New Runs'"
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  if (item.json.code !== 0) {\n    throw new Error('Import basarisiz (run: ' + (item.json.run_id || '?') + ', exit ' + item.json.code + '): ' + (item.json.stderr || ''));\n  }\n}\nreturn $input.all();"
+      },
+      "id": "a1b2c3d4-fix0-4f00-9abc-importcheck01",
+      "name": "Check Import",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        524,
+        -16
+      ]
     }
   ],
   "connections": {
@@ -261,6 +275,17 @@
       "main": [
         [
           {
+            "node": "Check Import",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Import": {
+      "main": [
+        [
+          {
             "node": "Call 'Monitor New Runs'",
             "type": "main",
             "index": 0
@@ -279,7 +304,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "45379276-64d8-4a3a-ba50-c138ca9f77d4",
+  "versionId": "54e6bcf1-6e4d-4090-b49d-6cb604f9b827",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -300,6 +325,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "29-06-2026/0:00",
+  "commitDate": "30-06-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
