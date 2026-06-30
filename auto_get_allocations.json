@@ -1,0 +1,828 @@
+{
+  "updatedAt": "2026-06-29T12:03:09.165Z",
+  "createdAt": "2026-06-29T07:12:21.523Z",
+  "id": "Ze7FVEhVq8UGCTxi",
+  "name": "auto_get_allocations",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Key"
+          ],
+          "schema": [
+            {
+              "id": "Kurum",
+              "displayName": "Kurum",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Local IP",
+              "displayName": "Local IP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ssh port",
+              "displayName": "ssh port",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Public IP",
+              "displayName": "Public IP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Çıkış Portu",
+              "displayName": "Çıkış Portu",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total Allocation",
+              "displayName": "total Allocation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Used Allocation",
+              "displayName": "Used Allocation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Remain",
+              "displayName": "Remain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Request ID",
+              "displayName": "Request ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ed7fdb38-295d-452a-bad1-04dd4e0a44f6",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "9TKjgQ7TJyNbGPzH",
+          "name": "klinikbioinf"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                5
+              ],
+              "triggerAtHour": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -960,
+        80
+      ],
+      "id": "ae65d597-3d48-4bcd-a0c3-04192ae4e591",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1705561697,
+          "mode": "list",
+          "cachedResultName": "History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g/edit#gid=1705561697"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total Allocation",
+              "displayName": "total Allocation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Used Allocation",
+              "displayName": "Used Allocation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Remain",
+              "displayName": "Remain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Public IP",
+              "displayName": "Public IP",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Port",
+              "displayName": "Port",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        176
+      ],
+      "id": "115f17bf-fb3d-44d2-82e9-b0228a22e063",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "9TKjgQ7TJyNbGPzH",
+          "name": "klinikbioinf"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $node[\"get_allocations\"].json.stdout || $node[\"get_allocations\"].json;\nconst ts = new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });\n\nlet rows;\n\nif (typeof stdout === 'string') {\n  rows = JSON.parse(stdout);\n} else if (Array.isArray(stdout)) {\n  rows = stdout;\n} else if (stdout && stdout.length && typeof stdout[0] === 'string') {\n  rows = JSON.parse(stdout[0]);\n} else {\n  throw new Error('get_allocations çıktısında JSON bulunamadı');\n}\n\n// İstanbul saatine göre yyyy-mm üret\nconst nowTR = new Date();\nconst ay = nowTR.toLocaleString('sv-SE', {\n  timeZone: 'Europe/Istanbul',\n  year: 'numeric',\n  month: '2-digit'\n});\n\n// Key → Kurum eşleştirme\nconst kurumMap = {\n  '194.15.102.33:8443': 'GenEra Bioinformatik',\n  '194.15.102.101:8443': 'Düzen',\n  '194.15.102.101:8444': 'Nucleus/ Gentan GTM',\n  '194.15.102.101:8445': 'Osmangazi Üniversitesi',\n  '194.15.102.101:8446': 'Viagen',\n  '194.15.102.101:8447': 'Jimer',\n  '194.15.102.101:8448': 'Bursa Uludağ Üniversitesi',\n  '194.15.102.101:8449': 'Gazi Yaşargil EAH',\n  '194.15.102.101:8450': 'Marmara Üniversitesi Pendik EAH',\n  '194.15.102.101:8451': 'Göztepe EAH',\n  '194.15.102.101:8452': 'Zeynep Kamil EAH',\n  '194.15.102.101:8453': 'Gelişim Laboratuvarı',\n  '194.15.102.101:8454': 'Dr. Ersin Arslan-Gaziantep GTM',\n  '194.15.102.101:8455': 'İstinye Üniversitesi',\n  '194.15.102.101:8456': 'Akdeniz Üniversitesi',\n  '194.15.102.101:8457': 'DNA Lab',\n  '194.15.102.101:8458': 'Detagen',\n  '194.15.102.101:8459': 'Ümraniye EAH',\n  '194.15.102.101:8460': 'Sapiens GTM / Florence',\n  '194.15.102.101:8461': 'Adnan Menderes Üniversitesi',\n  '194.15.102.101:8462': 'Haydarpaşa',\n  '194.15.102.101:8463': 'Prof. Dr. Cemil Taşçıoğlu Şehir Hastanesi (Okmeydanı)',\n  '194.15.102.101:8464': 'İstanbul Eğitim Araştırma Hastanesi',\n  '194.15.102.101:8465': 'Bağcılar Eğitim Araştırma Hastanesi',\n  '194.15.102.101:8466': 'Kanuni Sultan Süleyman EAH',\n  '194.15.102.101:8467': 'Kayseri Erciyes Üniversitesi',\n  '194.15.102.101:8468': 'Sarıyer Hamidiye Etfal Eğitim ve Araştırma Hastanesi',\n  '194.15.102.101:8469': 'Biogen',\n  '194.15.102.101:8470': 'Etlik',\n  '194.15.102.101:8471': 'Medipol',\n  '194.15.102.101:8472': 'Ecegen',\n  '194.15.102.101:8473': 'Smartgen / Engin Tıp',\n  '194.15.102.101:8474': 'Haseki',\n  '194.15.102.101:8475': 'Sadi Konuk',\n  '194.15.102.101:8476': 'Sancaktepe',\n  '194.15.102.101:8477': 'Burgen',\n  '194.15.102.101:8478': '19 Mayıs',\n  '194.15.102.101:8479': 'İzmir Genetik',\n  '194.15.102.101:8480': 'Nesiller Genetik',\n  '194.15.102.101:8481': '9 Eylül',\n  '194.15.102.101:8482': 'Memorial Genetik Pgt Lab',\n  '194.15.102.101:8483': 'Genstar',\n  '194.15.102.101:8484': 'İstanbul Genetik Grubu (İGG)',\n  '194.15.102.101:8485': 'Demo Hesabı',\n  '194.15.102.101:8486': 'PeraLabs',\n  '194.15.102.101:8487': 'Taksim EAH',\n  '194.15.102.101:8488': 'Özel Ünlü Tanı Merkezi'\n};\n\n// Separator satırı\nconst sep = `'=== ${ts} ===`;\n\nconst headerRow = {\n  json: {\n    'Timestamp': sep,\n    'Public IP': sep,\n    'Port': sep,\n    'total Allocation': sep,\n    'Used Allocation': sep,\n    'Remain': sep,\n    'Kurum': sep,\n    'Ay': sep,\n  }\n};\n\nconst dataRows = rows.map(o => {\n  const key = o.Key;\n\n  if (!key) {\n    throw new Error(`Key bulunamadı: ${JSON.stringify(o)}`);\n  }\n\n  const [ip, port] = key.split(':');\n\n  return {\n    json: {\n      'Timestamp': ts,\n      'Public IP': ip,\n      'Port': port,\n      'total Allocation': o['total Allocation'] ?? o['Allowed allocations'],\n      'Used Allocation': o['Used Allocation'] ?? o['Used allocations'],\n      'Remain': o['Remain'],\n      'Kurum': kurumMap[key] || '',\n      'Ay': ay,\n    }\n  };\n});\n\nreturn [headerRow, ...dataRows];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        176
+      ],
+      "id": "f7b4444f-ca3b-486f-bb4a-0d96f4010a75",
+      "name": "Append_list"
+    },
+    {
+      "parameters": {
+        "command": "get_allocs(){ ip=\"$1\"; port=\"$2\"; line=$(curl --insecure --silent --connect-timeout 5 --max-time 10 \"https://${ip}:${port}\" | grep -e \"GxA-Cyto\" | sed 's/<[^>]*>//g' | head -n 1); [ -z \"$line\" ] && return 0; total=$(echo \"$line\" | awk '{print $2}'); used=$(echo \"$line\" | awk '{print $3}'); remain=$((total-used)); jq -n --arg key \"${ip}:${port}\" --arg ip \"$ip\" --argjson port \"$port\" --argjson total \"$total\" --argjson used \"$used\" --argjson remain \"$remain\" '{Key:$key, \"Public IP\":$ip, \"Çıkış Portu\":$port, \"total Allocation\":$total, \"Used Allocation\":$used, Remain:$remain}'; }; { get_allocs 194.15.102.33 8443 & for port in $(seq 8443 8488); do get_allocs 194.15.102.101 \"$port\" & done; wait; } | jq -s 'sort_by(.Key)'"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        80
+      ],
+      "id": "1a2610c5-f691-46c0-b8e8-42f726e8c382",
+      "name": "get_allocations",
+      "credentials": {
+        "sshPassword": {
+          "id": "SD1HLLzHIERAKygv",
+          "name": "SSH Password account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Run Once for All Items: ON\n\nconst stdout = $node[\"get_allocations\"].json.stdout || $node[\"get_allocations\"].json;\n\n// JSON verisini çöz\nlet rows;\n\nif (typeof stdout === 'string') {\n  rows = JSON.parse(stdout);\n} else if (Array.isArray(stdout)) {\n  rows = stdout;\n} else if (stdout && stdout.length && typeof stdout[0] === 'string') {\n  rows = JSON.parse(stdout[0]);\n} else {\n  throw new Error('get_allocations çıktısında JSON bulunamadı');\n}\n\n// Çıktı: UPDATE kolu için\n// Key, total Allocation, Used Allocation, Remain\nreturn rows.map(o => {\n  const key = o.Key;\n  const total = o['total Allocation'] ?? o['Allowed allocations'];\n  const used = o['Used Allocation'] ?? o['Used allocations'];\n  const remain = o['Remain'];\n\n  if (!key) {\n    throw new Error(`Key bulunamadı: ${JSON.stringify(o)}`);\n  }\n\n  return {\n    json: {\n      'Key': key,\n      'total Allocation': total,\n      'Used Allocation': used,\n      'Remain': remain\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        80
+      ],
+      "id": "a6f83c94-b806-4fb3-b98e-bc886187dba0",
+      "name": "Convert_to_list"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "get_allocations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append_list": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_allocations": {
+      "main": [
+        [
+          {
+            "node": "Convert_to_list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert_to_list": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append_list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "df51552e-ee26-48ac-9936-bcaac7f275f9",
+  "activeVersionId": "df51552e-ee26-48ac-9936-bcaac7f275f9",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-06-29T07:12:21.530Z",
+      "createdAt": "2026-06-29T07:12:21.530Z",
+      "role": "workflow:owner",
+      "workflowId": "Ze7FVEhVq8UGCTxi",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-06-29T12:03:11.000Z",
+    "createdAt": "2026-06-29T12:03:09.167Z",
+    "versionId": "df51552e-ee26-48ac-9936-bcaac7f275f9",
+    "workflowId": "Ze7FVEhVq8UGCTxi",
+    "nodes": [
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Sheet1",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [
+              "Key"
+            ],
+            "schema": [
+              {
+                "id": "Kurum",
+                "displayName": "Kurum",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Local IP",
+                "displayName": "Local IP",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "ssh port",
+                "displayName": "ssh port",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Public IP",
+                "displayName": "Public IP",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Çıkış Portu",
+                "displayName": "Çıkış Portu",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "total Allocation",
+                "displayName": "total Allocation",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Used Allocation",
+                "displayName": "Used Allocation",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Remain",
+                "displayName": "Remain",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Request ID",
+                "displayName": "Request ID",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Key",
+                "displayName": "Key",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "row_number",
+                "displayName": "row_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "readOnly": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          0,
+          0
+        ],
+        "id": "ed7fdb38-295d-452a-bad1-04dd4e0a44f6",
+        "name": "Update row in sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "9TKjgQ7TJyNbGPzH",
+            "name": "klinikbioinf"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  5
+                ],
+                "triggerAtHour": 4
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -960,
+          80
+        ],
+        "id": "ae65d597-3d48-4bcd-a0c3-04192ae4e591",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 1705561697,
+            "mode": "list",
+            "cachedResultName": "History",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JWSGSq3pEbAyieGiNkvcisizf_3UY9tuxskbq5x82_g/edit#gid=1705561697"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Key",
+                "displayName": "Key",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "total Allocation",
+                "displayName": "total Allocation",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Used Allocation",
+                "displayName": "Used Allocation",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Remain",
+                "displayName": "Remain",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Timestamp",
+                "displayName": "Timestamp",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Public IP",
+                "displayName": "Public IP",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Port",
+                "displayName": "Port",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          0,
+          176
+        ],
+        "id": "115f17bf-fb3d-44d2-82e9-b0228a22e063",
+        "name": "Append row in sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "9TKjgQ7TJyNbGPzH",
+            "name": "klinikbioinf"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const stdout = $node[\"get_allocations\"].json.stdout || $node[\"get_allocations\"].json;\nconst ts = new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' });\n\nlet rows;\n\nif (typeof stdout === 'string') {\n  rows = JSON.parse(stdout);\n} else if (Array.isArray(stdout)) {\n  rows = stdout;\n} else if (stdout && stdout.length && typeof stdout[0] === 'string') {\n  rows = JSON.parse(stdout[0]);\n} else {\n  throw new Error('get_allocations çıktısında JSON bulunamadı');\n}\n\n// İstanbul saatine göre yyyy-mm üret\nconst nowTR = new Date();\nconst ay = nowTR.toLocaleString('sv-SE', {\n  timeZone: 'Europe/Istanbul',\n  year: 'numeric',\n  month: '2-digit'\n});\n\n// Key → Kurum eşleştirme\nconst kurumMap = {\n  '194.15.102.33:8443': 'GenEra Bioinformatik',\n  '194.15.102.101:8443': 'Düzen',\n  '194.15.102.101:8444': 'Nucleus/ Gentan GTM',\n  '194.15.102.101:8445': 'Osmangazi Üniversitesi',\n  '194.15.102.101:8446': 'Viagen',\n  '194.15.102.101:8447': 'Jimer',\n  '194.15.102.101:8448': 'Bursa Uludağ Üniversitesi',\n  '194.15.102.101:8449': 'Gazi Yaşargil EAH',\n  '194.15.102.101:8450': 'Marmara Üniversitesi Pendik EAH',\n  '194.15.102.101:8451': 'Göztepe EAH',\n  '194.15.102.101:8452': 'Zeynep Kamil EAH',\n  '194.15.102.101:8453': 'Gelişim Laboratuvarı',\n  '194.15.102.101:8454': 'Dr. Ersin Arslan-Gaziantep GTM',\n  '194.15.102.101:8455': 'İstinye Üniversitesi',\n  '194.15.102.101:8456': 'Akdeniz Üniversitesi',\n  '194.15.102.101:8457': 'DNA Lab',\n  '194.15.102.101:8458': 'Detagen',\n  '194.15.102.101:8459': 'Ümraniye EAH',\n  '194.15.102.101:8460': 'Sapiens GTM / Florence',\n  '194.15.102.101:8461': 'Adnan Menderes Üniversitesi',\n  '194.15.102.101:8462': 'Haydarpaşa',\n  '194.15.102.101:8463': 'Prof. Dr. Cemil Taşçıoğlu Şehir Hastanesi (Okmeydanı)',\n  '194.15.102.101:8464': 'İstanbul Eğitim Araştırma Hastanesi',\n  '194.15.102.101:8465': 'Bağcılar Eğitim Araştırma Hastanesi',\n  '194.15.102.101:8466': 'Kanuni Sultan Süleyman EAH',\n  '194.15.102.101:8467': 'Kayseri Erciyes Üniversitesi',\n  '194.15.102.101:8468': 'Sarıyer Hamidiye Etfal Eğitim ve Araştırma Hastanesi',\n  '194.15.102.101:8469': 'Biogen',\n  '194.15.102.101:8470': 'Etlik',\n  '194.15.102.101:8471': 'Medipol',\n  '194.15.102.101:8472': 'Ecegen',\n  '194.15.102.101:8473': 'Smartgen / Engin Tıp',\n  '194.15.102.101:8474': 'Haseki',\n  '194.15.102.101:8475': 'Sadi Konuk',\n  '194.15.102.101:8476': 'Sancaktepe',\n  '194.15.102.101:8477': 'Burgen',\n  '194.15.102.101:8478': '19 Mayıs',\n  '194.15.102.101:8479': 'İzmir Genetik',\n  '194.15.102.101:8480': 'Nesiller Genetik',\n  '194.15.102.101:8481': '9 Eylül',\n  '194.15.102.101:8482': 'Memorial Genetik Pgt Lab',\n  '194.15.102.101:8483': 'Genstar',\n  '194.15.102.101:8484': 'İstanbul Genetik Grubu (İGG)',\n  '194.15.102.101:8485': 'Demo Hesabı',\n  '194.15.102.101:8486': 'PeraLabs',\n  '194.15.102.101:8487': 'Taksim EAH',\n  '194.15.102.101:8488': 'Özel Ünlü Tanı Merkezi'\n};\n\n// Separator satırı\nconst sep = `'=== ${ts} ===`;\n\nconst headerRow = {\n  json: {\n    'Timestamp': sep,\n    'Public IP': sep,\n    'Port': sep,\n    'total Allocation': sep,\n    'Used Allocation': sep,\n    'Remain': sep,\n    'Kurum': sep,\n    'Ay': sep,\n  }\n};\n\nconst dataRows = rows.map(o => {\n  const key = o.Key;\n\n  if (!key) {\n    throw new Error(`Key bulunamadı: ${JSON.stringify(o)}`);\n  }\n\n  const [ip, port] = key.split(':');\n\n  return {\n    json: {\n      'Timestamp': ts,\n      'Public IP': ip,\n      'Port': port,\n      'total Allocation': o['total Allocation'] ?? o['Allowed allocations'],\n      'Used Allocation': o['Used Allocation'] ?? o['Used allocations'],\n      'Remain': o['Remain'],\n      'Kurum': kurumMap[key] || '',\n      'Ay': ay,\n    }\n  };\n});\n\nreturn [headerRow, ...dataRows];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -272,
+          176
+        ],
+        "id": "f7b4444f-ca3b-486f-bb4a-0d96f4010a75",
+        "name": "Append_list"
+      },
+      {
+        "parameters": {
+          "command": "get_allocs(){ ip=\"$1\"; port=\"$2\"; line=$(curl --insecure --silent --connect-timeout 5 --max-time 10 \"https://${ip}:${port}\" | grep -e \"GxA-Cyto\" | sed 's/<[^>]*>//g' | head -n 1); [ -z \"$line\" ] && return 0; total=$(echo \"$line\" | awk '{print $2}'); used=$(echo \"$line\" | awk '{print $3}'); remain=$((total-used)); jq -n --arg key \"${ip}:${port}\" --arg ip \"$ip\" --argjson port \"$port\" --argjson total \"$total\" --argjson used \"$used\" --argjson remain \"$remain\" '{Key:$key, \"Public IP\":$ip, \"Çıkış Portu\":$port, \"total Allocation\":$total, \"Used Allocation\":$used, Remain:$remain}'; }; { get_allocs 194.15.102.33 8443 & for port in $(seq 8443 8488); do get_allocs 194.15.102.101 \"$port\" & done; wait; } | jq -s 'sort_by(.Key)'"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          -768,
+          80
+        ],
+        "id": "1a2610c5-f691-46c0-b8e8-42f726e8c382",
+        "name": "get_allocations",
+        "credentials": {
+          "sshPassword": {
+            "id": "SD1HLLzHIERAKygv",
+            "name": "SSH Password account 2"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Run Once for All Items: ON\n\nconst stdout = $node[\"get_allocations\"].json.stdout || $node[\"get_allocations\"].json;\n\n// JSON verisini çöz\nlet rows;\n\nif (typeof stdout === 'string') {\n  rows = JSON.parse(stdout);\n} else if (Array.isArray(stdout)) {\n  rows = stdout;\n} else if (stdout && stdout.length && typeof stdout[0] === 'string') {\n  rows = JSON.parse(stdout[0]);\n} else {\n  throw new Error('get_allocations çıktısında JSON bulunamadı');\n}\n\n// Çıktı: UPDATE kolu için\n// Key, total Allocation, Used Allocation, Remain\nreturn rows.map(o => {\n  const key = o.Key;\n  const total = o['total Allocation'] ?? o['Allowed allocations'];\n  const used = o['Used Allocation'] ?? o['Used allocations'];\n  const remain = o['Remain'];\n\n  if (!key) {\n    throw new Error(`Key bulunamadı: ${JSON.stringify(o)}`);\n  }\n\n  return {\n    json: {\n      'Key': key,\n      'total Allocation': total,\n      'Used Allocation': used,\n      'Remain': remain\n    }\n  };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -576,
+          80
+        ],
+        "id": "a6f83c94-b806-4fb3-b98e-bc886187dba0",
+        "name": "Convert_to_list"
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "get_allocations",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append_list": {
+        "main": [
+          [
+            {
+              "node": "Append row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "get_allocations": {
+        "main": [
+          [
+            {
+              "node": "Convert_to_list",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert_to_list": {
+        "main": [
+          [
+            {
+              "node": "Update row in sheet",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Append_list",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update row in sheet": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version df51552e",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "30-06-2026/0:00",
+  "fileName": "auto_get_allocations.json"
+}
