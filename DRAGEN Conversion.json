@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-26T19:38:26.497Z",
+  "updatedAt": "2026-06-29T11:26:56.923Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260624_A01832R_0241_BHMLM7DRX7",
+              "value": "=260626_A01228_0304_AHTLTJDRX7",
               "type": "string"
             }
           ]
@@ -925,7 +925,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -1311,7 +1312,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "224421b8-b5b4-43e0-9e4c-b8ddc0f281ed",
+  "versionId": "44ea9d0e-7276-42c8-a5eb-2ef166c9df19",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1332,6 +1333,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "29-06-2026/0:00",
+  "commitDate": "30-06-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
