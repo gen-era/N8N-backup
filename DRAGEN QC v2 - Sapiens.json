@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-27T18:30:23.501Z",
+  "updatedAt": "2026-06-29T06:47:35.473Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -337,7 +337,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+        "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (excludeKeys.includes(key)) continue;\n  // Hesaplanamayan metrikler (null / NA / boş) ölçüm olarak yazılmaz —\n  // measurement_reads.value_as_number NOT NULL.\n  if (value === null || value === undefined || value === 'NA' || value === '') continue;\n  if (typeof value === 'number' && Number.isNaN(value)) continue;\n  result.push({\n    data_op_ref: data_op_ref,\n    parameter: key,\n    value: value\n  });\n}\n\nreturn result.map(item => ({ json: item }));"
       },
       "id": "Flatten Metrics JSON",
       "name": "Flatten Metrics JSON",
@@ -885,8 +885,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "ed9af508-4773-4a88-81d6-b2f46b9320d2",
-  "activeVersionId": "ed9af508-4773-4a88-81d6-b2f46b9320d2",
+  "versionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
+  "activeVersionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
   "triggerCount": 0,
   "shared": [
     {
@@ -898,9 +898,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-27T18:30:23.503Z",
-    "createdAt": "2026-06-27T18:30:23.503Z",
-    "versionId": "ed9af508-4773-4a88-81d6-b2f46b9320d2",
+    "updatedAt": "2026-06-29T06:47:35.477Z",
+    "createdAt": "2026-06-29T06:47:35.477Z",
+    "versionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
     "workflowId": "p8NYmUwJkEVaDlyp",
     "nodes": [
       {
@@ -1234,7 +1234,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (!excludeKeys.includes(key)) {\n    result.push({\n      data_op_ref: data_op_ref,\n      parameter: key,\n      value: value\n    });\n  }\n}\n\nreturn result.map(item => ({ json: item }));"
+          "jsCode": "const metrics = JSON.parse($input.item.json.stdout);\nconst data_op_ref = metrics.data_op_ref;\n\n// data_op_ref hariç tüm parametreleri al\nconst excludeKeys = ['data_op_ref'];\nconst result = [];\n\nfor (const [key, value] of Object.entries(metrics)) {\n  if (excludeKeys.includes(key)) continue;\n  // Hesaplanamayan metrikler (null / NA / boş) ölçüm olarak yazılmaz —\n  // measurement_reads.value_as_number NOT NULL.\n  if (value === null || value === undefined || value === 'NA' || value === '') continue;\n  if (typeof value === 'number' && Number.isNaN(value)) continue;\n  result.push({\n    data_op_ref: data_op_ref,\n    parameter: key,\n    value: value\n  });\n}\n\nreturn result.map(item => ({ json: item }));"
         },
         "id": "Flatten Metrics JSON",
         "name": "Flatten Metrics JSON",
@@ -1780,6 +1780,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "29-06-2026/0:00",
+  "commitDate": "30-06-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
