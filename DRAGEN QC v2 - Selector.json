@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29T14:43:36.031Z",
+  "updatedAt": "2026-06-30T10:04:46.360Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,19 +43,19 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260626_A01978_0192_BHYLVTDSXF",
+              "value": "260626_A01978_0193_AHGW3KDMX2",
               "type": "string"
             },
             {
               "id": "perbatch",
               "name": "per_batch",
-              "value": "5",
+              "value": "all",
               "type": "string"
             },
             {
               "id": "caresites",
               "name": "caresites",
-              "value": "AD,Ecegen,Gelişim,Genetiks,Nesiller,Viagen",
+              "value": "Doku,Ece,Erci,Geli,inye,Nesil,Pera,Via",
               "type": "string"
             }
           ]
@@ -210,7 +210,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "f2f27433-272b-4480-adfb-4a6354ff1395",
+  "versionId": "7c26395a-4727-474e-888f-683104a3e6ff",
   "activeVersionId": "47f2aa02-3347-41d0-87ca-17a05197deed",
   "triggerCount": 0,
   "shared": [
@@ -430,6 +430,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "30-06-2026/0:00",
+  "commitDate": "01-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
