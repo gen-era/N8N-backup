@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29T08:07:45.977Z",
+  "updatedAt": "2026-06-30T07:56:01.300Z",
   "createdAt": "2026-06-27T15:47:24.761Z",
   "id": "JNMNKgR7ChTZhvdv",
   "name": "Monitor New Runs v2",
@@ -21,8 +21,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -560,
-        -128
+        -752,
+        -144
       ],
       "id": "984c9b69-6b08-4baf-9760-231829f2cb47"
     },
@@ -40,21 +40,21 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -560,
-        80
+        -752,
+        64
       ],
       "id": "c75302c1-38fe-4356-8805-1385955378b4"
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
       },
       "name": "Find Runs",
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -336,
-        -16
+        -528,
+        -32
       ],
       "id": "ad264d0e-3ab4-4814-9d0b-c3a7a96f9644"
     },
@@ -66,8 +66,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -128,
-        -16
+        -320,
+        -32
       ],
       "id": "b57358ca-d37a-435f-a675-7326c3c1d262"
     },
@@ -81,8 +81,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        112,
-        -16
+        -80,
+        -32
       ],
       "id": "c43dd7b4-4870-414f-bdb8-2a3b9bd44821",
       "credentials": {
@@ -119,8 +119,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        320,
-        -16
+        128,
+        -32
       ],
       "id": "eb420c9a-4fff-49db-a31b-7de2bf5d3200"
     },
@@ -179,7 +179,7 @@
     },
     {
       "parameters": {
-        "command": "=echo \"{{ $json.run_id }}|{{ $json.path }}|$(test -f '{{ $json.path }}RunInfo.xml' && test -d '{{ $json.path }}InterOp' && echo OK || echo MISSING)\""
+        "command": "=while read -r rid path; do\n  [ -z \"$rid\" ] && continue\n  if [ -f \"${path}RunInfo.xml\" ] && [ -d \"${path}InterOp\" ]; then st=OK; else st=MISSING; fi\n  printf '%s|%s|%s\\n' \"$rid\" \"$path\" \"$st\"\ndone <<'RUNS_EOF'\n{{ $json.list }}\nRUNS_EOF"
       },
       "name": "Check Interop Files",
       "type": "n8n-nodes-base.executeCommand",
@@ -192,7 +192,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map(it => {\n  const p = String(it.json.stdout || '').trim().split('|');\n  return { json: { run_id: p[0] || '', path: p[1] || '', ok: (p[2] || '') === 'OK' } };\n});"
+        "jsCode": "const out = [];\nfor (const it of $input.all()) {\n  const lines = String(it.json.stdout || '').split('\\n');\n  for (const ln of lines) {\n    const t = ln.trim();\n    if (!t) continue;\n    const p = t.split('|');\n    out.push({ json: { run_id: p[0] || '', path: p[1] || '', ok: (p[2] || '') === 'OK' } });\n  }\n}\nreturn out;"
       },
       "name": "Parse Check",
       "type": "n8n-nodes-base.code",
@@ -311,6 +311,19 @@
         -160
       ],
       "id": "7fcaa045-74c8-460f-84f3-e6c7112ee18a"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lines = $input.all().map(it => `${it.json.run_id} ${it.json.path}`);\nreturn [{ json: { list: lines.join('\\n') } }];"
+      },
+      "name": "Aggregate Runs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -208
+      ],
+      "id": "f0e1d2c3-b4a5-4607-8809-aabbccddeeff"
     }
   ],
   "connections": {
@@ -373,7 +386,7 @@
       "main": [
         [
           {
-            "node": "Check Interop Files",
+            "node": "Aggregate Runs",
             "type": "main",
             "index": 0
           }
@@ -442,6 +455,17 @@
           }
         ]
       ]
+    },
+    "Aggregate Runs": {
+      "main": [
+        [
+          {
+            "node": "Check Interop Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -451,13 +475,15 @@
   },
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        0
+      ]
     }
   },
   "meta": null,
   "pinData": {},
-  "versionId": "6d0820d1-203a-4351-8fca-6de269a5e4dc",
-  "activeVersionId": "6d0820d1-203a-4351-8fca-6de269a5e4dc",
+  "versionId": "844d9203-c9a4-4297-a1cc-609b778c2223",
+  "activeVersionId": "db2243fd-85fb-42c4-a435-4c8715b8e9e2",
   "triggerCount": 1,
   "shared": [
     {
@@ -469,9 +495,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-29T09:45:56.000Z",
-    "createdAt": "2026-06-29T08:06:27.112Z",
-    "versionId": "6d0820d1-203a-4351-8fca-6de269a5e4dc",
+    "updatedAt": "2026-06-30T07:55:24.725Z",
+    "createdAt": "2026-06-30T07:55:24.725Z",
+    "versionId": "db2243fd-85fb-42c4-a435-4c8715b8e9e2",
     "workflowId": "JNMNKgR7ChTZhvdv",
     "nodes": [
       {
@@ -515,7 +541,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "name": "Find Runs",
         "type": "n8n-nodes-base.executeCommand",
@@ -647,7 +673,7 @@
       },
       {
         "parameters": {
-          "command": "=echo \"{{ $json.run_id }}|{{ $json.path }}|$(test -f '{{ $json.path }}RunInfo.xml' && test -d '{{ $json.path }}InterOp' && echo OK || echo MISSING)\""
+          "command": "=while read -r rid path; do\n  [ -z \"$rid\" ] && continue\n  if [ -f \"${path}RunInfo.xml\" ] && [ -d \"${path}InterOp\" ]; then st=OK; else st=MISSING; fi\n  printf '%s|%s|%s\\n' \"$rid\" \"$path\" \"$st\"\ndone <<'RUNS_EOF'\n{{ $json.list }}\nRUNS_EOF"
         },
         "name": "Check Interop Files",
         "type": "n8n-nodes-base.executeCommand",
@@ -660,7 +686,7 @@
       },
       {
         "parameters": {
-          "jsCode": "return $input.all().map(it => {\n  const p = String(it.json.stdout || '').trim().split('|');\n  return { json: { run_id: p[0] || '', path: p[1] || '', ok: (p[2] || '') === 'OK' } };\n});"
+          "jsCode": "const out = [];\nfor (const it of $input.all()) {\n  const lines = String(it.json.stdout || '').split('\\n');\n  for (const ln of lines) {\n    const t = ln.trim();\n    if (!t) continue;\n    const p = t.split('|');\n    out.push({ json: { run_id: p[0] || '', path: p[1] || '', ok: (p[2] || '') === 'OK' } });\n  }\n}\nreturn out;"
         },
         "name": "Parse Check",
         "type": "n8n-nodes-base.code",
@@ -779,6 +805,19 @@
           -160
         ],
         "id": "7fcaa045-74c8-460f-84f3-e6c7112ee18a"
+      },
+      {
+        "parameters": {
+          "jsCode": "const lines = $input.all().map(it => `${it.json.run_id} ${it.json.path}`);\nreturn [{ json: { list: lines.join('\\n') } }];"
+        },
+        "name": "Aggregate Runs",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          420,
+          -340
+        ],
+        "id": "f0e1d2c3-b4a5-4607-8809-aabbccddeeff"
       }
     ],
     "connections": {
@@ -841,7 +880,7 @@
         "main": [
           [
             {
-              "node": "Check Interop Files",
+              "node": "Aggregate Runs",
               "type": "main",
               "index": 0
             }
@@ -910,14 +949,25 @@
             }
           ]
         ]
+      },
+      "Aggregate Runs": {
+        "main": [
+          [
+            {
+              "node": "Check Interop Files",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 6d0820d1",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "30-06-2026/0:00",
+  "commitDate": "01-07-2026/0:00",
   "fileName": "Monitor New Runs v2.json"
 }
