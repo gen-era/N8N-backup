@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29T06:47:35.473Z",
+  "updatedAt": "2026-07-01T09:05:33.626Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"2\":  \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
       },
       "id": "Attach BED",
       "name": "Attach BED",
@@ -885,8 +885,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
-  "activeVersionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
+  "versionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
+  "activeVersionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
   "triggerCount": 0,
   "shared": [
     {
@@ -898,9 +898,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-29T06:47:35.477Z",
-    "createdAt": "2026-06-29T06:47:35.477Z",
-    "versionId": "efe9b271-0c8a-4f3b-bca9-71a4e93c7726",
+    "updatedAt": "2026-07-01T09:05:33.627Z",
+    "createdAt": "2026-07-01T09:05:33.627Z",
+    "versionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
     "workflowId": "p8NYmUwJkEVaDlyp",
     "nodes": [
       {
@@ -992,7 +992,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"2\":  \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
         },
         "id": "Attach BED",
         "name": "Attach BED",
@@ -1780,6 +1780,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "01-07-2026/0:00",
+  "commitDate": "02-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
