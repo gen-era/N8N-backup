@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T14:13:14.445Z",
+  "updatedAt": "2026-07-01T09:35:42.604Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -26,7 +26,7 @@
     },
     {
       "parameters": {
-        "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\n\nQC_TXT=$(find \"$IDAT_DIR\" -maxdepth 1 -type f \\( -name \"*.txt\" -o -name \"*.log\" \\) | head -1 || true)\n\nif [ -z \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\n\ncat \"$QC_TXT\"\nBASH_SCRIPT"
+        "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\nQC_TXT=\"$IDAT_DIR/${SENTRIX}_qc.txt\"\nif [ ! -f \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\ncat \"$QC_TXT\"\nBASH_SCRIPT"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -82,7 +82,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2768,
+        2784,
         -16
       ],
       "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -880,
-        -64
+        -832,
+        -176
       ],
       "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
       "name": "Webhook",
@@ -130,8 +130,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -640,
-        -64
+        -608,
+        -176
       ],
       "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
       "name": "parse_webhook_payload"
@@ -185,7 +185,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.all();\n\nreturn input.map(item => {\n  const source =\n    $('parse_find_qc_xlsx').item.json ||\n    $('parse_sentrix_qc').item.json ||\n    {};\n\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
+        "jsCode": "const input = $input.all();\nconst findItems = $('parse_find_qc_xlsx').all();\n\nreturn input.map((item, index) => {\n  const source = findItems[index]?.json || {};\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -212,7 +212,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT i.uniqueref\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
+        "query": "SELECT i.uniqueref, s.sentrix_id AS sentrix_id, i.position AS position\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -233,7 +233,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref) \nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref;",
+        "query": "INSERT INTO data_operations_array\n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES\n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref)\nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref, idat_ref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -253,7 +253,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst prepareItems = $('prepare_insert').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    metrics: JSON.stringify({\n      ...prepareItems[index].json.raw_control_metrics,\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
+        "jsCode": "const prep = $('prepare_insert').all();\nconst metricsByIdat = {};\nfor (const p of prep) {\n  metricsByIdat[String(p.json.idat_ref)] = p.json.raw_control_metrics;\n}\n\nreturn $input.all().map(item => ({\n  json: {\n    metrics: JSON.stringify({\n      ...(metricsByIdat[String(item.json.idat_ref)] || {}),\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -267,8 +267,10 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  ('{{ $json.metrics }}'::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
-        "options": {}
+        "query": "INSERT INTO measurement_idats\n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT\n  c.uniqueref,\n  (r.value)::double precision,\n  ($1::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text($1::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\n  AND r.value IS NOT NULL\n  AND btrim(r.value) <> ''\n  AND r.value ~ '^-?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?$'\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
+        "options": {
+          "queryReplacement": "={{ [$json.metrics] }}"
+        }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -308,7 +310,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst packItems = $('pack_qc_rows').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    idat_ref: item.json.uniqueref,\n    raw_control_metrics: packItems[index].json.raw_control_metrics\n  }\n}));"
+        "jsCode": "const packRows = $('pack_qc_rows').all();\nconst metricsByKey = {};\nfor (const p of packRows) {\n  metricsByKey[`${p.json.sentrix_id}|${p.json.position}`] = p.json.raw_control_metrics;\n}\n\nreturn $input.all().map(item => {\n  const key = `${item.json.sentrix_id}|${item.json.position}`;\n  return {\n    json: {\n      idat_ref: item.json.uniqueref,\n      sentrix_id: item.json.sentrix_id,\n      position: item.json.position,\n      raw_control_metrics: metricsByKey[key] ?? null\n    }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -840,8 +842,8 @@
       }
     ]
   },
-  "versionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
-  "activeVersionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
+  "versionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
+  "activeVersionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
   "triggerCount": 1,
   "shared": [
     {
@@ -853,9 +855,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-16T14:13:16.000Z",
-    "createdAt": "2026-06-16T14:13:14.448Z",
-    "versionId": "70700e3c-9b36-44a1-bd1a-e005d1dab1db",
+    "updatedAt": "2026-07-01T09:35:44.000Z",
+    "createdAt": "2026-07-01T09:35:42.606Z",
+    "versionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -878,7 +880,7 @@
       },
       {
         "parameters": {
-          "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\n\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\n\nQC_TXT=$(find \"$IDAT_DIR\" -maxdepth 1 -type f \\( -name \"*.txt\" -o -name \"*.log\" \\) | head -1 || true)\n\nif [ -z \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\n\ncat \"$QC_TXT\"\nBASH_SCRIPT"
+          "command": "=bash << 'BASH_SCRIPT'\nset -euo pipefail\nSENTRIX=\"{{ $json.SentrixBarcode || $json.sentrix_id }}\"\nIDAT_DIR=\"/mnt/koza_alldata/Scans/$SENTRIX\"\nQC_TXT=\"$IDAT_DIR/${SENTRIX}_qc.txt\"\nif [ ! -f \"$QC_TXT\" ]; then\n  echo \"\"\n  exit 0\nfi\ncat \"$QC_TXT\"\nBASH_SCRIPT"
         },
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
@@ -934,7 +936,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          2768,
+          2784,
           -16
         ],
         "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -968,8 +970,8 @@
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
         "position": [
-          -880,
-          -64
+          -832,
+          -176
         ],
         "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
         "name": "Webhook",
@@ -982,8 +984,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -640,
-          -64
+          -608,
+          -176
         ],
         "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
         "name": "parse_webhook_payload"
@@ -1037,7 +1039,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.all();\n\nreturn input.map(item => {\n  const source =\n    $('parse_find_qc_xlsx').item.json ||\n    $('parse_sentrix_qc').item.json ||\n    {};\n\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
+          "jsCode": "const input = $input.all();\nconst findItems = $('parse_find_qc_xlsx').all();\n\nreturn input.map((item, index) => {\n  const source = findItems[index]?.json || {};\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1064,7 +1066,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT i.uniqueref\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
+          "query": "SELECT i.uniqueref, s.sentrix_id AS sentrix_id, i.position AS position\nFROM idats i\nJOIN scans s ON s.uniqueref = i.scan_ref\nWHERE s.sentrix_id = '{{ $json.sentrix_id }}'\nAND i.position = '{{ $json.position }}'\nLIMIT 1;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1085,7 +1087,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "INSERT INTO data_operations_array \n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES \n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref) \nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref;",
+          "query": "INSERT INTO data_operations_array\n  (idat_ref, recipe_ref, status_concept_ref, created_at)\nVALUES\n  ({{ $json.idat_ref }}, 489, 24, NOW())\nON CONFLICT (idat_ref, recipe_ref)\nDO UPDATE SET updated_at = NOW()\nRETURNING uniqueref, idat_ref;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1105,7 +1107,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all();\nconst prepareItems = $('prepare_insert').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    metrics: JSON.stringify({\n      ...prepareItems[index].json.raw_control_metrics,\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
+          "jsCode": "const prep = $('prepare_insert').all();\nconst metricsByIdat = {};\nfor (const p of prep) {\n  metricsByIdat[String(p.json.idat_ref)] = p.json.raw_control_metrics;\n}\n\nreturn $input.all().map(item => ({\n  json: {\n    metrics: JSON.stringify({\n      ...(metricsByIdat[String(item.json.idat_ref)] || {}),\n      data_operations_ref: item.json.uniqueref\n    })\n  }\n}));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1119,8 +1121,10 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "INSERT INTO measurement_idats \n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT \n  c.uniqueref,\n  (r.value)::double precision,\n  ('{{ $json.metrics }}'::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text('{{ $json.metrics }}'::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\nAND r.value IS NOT NULL\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
-          "options": {}
+          "query": "INSERT INTO measurement_idats\n  (measurement_concept_ref, value_as_number, data_operations_ref)\nSELECT\n  c.uniqueref,\n  (r.value)::double precision,\n  ($1::jsonb->>'data_operations_ref')::bigint\nFROM jsonb_each_text($1::jsonb) AS r(key, value)\nJOIN concepts c ON c.concept_name = r.key\nWHERE c.uniqueref BETWEEN 496 AND 544\n  AND r.value IS NOT NULL\n  AND btrim(r.value) <> ''\n  AND r.value ~ '^-?[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?$'\nON CONFLICT (data_operations_ref, measurement_concept_ref)\nDO UPDATE SET value_as_number = EXCLUDED.value_as_number;",
+          "options": {
+            "queryReplacement": "={{ [$json.metrics] }}"
+          }
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -1160,7 +1164,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all();\nconst packItems = $('pack_qc_rows').all();\n\nreturn items.map((item, index) => ({\n  json: {\n    idat_ref: item.json.uniqueref,\n    raw_control_metrics: packItems[index].json.raw_control_metrics\n  }\n}));"
+          "jsCode": "const packRows = $('pack_qc_rows').all();\nconst metricsByKey = {};\nfor (const p of packRows) {\n  metricsByKey[`${p.json.sentrix_id}|${p.json.position}`] = p.json.raw_control_metrics;\n}\n\nreturn $input.all().map(item => {\n  const key = `${item.json.sentrix_id}|${item.json.position}`;\n  return {\n    json: {\n      idat_ref: item.json.uniqueref,\n      sentrix_id: item.json.sentrix_id,\n      position: item.json.position,\n      raw_control_metrics: metricsByKey[key] ?? null\n    }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1366,11 +1370,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 70700e3c",
+    "name": "Version 1d301a79",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "01-07-2026/0:00",
+  "commitDate": "02-07-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
