@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-22T13:54:13.404Z",
+  "updatedAt": "2026-07-01T10:23:24.363Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -423,12 +423,12 @@
     },
     {
       "parameters": {
-        "command": "=rsync -avu \"{{ $json.r1_path }}\" \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/\""
+        "command": "=rsync -avu \"{{ $json.r1_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/{{ $json.dest_r1 }}\" && rsync -avu \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/{{ $json.dest_r2 }}\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -448,
+        -368,
         -288
       ],
       "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
@@ -447,7 +447,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -272,
+        -208,
         -288
       ],
       "id": "89d82f0d-34a3-44c7-9d2f-bf0ccd80dd7b",
@@ -1169,6 +1169,19 @@
           "name": "bioinf.notify@gen-era.tech"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resolve S Collisions — aynı S numarasını paylaşan örneklerde ikinciye +100 (yalnız hedef ad)\nconst items = $input.all();\nconst base   = p => (p || '').split('/').pop();\nconst parseS = f => { const m = String(f).match(/_S(\\d+)_/); return m ? parseInt(m[1], 10) : null; };\nconst rename = (f, s) => s == null ? f : f.replace(/_S\\d+(?=_)/, '_S' + s);\n\nconst rows = items.map(it => ({ json: it.json, b1: base(it.json.r1_path), b2: base(it.json.r2_path) }));\nrows.forEach(r => r.S = parseS(r.b1));\n\n// örnek başına orijinal S (aynı örneğin R1/R2/lane'leri aynı numarayı korur)\nconst orig = new Map();\nfor (const r of rows) if (!orig.has(r.json.sample_id)) orig.set(r.json.sample_id, r.S);\n\nconst cnt = new Map();\nfor (const s of orig.values()) cnt.set(s, (cnt.get(s) || 0) + 1);\n\nconst finalS = new Map(), used = new Set();\nfor (const [sid, s] of orig) if (cnt.get(s) === 1) { finalS.set(sid, s); used.add(s); }  // tekiller sabit\nfor (const sid of [...orig.keys()].sort()) {\n  if (finalS.has(sid)) continue;\n  let s = orig.get(sid);\n  if (!used.has(s)) { finalS.set(sid, s); used.add(s); }\n  else { let ns = s + 100; while (used.has(ns)) ns += 100; finalS.set(sid, ns); used.add(ns); }\n}\n\nreturn rows.map(r => {\n  const s = finalS.get(r.json.sample_id);\n  return { json: { ...r.json, dest_r1: rename(r.b1, s), dest_r2: rename(r.b2, s), _orig_S: r.S, _final_S: s } };\n});\n"
+      },
+      "id": "50c07e30-e605-4524-afbf-9b7d5b1f2a49",
+      "name": "Resolve S Collisions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        -288
+      ]
     }
   ],
   "connections": {
@@ -1433,7 +1446,7 @@
             "index": 0
           },
           {
-            "node": "Move Files to Launch Site",
+            "node": "Resolve S Collisions",
             "type": "main",
             "index": 0
           }
@@ -1534,6 +1547,17 @@
           }
         ]
       ]
+    },
+    "Resolve S Collisions": {
+      "main": [
+        [
+          {
+            "node": "Move Files to Launch Site",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1546,8 +1570,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "5e9ef3fe-8357-4386-aeb1-9ab4f608b5d7",
-  "activeVersionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
+  "versionId": "8543791e-3d70-4e28-a4c1-f1b936ccbce8",
+  "activeVersionId": "2599e3ec-d74e-45a8-9b48-6e716c79406b",
   "triggerCount": 0,
   "shared": [
     {
@@ -1559,9 +1583,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-21T05:14:04.000Z",
-    "createdAt": "2026-06-21T05:13:48.950Z",
-    "versionId": "e566b253-5732-4e8c-b425-0560d6f22ad7",
+    "updatedAt": "2026-07-01T09:54:35.413Z",
+    "createdAt": "2026-07-01T09:54:35.413Z",
+    "versionId": "2599e3ec-d74e-45a8-9b48-6e716c79406b",
     "workflowId": "p5v6HfuZ2iO5nnbC",
     "nodes": [
       {
@@ -1981,7 +2005,7 @@
       },
       {
         "parameters": {
-          "command": "=rsync -avu \"{{ $json.r1_path }}\" \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/\""
+          "command": "=rsync -avu \"{{ $json.r1_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/{{ $json.dest_r1 }}\" && rsync -avu \"{{ $json.r2_path }}\" \"/volume1/ALLDATA/Temp/sophia_launch_site/{{ $json.dest_r2 }}\""
         },
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
@@ -2084,21 +2108,6 @@
             "name": "Koza ALLData - Can User"
           }
         }
-      },
-      {
-        "parameters": {
-          "content": "#### Akış, batch_name değerine göre gruplanacak şekilde düzenlendi.",
-          "height": 80,
-          "width": 1472
-        },
-        "type": "n8n-nodes-base.stickyNote",
-        "position": [
-          -2944,
-          -416
-        ],
-        "typeVersion": 1,
-        "id": "3f34e1e1-6da1-4b9b-b8b4-c573d90e77d0",
-        "name": "Sticky Note"
       },
       {
         "parameters": {
@@ -2735,12 +2744,26 @@
           -544
         ],
         "webhookId": "fb66f18d-c6c4-4255-bb5d-31afd75e8d03",
+        "executeOnce": true,
         "credentials": {
           "smtp": {
             "id": "clTmxNgA7AqNrh5h",
             "name": "bioinf.notify@gen-era.tech"
           }
         }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Resolve S Collisions — aynı S numarasını paylaşan örneklerde ikinciye +100 (yalnız hedef ad)\nconst items = $input.all();\nconst base   = p => (p || '').split('/').pop();\nconst parseS = f => { const m = String(f).match(/_S(\\d+)_/); return m ? parseInt(m[1], 10) : null; };\nconst rename = (f, s) => s == null ? f : f.replace(/_S\\d+(?=_)/, '_S' + s);\n\nconst rows = items.map(it => ({ json: it.json, b1: base(it.json.r1_path), b2: base(it.json.r2_path) }));\nrows.forEach(r => r.S = parseS(r.b1));\n\n// örnek başına orijinal S (aynı örneğin R1/R2/lane'leri aynı numarayı korur)\nconst orig = new Map();\nfor (const r of rows) if (!orig.has(r.json.sample_id)) orig.set(r.json.sample_id, r.S);\n\nconst cnt = new Map();\nfor (const s of orig.values()) cnt.set(s, (cnt.get(s) || 0) + 1);\n\nconst finalS = new Map(), used = new Set();\nfor (const [sid, s] of orig) if (cnt.get(s) === 1) { finalS.set(sid, s); used.add(s); }  // tekiller sabit\nfor (const sid of [...orig.keys()].sort()) {\n  if (finalS.has(sid)) continue;\n  let s = orig.get(sid);\n  if (!used.has(s)) { finalS.set(sid, s); used.add(s); }\n  else { let ns = s + 100; while (used.has(ns)) ns += 100; finalS.set(sid, ns); used.add(ns); }\n}\n\nreturn rows.map(r => {\n  const s = finalS.get(r.json.sample_id);\n  return { json: { ...r.json, dest_r1: rename(r.b1, s), dest_r2: rename(r.b2, s), _orig_S: r.S, _final_S: s } };\n});\n"
+        },
+        "id": "50c07e30-e605-4524-afbf-9b7d5b1f2a49",
+        "name": "Resolve S Collisions",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -592,
+          -140
+        ]
       }
     ],
     "connections": {
@@ -3005,7 +3028,7 @@
               "index": 0
             },
             {
-              "node": "Move Files to Launch Site",
+              "node": "Resolve S Collisions",
               "type": "main",
               "index": 0
             }
@@ -3106,11 +3129,22 @@
             }
           ]
         ]
+      },
+      "Resolve S Collisions": {
+        "main": [
+          [
+            {
+              "node": "Move Files to Launch Site",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version e566b253",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -3121,6 +3155,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "01-07-2026/0:00",
+  "commitDate": "02-07-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
