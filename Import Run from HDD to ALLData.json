@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29T08:09:01.242Z",
+  "updatedAt": "2026-07-02T13:43:37.555Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -24,7 +24,7 @@
             {
               "id": "761d1698-d730-4940-a9f5-ed756adedbcb",
               "name": "run_ids",
-              "value": "260626_A01228_0303_BHTKYCDRX7,260626_A01228_0304_AHTLTJDRX7",
+              "value": "260629_VH01138_12_AACNKLLHV",
               "type": "string"
             }
           ]
@@ -151,6 +151,19 @@
     },
     {
       "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  if (item.json.code !== 0) {\n    throw new Error('Import basarisiz (run: ' + (item.json.run_id || '?') + ', exit ' + item.json.code + '): ' + (item.json.stderr || ''));\n  }\n}\nreturn $input.all();"
+      },
+      "id": "a1b2c3d4-fix0-4f00-9abc-importcheck01",
+      "name": "Check Import",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        -16
+      ]
+    },
+    {
+      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "JNMNKgR7ChTZhvdv",
@@ -184,24 +197,11 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        744,
+        752,
         -16
       ],
       "id": "9d219760-340b-4380-a5e1-75e39d481ae9",
       "name": "Call 'Monitor New Runs'"
-    },
-    {
-      "parameters": {
-        "jsCode": "for (const item of $input.all()) {\n  if (item.json.code !== 0) {\n    throw new Error('Import basarisiz (run: ' + (item.json.run_id || '?') + ', exit ' + item.json.code + '): ' + (item.json.stderr || ''));\n  }\n}\nreturn $input.all();"
-      },
-      "id": "a1b2c3d4-fix0-4f00-9abc-importcheck01",
-      "name": "Check Import",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        524,
-        -16
-      ]
     }
   ],
   "connections": {
@@ -304,7 +304,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "54e6bcf1-6e4d-4090-b49d-6cb604f9b827",
+  "versionId": "33e69c7c-a96c-4c4e-bea5-c54e165c093b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -325,6 +325,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "02-07-2026/0:00",
+  "commitDate": "03-07-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
