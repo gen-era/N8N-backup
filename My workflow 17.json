@@ -1,0 +1,297 @@
+{
+  "updatedAt": "2026-07-03T13:02:25.114Z",
+  "createdAt": "2026-07-03T12:58:21.389Z",
+  "id": "UDOGAJZBS99QkaFb",
+  "name": "My workflow 17",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "ca0ee599-37ba-413d-a28b-0ee4f1aecc34",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appnIcG4fWZcY18JK",
+          "mode": "list",
+          "cachedResultName": "QC Requests",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl20DP246JvqUdqI",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appnIcG4fWZcY18JK/tbl20DP246JvqUdqI"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Priority": false
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Run ID",
+              "displayName": "Run ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Sample_ID",
+              "displayName": "Sample_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Sample_Project",
+              "displayName": "Sample_Project",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Kit",
+              "displayName": "Kit",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Todo",
+                  "value": "Todo"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        -160
+      ],
+      "id": "49b2a564-dba8-4211-b4f7-6dd655225d0d",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "7e4b533b-c14d-4776-9c3b-60a387143227",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        64,
+        -48
+      ],
+      "id": "0d308a8f-d421-4927-8c58-d47a704fba2e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        272,
+        -48
+      ],
+      "id": "b3d35120-9247-4401-a127-eceb5d78a6b2",
+      "name": "Send email",
+      "webhookId": "6b65eecb-adaf-4a03-8e9f-b9053b490c0a",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# Loop over input items and add a new field called 'my_new_field' to the JSON of each one\nfor item in _items:\n  item[\"json\"][\"my_new_field\"] = 1\nreturn _items"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -48
+      ],
+      "id": "69a0b6d4-a95f-44d2-84a8-a49d0532393e",
+      "name": "Code in Python (Native)"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Code in Python (Native)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "versionId": "99cccbcc-f54e-4f9f-8a26-9254ef27bd16",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-03T12:58:21.396Z",
+      "createdAt": "2026-07-03T12:58:21.396Z",
+      "role": "workflow:owner",
+      "workflowId": "UDOGAJZBS99QkaFb",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "04-07-2026/0:00",
+  "fileName": "My workflow 17.json"
+}
