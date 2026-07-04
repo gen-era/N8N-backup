@@ -1,0 +1,3254 @@
+{
+  "updatedAt": "2026-07-03T17:29:26.258Z",
+  "createdAt": "2026-07-03T17:01:01.383Z",
+  "id": "a1Mtyp9jfIrABIht",
+  "name": "archer_auto_upload V2 Sapiens",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        176
+      ],
+      "id": "96b0f8a9-b30f-4247-8fc1-942fce546224",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 4
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "73c0117c-22a7-4017-92e1-1c1c4731a3c2",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operation_recipes",
+          "mode": "list",
+          "cachedResultName": "data_operation_recipes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "type_concept_ref",
+              "value": "251"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        368,
+        176
+      ],
+      "id": "7bf551c7-ea67-4a04-850f-03bb2937e4cb",
+      "name": "Find Possible Recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "recipe_ref",
+              "value": "={{ $json.uniqueref }}"
+            },
+            {
+              "column": "status_concept_ref",
+              "value": "24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        640,
+        176
+      ],
+      "id": "30bb3c55-a07f-483d-800a-b3e1b026926a",
+      "name": "GET On-Hold Archer upload recipes",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "uniqueref",
+              "field2": "read_ref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        992,
+        384
+      ],
+      "id": "5909ad46-ca53-4698-a594-ea194496b411",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Group items by recipe_ref AND storage location (derived from r1_path)\nconst getLocation = (r1Path) => {\n  if (!r1Path) return 'unknown';\n  if (r1Path.startsWith('/mnt/illuminastorage/')) return 'illuminastorage';\n  if (r1Path.startsWith('/volume1/ALLDATA/')) return 'alldata';\n  return 'other';\n};\n\nconst grouped = {};\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  const location = getLocation(item.json.r1_path);\n  const groupKey = `${recipeRef}__${location}`;\n\n  if (!grouped[groupKey]) {\n    grouped[groupKey] = {\n      recipe_ref: recipeRef,\n      location: location,\n      items: []\n    };\n  }\n  grouped[groupKey].items.push(item.json);\n}\n\n// Return as array of groups\nreturn Object.values(grouped).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    location: group.location,\n    items: group.items,\n    count: group.items.length\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        384
+      ],
+      "id": "8372ff35-66ee-4139-a04f-7d90a3019687",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "recipe_ref",
+              "field2": "uniqueref"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        720,
+        400
+      ],
+      "id": "68cdf968-c21f-4376-80ff-337011bd0cec",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "reads",
+          "mode": "list",
+          "cachedResultName": "reads"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "uniqueref",
+              "value": "={{ $json.read_ref }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        864,
+        176
+      ],
+      "id": "e1fef0ae-6ab1-4dfa-a20f-56965cf5caa4",
+      "name": "Get read info",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "care_site_credentials",
+          "mode": "list",
+          "cachedResultName": "care_site_credentials"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "platform_site_id",
+              "value": "={{ $json.items[0].account_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2800,
+        544
+      ],
+      "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
+      "name": "GET Credentials",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3aaa6f88-270b-4681-83c2-787e12f14866",
+              "name": "platform_site_id",
+              "value": "={{ $json.platform_site_id }}",
+              "type": "string"
+            },
+            {
+              "id": "967f0462-3d2a-4f22-9ccd-642b5dec8058",
+              "name": "platform_site_password",
+              "value": "={{ $json.platform_site_password }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3216,
+        544
+      ],
+      "id": "783369cd-3d48-44a3-ba14-a2cc8f4aeb23",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3984,
+        400
+      ],
+      "id": "bb39229a-5cae-452a-b436-322c7f066e2b",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "command": "=python3 /home/genera/uploaderV2/uploaderV3/batch_uploader.py /home/genera/uploaderV2/uploaderV3/test.json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        5312,
+        416
+      ],
+      "id": "8da502ba-9a07-449b-8edc-75c75591c854",
+      "name": "Execute Command"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/genera/uploaderV2/uploaderV3/test.json",
+        "dataPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        4944,
+        416
+      ],
+      "id": "2cc37257-c9ae-4987-9379-7011334f8151",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        4304,
+        288
+      ],
+      "id": "526c8ab0-389f-47b4-aa5f-4bd194f3831c",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout;\n\nif (!stdout) {\n  throw new Error('stdout is empty');\n}\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error('stdout is not valid JSON:\\n' + stdout);\n}\n\n// Eğer array dönüyorsa → n8n item formatına çevir\nif (Array.isArray(parsed)) {\n  return parsed.map(item => ({ json: item }));\n}\n\n// Eğer object ise direkt dön\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5760,
+        368
+      ],
+      "id": "053c53eb-4a81-4748-aeab-808d661a0bf5",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        5904,
+        704
+      ],
+      "id": "769ef1c5-ed0e-4300-8f34-f95a54e2bd64",
+      "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        6112,
+        704
+      ],
+      "id": "c1827490-364b-41f8-aeba-7ecea9f69010",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/genera/uploaderV2/uploaderV3/submit_test.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        6320,
+        704
+      ],
+      "id": "31a19f04-834b-409a-b504-87dda4435e03",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "command": "python3 /home/genera/uploaderV2/uploaderV3/job_submitter.py /home/genera/uploaderV2/uploaderV3/submit_test.json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        6528,
+        704
+      ],
+      "id": "e48d0f52-428f-4e7f-aa08-14b649778bbf",
+      "name": "Execute Command1",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout || '';\n\n// JSON kısmını yakala (object)\nconst match = stdout.match(/\\{[\\s\\S]*\\}$/);\n\nif (!match) {\n  throw new Error('JSON not found in stdout:\\n' + stdout);\n}\n\nlet parsed;\ntry {\n  parsed = JSON.parse(match[0]);\n} catch (e) {\n  throw new Error('Invalid JSON:\\n' + match[0]);\n}\n\n// Genel başarı durumu\nconst jobSuccess = parsed.success;\n\n// Sample bilgisi direkt yok → count var\n// Ama senin önceki node’dan sample listesi geliyor olabilir\n// Burada fallback olarak count kadar item üretelim\n\nconst samplesCount = parsed.samples_count || 0;\n\n// Her sample için item üret\nconst items = [];\n\nfor (let i = 0; i < samplesCount; i++) {\n  items.push({\n    json: {\n      job_id: parsed.job_id,\n      job_name: parsed.job_name,\n      success: jobSuccess,\n      error: parsed.error,\n      sample_index: i + 1,\n      samples_count: samplesCount\n    }\n  });\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6784,
+        704
+      ],
+      "id": "63c10f3c-28d2-4fd0-8574-5a310217c575",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a7d49ca-87ef-46b9-a31e-5a44d353300f",
+              "leftValue": "={{ $('Merge2').item.json.items[0].r1_path }}",
+              "rightValue": "/illuminastorage",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4576,
+        288
+      ],
+      "id": "736972b0-15fe-49c6-82a2-8a7e36482cae",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "path": "/staging/uploaderV2/uploaderV3/",
+        "options": {
+          "fileName": "test.json"
+        }
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        4960,
+        240
+      ],
+      "id": "48b202dd-eb88-4652-833c-e086b0e5240d",
+      "name": "Upload a file",
+      "credentials": {
+        "sshPassword": {
+          "id": "taqCh3jOEpAjpst4",
+          "name": "Sapiens-dragen-root"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "python3.8 /staging/uploaderV2/uploaderV3/batch_uploader.py /staging/uploaderV2/uploaderV3/test.json"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        5328,
+        240
+      ],
+      "id": "b7531d35-0ed7-481e-93c2-c40e83d4f0b8",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "taqCh3jOEpAjpst4",
+          "name": "Sapiens-dragen-root"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a6ccacd-a3ba-4672-9dfb-801985faa8d3",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        6000,
+        368
+      ],
+      "id": "ded26ff0-d9c5-427c-807e-eba5b4b1a87c",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1.1,
+      "position": [
+        6256,
+        384
+      ],
+      "id": "dcde6125-8d4d-479d-bff4-22dd28cb2816",
+      "name": "Execution Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c126c9b5-ef5c-4cfc-a53d-837775b454df",
+              "leftValue": "={{ $json.platform_site_password }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2992,
+        544
+      ],
+      "id": "cfdcf6f8-9b61-4b44-a667-1e864e42f12c",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com",
+        "subject": "credential error",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3232,
+        768
+      ],
+      "id": "7c84dded-3a6f-4810-8e16-1c66a1e94bb1",
+      "name": "Send email",
+      "webhookId": "94f0dd62-e3ab-443e-88c1-ccf9a113efc9",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2096,
+        368
+      ],
+      "id": "925b3a7e-74a2-4312-9c99-9e04a84a6ce3",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com.tr",
+        "subject": "Archer Upload Error",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        6464,
+        384
+      ],
+      "id": "1b5a27ea-8089-4988-a4c3-526061e31e82",
+      "name": "Send email1",
+      "webhookId": "7ec67290-f9c6-467b-b8d5-a0c636f3c5c7",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "={{ $json.id }}",
+        "subject": "=Archer DX Yüklemesi Tamamlandı - {{ $('Loop Over Items').item.json.account_id }}",
+        "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"vertical-align:middle;\">\n                  <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n                </td>\n                <td align=\"right\" style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAI5klEQVR4nK2Ya2xcxRXH/2dm7r7Xu34ktpMoQEpBqQm0TWgRD0FaaCRaJa1U8wHa5oEMBNpEQaH9QIUdESFUkQIlFMnkgaCiYERbUV5SVdbQ0OIkRAWSEkIgPJIQP/Brd727996ZU821Hdsb23GAI+2uNHtn5jfnNedcwgyljdsk0IjriPT48fv7MukEhYUHzU6qkprogt7x/zMztaBdbqKl/kz2odM9wMz0DCBGQVrzb80Lk/6+YHmFAp2jDBYSwWGABQl44MMe6aPM2MVS/mNlZNG7Y2CgTURmuv3U6bRCwyB6e//uq8Ox6Mq4L1fMidYnKxFDHAoh8IQ5PmjWEDQGUGr8zO3RTw69k3GhnyCixy1XG7Ms1/KMNDQ6cVv3rjnheGJzjZNY/XVVjyQYYS00kWAGk2YjxiNJEsYuSgC7MCovGEeRw1G355/5YvHOG1NLOpqZxSYQg8pOMxVQcyajNi1d6rf2dyxLReI7F4Xn18/W0jgkjc9aGuKReXTKAjzum0CsIAwY3Cu1ets95ve5Q3esTn7rAWYW9kEi4mmBmDkw07a+jqZ5qdmtC6kaae34HhnFsIc6rduVAdr9rJMJXWBPfKRcei/38aOrkotvmgxKlZtpFOacdH3rhajRSoNcMmrYDGcGM6Kl4NcjI0OQ/A0T9yKJBU2PZd+EEOKmp42R1kdHnxflPvNoz3+umZeubb3Q1GihWfjE4swxJgMDDIE8GGeBjniLEl9rau1/o8XumeGMmgDUzM3iAMA7OzvqKmKJJxaiihWD7AJfBcx4KGsba/752vHnxmrustG7lJb6w3luBKgBDUF+MFG6d1H07Nq0cfRXpRltTPApgyIFEg2qlsJSPdzG+0MH0Mg2V4lhU12nt/fuvnJutObntVpqD8M+82XFsEGFigefcih74LSR/sLEWeflBoY2WoW0t7dLcaC9PdibpLjlXFUrFBGfkhy+gPhGo1ImsO3V5/HMngxmqwQE2cQztroGi3pEOSxDTVs++Xe0vb09yGHYmuuomyMShy+LnhWTmr5YOJXBpFUCuw6/g6vvWheM3X19E5quXg7Hkda5T/qTZJgDckAcHDz2w6bUxS8GPuRovmZudFY8rIXhLwmjjUFKxXGo6yiu+91vEQlFbHLDzsxL8H0fZMPkpA0YiqSpRQUrQT+xIwFQmOT37N00nKD4S/lMSCh05/qx6qHN6MsNBuM1yRT+vKEF1YkUPKOHoQIhaBgRg6CQkZft5CMRYT1bslxgL0rr/TMoACYVZoa9UaIijFUP34N9B99BLBpHsZDHtvV3YvG8c9Hv5yHFydQX7KSZKQxCWKj6gc4TKXHvwK50hOR5Dhg+mylD3TBPiJTJ/k+rOG597H688uYbSKSqkM/n8Ie1d+Dahu+ix8vCEfLUgxBIaeZUOFYRi1ODCEHa9OdMpxdtNKIyhEqVCDYuF09rVKsEtmb+hh0vPItkqhK5/l7ctrwRv7pqOXr9LJQ8FWa8SCEENDmj+jPTmWK2SuLtTz/A5uceR0JGg7ExGB91ThJP7slgwyP3BTDZ3h78+MprsOX6W9Hl5SBpephgn8CExqgSSascMRWMJImn9r6KdTseRPfxT1FdkcLaq1ag18sGTpB24njtyP+wvnULIrE48kN5LG64CFvXbEDRuCAxs/vHOrqGkKL6fTnosf+BD4LAxKTIthiDg7/seQ3dnx1Fxaw6rH/kPrx4oANVThIOKfTks0FEDQzlobVGTboSbRvvRjqeQMn4QTKcFoTBWhBli/ksszkobl6yxHOJP7ZlpygLewLBhYc/rrkdF1+0BLl8DtFoHDc+sBn/PX7YRgZW3PtrfHTiOEJOGCGl8PTGu1FfUYWcX5gQUVMCAXCJkffd3lxxsDuY4Rv9+gBKQdlZrkaXfUTCITx1+6bg9L7W+Dw7gHXbH8Qt23+Pfe/uRyKWQLE4hPtuXIcrFzRg0B+CmiSiysVawJa8BTB7Qu+9o35ZPgBy4b58vNStXRgbchMmSRLI+8Xg1Pb0ISURCkew5/2D+NMrLyNRWYVsbzfuWX0bbrn8WnR6gzOCGdWP9dM+FMkl/N2OiLa2Nrm24rJDn5ey/7J4CkKXB7YSMji1Pb3VgnZdGKMBIZDr78PKH/0UG5Y1otvPwZHTNjITcRhcIhZHCsc/NwYv2CE1q7GR7JWxvX9P6zHkrkojOendoYQMTm+1cPizo3i+YxdmV1Wj6JawdfV6FExp3JVwegkChqTuEp7KeaW/3pxa0pPJZIbLHltst6NdfJqreOXyxPlXVNmaiKz5ThXr9q72odkgFgpjsDCEdCQOl4OgwEzEnlgw2CXw66WPBgqm0PCz+OITLS0tdBKIiMyOvr3fro4md1/izLMlrJyshA0Wo2FPs1nbRpItN86kSLBrKCbvXZlz9g98+Mub0pc8bEtYWygGTm1hbOW4pnLJvs5C38YjoqgUiaAXL7cfld1rNurOFCbMwuuUxjmY++RZC2OLfAszuv7YwyNt0GPZN1svSixost2BT0YZyzzjLacGwQhMl9TO7sKHe9jFskOpRQMt43qz8sxlrPlsE/dW7sNHD8uSo5mNYjL26S9aKVkHtj5jzXRsBKbfHVh2Q/rCPqBlpA6bunMNesLAp3L7mmujFS0XiDqktfQ1sbB18OhVOJXWxtppGgaB1HnpqyPI44PiibZSd35t0/xLe0d9d/zcU5JGQMu2V2OxhmjTjv69b2QjhS3nhusb5iCGqCEtIdlWera4Ki957WxJxAK29mOUJMtOuOo973jXoJffvDK++KHRXrAcZlINjZdmzij7oqlt//5Q4Wz3N7Fw5IY6lT6/FknEIGErPWks1dgcI4lcMIYQZGB8UuzsypH7nMkNtayqufTYVC8ZZgSEkXdEoxHw4KEXw5Xz5/yADa8IQ30nDFkfV+EaW3wFJSwRsqWhwSJ0jwe9jyU9zy6/9IvkN7uG15r+3dCMgAJhUHN7RtpXNCeHmOUzeL+qp793kXSgjM/shB1ChN6bjbru5TR3aOxQLBttaz+FVsbL/wHA6mM7WukUNwAAAABJRU5ErkJggg==\" alt=\"Tamamlandı\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;outline:none;text-decoration:none;width:36px;height:36px;vertical-align:middle;\">\n                </td>\n              </tr>\n            </table>\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#102a43;\">Sophia DDM Yüklemesi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba {{ $json.name }},</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Başlatmış olduğunuz Sophia DDM yüklemesi başarıyla tamamlandı. Detaylar aşağıdadır.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.run_ids }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Numune Sahibi</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.sample_owners }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kit</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.kit_names }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batches }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yüklenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yüklenen Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $('Loop Over Items').item.json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false,
+          "ccEmail": "can.holyavkin@gen-era.com.tr"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        7536,
+        704
+      ],
+      "id": "6a2805ba-e5ea-4e54-96af-a707c879df14",
+      "name": "Send email3",
+      "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      },
+      "disabled": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operation_recipes",
+          "mode": "list",
+          "cachedResultName": "data_operation_recipes"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "platform_concept_ref",
+              "value": "12"
+            },
+            {
+              "column": "type_concept_ref",
+              "value": "251"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        7808,
+        704
+      ],
+      "id": "8c323c12-9b23-4d1d-8f6d-1c8e49677c1e",
+      "name": "Find Possible Recipes1",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "recipe_ref",
+              "value": "={{ $json.uniqueref }}"
+            },
+            {
+              "column": "status_concept_ref",
+              "value": "24"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        8016,
+        704
+      ],
+      "id": "989aa23f-d3e4-4dc0-a560-a36f75a06421",
+      "name": "GET On-Hold Archer upload recipes1",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9e3bd7db-effc-4fdf-8528-d6fd0f4ee323",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        8240,
+        704
+      ],
+      "id": "03129836-efa7-41cf-9f27-2f070bef7fbc",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "archer-sap",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        352
+      ],
+      "id": "0f46936e-f8e6-4853-b7c8-7159b6fbaa6d",
+      "name": "Webhook",
+      "webhookId": "2dca8eea-a347-48f5-b8f2-61a81af000c2"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com.tr",
+        "subject": "Archer Job Submission Fail",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        6720,
+        976
+      ],
+      "id": "e228d731-edf9-4f11-8b29-ef5868fa62d1",
+      "name": "Send email2",
+      "webhookId": "0a2c781d-b28c-48bc-802f-0d363dbaac82",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations AS d\nSET\n    status_concept_ref = pairs.status_concept_ref,\n    performed_at = CASE WHEN pairs.status_concept_ref = 29 THEN NOW() ELSE d.performed_at END,\n    updated_at = NOW()\nFROM (\n    SELECT\n        r.value AS read_ref,\n        (s.value)::int AS status_concept_ref\n    FROM jsonb_array_elements_text($1::jsonb) WITH ORDINALITY AS r(value, idx)\n    JOIN jsonb_array_elements_text($2::jsonb) WITH ORDINALITY AS s(value, idx2)\n      ON r.idx = s.idx2\n) AS pairs\nWHERE d.read_ref = pairs.read_ref::int;",
+        "options": {
+          "queryReplacement": "={{ $json.readRefsJson }},{{ $json.statusesJson }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        7232,
+        704
+      ],
+      "id": "11e7e7df-2f1a-4b12-9d86-49a2f57742fa",
+      "name": "Execute a SQL query",
+      "executeOnce": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "SQL query ile \n",
+        "height": 320,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6768,
+        576
+      ],
+      "typeVersion": 1,
+      "id": "9ee74527-27b9-49d7-a3ff-6a384c8026e0",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Basıbuyuk ve pendik için marmara patoloji maili, geri kalanlar için op_ref maili",
+        "height": 288,
+        "width": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        6640,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "af41a03f-87f8-4fc7-8350-65fbcc11701a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Kurum önceliklendirmesi buraya",
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1488,
+        352
+      ],
+      "typeVersion": 1,
+      "id": "994c851c-144c-42e1-b64f-3fd66c8a051a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\n\n// Build a quick lookup: caresite_ref -> priority rank (lower = higher priority)\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Get the incoming groups (assumes each n8n item.json is one group object\n// like { recipe_ref, location, items, count })\nconst groups = $input.all().map(i => i.json);\n\n// Helper: find the best (lowest) priority rank among a group's items.\n// If none of the items match a prioritized caresite, returns Infinity.\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      const rank = priorityRank.get(ref);\n      if (rank < best) best = rank;\n    }\n  }\n  return best;\n}\n\n// Attach priority, stable-sort, then strip the helper field back out\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group)\n  }))\n  .sort((a, b) => {\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // tie-break: keep original relative order (stable sort)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\n// Return as n8n items\nreturn sorted.map(group => ({ json: group }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        384
+      ],
+      "id": "70917d35-4634-457c-89e7-55997eb22c09",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "command": "=printf '%s' '{{ $json.b64 }}' | base64 -d | jq -r '.[] | .items[] | [.recipe_ref, .sample_id, .r1_path, .r2_path] | @tsv' | while IFS=\"$(printf '\\t')\" read -r recipe sample r1 r2; do ok=true; reasons=\"\"; if [ ! -f \"$r1\" ]; then ok=false; reasons=\"${reasons}$(basename \"$r1\"): missing; \"; fi; if [ ! -f \"$r2\" ]; then ok=false; reasons=\"${reasons}$(basename \"$r2\"): missing; \"; fi; echo \"${recipe}|${sample}|${ok}|${reasons}\"; done | jq -R -s 'split(\"\\n\") | map(select(length > 0)) | map(split(\"|\") as $p | {recipe_ref: $p[0], sample_id: $p[1], ok: ($p[2] == \"true\"), reason: $p[3]}) | {all_ok: (map(.ok) | all), failed: map(select(.ok | not)), results: .}'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2912,
+        80
+      ],
+      "id": "2bca0f74-b573-41d1-bcc7-0a7e671d8915",
+      "name": "Execute Command2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const groups = $input.all().map(i => i.json);\nconst jsonStr = JSON.stringify(groups);\nconst b64 = Buffer.from(jsonStr).toString('base64');\nreturn [{ json: { b64 } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        80
+      ],
+      "id": "2968b503-e313-4ed0-89d7-f963c64f24b3",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "68257002-6039-49ef-a778-d99be9504b81",
+              "leftValue": "={{ $json.all_ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3328,
+        80
+      ],
+      "id": "10c4cd8f-5c23-441a-a9eb-b4bba2b95ac2",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const stdout = $input.first().json.stdout;\nconst parsed = JSON.parse(stdout);\n\nreturn [{ json: parsed }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3120,
+        80
+      ],
+      "id": "c600e1fa-d610-43a7-af5d-59fea90455b2",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "sinan.erdem@gen-era.com.tr",
+        "subject": "PATH error",
+        "html": "={{ $json.failed[0].reason }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3584,
+        96
+      ],
+      "id": "a908db59-2871-4b88-88b8-045b5b49fed0",
+      "name": "Send email4",
+      "webhookId": "94f0dd62-e3ab-443e-88c1-ccf9a113efc9",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "useDataOfInput": 2
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3568,
+        368
+      ],
+      "id": "4fc2ce05-9c03-4213-b0c0-87aa87d6bc86",
+      "name": "Merge4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const batchResult = $('Merge3').first().json;\n\nconst readRefs = [];\nconst statuses = [];\n\nfor (const batch of batchResult.batches) {\n  for (const sample of batch.samples) {\n    const item = batchResult.items.find(i => i.sample_id === sample.sample_id);\n    if (!item) continue;\n    readRefs.push(item.read_ref);\n    statuses.push(sample.success && sample.failed_files === 0 ? 29 : 27);\n  }\n}\n\nreturn [{\n  json: {\n    readRefsJson: JSON.stringify(readRefs),\n    statusesJson: JSON.stringify(statuses)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6992,
+        704
+      ],
+      "id": "a889dee7-2773-4ac3-8de9-38736225532b",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6aa42e14-5c54-4bff-ae03-0f78b277df81",
+              "leftValue": "={{ $json.location }}",
+              "rightValue": "illuminastorage",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1856,
+        384
+      ],
+      "id": "e4569fe5-bc54-4849-ae62-ffcd125307f6",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5678/webhook/archer-sap",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        8448,
+        608
+      ],
+      "id": "151cf5d5-fe03-43e8-99cc-cc031cea2073",
+      "name": "HTTP Request",
+      "executeOnce": true
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Possible Recipes": {
+      "main": [
+        [
+          {
+            "node": "GET On-Hold Archer upload recipes",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "GET On-Hold Archer upload recipes": {
+      "main": [
+        [
+          {
+            "node": "Get read info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get read info": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Credentials": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Execute Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload a file": {
+      "main": [
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execution Data": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "GET Credentials",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send email3": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Possible Recipes1": {
+      "main": [
+        [
+          {
+            "node": "GET On-Hold Archer upload recipes1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET On-Hold Archer upload recipes1": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Find Possible Recipes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Send email3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Execute Command2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Merge4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge4": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
+  "activeVersionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-03T17:01:01.397Z",
+      "createdAt": "2026-07-03T17:01:01.397Z",
+      "role": "workflow:owner",
+      "workflowId": "a1Mtyp9jfIrABIht",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-03T17:29:29.000Z",
+    "createdAt": "2026-07-03T17:29:26.261Z",
+    "versionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
+    "workflowId": "a1Mtyp9jfIrABIht",
+    "nodes": [
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          176
+        ],
+        "id": "96b0f8a9-b30f-4247-8fc1-942fce546224",
+        "name": "When clicking ‘Execute workflow’"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 4
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          0
+        ],
+        "id": "73c0117c-22a7-4017-92e1-1c1c4731a3c2",
+        "name": "Schedule Trigger",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operation_recipes",
+            "mode": "list",
+            "cachedResultName": "data_operation_recipes"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "platform_concept_ref",
+                "value": "12"
+              },
+              {
+                "column": "type_concept_ref",
+                "value": "251"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          368,
+          176
+        ],
+        "id": "7bf551c7-ea67-4a04-850f-03bb2937e4cb",
+        "name": "Find Possible Recipes",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "recipe_ref",
+                "value": "={{ $json.uniqueref }}"
+              },
+              {
+                "column": "status_concept_ref",
+                "value": "24"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          640,
+          176
+        ],
+        "id": "30bb3c55-a07f-483d-800a-b3e1b026926a",
+        "name": "GET On-Hold Archer upload recipes",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "uniqueref",
+                "field2": "read_ref"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          992,
+          384
+        ],
+        "id": "5909ad46-ca53-4698-a594-ea194496b411",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Group items by recipe_ref AND storage location (derived from r1_path)\nconst getLocation = (r1Path) => {\n  if (!r1Path) return 'unknown';\n  if (r1Path.startsWith('/mnt/illuminastorage/')) return 'illuminastorage';\n  if (r1Path.startsWith('/volume1/ALLDATA/')) return 'alldata';\n  return 'other';\n};\n\nconst grouped = {};\nfor (const item of $input.all()) {\n  const recipeRef = item.json.recipe_ref;\n  const location = getLocation(item.json.r1_path);\n  const groupKey = `${recipeRef}__${location}`;\n\n  if (!grouped[groupKey]) {\n    grouped[groupKey] = {\n      recipe_ref: recipeRef,\n      location: location,\n      items: []\n    };\n  }\n  grouped[groupKey].items.push(item.json);\n}\n\n// Return as array of groups\nreturn Object.values(grouped).map(group => ({\n  json: {\n    recipe_ref: group.recipe_ref,\n    location: group.location,\n    items: group.items,\n    count: group.items.length\n  }\n}));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1248,
+          384
+        ],
+        "id": "8372ff35-66ee-4139-a04f-7d90a3019687",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "advanced": true,
+          "mergeByFields": {
+            "values": [
+              {
+                "field1": "recipe_ref",
+                "field2": "uniqueref"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          720,
+          400
+        ],
+        "id": "68cdf968-c21f-4376-80ff-337011bd0cec",
+        "name": "Merge1"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "reads",
+            "mode": "list",
+            "cachedResultName": "reads"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "uniqueref",
+                "value": "={{ $json.read_ref }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          864,
+          176
+        ],
+        "id": "e1fef0ae-6ab1-4dfa-a20f-56965cf5caa4",
+        "name": "Get read info",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "care_site_credentials",
+            "mode": "list",
+            "cachedResultName": "care_site_credentials"
+          },
+          "limit": 1,
+          "where": {
+            "values": [
+              {
+                "column": "platform_concept_ref",
+                "value": "12"
+              },
+              {
+                "column": "platform_site_id",
+                "value": "={{ $json.items[0].account_id }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2800,
+          544
+        ],
+        "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
+        "name": "GET Credentials",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "3aaa6f88-270b-4681-83c2-787e12f14866",
+                "name": "platform_site_id",
+                "value": "={{ $json.platform_site_id }}",
+                "type": "string"
+              },
+              {
+                "id": "967f0462-3d2a-4f22-9ccd-642b5dec8058",
+                "name": "platform_site_password",
+                "value": "={{ $json.platform_site_password }}",
+                "type": "string"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          3216,
+          544
+        ],
+        "id": "783369cd-3d48-44a3-ba14-a2cc8f4aeb23",
+        "name": "Edit Fields"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineAll",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          3984,
+          400
+        ],
+        "id": "bb39229a-5cae-452a-b436-322c7f066e2b",
+        "name": "Merge2"
+      },
+      {
+        "parameters": {
+          "command": "=python3 /home/genera/uploaderV2/uploaderV3/batch_uploader.py /home/genera/uploaderV2/uploaderV3/test.json"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          5312,
+          416
+        ],
+        "id": "8da502ba-9a07-449b-8edc-75c75591c854",
+        "name": "Execute Command"
+      },
+      {
+        "parameters": {
+          "operation": "write",
+          "fileName": "/home/genera/uploaderV2/uploaderV3/test.json",
+          "dataPropertyName": "=data",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1.1,
+        "position": [
+          4944,
+          416
+        ],
+        "id": "2cc37257-c9ae-4987-9379-7011334f8151",
+        "name": "Read/Write Files from Disk"
+      },
+      {
+        "parameters": {
+          "operation": "toJson",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1,
+        "position": [
+          4304,
+          288
+        ],
+        "id": "526c8ab0-389f-47b4-aa5f-4bd194f3831c",
+        "name": "Convert to File"
+      },
+      {
+        "parameters": {
+          "jsCode": "const stdout = $input.first().json.stdout;\n\nif (!stdout) {\n  throw new Error('stdout is empty');\n}\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(stdout);\n} catch (e) {\n  throw new Error('stdout is not valid JSON:\\n' + stdout);\n}\n\n// Eğer array dönüyorsa → n8n item formatına çevir\nif (Array.isArray(parsed)) {\n  return parsed.map(item => ({ json: item }));\n}\n\n// Eğer object ise direkt dön\nreturn [{ json: parsed }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5760,
+          368
+        ],
+        "id": "053c53eb-4a81-4748-aeab-808d661a0bf5",
+        "name": "Code in JavaScript2"
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          5904,
+          704
+        ],
+        "id": "769ef1c5-ed0e-4300-8f34-f95a54e2bd64",
+        "name": "Merge3"
+      },
+      {
+        "parameters": {
+          "operation": "toJson",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.convertToFile",
+        "typeVersion": 1.1,
+        "position": [
+          6112,
+          704
+        ],
+        "id": "c1827490-364b-41f8-aeba-7ecea9f69010",
+        "name": "Convert to File1"
+      },
+      {
+        "parameters": {
+          "operation": "write",
+          "fileName": "/home/genera/uploaderV2/uploaderV3/submit_test.json",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.readWriteFile",
+        "typeVersion": 1.1,
+        "position": [
+          6320,
+          704
+        ],
+        "id": "31a19f04-834b-409a-b504-87dda4435e03",
+        "name": "Read/Write Files from Disk1"
+      },
+      {
+        "parameters": {
+          "command": "python3 /home/genera/uploaderV2/uploaderV3/job_submitter.py /home/genera/uploaderV2/uploaderV3/submit_test.json"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          6528,
+          704
+        ],
+        "id": "e48d0f52-428f-4e7f-aa08-14b649778bbf",
+        "name": "Execute Command1",
+        "onError": "continueErrorOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const stdout = $input.first().json.stdout || '';\n\n// JSON kısmını yakala (object)\nconst match = stdout.match(/\\{[\\s\\S]*\\}$/);\n\nif (!match) {\n  throw new Error('JSON not found in stdout:\\n' + stdout);\n}\n\nlet parsed;\ntry {\n  parsed = JSON.parse(match[0]);\n} catch (e) {\n  throw new Error('Invalid JSON:\\n' + match[0]);\n}\n\n// Genel başarı durumu\nconst jobSuccess = parsed.success;\n\n// Sample bilgisi direkt yok → count var\n// Ama senin önceki node’dan sample listesi geliyor olabilir\n// Burada fallback olarak count kadar item üretelim\n\nconst samplesCount = parsed.samples_count || 0;\n\n// Her sample için item üret\nconst items = [];\n\nfor (let i = 0; i < samplesCount; i++) {\n  items.push({\n    json: {\n      job_id: parsed.job_id,\n      job_name: parsed.job_name,\n      success: jobSuccess,\n      error: parsed.error,\n      sample_index: i + 1,\n      samples_count: samplesCount\n    }\n  });\n}\n\nreturn items;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6784,
+          704
+        ],
+        "id": "63c10f3c-28d2-4fd0-8574-5a310217c575",
+        "name": "Code in JavaScript3"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "3a7d49ca-87ef-46b9-a31e-5a44d353300f",
+                "leftValue": "={{ $('Merge2').item.json.items[0].r1_path }}",
+                "rightValue": "/illuminastorage",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          4576,
+          288
+        ],
+        "id": "736972b0-15fe-49c6-82a2-8a7e36482cae",
+        "name": "If"
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "path": "/staging/uploaderV2/uploaderV3/",
+          "options": {
+            "fileName": "test.json"
+          }
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          4960,
+          240
+        ],
+        "id": "48b202dd-eb88-4652-833c-e086b0e5240d",
+        "name": "Upload a file",
+        "credentials": {
+          "sshPassword": {
+            "id": "taqCh3jOEpAjpst4",
+            "name": "Sapiens-dragen-root"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "python3.8 /staging/uploaderV2/uploaderV3/batch_uploader.py /staging/uploaderV2/uploaderV3/test.json"
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          5328,
+          240
+        ],
+        "id": "b7531d35-0ed7-481e-93c2-c40e83d4f0b8",
+        "name": "Execute a command",
+        "credentials": {
+          "sshPassword": {
+            "id": "taqCh3jOEpAjpst4",
+            "name": "Sapiens-dragen-root"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "3a6ccacd-a3ba-4672-9dfb-801985faa8d3",
+                "leftValue": "={{ $json.success }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          6000,
+          368
+        ],
+        "id": "ded26ff0-d9c5-427c-807e-eba5b4b1a87c",
+        "name": "If1"
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.executionData",
+        "typeVersion": 1.1,
+        "position": [
+          6256,
+          384
+        ],
+        "id": "dcde6125-8d4d-479d-bff4-22dd28cb2816",
+        "name": "Execution Data"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "c126c9b5-ef5c-4cfc-a53d-837775b454df",
+                "leftValue": "={{ $json.platform_site_password }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          2992,
+          544
+        ],
+        "id": "cfdcf6f8-9b61-4b44-a667-1e864e42f12c",
+        "name": "If2"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "sinan.erdem@gen-era.com",
+          "subject": "credential error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          3232,
+          768
+        ],
+        "id": "7c84dded-3a6f-4810-8e16-1c66a1e94bb1",
+        "name": "Send email",
+        "webhookId": "94f0dd62-e3ab-443e-88c1-ccf9a113efc9",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1,
+        "position": [
+          2096,
+          368
+        ],
+        "id": "925b3a7e-74a2-4312-9c99-9e04a84a6ce3",
+        "name": "Limit"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "sinan.erdem@gen-era.com.tr",
+          "subject": "Archer Upload Error",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          6464,
+          384
+        ],
+        "id": "1b5a27ea-8089-4988-a4c3-526061e31e82",
+        "name": "Send email1",
+        "webhookId": "7ec67290-f9c6-467b-b8d5-a0c636f3c5c7",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "={{ $json.id }}",
+          "subject": "=Archer DX Yüklemesi Tamamlandı - {{ $('Loop Over Items').item.json.account_id }}",
+          "html": "=<!DOCTYPE html>\n<html lang=\"tr\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head>\n<body style=\"margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1f2933;\">\n  <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background:#f4f6f8;padding:32px 16px;\">\n    <tr><td align=\"center\">\n      <table role=\"presentation\" width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);\">\n\n        <tr>\n          <td style=\"padding:24px 32px 20px 32px;border-bottom:1px solid #e4e7eb;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n              <tr>\n                <td style=\"vertical-align:middle;\">\n                  <img src=\"data:image/gif;base64,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\" alt=\"Era\" height=\"36\" style=\"display:block;border:0;outline:none;text-decoration:none;height:36px;\">\n                </td>\n                <td align=\"right\" style=\"vertical-align:middle;\">\n                  <img src=\"data:image/png;base64,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\" alt=\"Tamamlandı\" width=\"36\" height=\"36\" style=\"display:inline-block;border:0;outline:none;text-decoration:none;width:36px;height:36px;vertical-align:middle;\">\n                </td>\n              </tr>\n            </table>\n            <div style=\"font-size:20px;font-weight:600;margin-top:18px;line-height:1.3;color:#102a43;\">Sophia DDM Yüklemesi Tamamlandı</div>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:26px 32px 4px 32px;\">\n            <p style=\"margin:0 0 14px 0;font-size:15px;line-height:1.55;\">Merhaba {{ $json.name }},</p>\n            <p style=\"margin:0 0 20px 0;font-size:15px;line-height:1.55;\">\n              Başlatmış olduğunuz Sophia DDM yüklemesi başarıyla tamamlandı. Detaylar aşağıdadır.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:0 32px 4px 32px;\">\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;\">\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;width:170px;\">Run ID</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.run_ids }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Numune Sahibi</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.sample_owners }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Hesap (Account ID)</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.account_id }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Kit</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.kit_names }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Pipeline</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.pipeline_name }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:13px;color:#52606d;\">Batch</td>\n                <td style=\"padding:12px 16px;border-bottom:1px solid #e4e7eb;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">{{ $('Loop Over Items').item.json.batches }}</td>\n              </tr>\n              <tr>\n                <td style=\"padding:12px 16px;font-size:13px;color:#52606d;\">Yüklenen örnek sayısı</td>\n                <td style=\"padding:12px 16px;font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\"><strong>{{ $('Loop Over Items').item.json.total_data_operations }}</strong></td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 4px 32px;\">\n            <div style=\"font-size:12px;color:#52606d;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.7px;font-weight:600;\">Yüklenen Örnekler</div>\n            <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border:1px solid #e4e7eb;border-radius:8px;border-collapse:separate;border-spacing:0;background:#fafbfc;\">\n              {{ $('Loop Over Items').item.json.sample_ids.split(', ').map((s, i, arr) => `<tr><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:13px;color:#7b8794;width:36px;\">${String(i+1).padStart(2,'0')}</td><td style=\"padding:10px 16px;${i < arr.length - 1 ? 'border-bottom:1px solid #e4e7eb;' : ''}font-size:14px;font-family:'SFMono-Regular',Menlo,Consolas,monospace;color:#102a43;\">${s}</td></tr>`).join('') }}\n            </table>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"padding:24px 32px 28px 32px;\">\n            <p style=\"margin:0;font-size:13px;color:#7b8794;line-height:1.55;\">\n              Bu, otomatik bir bildirimdir; lütfen bu e-postaya yanıt vermeyiniz. Sorularınız için\n              <a href=\"mailto:can.holyavkin@gen-era.com.tr\" style=\"color:#0f766e;text-decoration:none;font-weight:500;\">can.holyavkin@gen-era.com.tr</a>\n              adresine e-posta atabilirsiniz.\n            </p>\n          </td>\n        </tr>\n\n        <tr>\n          <td style=\"background:#f4f6f8;padding:14px 32px;text-align:center;font-size:11px;color:#9aa5b1;letter-spacing:0.4px;\">\n            Gen-Era Diagnostik · Biyoinformatik Çözümler\n          </td>\n        </tr>\n      </table>\n    </td></tr>\n  </table>\n</body>\n</html>",
+          "options": {
+            "appendAttribution": false,
+            "ccEmail": "can.holyavkin@gen-era.com.tr"
+          }
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          7536,
+          704
+        ],
+        "id": "6a2805ba-e5ea-4e54-96af-a707c879df14",
+        "name": "Send email3",
+        "webhookId": "c85ee1f3-4f74-4f15-b14a-486c2f7aa52b",
+        "executeOnce": true,
+        "retryOnFail": true,
+        "waitBetweenTries": 5000,
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        },
+        "disabled": true,
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operation_recipes",
+            "mode": "list",
+            "cachedResultName": "data_operation_recipes"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "platform_concept_ref",
+                "value": "12"
+              },
+              {
+                "column": "type_concept_ref",
+                "value": "251"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          7808,
+          704
+        ],
+        "id": "8c323c12-9b23-4d1d-8f6d-1c8e49677c1e",
+        "name": "Find Possible Recipes1",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "select",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "returnAll": true,
+          "where": {
+            "values": [
+              {
+                "column": "recipe_ref",
+                "value": "={{ $json.uniqueref }}"
+              },
+              {
+                "column": "status_concept_ref",
+                "value": "24"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          8016,
+          704
+        ],
+        "id": "989aa23f-d3e4-4dc0-a560-a36f75a06421",
+        "name": "GET On-Hold Archer upload recipes1",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "9e3bd7db-effc-4fdf-8528-d6fd0f4ee323",
+                "leftValue": "",
+                "rightValue": "",
+                "operator": {
+                  "type": "string",
+                  "operation": "exists",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          8240,
+          704
+        ],
+        "id": "03129836-efa7-41cf-9f27-2f070bef7fbc",
+        "name": "If3"
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "archer-sap",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          352
+        ],
+        "id": "0f46936e-f8e6-4853-b7c8-7159b6fbaa6d",
+        "name": "Webhook",
+        "webhookId": "2dca8eea-a347-48f5-b8f2-61a81af000c2"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "sinan.erdem@gen-era.com.tr",
+          "subject": "Archer Job Submission Fail",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          6720,
+          976
+        ],
+        "id": "e228d731-edf9-4f11-8b29-ef5868fa62d1",
+        "name": "Send email2",
+        "webhookId": "0a2c781d-b28c-48bc-802f-0d363dbaac82",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE data_operations AS d\nSET\n    status_concept_ref = pairs.status_concept_ref,\n    performed_at = CASE WHEN pairs.status_concept_ref = 29 THEN NOW() ELSE d.performed_at END,\n    updated_at = NOW()\nFROM (\n    SELECT\n        r.value AS read_ref,\n        (s.value)::int AS status_concept_ref\n    FROM jsonb_array_elements_text($1::jsonb) WITH ORDINALITY AS r(value, idx)\n    JOIN jsonb_array_elements_text($2::jsonb) WITH ORDINALITY AS s(value, idx2)\n      ON r.idx = s.idx2\n) AS pairs\nWHERE d.read_ref = pairs.read_ref::int;",
+          "options": {
+            "queryReplacement": "={{ $json.readRefsJson }},{{ $json.statusesJson }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          7232,
+          704
+        ],
+        "id": "11e7e7df-2f1a-4b12-9d86-49a2f57742fa",
+        "name": "Execute a SQL query",
+        "executeOnce": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "SQL query ile \n",
+          "height": 320,
+          "width": 416
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          6768,
+          576
+        ],
+        "typeVersion": 1,
+        "id": "9ee74527-27b9-49d7-a3ff-6a384c8026e0",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "Basıbuyuk ve pendik için marmara patoloji maili, geri kalanlar için op_ref maili",
+          "height": 288,
+          "width": 208
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          6640,
+          240
+        ],
+        "typeVersion": 1,
+        "id": "af41a03f-87f8-4fc7-8350-65fbcc11701a",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "content": "Kurum önceliklendirmesi buraya",
+          "color": 4
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "position": [
+          1488,
+          352
+        ],
+        "typeVersion": 1,
+        "id": "994c851c-144c-42e1-b64f-3fd66c8a051a",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\n\n// Build a quick lookup: caresite_ref -> priority rank (lower = higher priority)\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Get the incoming groups (assumes each n8n item.json is one group object\n// like { recipe_ref, location, items, count })\nconst groups = $input.all().map(i => i.json);\n\n// Helper: find the best (lowest) priority rank among a group's items.\n// If none of the items match a prioritized caresite, returns Infinity.\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      const rank = priorityRank.get(ref);\n      if (rank < best) best = rank;\n    }\n  }\n  return best;\n}\n\n// Attach priority, stable-sort, then strip the helper field back out\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group)\n  }))\n  .sort((a, b) => {\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // tie-break: keep original relative order (stable sort)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\n// Return as n8n items\nreturn sorted.map(group => ({ json: group }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1552,
+          384
+        ],
+        "id": "70917d35-4634-457c-89e7-55997eb22c09",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "command": "=printf '%s' '{{ $json.b64 }}' | base64 -d | jq -r '.[] | .items[] | [.recipe_ref, .sample_id, .r1_path, .r2_path] | @tsv' | while IFS=\"$(printf '\\t')\" read -r recipe sample r1 r2; do ok=true; reasons=\"\"; if [ ! -f \"$r1\" ]; then ok=false; reasons=\"${reasons}$(basename \"$r1\"): missing; \"; fi; if [ ! -f \"$r2\" ]; then ok=false; reasons=\"${reasons}$(basename \"$r2\"): missing; \"; fi; echo \"${recipe}|${sample}|${ok}|${reasons}\"; done | jq -R -s 'split(\"\\n\") | map(select(length > 0)) | map(split(\"|\") as $p | {recipe_ref: $p[0], sample_id: $p[1], ok: ($p[2] == \"true\"), reason: $p[3]}) | {all_ok: (map(.ok) | all), failed: map(select(.ok | not)), results: .}'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          2912,
+          80
+        ],
+        "id": "2bca0f74-b573-41d1-bcc7-0a7e671d8915",
+        "name": "Execute Command2"
+      },
+      {
+        "parameters": {
+          "jsCode": "const groups = $input.all().map(i => i.json);\nconst jsonStr = JSON.stringify(groups);\nconst b64 = Buffer.from(jsonStr).toString('base64');\nreturn [{ json: { b64 } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2624,
+          80
+        ],
+        "id": "2968b503-e313-4ed0-89d7-f963c64f24b3",
+        "name": "Code in JavaScript4"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "68257002-6039-49ef-a778-d99be9504b81",
+                "leftValue": "={{ $json.all_ok }}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          3328,
+          80
+        ],
+        "id": "10c4cd8f-5c23-441a-a9eb-b4bba2b95ac2",
+        "name": "If4"
+      },
+      {
+        "parameters": {
+          "jsCode": "const stdout = $input.first().json.stdout;\nconst parsed = JSON.parse(stdout);\n\nreturn [{ json: parsed }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3120,
+          80
+        ],
+        "id": "c600e1fa-d610-43a7-af5d-59fea90455b2",
+        "name": "Code in JavaScript5"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "sinan.erdem@gen-era.com.tr",
+          "subject": "PATH error",
+          "html": "={{ $json.failed[0].reason }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          3584,
+          96
+        ],
+        "id": "a908db59-2871-4b88-88b8-045b5b49fed0",
+        "name": "Send email4",
+        "webhookId": "94f0dd62-e3ab-443e-88c1-ccf9a113efc9",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "mode": "chooseBranch",
+          "useDataOfInput": 2
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          3568,
+          368
+        ],
+        "id": "4fc2ce05-9c03-4213-b0c0-87aa87d6bc86",
+        "name": "Merge4"
+      },
+      {
+        "parameters": {
+          "jsCode": "const batchResult = $('Merge3').first().json;\n\nconst readRefs = [];\nconst statuses = [];\n\nfor (const batch of batchResult.batches) {\n  for (const sample of batch.samples) {\n    const item = batchResult.items.find(i => i.sample_id === sample.sample_id);\n    if (!item) continue;\n    readRefs.push(item.read_ref);\n    statuses.push(sample.success && sample.failed_files === 0 ? 29 : 27);\n  }\n}\n\nreturn [{\n  json: {\n    readRefsJson: JSON.stringify(readRefs),\n    statusesJson: JSON.stringify(statuses)\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6992,
+          704
+        ],
+        "id": "a889dee7-2773-4ac3-8de9-38736225532b",
+        "name": "Code in JavaScript6"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "6aa42e14-5c54-4bff-ae03-0f78b277df81",
+                "leftValue": "={{ $json.location }}",
+                "rightValue": "illuminastorage",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          1856,
+          384
+        ],
+        "id": "e4569fe5-bc54-4849-ae62-ffcd125307f6",
+        "name": "Filter"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5678/webhook/archer-sap",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          8448,
+          608
+        ],
+        "id": "151cf5d5-fe03-43e8-99cc-cc031cea2073",
+        "name": "HTTP Request",
+        "executeOnce": true
+      }
+    ],
+    "connections": {
+      "When clicking ‘Execute workflow’": {
+        "main": [
+          [
+            {
+              "node": "Find Possible Recipes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Find Possible Recipes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Possible Recipes": {
+        "main": [
+          [
+            {
+              "node": "GET On-Hold Archer upload recipes",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge1",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "GET On-Hold Archer upload recipes": {
+        "main": [
+          [
+            {
+              "node": "Get read info",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge1": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Get read info": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET Credentials": {
+        "main": [
+          [
+            {
+              "node": "If2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "Merge2",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge2": {
+        "main": [
+          [
+            {
+              "node": "Merge3",
+              "type": "main",
+              "index": 1
+            },
+            {
+              "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Command": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read/Write Files from Disk": {
+        "main": [
+          [
+            {
+              "node": "Execute Command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to File": {
+        "main": [
+          [
+            {
+              "node": "If",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript2": {
+        "main": [
+          [
+            {
+              "node": "If1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge3": {
+        "main": [
+          [
+            {
+              "node": "Convert to File1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to File1": {
+        "main": [
+          [
+            {
+              "node": "Read/Write Files from Disk1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read/Write Files from Disk1": {
+        "main": [
+          [
+            {
+              "node": "Execute Command1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Command1": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send email2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript3": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript6",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Upload a file",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Read/Write Files from Disk",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload a file": {
+        "main": [
+          [
+            {
+              "node": "Execute a command",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a command": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If1": {
+        "main": [
+          [
+            {
+              "node": "Merge3",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Execution Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execution Data": {
+        "main": [
+          [
+            {
+              "node": "Send email1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If2": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Limit": {
+        "main": [
+          [
+            {
+              "node": "GET Credentials",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Code in JavaScript4",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Merge4",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Send email3": {
+        "main": [
+          [
+            {
+              "node": "Find Possible Recipes1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Possible Recipes1": {
+        "main": [
+          [
+            {
+              "node": "GET On-Hold Archer upload recipes1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GET On-Hold Archer upload recipes1": {
+        "main": [
+          [
+            {
+              "node": "If3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If3": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Find Possible Recipes",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL query": {
+        "main": [
+          [
+            {
+              "node": "Send email3",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript1": {
+        "main": [
+          [
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute Command2": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript5",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript4": {
+        "main": [
+          [
+            {
+              "node": "Execute Command2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "If4": {
+        "main": [
+          [
+            {
+              "node": "Merge4",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Send email4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript5": {
+        "main": [
+          [
+            {
+              "node": "If4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge4": {
+        "main": [
+          [
+            {
+              "node": "Merge2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript6": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Limit",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 87abd080",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "04-07-2026/0:00",
+  "fileName": "archer_auto_upload V2 Sapiens.json"
+}
