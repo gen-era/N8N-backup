@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T07:56:01.300Z",
+  "updatedAt": "2026-07-03T06:58:47.108Z",
   "createdAt": "2026-06-27T15:47:24.761Z",
   "id": "JNMNKgR7ChTZhvdv",
   "name": "Monitor New Runs v2",
@@ -97,10 +97,10 @@
         "conditions": {
           "options": {
             "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
-          "combinator": "and",
           "conditions": [
             {
               "id": "r1",
@@ -111,7 +111,8 @@
                 "operation": "equals"
               }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
@@ -482,7 +483,7 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "844d9203-c9a4-4297-a1cc-609b778c2223",
+  "versionId": "465c5083-121e-48de-af9a-c04f1e47a963",
   "activeVersionId": "db2243fd-85fb-42c4-a435-4c8715b8e9e2",
   "triggerCount": 1,
   "shared": [
@@ -968,6 +969,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "03-07-2026/0:00",
+  "commitDate": "04-07-2026/0:00",
   "fileName": "Monitor New Runs v2.json"
 }
