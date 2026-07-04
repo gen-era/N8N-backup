@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-02T13:43:37.555Z",
+  "updatedAt": "2026-07-03T10:29:24.408Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -944,
+        -960,
         -16
       ],
       "id": "5cd94da7-021a-4dde-86dc-a3efdf095c15",
@@ -22,38 +22,9 @@
         "assignments": {
           "assignments": [
             {
-              "id": "761d1698-d730-4940-a9f5-ed756adedbcb",
-              "name": "run_ids",
-              "value": "260629_VH01138_12_AACNKLLHV",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        -736,
-        -16
-      ],
-      "id": "41d92d8a-9499-4cd0-97ce-c99d8f6509e3",
-      "name": "Edit Fields"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
               "id": "adfc3d9d-c345-438a-9572-cb0253f1027d",
               "name": "run_id",
               "value": "={{ $json.path.match(/([^\\/]+)\\/?$/)[1] }}",
-              "type": "string"
-            },
-            {
-              "id": "dd0bef9a-c3b5-425a-9382-4b9e74d2bf98",
-              "name": "path",
-              "value": "={{ $json.path.replace('/mnt/alldata_usb1/', '/volumeUSB1/usbshare/').replace('/mnt/alldata_usb2/', '/volumeUSB2/usbshare/') }}",
               "type": "string"
             }
           ]
@@ -64,7 +35,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -128,
+        -160,
         -16
       ],
       "id": "fd79bd7c-ad14-4304-85cd-22156069194f",
@@ -72,25 +43,31 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/alldata_usb1 /mnt/alldata_usb2 \\\n  --max-depth 2 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "sudo sh -c 'for d in /volumeUSB1/usbshare1-1 /volumeUSB1/usbshare1-2 /volumeUSB2/usbshare2-1 /volumeUSB2/usbshare2-2; do [ -d \"$d\" ] && find \"$d\" -maxdepth 2 -type d; done 2>/dev/null' | awk -F/ '$NF ~ /^(20)?(25|26)[0-9]{2}/ && $NF !~ /-/' | paste -sd ','"
       },
-      "type": "n8n-nodes-base.executeCommand",
+      "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -528,
+        -760,
         -16
       ],
       "id": "bf55c47b-b4ac-43cc-9bc5-1b24b143645c",
-      "name": "Find Runs"
+      "name": "List USB Runs",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const paths = $input.item.json.stdout.trim().split(',').filter(p => p.length > 0);\nreturn paths.map(path => ({ json: { path: path.trim() } }));"
+        "jsCode": "const paths = $('List USB Runs').first().json.stdout.trim().split(',').filter(p => p.length > 0);\nreturn paths.map(path => ({ json: { path: path.trim() } }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -336,
+        -360,
         -16
       ],
       "id": "63ec6209-e3fc-4b70-b7d6-c5b2cd0246c3",
@@ -108,7 +85,7 @@
           "conditions": [
             {
               "id": "977bc97a-473a-4f9b-a530-e623ed45e365",
-              "leftValue": "={{ $('Edit Fields').first().json.run_ids.split(',').map(s => s.trim()).includes($json.run_id) }}",
+              "leftValue": "={{ !$('List ALLData Runs').first().json.stdout.split('\\n').map(s => s.trim()).filter(Boolean).includes($json.run_id) }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -124,7 +101,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        80,
+        40,
         -16
       ],
       "id": "5a38b3cf-2e53-408a-8ff4-c2e68f0337a6",
@@ -132,12 +109,12 @@
     },
     {
       "parameters": {
-        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; sudo mkdir -p \"$DEST\" && sudo rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}\" \"$DEST/\" && sudo chgrp -R users \"$DEST\" 2>/dev/null; sudo chmod -R a+rX \"$DEST\""
+        "command": "=DEST=\"/volume1/ALLDATA/Runs/{{ $json.run_id }}\"; sudo mkdir -p \"$DEST\" && sudo rsync -a --whole-file --no-owner --no-group --chmod=Du=rwx,Dg=rwx,Do=rx,Fu=rw,Fg=rw,Fo=r --info=progress2 \"{{ $json.path }}/\" \"$DEST/\" && sudo chgrp -R users \"$DEST\" 2>/dev/null; sudo chmod -R a+rX \"$DEST\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        304,
+        240,
         -16
       ],
       "id": "399f9461-51af-4f60-9752-fd47b6c5b1ec",
@@ -158,7 +135,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
+        440,
         -16
       ]
     },
@@ -197,11 +174,30 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        752,
+        640,
         -16
       ],
       "id": "9d219760-340b-4380-a5e1-75e39d481ae9",
-      "name": "Call 'Monitor New Runs'"
+      "name": "Call 'Monitor New Runs v2'"
+    },
+    {
+      "parameters": {
+        "command": "sudo ls -1 /volume1/ALLDATA/Runs/ 2>/dev/null"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -560,
+        -16
+      ],
+      "id": "a1b2c3d4-1111-4222-8333-444455556666",
+      "name": "List ALLData Runs",
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     }
   ],
   "connections": {
@@ -209,14 +205,25 @@
       "main": [
         [
           {
-            "node": "Edit Fields",
+            "node": "List USB Runs",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Find Runs": {
+    "List USB Runs": {
+      "main": [
+        [
+          {
+            "node": "List ALLData Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List ALLData Runs": {
       "main": [
         [
           {
@@ -232,17 +239,6 @@
         [
           {
             "node": "Get Run IDs",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "node": "Find Runs",
             "type": "main",
             "index": 0
           }
@@ -286,7 +282,7 @@
       "main": [
         [
           {
-            "node": "Call 'Monitor New Runs'",
+            "node": "Call 'Monitor New Runs v2'",
             "type": "main",
             "index": 0
           }
@@ -304,7 +300,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "33e69c7c-a96c-4c4e-bea5-c54e165c093b",
+  "versionId": "d38c0a8d-4d8b-4d02-a94a-3855725b4056",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -325,6 +321,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "03-07-2026/0:00",
+  "commitDate": "04-07-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
