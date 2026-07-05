@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-03T17:29:26.258Z",
+  "updatedAt": "2026-07-05T03:51:56.171Z",
   "createdAt": "2026-07-03T17:01:01.383Z",
   "id": "a1Mtyp9jfIrABIht",
   "name": "archer_auto_upload V2 Sapiens",
@@ -35,8 +35,7 @@
         0
       ],
       "id": "73c0117c-22a7-4017-92e1-1c1c4731a3c2",
-      "name": "Schedule Trigger",
-      "disabled": true
+      "name": "Schedule Trigger"
     },
     {
       "parameters": {
@@ -1615,14 +1614,18 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
-  "activeVersionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
-  "triggerCount": 1,
+  "versionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
+  "activeVersionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
+  "triggerCount": 2,
   "shared": [
     {
       "updatedAt": "2026-07-03T17:01:01.397Z",
@@ -1633,9 +1636,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-03T17:29:29.000Z",
-    "createdAt": "2026-07-03T17:29:26.261Z",
-    "versionId": "87abd080-1eca-480e-b8dc-7458b5bad3e7",
+    "updatedAt": "2026-07-05T03:51:59.000Z",
+    "createdAt": "2026-07-05T03:51:56.175Z",
+    "versionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
     "workflowId": "a1Mtyp9jfIrABIht",
     "nodes": [
       {
@@ -1667,8 +1670,7 @@
           0
         ],
         "id": "73c0117c-22a7-4017-92e1-1c1c4731a3c2",
-        "name": "Schedule Trigger",
-        "disabled": true
+        "name": "Schedule Trigger"
       },
       {
         "parameters": {
@@ -3244,11 +3246,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 87abd080",
+    "name": "Version b63e88fa",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "04-07-2026/0:00",
+  "commitDate": "05-07-2026/0:00",
   "fileName": "archer_auto_upload V2 Sapiens.json"
 }
