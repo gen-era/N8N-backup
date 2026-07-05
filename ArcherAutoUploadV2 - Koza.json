@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-03T17:07:14.027Z",
+  "updatedAt": "2026-07-04T13:51:06.278Z",
   "createdAt": "2026-06-10T06:07:49.804Z",
   "id": "365MNVcdopNK6zo7",
   "name": "ArcherAutoUploadV2 - Koza",
@@ -35,8 +35,7 @@
         -256
       ],
       "id": "588023ab-fdc8-4496-b5c6-293f9942f266",
-      "name": "Schedule Trigger",
-      "disabled": true
+      "name": "Schedule Trigger"
     },
     {
       "parameters": {
@@ -1617,16 +1616,18 @@
   },
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        0
+      ]
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1bcc67a6-7209-4101-adfb-04b6a3531c4f",
-  "activeVersionId": "1bcc67a6-7209-4101-adfb-04b6a3531c4f",
-  "triggerCount": 1,
+  "versionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
+  "activeVersionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
+  "triggerCount": 2,
   "shared": [
     {
       "updatedAt": "2026-06-10T06:07:49.809Z",
@@ -1637,9 +1638,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-03T17:07:20.000Z",
-    "createdAt": "2026-07-03T17:07:14.028Z",
-    "versionId": "1bcc67a6-7209-4101-adfb-04b6a3531c4f",
+    "updatedAt": "2026-07-04T13:51:26.000Z",
+    "createdAt": "2026-07-04T13:51:06.280Z",
+    "versionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
     "workflowId": "365MNVcdopNK6zo7",
     "nodes": [
       {
@@ -1671,8 +1672,7 @@
           -256
         ],
         "id": "588023ab-fdc8-4496-b5c6-293f9942f266",
-        "name": "Schedule Trigger",
-        "disabled": true
+        "name": "Schedule Trigger"
       },
       {
         "parameters": {
@@ -3248,11 +3248,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1bcc67a6",
+    "name": "Version e4dc6263",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "04-07-2026/0:00",
+  "commitDate": "05-07-2026/0:00",
   "fileName": "ArcherAutoUploadV2 - Koza.json"
 }
