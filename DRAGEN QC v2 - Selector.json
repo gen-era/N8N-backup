@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T20:33:10.107Z",
+  "updatedAt": "2026-07-06T09:43:01.863Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,19 +43,19 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260624_VH01138_10_2225HK5NX 260624_A01832R_0241_BHMLM7DRX7 260626_VH01138_11_AAJFLV5M5 260626_A01978_0193_AHGW3KDMX2 260626_A01978_0192_BHYLVTDSXF 260626_A01228_0304_AHTLTJDRX7 260626_A01228_0303_BHTKYCDRX7 260629_VH01138_12_AACNKLLHV 260701_A01978_0195_BHYLYYDSXF 260701_A01978_0194_AHTLJMDRX7 260701_A01228_0306_AHTLGHDRX7 260701_A01228_0305_BHML27DRX7",
+              "value": "260704_A01978_0197_BHMKYJDRX7",
               "type": "string"
             },
             {
               "id": "perbatch",
               "name": "per_batch",
-              "value": "5",
+              "value": "all",
               "type": "string"
             },
             {
               "id": "caresites",
               "name": "caresites",
-              "value": "",
+              "value": "ASM",
               "type": "string"
             }
           ]
@@ -210,7 +210,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "99a91178-6663-44f7-9a54-30fa12590b91",
+  "versionId": "8bee234a-dd27-42c8-ba02-3627e348cc79",
   "activeVersionId": "e2dfff0d-5f57-435e-b733-be2af1068978",
   "triggerCount": 0,
   "shared": [
@@ -430,6 +430,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "06-07-2026/0:00",
+  "commitDate": "07-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
