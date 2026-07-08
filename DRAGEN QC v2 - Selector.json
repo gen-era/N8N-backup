@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-06T09:43:01.863Z",
+  "updatedAt": "2026-07-07T10:32:35.838Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,7 +43,7 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260704_A01978_0197_BHMKYJDRX7",
+              "value": "260518_A01832R_0240_BHLG5GDRX7",
               "type": "string"
             },
             {
@@ -55,7 +55,7 @@
             {
               "id": "caresites",
               "name": "caresites",
-              "value": "ASM",
+              "value": "",
               "type": "string"
             }
           ]
@@ -210,7 +210,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "8bee234a-dd27-42c8-ba02-3627e348cc79",
+  "versionId": "cc7b517a-5665-4565-ab03-99e2a8b202f6",
   "activeVersionId": "e2dfff0d-5f57-435e-b733-be2af1068978",
   "triggerCount": 0,
   "shared": [
@@ -430,6 +430,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "07-07-2026/0:00",
+  "commitDate": "08-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
