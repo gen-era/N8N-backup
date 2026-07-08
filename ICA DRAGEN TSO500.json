@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T06:47:24.429Z",
+  "updatedAt": "2026-07-07T12:35:40.357Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -328,19 +328,6 @@
       ],
       "id": "3632cfd6-c3e8-4398-9dde-72580c1a5b17",
       "name": "When Executed by Another Workflow"
-    },
-    {
-      "parameters": {
-        "maxItems": 5
-      },
-      "type": "n8n-nodes-base.limit",
-      "typeVersion": 1,
-      "position": [
-        832,
-        0
-      ],
-      "id": "008d910b-be3d-4fef-864c-1f51d06b57e4",
-      "name": "Limit1"
     }
   ],
   "connections": {
@@ -359,7 +346,7 @@
       "main": [
         [
           {
-            "node": "Limit1",
+            "node": "Filter Files Present on Remote",
             "type": "main",
             "index": 0
           }
@@ -522,17 +509,6 @@
           }
         ]
       ]
-    },
-    "Limit1": {
-      "main": [
-        [
-          {
-            "node": "Filter Files Present on Remote",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -545,7 +521,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "25f8ac42-deed-4269-8b85-d111f4bd9f99",
+  "versionId": "9d9f1f78-d75c-4443-b377-2980e314c161",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -566,6 +542,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "07-07-2026/0:00",
+  "commitDate": "08-07-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
