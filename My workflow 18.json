@@ -1,0 +1,49 @@
+{
+  "updatedAt": "2026-07-08T05:39:03.906Z",
+  "createdAt": "2026-07-08T05:39:03.906Z",
+  "id": "a95NU7G2DFPfvY8h",
+  "name": "My workflow 18",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "b9e10d34-8eed-4a73-87be-63791d2d2ead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0d04d6d0-cc15-4916-bf46-bb8c7d45d295",
+      "name": "Webhook",
+      "webhookId": "b9e10d34-8eed-4a73-87be-63791d2d2ead"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "989861d7-b86b-47cd-878a-897e10817266",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-08T05:39:03.915Z",
+      "createdAt": "2026-07-08T05:39:03.915Z",
+      "role": "workflow:owner",
+      "workflowId": "a95NU7G2DFPfvY8h",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "09-07-2026/0:00",
+  "fileName": "My workflow 18.json"
+}
