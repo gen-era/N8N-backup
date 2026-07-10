@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T03:51:56.171Z",
+  "updatedAt": "2026-07-09T14:51:36.367Z",
   "createdAt": "2026-07-03T17:01:01.383Z",
   "id": "a1Mtyp9jfIrABIht",
   "name": "archer_auto_upload V2 Sapiens",
@@ -261,6 +261,7 @@
       ],
       "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
       "name": "GET Credentials",
+      "alwaysOutputData": true,
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -1616,15 +1617,17 @@
   },
   "staticData": {
     "node:Schedule Trigger": {
-      "recurrenceRules": []
+      "recurrenceRules": [
+        0
+      ]
     }
   },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
-  "activeVersionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
+  "versionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
+  "activeVersionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
   "triggerCount": 2,
   "shared": [
     {
@@ -1636,9 +1639,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-05T03:51:59.000Z",
-    "createdAt": "2026-07-05T03:51:56.175Z",
-    "versionId": "b63e88fa-423b-40d1-bd13-5aa048f01822",
+    "updatedAt": "2026-07-09T14:51:39.000Z",
+    "createdAt": "2026-07-09T14:51:36.370Z",
+    "versionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
     "workflowId": "a1Mtyp9jfIrABIht",
     "nodes": [
       {
@@ -1896,6 +1899,7 @@
         ],
         "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
         "name": "GET Credentials",
+        "alwaysOutputData": true,
         "credentials": {
           "postgres": {
             "id": "vvzB2Z8ymgMiekHW",
@@ -3246,11 +3250,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version b63e88fa",
+    "name": "Version dfa8fac2",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "09-07-2026/0:00",
+  "commitDate": "10-07-2026/0:00",
   "fileName": "archer_auto_upload V2 Sapiens.json"
 }
