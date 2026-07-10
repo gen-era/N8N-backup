@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T12:35:40.357Z",
+  "updatedAt": "2026-07-09T09:41:30.960Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -187,8 +187,8 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        1072,
-        0
+        816,
+        16
       ],
       "id": "eb8b0c55-eed4-4f03-995f-166872e8995a",
       "name": "Filter Files Present on Remote"
@@ -200,8 +200,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1504,
-        0
+        1472,
+        16
       ],
       "id": "851524dd-7cfc-44cc-bbea-926233a1c8a3",
       "name": "Send Script",
@@ -214,13 +214,13 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst AWS_CONC = 32;        // test edilen\nconst AWS_CHUNK = '16MB';   // test edilen\n\nconst sampleBlocks = items.map((item) => {\n  const files = item.LOCAL_FILES.split('\\n').map(f => f.trim()).filter(Boolean);\n  const encodedJson = Buffer.from(JSON.stringify({ ...item, BATCH_HAS_UMI: batchHasUmi })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d)`,\n`printf '[awsup]\\\\naws_access_key_id=%s\\\\naws_secret_access_key=%s\\\\naws_session_token=%s\\\\n' \"$AK\" \"$SK\" \"$ST\" > \"$WD/creds\"`,\n`printf '[profile awsup]\\\\nregion=us-east-1\\\\ns3=\\\\n    max_concurrent_requests=${AWS_CONC}\\\\n    multipart_threshold=64MB\\\\n    multipart_chunksize=${AWS_CHUNK}\\\\n' > \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 60`,\n`  echo \"[$(date '+%F %T')] Sending webhook for ${item.SAMPLE_ID}\"`,\n`  echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED for ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\nconst scriptFile = `/tmp/awsup_${timestamp}.sh`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=~/bin/aws`,\n`ICAV2=~/bin/icav2`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
+        "jsCode": "const items = $('Filter Files Present on Remote').all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst AWS_CONC = 32;        // test edilen\nconst AWS_CHUNK = '16MB';   // test edilen\n\nconst sampleBlocks = items.map((item) => {\n  const files = item.LOCAL_FILES.split('\\n').map(f => f.trim()).filter(Boolean);\n  const encodedJson = Buffer.from(JSON.stringify({ ...item, BATCH_HAS_UMI: batchHasUmi })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d)`,\n`printf '[awsup]\\\\naws_access_key_id=%s\\\\naws_secret_access_key=%s\\\\naws_session_token=%s\\\\n' \"$AK\" \"$SK\" \"$ST\" > \"$WD/creds\"`,\n`printf '[profile awsup]\\\\nregion=us-east-1\\\\ns3=\\\\n    max_concurrent_requests=${AWS_CONC}\\\\n    multipart_threshold=64MB\\\\n    multipart_chunksize=${AWS_CHUNK}\\\\n' > \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 60`,\n`  echo \"[$(date '+%F %T')] Sending webhook for ${item.SAMPLE_ID}\"`,\n`  echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED for ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\nconst scriptFile = `/tmp/awsup_${timestamp}.sh`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=~/bin/aws`,\n`ICAV2=~/bin/icav2`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1296,
-        0
+        1264,
+        16
       ],
       "id": "6e7237e1-c23d-483b-b819-c8f8a51d0981",
       "name": "Prepare Upload Script"
@@ -328,6 +328,76 @@
       ],
       "id": "3632cfd6-c3e8-4398-9dde-72580c1a5b17",
       "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app7zuDMPnrkW6fKx",
+          "mode": "list",
+          "cachedResultName": "ICA Upload",
+          "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblZHb0ztwV1UVUZh",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/app7zuDMPnrkW6fKx/tblZHb0ztwV1UVUZh"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "In Progress"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        16
+      ],
+      "id": "c017d42b-b5ee-4c9c-ac93-6b2c11942186",
+      "name": "Mark In Progress",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "cdKTy3hOj7iW90c4",
+          "name": "Airtable"
+        }
+      }
     }
   ],
   "connections": {
@@ -423,7 +493,7 @@
       "main": [
         [
           {
-            "node": "Prepare Upload Script",
+            "node": "Mark In Progress",
             "type": "main",
             "index": 0
           }
@@ -509,6 +579,17 @@
           }
         ]
       ]
+    },
+    "Mark In Progress": {
+      "main": [
+        [
+          {
+            "node": "Prepare Upload Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -521,7 +602,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9d9f1f78-d75c-4443-b377-2980e314c161",
+  "versionId": "176ce0c8-47cc-436f-b908-697d04fbfe73",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -542,6 +623,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "09-07-2026/0:00",
+  "commitDate": "10-07-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
