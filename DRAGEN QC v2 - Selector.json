@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T10:32:35.838Z",
+  "updatedAt": "2026-07-09T21:47:10.530Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,13 +43,13 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260518_A01832R_0240_BHLG5GDRX7",
+              "value": "260701_VH02229_35_AAJ2WN5M5 260703_VH01138_13_2225HHWNX 260703_A01228_0308_AHTL77DRX7 260703_A01228_0307_BHGYFJDMX2 260704_A01978_0197_BHMKYJDRX7 260704_A01978_0196_AHYLLFDSXF 260706_A01228_0310_BHN5G7DRX7 260706_A01228_0309_AHMKNHDRX7",
               "type": "string"
             },
             {
               "id": "perbatch",
               "name": "per_batch",
-              "value": "all",
+              "value": "5",
               "type": "string"
             },
             {
@@ -210,7 +210,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "cc7b517a-5665-4565-ab03-99e2a8b202f6",
+  "versionId": "7fe847ec-0e8c-46e1-a9cf-e2047370b906",
   "activeVersionId": "e2dfff0d-5f57-435e-b733-be2af1068978",
   "triggerCount": 0,
   "shared": [
@@ -430,6 +430,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "09-07-2026/0:00",
+  "commitDate": "10-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
