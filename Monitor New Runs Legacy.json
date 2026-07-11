@@ -794,7 +794,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        20
+        0
       ]
     }
   },
@@ -803,8 +803,8 @@
   },
   "pinData": {},
   "versionId": "dd480c0a-79e7-46d4-b2da-922aac5194df",
-  "activeVersionId": "3a901071-8321-465b-a302-04f641a0ef39",
-  "triggerCount": 1,
+  "activeVersionId": "dd480c0a-79e7-46d4-b2da-922aac5194df",
+  "triggerCount": 0,
   "shared": [
     {
       "updatedAt": "2025-12-19T08:46:42.944Z",
@@ -815,9 +815,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-24T19:20:00.003Z",
-    "createdAt": "2026-06-24T19:20:00.003Z",
-    "versionId": "3a901071-8321-465b-a302-04f641a0ef39",
+    "updatedAt": "2026-07-10T07:03:19.000Z",
+    "createdAt": "2026-06-27T15:54:59.565Z",
+    "versionId": "dd480c0a-79e7-46d4-b2da-922aac5194df",
     "workflowId": "GgcoorkW5qEx86Uq",
     "nodes": [
       {
@@ -1032,7 +1032,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -1124,26 +1124,6 @@
         ],
         "id": "982f3026-56c6-4e55-9362-1c8071704df1",
         "name": "Add Paths"
-      },
-      {
-        "parameters": {
-          "rule": {
-            "interval": [
-              {
-                "field": "hours",
-                "hoursInterval": 4
-              }
-            ]
-          }
-        },
-        "type": "n8n-nodes-base.scheduleTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          -608,
-          -288
-        ],
-        "id": "f6214056-5ff1-4c22-9d18-d1bb41d08981",
-        "name": "Schedule Trigger"
       },
       {
         "parameters": {
@@ -1503,17 +1483,6 @@
           ]
         ]
       },
-      "Schedule Trigger": {
-        "main": [
-          [
-            {
-              "node": "Find Runs",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Aggregate Run IDs": {
         "main": [
           [
@@ -1632,11 +1601,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": null,
-    "description": null,
+    "name": "Version dd480c0a",
+    "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "10-07-2026/0:00",
+  "commitDate": "11-07-2026/0:00",
   "fileName": "Monitor New Runs Legacy.json"
 }
