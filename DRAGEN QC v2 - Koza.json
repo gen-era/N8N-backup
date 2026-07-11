@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T09:05:33.405Z",
+  "updatedAt": "2026-07-10T08:54:33.843Z",
   "createdAt": "2026-05-29T19:54:21.793Z",
   "id": "5yypZE2MSOSkIDmN",
   "name": "DRAGEN QC v2 - Koza",
@@ -346,7 +346,10 @@
       "position": [
         1380,
         320
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -885,8 +888,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "1d9668ae-4d51-42b5-b19c-7ec207c62bd1",
-  "activeVersionId": "1d9668ae-4d51-42b5-b19c-7ec207c62bd1",
+  "versionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
+  "activeVersionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
   "triggerCount": 0,
   "shared": [
     {
@@ -898,9 +901,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-01T09:05:33.407Z",
-    "createdAt": "2026-07-01T09:05:33.407Z",
-    "versionId": "1d9668ae-4d51-42b5-b19c-7ec207c62bd1",
+    "updatedAt": "2026-07-10T08:54:33.845Z",
+    "createdAt": "2026-07-10T08:54:33.845Z",
+    "versionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
     "workflowId": "5yypZE2MSOSkIDmN",
     "nodes": [
       {
@@ -1243,7 +1246,10 @@
         "position": [
           1380,
           320
-        ]
+        ],
+        "retryOnFail": true,
+        "maxTries": 4,
+        "waitBetweenTries": 5000
       },
       {
         "parameters": {
@@ -1780,6 +1786,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "10-07-2026/0:00",
+  "commitDate": "11-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Koza.json"
 }
