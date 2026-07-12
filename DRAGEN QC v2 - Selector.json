@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-09T21:47:10.530Z",
+  "updatedAt": "2026-07-11T12:34:42.006Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Selector",
@@ -43,19 +43,19 @@
             {
               "id": "runids",
               "name": "run_ids",
-              "value": "260701_VH02229_35_AAJ2WN5M5 260703_VH01138_13_2225HHWNX 260703_A01228_0308_AHTL77DRX7 260703_A01228_0307_BHGYFJDMX2 260704_A01978_0197_BHMKYJDRX7 260704_A01978_0196_AHYLLFDSXF 260706_A01228_0310_BHN5G7DRX7 260706_A01228_0309_AHMKNHDRX7",
+              "value": "260708_A01978_0199_AH27W5DSXG",
               "type": "string"
             },
             {
               "id": "perbatch",
               "name": "per_batch",
-              "value": "5",
+              "value": "all",
               "type": "string"
             },
             {
               "id": "caresites",
               "name": "caresites",
-              "value": "",
+              "value": "Era",
               "type": "string"
             }
           ]
@@ -74,7 +74,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(string_to_array('{{ $json.caresites ?? '' }}', ',')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref\n  FROM care_site cs\n  JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name\n    OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (\n  SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+        "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(regexp_split_to_array(trim('{{ $json.caresites ?? '' }}'), '[[:space:],]+')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref\n  FROM care_site cs\n  JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name\n    OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (\n  SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
         "options": {}
       },
       "id": "Select & Queue",
@@ -210,8 +210,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "7fe847ec-0e8c-46e1-a9cf-e2047370b906",
-  "activeVersionId": "e2dfff0d-5f57-435e-b733-be2af1068978",
+  "versionId": "e406bc5e-8abd-4186-99a0-65e1bcf455a7",
+  "activeVersionId": "e406bc5e-8abd-4186-99a0-65e1bcf455a7",
   "triggerCount": 0,
   "shared": [
     {
@@ -223,9 +223,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-01T09:05:33.099Z",
-    "createdAt": "2026-07-01T09:05:33.099Z",
-    "versionId": "e2dfff0d-5f57-435e-b733-be2af1068978",
+    "updatedAt": "2026-07-11T12:34:42.008Z",
+    "createdAt": "2026-07-11T12:34:42.008Z",
+    "versionId": "e406bc5e-8abd-4186-99a0-65e1bcf455a7",
     "workflowId": "S2oU9ggilqJrFCxm",
     "nodes": [
       {
@@ -265,7 +265,7 @@
               {
                 "id": "runids",
                 "name": "run_ids",
-                "value": "260626_A01978_0193_AHGW3KDMX2",
+                "value": "260708_A01978_0199_AH27W5DSXG",
                 "type": "string"
               },
               {
@@ -277,7 +277,7 @@
               {
                 "id": "caresites",
                 "name": "caresites",
-                "value": "Doku,Ece,Erci,Geli,inye,Nesil,Pera,Via",
+                "value": "Era",
                 "type": "string"
               }
             ]
@@ -296,7 +296,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(string_to_array('{{ $json.caresites ?? '' }}', ',')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref\n  FROM care_site cs\n  JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name\n    OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (\n  SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+          "query": "WITH params AS (\n  SELECT CASE\n    WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 3\n    WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n    ELSE trim('{{ $json.per_batch ?? '' }}')::int\n  END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(regexp_split_to_array(trim('{{ $json.caresites ?? '' }}'), '[[:space:],]+')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref\n  FROM care_site cs\n  JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name\n    OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (\n  SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter\n),\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref AND dop.recipe_ref = 6\n                          AND dop.status_concept_ref IN (24, 26, 29)\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project\n                            ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE r.run_id IN (SELECT trim(x) FROM unnest(regexp_split_to_array(trim('{{ $json.run_ids }}'), '[[:space:],]+')) AS x)\n    AND rd.kit_ref IN (1, 2, 3, 4, 5, 40, 73, 97)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref = 6 AND dop.status_concept_ref IN (24, 26, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, 6, 24, e.sample_project\nFROM eligible e\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM params) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
           "options": {}
         },
         "id": "Select & Queue",
@@ -430,6 +430,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "11-07-2026/0:00",
+  "commitDate": "12-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Selector.json"
 }
