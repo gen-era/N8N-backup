@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T09:05:33.626Z",
+  "updatedAt": "2026-07-11T12:16:05.781Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -346,7 +346,10 @@
       "position": [
         1380,
         320
-      ]
+      ],
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 5000
     },
     {
       "parameters": {
@@ -885,8 +888,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
-  "activeVersionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
+  "versionId": "103cad1b-ee41-402b-8a0b-67bc579fdee8",
+  "activeVersionId": "103cad1b-ee41-402b-8a0b-67bc579fdee8",
   "triggerCount": 0,
   "shared": [
     {
@@ -898,9 +901,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-01T09:05:33.627Z",
-    "createdAt": "2026-07-01T09:05:33.627Z",
-    "versionId": "387bea99-4d88-4472-bd9f-b2bdc093699f",
+    "updatedAt": "2026-07-11T12:16:05.783Z",
+    "createdAt": "2026-07-11T12:16:05.783Z",
+    "versionId": "103cad1b-ee41-402b-8a0b-67bc579fdee8",
     "workflowId": "p8NYmUwJkEVaDlyp",
     "nodes": [
       {
@@ -1243,7 +1246,10 @@
         "position": [
           1380,
           320
-        ]
+        ],
+        "retryOnFail": true,
+        "maxTries": 4,
+        "waitBetweenTries": 5000
       },
       {
         "parameters": {
@@ -1780,6 +1786,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "11-07-2026/0:00",
+  "commitDate": "12-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
