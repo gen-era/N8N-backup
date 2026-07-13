@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-10T08:54:33.843Z",
+  "updatedAt": "2026-07-12T20:52:52.696Z",
   "createdAt": "2026-05-29T19:54:21.793Z",
   "id": "5yypZE2MSOSkIDmN",
   "name": "DRAGEN QC v2 - Koza",
@@ -75,7 +75,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref = 6\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nORDER BY cl.data_op_ref;",
+        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
         "options": {}
       },
       "id": "Claim All Pending",
@@ -95,7 +95,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"2\":  \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+        "jsCode": "// BED artik DB'de (data_operation_recipes.pipeline_id); Claim sorgusu bed_file olarak donduruyor.\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: item.json.bed_file || \"\" },\n  pairedItem: { item: idx }\n}));"
       },
       "id": "Attach BED",
       "name": "Attach BED",
@@ -653,6 +653,108 @@
           "name": "Koza DRAGEN - Root User"
         }
       }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1280,
+        260
+      ],
+      "id": "1c2007ab-5857-40e3-ac8e-2a42d42c51ab",
+      "name": "Her 1 Saatte Bir"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:5678/api/v1/executions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "workflowId",
+              "value": "5yypZE2MSOSkIDmN"
+            },
+            {
+              "name": "status",
+              "value": "running"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-N8N-API-KEY",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTRkZTM2My00ZTYzLTQwZGYtYTA1MS03OGNjOWQ4MGZiZDEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc3NDg2NjAxfQ.sH-OPVPNZdXuHuJtFKAcJGqBmKZcfcbwLQ1arLvuxbo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1060,
+        260
+      ],
+      "id": "43c02968-4716-4eb6-b3fe-eea1eefb4736",
+      "name": "Calisan Kopya Var mi"
+    },
+    {
+      "parameters": {
+        "jsCode": "const self = $execution.id;\nconst data = ($input.first().json.data) || [];\nconst others = data.filter(e => String(e.id) !== String(self));\nreturn [{ json: { otherRunning: others.length, otherIds: others.map(e => e.id) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -840,
+        260
+      ],
+      "id": "679ca1ce-24d2-4450-8aec-b1360b6da516",
+      "name": "Baska Kopya Sayisi"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-guard-1",
+              "leftValue": "={{ $json.otherRunning }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -620,
+        260
+      ],
+      "id": "16e7c780-0188-4210-9582-ef3bce219ed6",
+      "name": "Bosta mi"
     }
   ],
   "connections": {
@@ -872,7 +974,52 @@
       "main": [
         [
           {
+            "node": "Calisan Kopya Var mi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calisan Kopya Var mi": {
+      "main": [
+        [
+          {
+            "node": "Baska Kopya Sayisi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baska Kopya Sayisi": {
+      "main": [
+        [
+          {
+            "node": "Bosta mi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bosta mi": {
+      "main": [
+        [
+          {
             "node": "Check DRAGEN Idle",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Her 1 Saatte Bir": {
+      "main": [
+        [
+          {
+            "node": "Calisan Kopya Var mi",
             "type": "main",
             "index": 0
           }
@@ -885,12 +1032,19 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "node:Her 3 Saatte Bir": {
+      "recurrenceRules": []
+    },
+    "node:Her 1 Saatte Bir": {
+      "recurrenceRules": []
+    }
+  },
   "meta": null,
   "pinData": {},
-  "versionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
-  "activeVersionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
-  "triggerCount": 0,
+  "versionId": "7df499d8-f05b-49a7-bb9c-db7bac1f2252",
+  "activeVersionId": "7df499d8-f05b-49a7-bb9c-db7bac1f2252",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-05-29T19:54:21.800Z",
@@ -901,9 +1055,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-10T08:54:33.845Z",
-    "createdAt": "2026-07-10T08:54:33.845Z",
-    "versionId": "115a6f5a-6a72-44a7-a4f7-81575d761d37",
+    "updatedAt": "2026-07-12T20:52:52.697Z",
+    "createdAt": "2026-07-12T20:52:52.697Z",
+    "versionId": "7df499d8-f05b-49a7-bb9c-db7bac1f2252",
     "workflowId": "5yypZE2MSOSkIDmN",
     "nodes": [
       {
@@ -975,7 +1129,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref = 6\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nORDER BY cl.data_op_ref;",
+          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
           "options": {}
         },
         "id": "Claim All Pending",
@@ -995,7 +1149,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const kitBedMap = {\n  \"1\":  \"CES_v3_hg38_original_normalized_chr.bed\",\n  \"2\":  \"CHCS_C_v2_target_hg38_liftover_normalized_chr.bed\",\n  \"3\":  \"extCAS_v2_target_normalized_chr.bed\",\n  \"4\":  \"NES_v3_target_normalized_chr.bed\",\n  \"5\":  \"FAID_GenEra_v1_target_normalized_chr.bed\",\n  \"40\": \"Twist_Exome_hg38_original_normalized_chr.bed\",\n  \"73\": \"HCS_v2_0_1_hg38_target_normalized.bed\",\n  \"97\": \"Twist_Exome_hg38_original_with_mtDNA_normalized_chr.bed\"\n};\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: kitBedMap[String(item.json.kit_ref)] || \"\" },\n  pairedItem: { item: idx }\n}));"
+          "jsCode": "// BED artik DB'de (data_operation_recipes.pipeline_id); Claim sorgusu bed_file olarak donduruyor.\n// Claim returns [{success:true}] when 0 rows claimed -> drop it so worker stops cleanly\nconst items = $(\"Claim All Pending\").all().filter(it => it.json.read_ref != null);\nreturn items.map((item, idx) => ({\n  json: { ...item.json, bed_file_path: item.json.bed_file || \"\" },\n  pairedItem: { item: idx }\n}));"
         },
         "id": "Attach BED",
         "name": "Attach BED",
@@ -1553,6 +1707,108 @@
             "name": "Koza DRAGEN - Root User"
           }
         }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 1
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -1280,
+          260
+        ],
+        "id": "1c2007ab-5857-40e3-ac8e-2a42d42c51ab",
+        "name": "Her 1 Saatte Bir"
+      },
+      {
+        "parameters": {
+          "url": "http://localhost:5678/api/v1/executions",
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "workflowId",
+                "value": "5yypZE2MSOSkIDmN"
+              },
+              {
+                "name": "status",
+                "value": "running"
+              }
+            ]
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "X-N8N-API-KEY",
+                "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOTRkZTM2My00ZTYzLTQwZGYtYTA1MS03OGNjOWQ4MGZiZDEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzc3NDg2NjAxfQ.sH-OPVPNZdXuHuJtFKAcJGqBmKZcfcbwLQ1arLvuxbo"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -1060,
+          260
+        ],
+        "id": "43c02968-4716-4eb6-b3fe-eea1eefb4736",
+        "name": "Calisan Kopya Var mi"
+      },
+      {
+        "parameters": {
+          "jsCode": "const self = $execution.id;\nconst data = ($input.first().json.data) || [];\nconst others = data.filter(e => String(e.id) !== String(self));\nreturn [{ json: { otherRunning: others.length, otherIds: others.map(e => e.id) } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -840,
+          260
+        ],
+        "id": "679ca1ce-24d2-4450-8aec-b1360b6da516",
+        "name": "Baska Kopya Sayisi"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "cond-guard-1",
+                "leftValue": "={{ $json.otherRunning }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2,
+        "position": [
+          -620,
+          260
+        ],
+        "id": "16e7c780-0188-4210-9582-ef3bce219ed6",
+        "name": "Bosta mi"
       }
     ],
     "connections": {
@@ -1772,7 +2028,52 @@
         "main": [
           [
             {
+              "node": "Calisan Kopya Var mi",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Calisan Kopya Var mi": {
+        "main": [
+          [
+            {
+              "node": "Baska Kopya Sayisi",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Baska Kopya Sayisi": {
+        "main": [
+          [
+            {
+              "node": "Bosta mi",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bosta mi": {
+        "main": [
+          [
+            {
               "node": "Check DRAGEN Idle",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Her 1 Saatte Bir": {
+        "main": [
+          [
+            {
+              "node": "Calisan Kopya Var mi",
               "type": "main",
               "index": 0
             }
@@ -1786,6 +2087,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "12-07-2026/0:00",
+  "commitDate": "13-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Koza.json"
 }
