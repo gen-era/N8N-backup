@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T10:23:24.363Z",
+  "updatedAt": "2026-07-12T13:02:40.223Z",
   "createdAt": "2025-12-10T20:39:39.739Z",
   "id": "p5v6HfuZ2iO5nnbC",
   "name": "Sophia Upload",
@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -3152,
+        -3296,
         -288
       ],
       "id": "c68bcd67-2b5d-430d-af8c-c2e7b5e637e9",
@@ -26,7 +26,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1168,
+        -1312,
         -288
       ],
       "id": "043e7ad2-f85f-4c6c-bebc-8aef5f623e62",
@@ -45,7 +45,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -2208,
+        -2352,
         -288
       ],
       "id": "66bec76f-14a8-4dde-9397-074d3974da25",
@@ -60,7 +60,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -2720,
+        -2864,
         -288
       ],
       "id": "9f8e2df8-7642-462d-a94b-96a5af0dc2ed",
@@ -79,7 +79,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1920,
+        -2064,
         -288
       ],
       "id": "caa1ab48-6426-4bf9-9591-f05a2ac676bf",
@@ -113,7 +113,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1696,
+        -1840,
         -288
       ],
       "id": "3ffe6b31-a944-4d04-bdb1-52bde5a61cd2",
@@ -255,7 +255,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
+        -576,
         -480
       ],
       "id": "1d5835da-e256-4185-a69a-2e533a4457d5",
@@ -428,7 +428,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -368,
+        -384,
         -288
       ],
       "id": "91fa19aa-37cd-4bc6-ad58-70f0989d3d79",
@@ -517,7 +517,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -64,
+        -32,
         -288
       ],
       "credentials": {
@@ -702,7 +702,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1424,
+        -1568,
         -288
       ],
       "id": "390e4411-abcf-4774-bbba-9f25809333f4",
@@ -764,7 +764,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -928,
+        -1072,
         -288
       ],
       "id": "4e9d237c-db24-4a36-a5f1-5341f48b3a77",
@@ -799,7 +799,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -736,
+        -880,
         -288
       ],
       "id": "aa49a94b-e3b3-42c1-b7b1-7afed7fb8291",
@@ -929,8 +929,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -448,
-        -64
+        -576,
+        -48
       ],
       "id": "65bb5291-64b4-4e44-bcbe-ca40ed7c35a5",
       "name": "Update Records as Failed (Missing Path)",
@@ -954,8 +954,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -240,
-        -64
+        -320,
+        -48
       ],
       "id": "4d9d770a-1768-43c2-935c-cefc75893bb6",
       "name": "Send Missing Path Email",
@@ -995,7 +995,7 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        -2512,
+        -2656,
         -288
       ],
       "id": "5f907176-2494-4426-a74f-8515ad229333",
@@ -1010,7 +1010,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -3152,
+        -3296,
         -80
       ]
     },
@@ -1033,7 +1033,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2896,
+        -3040,
         -288
       ]
     },
@@ -1048,7 +1048,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1936,
+        -2080,
         -560
       ],
       "credentials": {
@@ -1096,7 +1096,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1712,
+        -1856,
         -560
       ]
     },
@@ -1119,7 +1119,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1488,
+        -1632,
         -704
       ]
     },
@@ -1139,7 +1139,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -1280,
+        -1424,
         -704
       ]
     },
@@ -1158,7 +1158,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -1488,
+        -1632,
         -544
       ],
       "webhookId": "fb66f18d-c6c4-4255-bb5d-31afd75e8d03",
@@ -1179,7 +1179,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -528,
+        -576,
         -288
       ]
     }
@@ -1570,7 +1570,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "8543791e-3d70-4e28-a4c1-f1b936ccbce8",
+  "versionId": "b320dbc7-4e0a-43cf-855f-9f038751ea48",
   "activeVersionId": "2599e3ec-d74e-45a8-9b48-6e716c79406b",
   "triggerCount": 0,
   "shared": [
@@ -3155,6 +3155,6 @@
       "name": "Production"
     }
   ],
-  "commitDate": "12-07-2026/0:00",
+  "commitDate": "13-07-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
