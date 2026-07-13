@@ -1,0 +1,503 @@
+{
+  "updatedAt": "2026-07-12T20:52:52.472Z",
+  "createdAt": "2026-05-29T21:10:31.161Z",
+  "id": "S2oU9ggilqJrFCxm",
+  "name": "DRAGEN QC v2 - Sentinel",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "run_ids"
+            }
+          ]
+        }
+      },
+      "id": "When Executed by Another Workflow",
+      "name": "When Executed by Another Workflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -672,
+        -288
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "Manual Trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "runids",
+              "name": "run_ids",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "perbatch",
+              "name": "per_batch",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "caresites",
+              "name": "caresites",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Set run_ids",
+      "name": "Set run_ids",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -656,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH input AS (\n  SELECT\n    NULLIF(trim('{{ $json.run_ids ?? '' }}'), '') AS run_ids_raw,\n    CASE\n      WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 5\n      WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n      ELSE trim('{{ $json.per_batch ?? '' }}')::int\n    END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(regexp_split_to_array(trim('{{ $json.caresites ?? '' }}'), '[[:space:],]+')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref FROM care_site cs JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter),\nrun_arr AS (\n  SELECT array(SELECT trim(x) FROM unnest(regexp_split_to_array(coalesce((SELECT run_ids_raw FROM input),''), '[[:space:],]+')) AS x WHERE trim(x) <> '') AS runs\n),\n-- run filtresi: elle run listesi verildiyse SADECE o runlar; verilmediyse son 14 gunde tamamlanmis cevrim\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref\n      AND dop.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND dop.status_concept_ref IN (24, 26, 27, 29)\n  WHERE rd.kit_ref IN (SELECT kit_ref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n    AND (CASE WHEN (SELECT run_ids_raw FROM input) IS NULL\n              THEN (c.status_concept_ref = 29 AND c.conversion_time >= now() - interval '14 days')\n              ELSE r.run_id IN (SELECT unnest(runs) FROM run_arr) END)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id, rd.kit_ref,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE rd.kit_ref IN (SELECT kit_ref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n    AND (CASE WHEN (SELECT run_ids_raw FROM input) IS NULL\n              THEN (c.status_concept_ref = 29 AND c.conversion_time >= now() - interval '14 days')\n              ELSE r.run_id IN (SELECT unnest(runs) FROM run_arr) END)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    -- Zaten herhangi bir QC kaydi (basarisiz dahil) olani tekrar acma\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n                      AND dop.status_concept_ref IN (24, 26, 27, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, rp.uniqueref, 24, e.sample_project\nFROM eligible e\nJOIN data_operation_recipes rp ON rp.kit_ref = e.kit_ref AND rp.platform_concept_ref = 549\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM input) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+        "options": {}
+      },
+      "id": "Select & Queue",
+      "name": "Select & Queue",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -288,
+        -112
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -656,
+        128
+      ],
+      "id": "63474bf5-a80b-4978-bd5d-b7af5755f2e0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "5yypZE2MSOSkIDmN",
+          "mode": "list",
+          "cachedResultName": "DRAGEN QC v2 - Koza"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "Run Koza Worker",
+      "name": "Run Koza Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "p8NYmUwJkEVaDlyp",
+          "mode": "list",
+          "cachedResultName": "DRAGEN QC v2 - Sapiens"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "Run Sapiens Worker",
+      "name": "Run Sapiens Worker",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        32,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Select & Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Select & Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set run_ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set run_ids": {
+      "main": [
+        [
+          {
+            "node": "Select & Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select & Queue": {
+      "main": [
+        [
+          {
+            "node": "Run Koza Worker",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Run Sapiens Worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        0
+      ]
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "6da515bf-5b0b-49d5-9ecc-23ffec20c298",
+  "activeVersionId": "6da515bf-5b0b-49d5-9ecc-23ffec20c298",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-29T21:10:31.166Z",
+      "createdAt": "2026-05-29T21:10:31.166Z",
+      "role": "workflow:owner",
+      "workflowId": "S2oU9ggilqJrFCxm",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-12T20:52:52.474Z",
+    "createdAt": "2026-07-12T20:52:52.474Z",
+    "versionId": "6da515bf-5b0b-49d5-9ecc-23ffec20c298",
+    "workflowId": "S2oU9ggilqJrFCxm",
+    "nodes": [
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "run_ids"
+              }
+            ]
+          }
+        },
+        "id": "When Executed by Another Workflow",
+        "name": "When Executed by Another Workflow",
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -672,
+          -288
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "Manual Trigger",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -864,
+          -96
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "runids",
+                "name": "run_ids",
+                "value": "",
+                "type": "string"
+              },
+              {
+                "id": "perbatch",
+                "name": "per_batch",
+                "value": "",
+                "type": "string"
+              },
+              {
+                "id": "caresites",
+                "name": "caresites",
+                "value": "",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "Set run_ids",
+        "name": "Set run_ids",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          -656,
+          -96
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "WITH input AS (\n  SELECT\n    NULLIF(trim('{{ $json.run_ids ?? '' }}'), '') AS run_ids_raw,\n    CASE\n      WHEN trim(coalesce('{{ $json.per_batch ?? '' }}', '')) = '' THEN 5\n      WHEN lower(trim('{{ $json.per_batch ?? '' }}')) IN ('all','tümü','tum','hepsi','tümünü') THEN 2147483647\n      ELSE trim('{{ $json.per_batch ?? '' }}')::int\n    END AS cap\n),\ncs_input AS (\n  SELECT trim(x) AS name\n  FROM unnest(regexp_split_to_array(trim('{{ $json.caresites ?? '' }}'), '[[:space:],]+')) AS x\n  WHERE trim(x) <> ''\n),\ncs_set AS (\n  SELECT DISTINCT cs.uniqueref FROM care_site cs JOIN cs_input i\n    ON cs.care_site_source_value ILIKE i.name OR cs.care_site_name ILIKE '%' || i.name || '%'\n),\ncs_flag AS (SELECT (SELECT COUNT(*) FROM cs_input) = 0 AS no_filter),\nrun_arr AS (\n  SELECT array(SELECT trim(x) FROM unnest(regexp_split_to_array(coalesce((SELECT run_ids_raw FROM input),''), '[[:space:],]+')) AS x WHERE trim(x) <> '') AS runs\n),\n-- run filtresi: elle run listesi verildiyse SADECE o runlar; verilmediyse son 14 gunde tamamlanmis cevrim\nbatch_done AS (\n  SELECT r.run_id, rd.sample_project, COUNT(DISTINCT rd.uniqueref) AS done_cnt\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  JOIN data_operations dop ON dop.read_ref = rd.uniqueref\n      AND dop.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND dop.status_concept_ref IN (24, 26, 27, 29)\n  WHERE rd.kit_ref IN (SELECT kit_ref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n    AND (CASE WHEN (SELECT run_ids_raw FROM input) IS NULL\n              THEN (c.status_concept_ref = 29 AND c.conversion_time >= now() - interval '14 days')\n              ELSE r.run_id IN (SELECT unnest(runs) FROM run_arr) END)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n  GROUP BY r.run_id, rd.sample_project\n),\neligible AS (\n  SELECT rd.uniqueref AS read_ref, rd.sample_project, r.run_id, rd.kit_ref,\n         ROW_NUMBER() OVER (PARTITION BY r.run_id, rd.sample_project ORDER BY random()) AS rn\n  FROM reads rd\n  JOIN conversions c ON c.uniqueref = rd.conversion_ref\n  JOIN runs r        ON r.uniqueref = c.run_ref\n  WHERE rd.kit_ref IN (SELECT kit_ref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n    AND (CASE WHEN (SELECT run_ids_raw FROM input) IS NULL\n              THEN (c.status_concept_ref = 29 AND c.conversion_time >= now() - interval '14 days')\n              ELSE r.run_id IN (SELECT unnest(runs) FROM run_arr) END)\n    AND ((SELECT no_filter FROM cs_flag) OR rd.requesting_caresite_ref IN (SELECT uniqueref FROM cs_set))\n    -- Bos/basarisiz ornekleri ele: sayisi DOLU ve 1000'den az ise QC'ye sokma (NULL=sayilmamis, dokunma)\n    AND (rd.reads IS NULL OR rd.reads >= 1000)\n    -- Zaten herhangi bir QC kaydi (basarisiz dahil) olani tekrar acma\n    AND NOT EXISTS (SELECT 1 FROM data_operations dop WHERE dop.read_ref = rd.uniqueref\n                      AND dop.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n                      AND dop.status_concept_ref IN (24, 26, 27, 29))\n)\nINSERT INTO data_operations (read_ref, recipe_ref, status_concept_ref, batch_source_value)\nSELECT e.read_ref, rp.uniqueref, 24, e.sample_project\nFROM eligible e\nJOIN data_operation_recipes rp ON rp.kit_ref = e.kit_ref AND rp.platform_concept_ref = 549\nLEFT JOIN batch_done bd ON bd.run_id = e.run_id AND bd.sample_project = e.sample_project\nWHERE e.rn <= ((SELECT cap FROM input) - COALESCE(bd.done_cnt, 0))\nRETURNING uniqueref, read_ref, batch_source_value;",
+          "options": {}
+        },
+        "id": "Select & Queue",
+        "name": "Select & Queue",
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -288,
+          -112
+        ],
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 6
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -656,
+          128
+        ],
+        "id": "63474bf5-a80b-4978-bd5d-b7af5755f2e0",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "5yypZE2MSOSkIDmN",
+            "mode": "list",
+            "cachedResultName": "DRAGEN QC v2 - Koza"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "Run Koza Worker",
+        "name": "Run Koza Worker",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          -112
+        ]
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "p8NYmUwJkEVaDlyp",
+            "mode": "list",
+            "cachedResultName": "DRAGEN QC v2 - Sapiens"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "id": "Run Sapiens Worker",
+        "name": "Run Sapiens Worker",
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          32,
+          80
+        ]
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Select & Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Select & Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "Set run_ids",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set run_ids": {
+        "main": [
+          [
+            {
+              "node": "Select & Queue",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select & Queue": {
+        "main": [
+          [
+            {
+              "node": "Run Koza Worker",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Run Sapiens Worker",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": [],
+  "commitDate": "13-07-2026/0:00",
+  "fileName": "DRAGEN QC v2 - Sentinel.json"
+}
