@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-09T14:51:36.367Z",
+  "updatedAt": "2026-07-13T02:57:48.057Z",
   "createdAt": "2026-07-03T17:01:01.383Z",
   "id": "a1Mtyp9jfIrABIht",
   "name": "archer_auto_upload V2 Sapiens",
@@ -256,7 +256,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2800,
+        3008,
         544
       ],
       "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
@@ -293,7 +293,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3216,
+        3424,
         544
       ],
       "id": "783369cd-3d48-44a3-ba14-a2cc8f4aeb23",
@@ -308,7 +308,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3984,
+        4192,
         400
       ],
       "id": "bb39229a-5cae-452a-b436-322c7f066e2b",
@@ -321,7 +321,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        5312,
+        5520,
         416
       ],
       "id": "8da502ba-9a07-449b-8edc-75c75591c854",
@@ -337,7 +337,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        4944,
+        5152,
         416
       ],
       "id": "2cc37257-c9ae-4987-9379-7011334f8151",
@@ -351,7 +351,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        4304,
+        4512,
         288
       ],
       "id": "526c8ab0-389f-47b4-aa5f-4bd194f3831c",
@@ -364,7 +364,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5760,
+        5968,
         368
       ],
       "id": "053c53eb-4a81-4748-aeab-808d661a0bf5",
@@ -379,7 +379,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        5904,
+        6112,
         704
       ],
       "id": "769ef1c5-ed0e-4300-8f34-f95a54e2bd64",
@@ -393,7 +393,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        6112,
+        6320,
         704
       ],
       "id": "c1827490-364b-41f8-aeba-7ecea9f69010",
@@ -408,7 +408,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        6320,
+        6528,
         704
       ],
       "id": "31a19f04-834b-409a-b504-87dda4435e03",
@@ -421,7 +421,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        6528,
+        6736,
         704
       ],
       "id": "e48d0f52-428f-4e7f-aa08-14b649778bbf",
@@ -435,7 +435,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6784,
+        6992,
         704
       ],
       "id": "63c10f3c-28d2-4fd0-8574-5a310217c575",
@@ -468,7 +468,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4576,
+        4784,
         288
       ],
       "id": "736972b0-15fe-49c6-82a2-8a7e36482cae",
@@ -485,7 +485,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        4960,
+        5168,
         240
       ],
       "id": "48b202dd-eb88-4652-833c-e086b0e5240d",
@@ -504,7 +504,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        5328,
+        5536,
         240
       ],
       "id": "b7531d35-0ed7-481e-93c2-c40e83d4f0b8",
@@ -543,7 +543,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        6000,
+        6208,
         368
       ],
       "id": "ded26ff0-d9c5-427c-807e-eba5b4b1a87c",
@@ -554,7 +554,7 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        6256,
+        6464,
         384
       ],
       "id": "dcde6125-8d4d-479d-bff4-22dd28cb2816",
@@ -588,7 +588,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2992,
+        3200,
         544
       ],
       "id": "cfdcf6f8-9b61-4b44-a667-1e864e42f12c",
@@ -604,7 +604,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        3232,
+        3440,
         768
       ],
       "id": "7c84dded-3a6f-4810-8e16-1c66a1e94bb1",
@@ -622,8 +622,8 @@
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        2096,
-        368
+        2464,
+        384
       ],
       "id": "925b3a7e-74a2-4312-9c99-9e04a84a6ce3",
       "name": "Limit"
@@ -638,7 +638,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        6464,
+        6672,
         384
       ],
       "id": "1b5a27ea-8089-4988-a4c3-526061e31e82",
@@ -665,7 +665,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        7536,
+        7744,
         704
       ],
       "id": "6a2805ba-e5ea-4e54-96af-a707c879df14",
@@ -715,7 +715,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        7808,
+        8016,
         704
       ],
       "id": "8c323c12-9b23-4d1d-8f6d-1c8e49677c1e",
@@ -759,7 +759,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        8016,
+        8224,
         704
       ],
       "id": "989aa23f-d3e4-4dc0-a560-a36f75a06421",
@@ -799,7 +799,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        8240,
+        8448,
         704
       ],
       "id": "03129836-efa7-41cf-9f27-2f070bef7fbc",
@@ -831,7 +831,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        6720,
+        6928,
         976
       ],
       "id": "e228d731-edf9-4f11-8b29-ef5868fa62d1",
@@ -855,7 +855,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        7232,
+        7440,
         704
       ],
       "id": "11e7e7df-2f1a-4b12-9d86-49a2f57742fa",
@@ -932,7 +932,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2912,
+        3120,
         80
       ],
       "id": "2bca0f74-b573-41d1-bcc7-0a7e671d8915",
@@ -945,7 +945,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2624,
+        2832,
         80
       ],
       "id": "2968b503-e313-4ed0-89d7-f963c64f24b3",
@@ -978,7 +978,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3328,
+        3536,
         80
       ],
       "id": "10c4cd8f-5c23-441a-a9eb-b4bba2b95ac2",
@@ -991,7 +991,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3120,
+        3328,
         80
       ],
       "id": "c600e1fa-d610-43a7-af5d-59fea90455b2",
@@ -1008,7 +1008,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        3584,
+        3792,
         96
       ],
       "id": "a908db59-2871-4b88-88b8-045b5b49fed0",
@@ -1029,7 +1029,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3568,
+        3776,
         368
       ],
       "id": "4fc2ce05-9c03-4213-b0c0-87aa87d6bc86",
@@ -1042,7 +1042,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6992,
+        7200,
         704
       ],
       "id": "a889dee7-2773-4ac3-8de9-38736225532b",
@@ -1090,12 +1090,64 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        8448,
+        8656,
         608
       ],
       "id": "151cf5d5-fe03-43e8-99cc-cc031cea2073",
       "name": "HTTP Request",
       "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "702bc924-bc8e-4a7f-841b-007a38f2c651",
+              "leftValue": "={{ $json.recipe_ref }}",
+              "rightValue": 430,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "9cc43bda-23c3-43d8-980b-b60af3911f14",
+              "leftValue": "={{ $json.recipe_ref }}",
+              "rightValue": 577,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            },
+            {
+              "id": "b5981e14-1a76-4870-9a12-822c3db72fc0",
+              "leftValue": "={{ $json.recipe_ref }}",
+              "rightValue": 233,
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2064,
+        384
+      ],
+      "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
+      "name": "Filter1"
     }
   ],
   "connections": {
@@ -1603,6 +1655,22 @@
       "main": [
         [
           {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email2": {
+      "main": [
+        []
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
             "node": "Limit",
             "type": "main",
             "index": 0
@@ -1626,8 +1694,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
-  "activeVersionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
+  "versionId": "f1947be0-f0a9-40f1-a8e1-80c53d3a3bfb",
+  "activeVersionId": "f1947be0-f0a9-40f1-a8e1-80c53d3a3bfb",
   "triggerCount": 2,
   "shared": [
     {
@@ -1639,9 +1707,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-09T14:51:39.000Z",
-    "createdAt": "2026-07-09T14:51:36.370Z",
-    "versionId": "dfa8fac2-c1d8-4443-b600-36b2264d4787",
+    "updatedAt": "2026-07-13T02:57:51.000Z",
+    "createdAt": "2026-07-13T02:57:48.060Z",
+    "versionId": "f1947be0-f0a9-40f1-a8e1-80c53d3a3bfb",
     "workflowId": "a1Mtyp9jfIrABIht",
     "nodes": [
       {
@@ -1894,7 +1962,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2800,
+          3008,
           544
         ],
         "id": "fa975e1c-e6c1-4cdd-90f0-c4aa41473bb8",
@@ -1931,7 +1999,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          3216,
+          3424,
           544
         ],
         "id": "783369cd-3d48-44a3-ba14-a2cc8f4aeb23",
@@ -1946,7 +2014,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          3984,
+          4192,
           400
         ],
         "id": "bb39229a-5cae-452a-b436-322c7f066e2b",
@@ -1959,7 +2027,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          5312,
+          5520,
           416
         ],
         "id": "8da502ba-9a07-449b-8edc-75c75591c854",
@@ -1975,7 +2043,7 @@
         "type": "n8n-nodes-base.readWriteFile",
         "typeVersion": 1.1,
         "position": [
-          4944,
+          5152,
           416
         ],
         "id": "2cc37257-c9ae-4987-9379-7011334f8151",
@@ -1989,7 +2057,7 @@
         "type": "n8n-nodes-base.convertToFile",
         "typeVersion": 1.1,
         "position": [
-          4304,
+          4512,
           288
         ],
         "id": "526c8ab0-389f-47b4-aa5f-4bd194f3831c",
@@ -2002,7 +2070,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          5760,
+          5968,
           368
         ],
         "id": "053c53eb-4a81-4748-aeab-808d661a0bf5",
@@ -2017,7 +2085,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          5904,
+          6112,
           704
         ],
         "id": "769ef1c5-ed0e-4300-8f34-f95a54e2bd64",
@@ -2031,7 +2099,7 @@
         "type": "n8n-nodes-base.convertToFile",
         "typeVersion": 1.1,
         "position": [
-          6112,
+          6320,
           704
         ],
         "id": "c1827490-364b-41f8-aeba-7ecea9f69010",
@@ -2046,7 +2114,7 @@
         "type": "n8n-nodes-base.readWriteFile",
         "typeVersion": 1.1,
         "position": [
-          6320,
+          6528,
           704
         ],
         "id": "31a19f04-834b-409a-b504-87dda4435e03",
@@ -2059,7 +2127,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          6528,
+          6736,
           704
         ],
         "id": "e48d0f52-428f-4e7f-aa08-14b649778bbf",
@@ -2073,7 +2141,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          6784,
+          6992,
           704
         ],
         "id": "63c10f3c-28d2-4fd0-8574-5a310217c575",
@@ -2106,7 +2174,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          4576,
+          4784,
           288
         ],
         "id": "736972b0-15fe-49c6-82a2-8a7e36482cae",
@@ -2123,7 +2191,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          4960,
+          5168,
           240
         ],
         "id": "48b202dd-eb88-4652-833c-e086b0e5240d",
@@ -2142,7 +2210,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          5328,
+          5536,
           240
         ],
         "id": "b7531d35-0ed7-481e-93c2-c40e83d4f0b8",
@@ -2181,7 +2249,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          6000,
+          6208,
           368
         ],
         "id": "ded26ff0-d9c5-427c-807e-eba5b4b1a87c",
@@ -2192,7 +2260,7 @@
         "type": "n8n-nodes-base.executionData",
         "typeVersion": 1.1,
         "position": [
-          6256,
+          6464,
           384
         ],
         "id": "dcde6125-8d4d-479d-bff4-22dd28cb2816",
@@ -2226,7 +2294,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          2992,
+          3200,
           544
         ],
         "id": "cfdcf6f8-9b61-4b44-a667-1e864e42f12c",
@@ -2242,7 +2310,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          3232,
+          3440,
           768
         ],
         "id": "7c84dded-3a6f-4810-8e16-1c66a1e94bb1",
@@ -2260,8 +2328,8 @@
         "type": "n8n-nodes-base.limit",
         "typeVersion": 1,
         "position": [
-          2096,
-          368
+          2464,
+          384
         ],
         "id": "925b3a7e-74a2-4312-9c99-9e04a84a6ce3",
         "name": "Limit"
@@ -2276,7 +2344,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          6464,
+          6672,
           384
         ],
         "id": "1b5a27ea-8089-4988-a4c3-526061e31e82",
@@ -2303,7 +2371,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          7536,
+          7744,
           704
         ],
         "id": "6a2805ba-e5ea-4e54-96af-a707c879df14",
@@ -2353,7 +2421,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          7808,
+          8016,
           704
         ],
         "id": "8c323c12-9b23-4d1d-8f6d-1c8e49677c1e",
@@ -2397,7 +2465,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          8016,
+          8224,
           704
         ],
         "id": "989aa23f-d3e4-4dc0-a560-a36f75a06421",
@@ -2437,7 +2505,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          8240,
+          8448,
           704
         ],
         "id": "03129836-efa7-41cf-9f27-2f070bef7fbc",
@@ -2469,7 +2537,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          6720,
+          6928,
           976
         ],
         "id": "e228d731-edf9-4f11-8b29-ef5868fa62d1",
@@ -2493,7 +2561,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          7232,
+          7440,
           704
         ],
         "id": "11e7e7df-2f1a-4b12-9d86-49a2f57742fa",
@@ -2570,7 +2638,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          2912,
+          3120,
           80
         ],
         "id": "2bca0f74-b573-41d1-bcc7-0a7e671d8915",
@@ -2583,7 +2651,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2624,
+          2832,
           80
         ],
         "id": "2968b503-e313-4ed0-89d7-f963c64f24b3",
@@ -2616,7 +2684,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          3328,
+          3536,
           80
         ],
         "id": "10c4cd8f-5c23-441a-a9eb-b4bba2b95ac2",
@@ -2629,7 +2697,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          3120,
+          3328,
           80
         ],
         "id": "c600e1fa-d610-43a7-af5d-59fea90455b2",
@@ -2646,7 +2714,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          3584,
+          3792,
           96
         ],
         "id": "a908db59-2871-4b88-88b8-045b5b49fed0",
@@ -2667,7 +2735,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          3568,
+          3776,
           368
         ],
         "id": "4fc2ce05-9c03-4213-b0c0-87aa87d6bc86",
@@ -2680,7 +2748,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          6992,
+          7200,
           704
         ],
         "id": "a889dee7-2773-4ac3-8de9-38736225532b",
@@ -2728,12 +2796,64 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.3,
         "position": [
-          8448,
+          8656,
           608
         ],
         "id": "151cf5d5-fe03-43e8-99cc-cc031cea2073",
         "name": "HTTP Request",
         "executeOnce": true
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "702bc924-bc8e-4a7f-841b-007a38f2c651",
+                "leftValue": "={{ $json.recipe_ref }}",
+                "rightValue": 430,
+                "operator": {
+                  "type": "number",
+                  "operation": "notEquals"
+                }
+              },
+              {
+                "id": "9cc43bda-23c3-43d8-980b-b60af3911f14",
+                "leftValue": "={{ $json.recipe_ref }}",
+                "rightValue": 577,
+                "operator": {
+                  "type": "number",
+                  "operation": "notEquals"
+                }
+              },
+              {
+                "id": "b5981e14-1a76-4870-9a12-822c3db72fc0",
+                "leftValue": "={{ $json.recipe_ref }}",
+                "rightValue": 233,
+                "operator": {
+                  "type": "number",
+                  "operation": "notEquals"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          2064,
+          384
+        ],
+        "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
+        "name": "Filter1"
       }
     ],
     "connections": {
@@ -3241,6 +3361,22 @@
         "main": [
           [
             {
+              "node": "Filter1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send email2": {
+        "main": [
+          []
+        ]
+      },
+      "Filter1": {
+        "main": [
+          [
+            {
               "node": "Limit",
               "type": "main",
               "index": 0
@@ -3250,11 +3386,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version dfa8fac2",
+    "name": "Version f1947be0",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "12-07-2026/0:00",
+  "commitDate": "13-07-2026/0:00",
   "fileName": "archer_auto_upload V2 Sapiens.json"
 }
