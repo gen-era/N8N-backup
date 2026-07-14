@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-25T06:26:59.960Z",
+  "updatedAt": "2026-07-13T08:39:56.865Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
@@ -81,7 +81,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json))\n  } \n}];"
+        "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\nconst descriptors = [...new Set(\n  items.filter(i => i.json.descriptor).map(i => `'${i.json.descriptor.replace(/'/g, \"''\")}'`)\n)].join(',');\nconst instruments = [...new Set(\n  items.filter(i => i.json.instrument_serial).map(i => `'${i.json.instrument_serial.replace(/'/g, \"''\")}'`)\n)].join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json)),\n    descriptors: descriptors || \"'__none__'\",\n    instruments: instruments || \"'__none__'\"\n  } \n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -194,7 +194,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        512,
+        496,
         256
       ],
       "id": "52de688f-5410-4fee-bd8e-03fbbebf52a2",
@@ -408,7 +408,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT uniqueref, serial_number, care_site_ref FROM instruments",
+        "query": "SELECT uniqueref, serial_number, care_site_ref \nFROM instruments \nWHERE serial_number IN ({{ $('list sentrix ids').first().json.instruments }})",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -430,7 +430,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT kits_ref, source_value FROM kits_mapping",
+        "query": "SELECT kits_ref, source_value \nFROM kits_mapping \nWHERE source_value IN ({{ $('list sentrix ids').first().json.descriptors }})",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -585,8 +585,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
-  "activeVersionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
+  "versionId": "469ced42-370a-46fc-830f-a9da83161719",
+  "activeVersionId": "469ced42-370a-46fc-830f-a9da83161719",
   "triggerCount": 1,
   "shared": [
     {
@@ -598,9 +598,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-25T06:27:01.000Z",
-    "createdAt": "2026-06-25T06:26:59.962Z",
-    "versionId": "2b98592f-f7ae-40bd-a9f0-08ae4db52ff7",
+    "updatedAt": "2026-07-13T08:39:59.000Z",
+    "createdAt": "2026-07-13T08:39:56.868Z",
+    "versionId": "469ced42-370a-46fc-830f-a9da83161719",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
       {
@@ -678,7 +678,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json))\n  } \n}];"
+          "jsCode": "const items = $input.all();\nconst sentrixIds = items.map(item => `'${item.json.sentrix_id}'`).join(',');\nconst descriptors = [...new Set(\n  items.filter(i => i.json.descriptor).map(i => `'${i.json.descriptor.replace(/'/g, \"''\")}'`)\n)].join(',');\nconst instruments = [...new Set(\n  items.filter(i => i.json.instrument_serial).map(i => `'${i.json.instrument_serial.replace(/'/g, \"''\")}'`)\n)].join(',');\n\nreturn [{ \n  json: { \n    sentrix_ids: sentrixIds, \n    items_json: JSON.stringify(items.map(i => i.json)),\n    descriptors: descriptors || \"'__none__'\",\n    instruments: instruments || \"'__none__'\"\n  } \n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -791,7 +791,7 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3.4,
         "position": [
-          512,
+          496,
           256
         ],
         "id": "52de688f-5410-4fee-bd8e-03fbbebf52a2",
@@ -1005,7 +1005,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT uniqueref, serial_number, care_site_ref FROM instruments",
+          "query": "SELECT uniqueref, serial_number, care_site_ref \nFROM instruments \nWHERE serial_number IN ({{ $('list sentrix ids').first().json.instruments }})",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1027,7 +1027,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT kits_ref, source_value FROM kits_mapping",
+          "query": "SELECT kits_ref, source_value \nFROM kits_mapping \nWHERE source_value IN ({{ $('list sentrix ids').first().json.descriptors }})",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1170,11 +1170,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 2b98592f",
+    "name": "Version 469ced42",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "12-07-2026/0:00",
+  "commitDate": "14-07-2026/0:00",
   "fileName": "Scans2Sup.json"
 }
