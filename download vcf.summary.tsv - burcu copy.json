@@ -1,0 +1,566 @@
+{
+  "updatedAt": "2026-07-14T13:41:53.042Z",
+  "createdAt": "2026-07-14T12:55:15.959Z",
+  "id": "Sg3bpD8pzpg4bvno",
+  "name": "download vcf.summary.tsv - burcu copy",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        48
+      ],
+      "id": "b3541a5c-3176-471c-a5de-4b518103c48d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://genera.analysis.archerdx.com/api/jobs/",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "filter_string",
+              "value": "etliksehir@gen-era.com.tr"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "page_size",
+              "value": "300"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.next }}",
+              "limitPagesFetched": true,
+              "maxRequests": 500,
+              "requestInterval": 500
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -128,
+        48
+      ],
+      "id": "43d2a518-eed3-4a1b-a530-801de06e2273",
+      "name": "owner = etliksehir jobs"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        96,
+        48
+      ],
+      "id": "2c608fb4-9b5b-49f9-ab68-b0bbfe767470",
+      "name": "Split Out jobs"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        944,
+        -48
+      ],
+      "id": "34aedccb-8a37-437a-9221-8c662041e9f1",
+      "name": "getting sample ids using jobid"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.samples",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        -96
+      ],
+      "id": "d0356997-f225-46a6-8055-f8e6081d6c6f",
+      "name": "Split Out samples"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $('is SNP').item.json.job_id }}/samples/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1440,
+        -96
+      ],
+      "id": "821934a7-4660-4341-8a9e-2945af3fb648",
+      "name": "get sample metadata",
+      "retryOnFail": false,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "url": "=",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        704,
+        -512
+      ],
+      "id": "bf34a2c4-5e32-4126-b689-132d427cf24b",
+      "name": "download summary.vcf files"
+    },
+    {
+      "parameters": {
+        "command": "mkdir archer_test"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        912,
+        -752
+      ],
+      "id": "4737380d-7599-43aa-8bc7-9e0d630f52df",
+      "name": "mkdir <target directory>",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "498acf6f-5a40-4354-9350-427f45f4cb5f",
+              "leftValue": "={{ $json.data.results.variants.source_file_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1840,
+        -208
+      ],
+      "id": "06f5dbc1-5153-480f-b0b4-eddec39c009a",
+      "name": "filter out \"source_file = null\""
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/home/genera/archer_test/{{$binary.data.fileName || 'summary.vcf'}}",
+        "options": {
+          "append": false
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        -496
+      ],
+      "id": "bde5e8da-bf9f-4cf8-ab05-28cd7c47d756",
+      "name": "write files to <target directory>"
+    },
+    {
+      "parameters": {
+        "command": "ls  /home/genera/archer_test"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -496
+      ],
+      "id": "728fd320-3d14-412d-b02c-a91c13a7326d",
+      "name": "ls <target directory> to check files"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1a176275-47f0-4a2c-8f63-65ba1ae1d291",
+              "leftValue": "={{ $json.complete_time }}",
+              "rightValue": "2026-01-01T00:00:00",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        48
+      ],
+      "id": "842f69be-2345-42ea-9643-8d0b746d329d",
+      "name": "time filter (after 01-07-2026)"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $json.data.job_id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "page",
+              "value": "1"
+            },
+            {
+              "name": "page_size",
+              "value": "100"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.next }}",
+              "limitPagesFetched": true,
+              "maxRequests": 500,
+              "requestInterval": 500
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2112,
+        -208
+      ],
+      "id": "98874c56-d39a-4a37-b075-e5efdf30814f",
+      "name": "owner = etliksehir jobs1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "56452cbc-55ad-4017-90c4-7e3910001ef5",
+              "leftValue": "={{ $json.is_snp }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        48
+      ],
+      "id": "5b97d5d4-6939-4e33-9733-a1989ee58672",
+      "name": "is SNP"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "owner = etliksehir jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "owner = etliksehir jobs": {
+      "main": [
+        [
+          {
+            "node": "Split Out jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out jobs": {
+      "main": [
+        [
+          {
+            "node": "time filter (after 01-07-2026)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getting sample ids using jobid": {
+      "main": [
+        [
+          {
+            "node": "Split Out samples",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out samples": {
+      "main": [
+        [
+          {
+            "node": "get sample metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get sample metadata": {
+      "main": [
+        []
+      ]
+    },
+    "download summary.vcf files": {
+      "main": [
+        [
+          {
+            "node": "mkdir <target directory>",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mkdir <target directory>": {
+      "main": [
+        [
+          {
+            "node": "write files to <target directory>",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "filter out \"source_file = null\"": {
+      "main": [
+        [
+          {
+            "node": "owner = etliksehir jobs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write files to <target directory>": {
+      "main": [
+        [
+          {
+            "node": "ls <target directory> to check files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "time filter (after 01-07-2026)": {
+      "main": [
+        [
+          {
+            "node": "is SNP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "owner = etliksehir jobs1": {
+      "main": [
+        []
+      ]
+    },
+    "is SNP": {
+      "main": [
+        [
+          {
+            "node": "getting sample ids using jobid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aa945ef5-5d2e-4da1-a582-4124f2af3e77",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-14T12:55:15.977Z",
+      "createdAt": "2026-07-14T12:55:15.977Z",
+      "role": "workflow:owner",
+      "workflowId": "Sg3bpD8pzpg4bvno",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "15-07-2026/0:00",
+  "fileName": "download vcf.summary.tsv - burcu copy.json"
+}
