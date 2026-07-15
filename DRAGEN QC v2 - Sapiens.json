@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-12T20:52:53.003Z",
+  "updatedAt": "2026-07-14T06:55:38.486Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -28,7 +28,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1060,
+        -1056,
         0
       ],
       "credentials": {
@@ -68,7 +68,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -840,
+        -848,
         0
       ]
     },
@@ -83,7 +83,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -620,
+        -624,
         0
       ],
       "credentials": {
@@ -115,7 +115,7 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        -180,
+        -176,
         0
       ]
     },
@@ -128,8 +128,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        60,
-        120
+        64,
+        128
       ]
     },
     {
@@ -141,8 +141,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        280,
-        120
+        288,
+        128
       ]
     },
     {
@@ -170,8 +170,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        500,
-        120
+        512,
+        128
       ]
     },
     {
@@ -184,7 +184,7 @@
       "typeVersion": 1,
       "position": [
         720,
-        120
+        128
       ],
       "credentials": {
         "sshPassword": {
@@ -268,8 +268,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        940,
-        120
+        944,
+        128
       ]
     },
     {
@@ -281,8 +281,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1160,
-        220
+        1168,
+        224
       ],
       "credentials": {
         "sshPassword": {
@@ -325,8 +325,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1380,
-        120
+        1392,
+        128
       ],
       "credentials": {
         "postgres": {
@@ -344,7 +344,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1380,
+        1392,
         320
       ],
       "retryOnFail": true,
@@ -371,7 +371,7 @@
       "typeVersion": 3.2,
       "position": [
         1600,
-        220
+        224
       ]
     },
     {
@@ -444,8 +444,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1820,
-        220
+        1824,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -579,8 +579,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2040,
-        220
+        2048,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -625,8 +625,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1160,
-        -60
+        1168,
+        -64
       ],
       "credentials": {
         "postgres": {
@@ -644,8 +644,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2260,
-        120
+        2272,
+        128
       ],
       "credentials": {
         "sshPassword": {
@@ -659,8 +659,7 @@
         "rule": {
           "interval": [
             {
-              "field": "hours",
-              "hoursInterval": 1
+              "field": "hours"
             }
           ]
         }
@@ -669,7 +668,7 @@
       "typeVersion": 1.2,
       "position": [
         -1280,
-        260
+        272
       ],
       "id": "475b9eb1-c73c-4783-ad85-4d25996dc6a5",
       "name": "Her 1 Saatte Bir"
@@ -704,8 +703,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1060,
-        260
+        -1056,
+        272
       ],
       "id": "8b7b986a-3627-4789-a6c5-44ca87d2df1f",
       "name": "Calisan Kopya Var mi"
@@ -717,8 +716,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -840,
-        260
+        -848,
+        272
       ],
       "id": "b24fd833-31e8-4da3-bee2-33e97503bde5",
       "name": "Baska Kopya Sayisi"
@@ -750,8 +749,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -620,
-        260
+        -624,
+        272
       ],
       "id": "a362ed31-26ea-421e-8887-22468138c719",
       "name": "Bosta mi"
@@ -1041,8 +1040,8 @@
     }
   },
   "meta": null,
-  "pinData": null,
-  "versionId": "cdd0fc25-2124-49db-8d60-4b0be7cd2ab1",
+  "pinData": {},
+  "versionId": "4e07cb7f-0b2c-41f3-850b-a3cfbbef628b",
   "activeVersionId": "cdd0fc25-2124-49db-8d60-4b0be7cd2ab1",
   "triggerCount": 1,
   "shared": [
@@ -2086,7 +2085,14 @@
     "description": null,
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "14-07-2026/0:00",
+  "tags": [
+    {
+      "updatedAt": "2026-07-14T06:55:21.187Z",
+      "createdAt": "2026-07-14T06:55:21.187Z",
+      "id": "c8jFPfIOomPo4dUv",
+      "name": "NGS QC"
+    }
+  ],
+  "commitDate": "15-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
