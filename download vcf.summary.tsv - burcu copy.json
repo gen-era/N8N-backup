@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-14T13:41:53.042Z",
+  "updatedAt": "2026-07-17T03:04:41.631Z",
   "createdAt": "2026-07-14T12:55:15.959Z",
   "id": "Sg3bpD8pzpg4bvno",
   "name": "download vcf.summary.tsv - burcu copy",
@@ -24,16 +24,16 @@
         "queryParameters": {
           "parameters": [
             {
-              "name": "filter_string",
-              "value": "etliksehir@gen-era.com.tr"
-            },
-            {
               "name": "page",
               "value": "1"
             },
             {
               "name": "page_size",
               "value": "300"
+            },
+            {
+              "name": "filter_string",
+              "value": "ikulac@ku.edu.tr"
             }
           ]
         },
@@ -42,7 +42,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
             },
             {
               "name": "Accept",
@@ -101,7 +101,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
             },
             {
               "name": "Accept",
@@ -142,7 +142,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
             },
             {
               "name": "Accept",
@@ -171,13 +171,13 @@
     },
     {
       "parameters": {
-        "url": "=",
+        "url": "={{ $json.data.results.variants.source_file_url }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
             },
             {
               "name": "Accept",
@@ -196,8 +196,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        704,
-        -512
+        1680,
+        16
       ],
       "id": "bf34a2c4-5e32-4126-b689-132d427cf24b",
       "name": "download summary.vcf files"
@@ -209,8 +209,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        912,
-        -752
+        1904,
+        -16
       ],
       "id": "4737380d-7599-43aa-8bc7-9e0d630f52df",
       "name": "mkdir <target directory>",
@@ -261,8 +261,8 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        1152,
-        -496
+        2144,
+        240
       ],
       "id": "bde5e8da-bf9f-4cf8-ab05-28cd7c47d756",
       "name": "write files to <target directory>"
@@ -274,8 +274,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1360,
-        -496
+        2352,
+        240
       ],
       "id": "728fd320-3d14-412d-b02c-a91c13a7326d",
       "name": "ls <target directory> to check files"
@@ -293,10 +293,10 @@
             {
               "id": "1a176275-47f0-4a2c-8f63-65ba1ae1d291",
               "leftValue": "={{ $json.complete_time }}",
-              "rightValue": "2026-01-01T00:00:00",
+              "rightValue": "2022-12-01T00:00:00",
               "operator": {
                 "type": "dateTime",
-                "operation": "after"
+                "operation": "before"
               }
             }
           ],
@@ -403,6 +403,82 @@
       ],
       "id": "5b97d5d4-6939-4e33-9733-a1989ee58672",
       "name": "is SNP"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        896,
+        160
+      ],
+      "id": "d25e6d44-e33d-4554-900b-a7891b06ea36",
+      "name": "getting sample ids using jobid1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.samples",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        160
+      ],
+      "id": "931dcef0-8a52-40ee-bd41-553075a2746a",
+      "name": "Split Out samples1"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $('is SNP').item.json.job_id }}/samples/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 10
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1392,
+        160
+      ],
+      "id": "07d4d42f-c358-429e-bf99-3087a616390c",
+      "name": "get sample metadata1",
+      "retryOnFail": false,
+      "waitBetweenTries": 2000
     }
   ],
   "connections": {
@@ -463,7 +539,13 @@
     },
     "get sample metadata": {
       "main": [
-        []
+        [
+          {
+            "node": "download summary.vcf files",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "download summary.vcf files": {
@@ -534,6 +616,29 @@
             "type": "main",
             "index": 0
           }
+        ],
+        []
+      ]
+    },
+    "getting sample ids using jobid1": {
+      "main": [
+        [
+          {
+            "node": "Split Out samples1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out samples1": {
+      "main": [
+        [
+          {
+            "node": "get sample metadata1",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -547,7 +652,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "aa945ef5-5d2e-4da1-a582-4124f2af3e77",
+  "versionId": "cd3b60f2-af14-40f7-ab7b-790dc3511fbd",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -561,6 +666,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "16-07-2026/0:01",
+  "commitDate": "17-07-2026/0:00",
   "fileName": "download vcf.summary.tsv - burcu copy.json"
 }
