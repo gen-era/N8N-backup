@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T09:35:42.604Z",
+  "updatedAt": "2026-07-17T12:12:46.966Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -82,7 +82,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        2784,
+        2976,
         -16
       ],
       "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -320,6 +320,27 @@
       ],
       "id": "562a5915-391e-453b-a7d7-88ca0577a410",
       "name": "prepare_insert"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $('prepare_insert').item.json.idat_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2752,
+        -16
+      ],
+      "id": "c7c99ee7-5ace-443d-8432-c2043d19153d",
+      "name": "update_idat_qc_status",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -500,7 +521,13 @@
     },
     "update_data_operation_completed": {
       "main": [
-        []
+        [
+          {
+            "node": "update_idat_qc_status",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "prepare_insert": {
@@ -842,8 +869,8 @@
       }
     ]
   },
-  "versionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
-  "activeVersionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
+  "versionId": "11343248-c267-4610-b985-b626e0da6a0f",
+  "activeVersionId": "11343248-c267-4610-b985-b626e0da6a0f",
   "triggerCount": 1,
   "shared": [
     {
@@ -855,9 +882,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-01T09:35:44.000Z",
-    "createdAt": "2026-07-01T09:35:42.606Z",
-    "versionId": "1d301a79-7e69-4dbe-925a-223f9b06e878",
+    "updatedAt": "2026-07-17T12:12:48.000Z",
+    "createdAt": "2026-07-17T12:12:46.969Z",
+    "versionId": "11343248-c267-4610-b985-b626e0da6a0f",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -936,7 +963,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          2784,
+          2976,
           -16
         ],
         "id": "b676cbbd-664d-4de4-a434-ba9692b4b455",
@@ -1174,6 +1201,27 @@
         ],
         "id": "562a5915-391e-453b-a7d7-88ca0577a410",
         "name": "prepare_insert"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $('prepare_insert').item.json.idat_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2752,
+          -16
+        ],
+        "id": "c7c99ee7-5ace-443d-8432-c2043d19153d",
+        "name": "update_idat_qc_status",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
       }
     ],
     "connections": {
@@ -1354,7 +1402,13 @@
       },
       "update_data_operation_completed": {
         "main": [
-          []
+          [
+            {
+              "node": "update_idat_qc_status",
+              "type": "main",
+              "index": 0
+            }
+          ]
         ]
       },
       "prepare_insert": {
@@ -1370,11 +1424,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1d301a79",
+    "name": "Version 11343248",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "17-07-2026/0:00",
+  "commitDate": "18-07-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
