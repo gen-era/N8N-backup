@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-24T10:17:47.000Z",
+  "updatedAt": "2026-07-20T11:08:54.379Z",
   "createdAt": "2025-12-24T09:43:52.746Z",
   "id": "zE1qHLcgDLnn6d6A",
   "name": "Monitor QC Waiting",
@@ -34,7 +34,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -167,7 +167,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     }
@@ -213,7 +213,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "fb3cbe47-eacd-4b92-ab3f-753797c6339b",
+  "versionId": "a6abda34-c6a5-4b42-96d2-b66ad21659f1",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
@@ -226,7 +226,14 @@
     }
   ],
   "activeVersion": null,
-  "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
+    }
+  ],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "Monitor QC Waiting.json"
 }
