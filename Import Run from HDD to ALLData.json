@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-16T13:37:38.508Z",
+  "updatedAt": "2026-07-20T07:52:07.052Z",
   "createdAt": "2026-04-25T17:54:51.881Z",
   "id": "RCJwnNUVOU37mQqu",
   "name": "Import Run from HDD to ALLData",
@@ -96,7 +96,7 @@
             {
               "id": "d681009f-c4f0-4308-906e-e373744a41c8",
               "leftValue": "={{ $json.run_id }}",
-              "rightValue": "260713_VH02229_38_AAF2KGWHV",
+              "rightValue": "2607",
               "operator": {
                 "type": "string",
                 "operation": "contains"
@@ -309,7 +309,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "1acf70a1-9e60-4b2e-aff1-b016a77ba2e3",
+  "versionId": "925af2d5-e0bb-43e3-b74f-dd50dfa5f624",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -322,14 +322,7 @@
     }
   ],
   "activeVersion": null,
-  "tags": [
-    {
-      "updatedAt": "2026-02-25T08:58:40.172Z",
-      "createdAt": "2026-02-25T08:58:40.172Z",
-      "id": "haVpXFpEUMjyquhf",
-      "name": "Production"
-    }
-  ],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "Import Run from HDD to ALLData.json"
 }
