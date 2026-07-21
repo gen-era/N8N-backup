@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-11-19T20:15:28.000Z",
+  "updatedAt": "2026-07-20T11:08:26.757Z",
   "createdAt": "2025-11-19T13:19:56.163Z",
   "id": "7sjWLziBLR4Zs2MK",
   "name": "Sophia Historical QC Retrieval",
@@ -61,7 +61,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -270,7 +270,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -417,7 +417,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -440,7 +440,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -651,7 +651,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1082,7 +1082,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1116,7 +1116,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1312,7 +1312,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1402,7 +1402,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1479,7 +1479,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1561,7 +1561,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -2274,7 +2274,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f3732166-5983-431d-bd78-011e02aa6cd9",
+  "versionId": "94a82d5c-cb0f-4493-b9be-564205dfb88b",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2287,7 +2287,14 @@
     }
   ],
   "activeVersion": null,
-  "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
+    }
+  ],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "Sophia Historical QC Retrieval.json"
 }
