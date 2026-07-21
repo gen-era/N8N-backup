@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-23T10:02:27.000Z",
+  "updatedAt": "2026-07-20T11:08:58.968Z",
   "createdAt": "2025-11-30T20:38:34.893Z",
   "id": "gpb02dMcpoieiSHi",
   "name": "Populate Reads DB",
@@ -57,7 +57,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -79,7 +79,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -138,7 +138,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -333,7 +333,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -398,7 +398,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -716,7 +716,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1243,7 +1243,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "78a5bbb5-697a-45b5-8945-f23dcb42446e",
+  "versionId": "aac53bae-761c-4426-9216-a1361cbe3a3a",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1256,7 +1256,14 @@
     }
   ],
   "activeVersion": null,
-  "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
+    }
+  ],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "Populate Reads DB.json"
 }
