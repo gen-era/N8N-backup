@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-19T11:54:29.528Z",
+  "updatedAt": "2026-07-20T10:23:21.601Z",
   "createdAt": "2026-05-29T21:10:31.161Z",
   "id": "S2oU9ggilqJrFCxm",
   "name": "DRAGEN QC v2 - Sentinel",
@@ -497,7 +497,14 @@
     "description": null,
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
+    }
+  ],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sentinel.json"
 }
