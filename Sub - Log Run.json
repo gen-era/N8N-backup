@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-24T19:37:48.588Z",
+  "updatedAt": "2026-07-20T10:23:15.005Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -2820,8 +2820,8 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "folder": "={{ $json.path }}",
-            "path": "={{ $json.run_id }}"
+            "folder": "={{ $json.run_id }}",
+            "path": "={{ $json.path }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -4091,8 +4091,8 @@
       }
     ]
   },
-  "versionId": "c80046de-5320-4987-b37e-78b8b497976b",
-  "activeVersionId": "c80046de-5320-4987-b37e-78b8b497976b",
+  "versionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
+  "activeVersionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
   "triggerCount": 0,
   "shared": [
     {
@@ -4104,9 +4104,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-24T19:37:48.590Z",
-    "createdAt": "2026-06-24T19:37:48.590Z",
-    "versionId": "c80046de-5320-4987-b37e-78b8b497976b",
+    "updatedAt": "2026-07-20T10:08:57.589Z",
+    "createdAt": "2026-07-20T10:08:57.589Z",
+    "versionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -6923,8 +6923,8 @@
           "workflowInputs": {
             "mappingMode": "defineBelow",
             "value": {
-              "folder": "={{ $json.path }}",
-              "path": "={{ $json.run_id }}"
+              "folder": "={{ $json.run_id }}",
+              "path": "={{ $json.path }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -8180,7 +8180,14 @@
     "description": null,
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
+    }
+  ],
+  "commitDate": "21-07-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
