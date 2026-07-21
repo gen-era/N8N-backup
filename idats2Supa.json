@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-17T11:49:50.969Z",
+  "updatedAt": "2026-07-20T12:17:34.227Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -19,12 +19,12 @@
     },
     {
       "parameters": {
-        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/18g81BdIbqReC-FgEgf0zbkmX36C46DFlDw4zqKnznG4/values/Sayfa1%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1216,
+        -1136,
         -48
       ],
       "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
@@ -45,7 +45,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const data1 = JSON.parse($('Execute Command').first().json.stdout);\nconst data2 = JSON.parse($('Execute Command1').first().json.stdout);\n\nconst [headers, ...rows1] = data1.values;\nconst rows2 = data2.values || [];\n\nconst allRows = [...rows1, ...rows2];\n\nreturn allRows.map(row => ({\n  json: Object.fromEntries(headers.map((h, i) => [h, row[i] ?? '']))\n}));"
+        "jsCode": "const data = JSON.parse($('Execute Command').first().json.stdout);\nconst [headers, ...rows] = data.values;\n\nreturn rows.map(row => ({\n  json: Object.fromEntries(headers.map((h, i) => [h, row[i] ?? '']))\n}));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -81,7 +81,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT care_site_ref, care_site_source_value FROM care_site_mapping",
+        "query": "SELECT care_site_ref, care_site_source_value \nFROM care_site_mapping \nWHERE care_site_source_value IN ({{ $json.kurumlar }})",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -350,7 +350,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const sheet = $input.all().map(i => i.json);\nconst barkodlar = [...new Set(sheet.map(row => `'${row.Barkod}'`))].join(',');\nreturn [{ json: { barkodlar, sheet: JSON.stringify(sheet) } }];"
+        "jsCode": "const sheet = $input.all().map(i => i.json);\nconst barkodlar = [...new Set(sheet.map(row => `'${row.Barkod}'`))].join(',');\nconst kurumlar = [...new Set(sheet.map(row => row.Kurum).filter(Boolean).map(k => `'${k}'`))].join(',');\nreturn [{ json: { barkodlar, kurumlar, sheet: JSON.stringify(sheet) } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -396,19 +396,6 @@
       ],
       "id": "436c911b-05c4-45cd-8f0d-7fce554c0cb5",
       "name": "HTTP Request"
-    },
-    {
-      "parameters": {
-        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A6001%3AH15000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -1040,
-        -48
-      ],
-      "id": "d6c8a2fa-19ef-4793-bd2b-6c6a0674580a",
-      "name": "Execute Command1"
     },
     {
       "parameters": {
@@ -462,7 +449,7 @@
       "main": [
         [
           {
-            "node": "Execute Command1",
+            "node": "sheet",
             "type": "main",
             "index": 0
           }
@@ -602,17 +589,6 @@
         []
       ]
     },
-    "Execute Command1": {
-      "main": [
-        [
-          {
-            "node": "sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "insert idats": {
       "main": [
         []
@@ -637,7 +613,7 @@
       }
     ]
   },
-  "versionId": "67684d63-bafd-4073-9af7-8dcdace13893",
+  "versionId": "d0f8e97f-a7c4-4d2e-a933-1a5bda99ded8",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -651,6 +627,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "20-07-2026/0:01",
+  "commitDate": "21-07-2026/0:00",
   "fileName": "idats2Supa.json"
 }
