@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-14T06:55:34.398Z",
+  "updatedAt": "2026-07-20T10:23:31.558Z",
   "createdAt": "2026-05-29T19:54:21.793Z",
   "id": "5yypZE2MSOSkIDmN",
   "name": "DRAGEN QC v2 - Koza",
@@ -2087,12 +2087,12 @@
   },
   "tags": [
     {
-      "updatedAt": "2026-07-14T06:55:21.187Z",
-      "createdAt": "2026-07-14T06:55:21.187Z",
-      "id": "c8jFPfIOomPo4dUv",
-      "name": "NGS QC"
+      "updatedAt": "2026-07-17T07:33:04.711Z",
+      "createdAt": "2026-07-17T07:33:04.711Z",
+      "id": "qHxyYo2K3ifoHKYp",
+      "name": "Can"
     }
   ],
-  "commitDate": "20-07-2026/0:01",
+  "commitDate": "21-07-2026/0:00",
   "fileName": "DRAGEN QC v2 - Koza.json"
 }
