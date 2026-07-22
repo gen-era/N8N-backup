@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29T12:03:09.165Z",
+  "updatedAt": "2026-07-21T13:36:07.318Z",
   "createdAt": "2026-06-29T07:12:21.523Z",
   "id": "Ze7FVEhVq8UGCTxi",
   "name": "auto_get_allocations",
@@ -822,7 +822,14 @@
     "description": "",
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "21-07-2026/0:00",
+  "tags": [
+    {
+      "updatedAt": "2026-07-21T13:05:00.691Z",
+      "createdAt": "2026-07-21T13:05:00.691Z",
+      "id": "hWWNK2F1nsC6cTZQ",
+      "name": "Hande"
+    }
+  ],
+  "commitDate": "22-07-2026/0:01",
   "fileName": "auto_get_allocations.json"
 }
