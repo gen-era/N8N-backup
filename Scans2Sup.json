@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-13T08:39:56.865Z",
+  "updatedAt": "2026-07-21T13:05:44.322Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
@@ -448,6 +448,49 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst sentrixIds = [...new Set(items.map(i => i.json.sentrix_id).filter(Boolean))];\nif (sentrixIds.length === 0) return [];\nreturn [{ json: { sentrix_ids: sentrixIds } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        208
+      ],
+      "id": "2d38cd6d-05a8-46b3-9709-f5733db2b85f",
+      "name": "Collect Sentrix IDs for Idat"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "gNQvXKZ12sRVaKYt",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/gNQvXKZ12sRVaKYt"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2000,
+        208
+      ],
+      "id": "a938b7fa-6c26-49bb-a3b6-b5a677c8b51a",
+      "name": "Call 'idats2Supa'"
     }
   ],
   "connections": {
@@ -570,6 +613,39 @@
           }
         ]
       ]
+    },
+    "insert_completed": {
+      "main": [
+        [
+          {
+            "node": "Collect Sentrix IDs for Idat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_completed": {
+      "main": [
+        [
+          {
+            "node": "Collect Sentrix IDs for Idat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Sentrix IDs for Idat": {
+      "main": [
+        [
+          {
+            "node": "Call 'idats2Supa'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -585,8 +661,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "469ced42-370a-46fc-830f-a9da83161719",
-  "activeVersionId": "469ced42-370a-46fc-830f-a9da83161719",
+  "versionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
+  "activeVersionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
   "triggerCount": 1,
   "shared": [
     {
@@ -598,9 +674,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-13T08:39:59.000Z",
-    "createdAt": "2026-07-13T08:39:56.868Z",
-    "versionId": "469ced42-370a-46fc-830f-a9da83161719",
+    "updatedAt": "2026-07-21T12:57:46.000Z",
+    "createdAt": "2026-07-21T12:57:44.131Z",
+    "versionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
       {
@@ -1045,6 +1121,49 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst sentrixIds = [...new Set(items.map(i => i.json.sentrix_id).filter(Boolean))];\nif (sentrixIds.length === 0) return [];\nreturn [{ json: { sentrix_ids: sentrixIds } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1760,
+          208
+        ],
+        "id": "2d38cd6d-05a8-46b3-9709-f5733db2b85f",
+        "name": "Collect Sentrix IDs for Idat"
+      },
+      {
+        "parameters": {
+          "workflowId": {
+            "__rl": true,
+            "value": "gNQvXKZ12sRVaKYt",
+            "mode": "id",
+            "cachedResultUrl": "/workflow/gNQvXKZ12sRVaKYt"
+          },
+          "workflowInputs": {
+            "mappingMode": "defineBelow",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": true
+          },
+          "mode": "each",
+          "options": {
+            "waitForSubWorkflow": false
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflow",
+        "typeVersion": 1.3,
+        "position": [
+          2000,
+          208
+        ],
+        "id": "a938b7fa-6c26-49bb-a3b6-b5a677c8b51a",
+        "name": "Call 'idats2Supa'"
       }
     ],
     "connections": {
@@ -1167,14 +1286,54 @@
             }
           ]
         ]
+      },
+      "insert_completed": {
+        "main": [
+          [
+            {
+              "node": "Collect Sentrix IDs for Idat",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "update_completed": {
+        "main": [
+          [
+            {
+              "node": "Collect Sentrix IDs for Idat",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Collect Sentrix IDs for Idat": {
+        "main": [
+          [
+            {
+              "node": "Call 'idats2Supa'",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 469ced42",
+    "name": "Version 0a6f8877",
     "description": "",
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "21-07-2026/0:00",
+  "tags": [
+    {
+      "updatedAt": "2026-07-21T13:05:00.691Z",
+      "createdAt": "2026-07-21T13:05:00.691Z",
+      "id": "hWWNK2F1nsC6cTZQ",
+      "name": "Hande"
+    }
+  ],
+  "commitDate": "22-07-2026/0:01",
   "fileName": "Scans2Sup.json"
 }
