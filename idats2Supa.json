@@ -1,35 +1,11 @@
 {
-  "updatedAt": "2026-07-20T12:17:34.227Z",
+  "updatedAt": "2026-07-21T13:30:36.581Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -1392,
-        -48
-      ],
-      "id": "f7edb37e-43fa-4f3e-afc7-8137c5c07e22",
-      "name": "When clicking ‘Execute workflow’"
-    },
-    {
-      "parameters": {
-        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/18g81BdIbqReC-FgEgf0zbkmX36C46DFlDw4zqKnznG4/values/Sayfa1%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
-      },
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        -1136,
-        -48
-      ],
-      "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
-      "name": "Execute Command"
-    },
     {
       "parameters": {
         "jsCode": "const scans = $('Get completed scans').all().map(i => i.json);\nconst sheetRaw = $('Extract Sentrixs').first().json.sheet;\nconst sheet = JSON.parse(sheetRaw);\nconst careSiteMapping = $('Get care_site_mapping').all().map(i => i.json);\n\nconst scanMap = {};\nscans.forEach(scan => {\n  scanMap[scan.sentrix_id] = scan;\n});\n\nconst careSiteMap = {};\ncareSiteMapping.forEach(row => {\n  careSiteMap[row.care_site_source_value] = row.care_site_ref;\n});\n\nconst results = [];\nsheet.forEach(row => {\n  const scan = scanMap[row.Barkod];\n  if (scan) {\n    results.push({\n      json: {\n        scan_ref: scan.uniqueref,\n        sentrix_id: scan.sentrix_id,\n        chiptype_ref: scan.chiptype_ref,\n        performing_caresite_ref: scan.care_site_ref,\n        position: row.Pozisyon,\n        sample_id: row['Örnek'],\n        requesting_caresite_ref: careSiteMap[row.Kurum] || null\n      }\n    });\n  }\n});\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
@@ -37,24 +13,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        64,
-        -48
+        368,
+        0
       ],
       "id": "d16f3c17-e9b3-402c-9633-f5f39ba254d4",
       "name": "Merge SQL and Sheet"
-    },
-    {
-      "parameters": {
-        "jsCode": "const data = JSON.parse($('Execute Command').first().json.stdout);\nconst [headers, ...rows] = data.values;\n\nreturn rows.map(row => ({\n  json: Object.fromEntries(headers.map((h, i) => [h, row[i] ?? '']))\n}));"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -880,
-        -48
-      ],
-      "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
-      "name": "sheet"
     },
     {
       "parameters": {
@@ -65,8 +28,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -352,
-        -48
+        -48,
+        0
       ],
       "id": "c87bda64-56dc-4d34-96ed-41a2628cad58",
       "name": "Get completed scans",
@@ -81,14 +44,14 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT care_site_ref, care_site_source_value \nFROM care_site_mapping \nWHERE care_site_source_value IN ({{ $json.kurumlar }})",
+        "query": "SELECT care_site_ref, care_site_source_value \nFROM care_site_mapping \nWHERE care_site_source_value IN ({{ $('Extract Sentrixs').first().json.kurumlar }})",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -160,
-        -48
+        144,
+        0
       ],
       "id": "464f7a6b-ff2a-4ac9-8db1-880637b8fd2a",
       "name": "Get care_site_mapping",
@@ -107,8 +70,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        272,
-        -48
+        576,
+        0
       ],
       "id": "a350611a-a1e7-49a9-a17b-b2b407ff8c69",
       "name": "Get idat path and rescan count",
@@ -126,8 +89,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        448,
-        -48
+        752,
+        0
       ],
       "id": "eef25d12-d233-4f79-8845-313d630fdadb",
       "name": "Parse"
@@ -141,8 +104,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        640,
-        -48
+        944,
+        0
       ],
       "id": "d56a1479-f0b9-41ac-82fe-8b08ca47f379",
       "name": "Check idat exists",
@@ -233,66 +196,11 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1040,
-        -64
+        1344,
+        -16
       ],
       "id": "c89dc950-a25c-4f27-ab9f-f15029f18337",
       "name": "Switch"
-    },
-    {
-      "parameters": {
-        "tableId": "idats",
-        "fieldsUi": {
-          "fieldValues": [
-            {
-              "fieldId": "scan_ref",
-              "fieldValue": "={{ $json.scan_ref }}"
-            },
-            {
-              "fieldId": "position",
-              "fieldValue": "={{ $json.position }}"
-            },
-            {
-              "fieldId": "sample_id",
-              "fieldValue": "={{ $json.sample_id }}"
-            },
-            {
-              "fieldId": "green_idat_path",
-              "fieldValue": "={{ $json.green_idat_path }}"
-            },
-            {
-              "fieldId": "red_idat_path",
-              "fieldValue": "={{ $json.red_idat_path }}"
-            },
-            {
-              "fieldId": "performing_caresite_ref",
-              "fieldValue": "={{ $json.performing_caresite_ref }}"
-            },
-            {
-              "fieldId": "requesting_caresite_ref",
-              "fieldValue": "={{ $json.requesting_caresite_ref }}"
-            },
-            {
-              "fieldId": "rescan_count",
-              "fieldValue": "={{ $json.position_rescan_count }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        1104,
-        -528
-      ],
-      "id": "63a04aa2-c33e-4a9b-a8fd-f54651b9a40e",
-      "name": "Insert idats",
-      "credentials": {
-        "supabaseApi": {
-          "id": "HA1IMjyc0iMX0UIX",
-          "name": "Supabase account"
-        }
-      }
     },
     {
       "parameters": {
@@ -323,8 +231,8 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        1344,
-        -48
+        1648,
+        0
       ],
       "id": "5bfc0a07-0f86-4b9f-8eeb-181567df3abd",
       "name": "Update a row",
@@ -342,8 +250,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        832,
-        -48
+        1136,
+        0
       ],
       "id": "0bfe1185-7f13-42e2-a988-2b433db893f4",
       "name": "Decision code"
@@ -355,47 +263,24 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -544,
-        -48
+        -240,
+        0
       ],
       "id": "758549dd-9753-4833-9222-6fdeb683a74f",
       "name": "Extract Sentrixs"
     },
     {
       "parameters": {
-        "jsCode": "const KURUM_MAP = {\n  \"Ümraniye\": \"Umraniye-EAH\",\n  \"ÜMRANİYE\": \"Umraniye-EAH\",\n  \"ÜMRANİYE EAH\": \"Umraniye-EAH\",\n  \"Ümraniye eah\": \"Umraniye-EAH\",\n  \"MERKEZ\": \"Umraniye-EAH\",\n  \"Engin Tıp\": \"Engin-Tip\",\n  \"Engintıp\": \"Engin-Tip\",\n  \"ENGİN TIP GATA\": \"Engin-Tip-GTM-GATA\",\n  \"Gelişim\": \"Gelisim-Tip-Laboratuvar\",\n  \"Gelişim Tıp\": \"Gelisim-Tip-Laboratuvar\",\n  \"Düzen\": \"Duzen-Laboratuvari\",\n  \"Erciyes\": \"Erciyes-Uni\",\n  \"Kayseri\": \"Erciyes-Uni\",\n  \"Kayseri Erciyes üni\": \"Erciyes-Uni\",\n  \"Marmara\": \"Marmara-Pendik-EAH\",\n  \"MARMARA\": \"Marmara-Pendik-EAH\",\n  \"Marmara Patoloji\": \"Marmara-Unv-Patoloji\",\n  \"Zeynep Kamil\": \"Zeynep-Kamil-EAH\",\n  \"ZEYNEP KAMİL\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH.\": \"Zeynep-Kamil-EAH\",\n  \"Haseki\": \"Haseki-EAH\",\n  \"HASEKİ\": \"Haseki-EAH\",\n  \"HASEKİ E.A.H\": \"Haseki-EAH\",\n  \"Göztepe\": \"Goztepe-SH\",\n  \"GÖZTEPE\": \"Goztepe-SH\",\n  \"GÖZTEPE EAH\": \"Goztepe-SH\",\n  \"Sadi Konuk\": \"Sadi-Konuk-EAH\",\n  \"SADİ KONUK\": \"Sadi-Konuk-EAH\",\n  \"Ecegen\": \"Ecegen\",\n  \"Nesiller\": \"Nesiller\",\n  \"Nesiller Genetik\": \"Nesiller\",\n  \"Istanbul EAH\": \"Istanbul-EAH\",\n  \"Istanbul EAH.\": \"Istanbul-EAH\",\n  \"Istanbul E.A.H\": \"Istanbul-EAH\",\n  \"İstanbul EAH\": \"Istanbul-EAH\",\n  \"İstanbul EAH.\": \"Istanbul-EAH\",\n  \"Istinye\": \"Istinye-GHDM\",\n  \"İstinye\": \"Istinye-GHDM\",\n  \"İstinye üni\": \"Istinye-GHDM\",\n  \"Haydarpaşa\": \"Haydarpasa-Numune-EAH\",\n  \"HAYDARPAŞA\": \"Haydarpasa-Numune-EAH\",\n  \"Haydarpaşa eah\": \"Haydarpasa-Numune-EAH\",\n  \"Şişli Etfal\": \"Sisli-Etfal-EAH\",\n  \"SISLİ ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"SISLI ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"Sarıyer Hamidiye\": \"Sisli-Etfal-EAH\",\n  \"Okmeydanı\": \"Okmeydani-EAH\",\n  \"OKMEYDANİ\": \"Okmeydani-EAH\",\n  \"OKMEYDANI\": \"Okmeydani-EAH\",\n  \"Sancaktepe\": \"Sancaktepe-EAH\",\n  \"SANCAKTEPE\": \"Sancaktepe-EAH\",\n  \"SANcaktepe\": \"Sancaktepe-EAH\",\n  \"Bağcılar\": \"Bagcilar-EAH\",\n  \"BAGCILAR EAH\": \"Bagcilar-EAH\",\n  \"İzmir Genetik\": \"Izmir-GHDM\",\n  \"İzmir genetik\": \"Izmir-GHDM\",\n  \"Etlik\": \"Etlik-SH\",\n  \"Etlik şehir hastanesi\": \"Etlik-SH\",\n  \"Smartgen\": \"Smartgen\",\n  \"Peralabs\": \"PeraLabs-GHDM\",\n  \"Kanuni\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNİ\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNI SULTAN SULEYMAN E.A.H\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"Dokuz Eylül\": \"Dokuz-Eylul-Unv\",\n  \"Dokuz Eylül üni\": \"Dokuz-Eylul-Unv\",\n  \"Refgen\": \"Refgen\",\n  \"Refgen/Koç üni\": \"Refgen\",\n  \"RP25-224\": \"Refgen\",\n  \"RP25-237\": \"Refgen\",\n  \"Koç Üni.\": \"Koc-Uni\",\n  \"Koç Üniversitesi\": \"Koc-Uni\",\n  \"Florence\": \"Florence-Nightingale\",\n  \"Sapiens\": \"Sapiens-GHDM\",\n  \"Acıbadem\": \"Acıbadem Patoloji\",\n  \"Acıbadem Patoloji\": \"Acıbadem Patoloji\",\n  \"Memorial\": \"Memorial-Sisli-Hastanesi\",\n  \"Memorial PGT\": \"Memorial-Sisli-Hastanesi\",\n  \"Viagen\": \"Viagen\",\n  \"ASM Patoloji\": \"ASM-Patoloji\",\n  \"Genoks\": \"Genoks\",\n  \"Genstar\": \"Genstar\",\n  \"Dnalab\": \"Dnalab\",\n  \"Adnan Menderes\": \"Adnan Menderes\",\n  \"Akdeniz\": \"Akdeniz Uni\",\n  \"Osmangazi\": \"Osmangazi\",\n  \"Osmangazi üni\": \"Osmangazi\",\n  \"İstanbul Genetik\": \"İstanbul Genetik\",\n  \"İstanbul Genetik Grubu\": \"İstanbul Genetik\",\n  \"Jimer\": \"Ozel-Jimer-Hastanesi\",\n};\n\nconst PATOLOJI_MAP = {\n  \"Goztepe-SH\": \"Goztepe-SH-Patoloji\",\n  \"Etlik-SH\": \"Etlik-SH-Patoloji\",\n  \"Umraniye-EAH\": \"Umraniye-EAH-Patoloji\",\n  \"Istanbul-EAH\": \"Istanbul-EAH-Patoloji\",\n  \"Marmara-Pendik-EAH\": \"Marmara Patoloji\",\n  \"Istinye-GHDM\": \"Istinye-Patoloji\",\n};\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const row = { ...item.json };\n\n  // Trim all string fields\n  for (const key of Object.keys(row)) {\n    if (typeof row[key] === 'string') {\n      row[key] = row[key].trim();\n    }\n  }\n\n  // Filter: Örnek boş veya \"BOŞ\" ise atla\n  const ornek = (row['Örnek'] || '').toUpperCase();\n  if (!ornek) continue;\n\n  // Filter: Kurum \"BOŞ\" veya \"-\" ise atla\n  const kurum = row.Kurum || '';\n  if (kurum.toUpperCase() === 'BOŞ' || kurum === '-') continue;\n\n  // Kurum mapping\n  if (kurum in KURUM_MAP) {\n    let mapped = KURUM_MAP[kurum];\n    if (mapped && (row['Çip'] || row['Cip'] || '').toUpperCase().includes('EPIC') && mapped in PATOLOJI_MAP) {\n      mapped = PATOLOJI_MAP[mapped];\n    }\n    row.Kurum = mapped;\n  }\n\n  results.push({ json: row });\n}\n\nreturn results;"
+        "jsCode": "const KURUM_MAP = {\n  \"Ümraniye\": \"Umraniye-EAH\",\n  \"ÜMRANİYE\": \"Umraniye-EAH\",\n  \"ÜMRANİYE EAH\": \"Umraniye-EAH\",\n  \"Ümraniye eah\": \"Umraniye-EAH\",\n  \"MERKEZ\": \"Umraniye-EAH\",\n  \"Engin Tıp\": \"Engin-Tip\",\n  \"Engintıp\": \"Engin-Tip\",\n  \"ENGİN TIP GATA\": \"Engin-Tip-GTM-GATA\",\n  \"Gelişim\": \"Gelisim-Tip-Laboratuvar\",\n  \"Gelişim Tıp\": \"Gelisim-Tip-Laboratuvar\",\n  \"Düzen\": \"Duzen-Laboratuvari\",\n  \"Erciyes\": \"Erciyes-Uni\",\n  \"Kayseri\": \"Erciyes-Uni\",\n  \"Kayseri Erciyes üni\": \"Erciyes-Uni\",\n  \"Marmara\": \"Marmara-Pendik-EAH\",\n  \"MARMARA\": \"Marmara-Pendik-EAH\",\n  \"Marmara Patoloji\": \"Marmara-Unv-Patoloji\",\n  \"Zeynep Kamil\": \"Zeynep-Kamil-EAH\",\n  \"ZEYNEP KAMİL\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH.\": \"Zeynep-Kamil-EAH\",\n  \"Haseki\": \"Haseki-EAH\",\n  \"HASEKİ\": \"Haseki-EAH\",\n  \"HASEKİ E.A.H\": \"Haseki-EAH\",\n  \"Göztepe\": \"Goztepe-SH\",\n  \"GÖZTEPE\": \"Goztepe-SH\",\n  \"GÖZTEPE EAH\": \"Goztepe-SH\",\n  \"Sadi Konuk\": \"Sadi-Konuk-EAH\",\n  \"SADİ KONUK\": \"Sadi-Konuk-EAH\",\n  \"Ecegen\": \"Ecegen\",\n  \"Nesiller\": \"Nesiller\",\n  \"Nesiller Genetik\": \"Nesiller\",\n  \"Istanbul EAH\": \"Istanbul-EAH\",\n  \"Istanbul EAH.\": \"Istanbul-EAH\",\n  \"Istanbul E.A.H\": \"Istanbul-EAH\",\n  \"İstanbul EAH\": \"Istanbul-EAH\",\n  \"İstanbul EAH.\": \"Istanbul-EAH\",\n  \"Istinye\": \"Istinye-GHDM\",\n  \"İstinye\": \"Istinye-GHDM\",\n  \"İstinye üni\": \"Istinye-GHDM\",\n  \"Haydarpaşa\": \"Haydarpasa-Numune-EAH\",\n  \"HAYDARPAŞA\": \"Haydarpasa-Numune-EAH\",\n  \"Haydarpaşa eah\": \"Haydarpasa-Numune-EAH\",\n  \"Şişli Etfal\": \"Sisli-Etfal-EAH\",\n  \"SISLİ ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"SISLI ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"Sarıyer Hamidiye\": \"Sisli-Etfal-EAH\",\n  \"Okmeydanı\": \"Okmeydani-EAH\",\n  \"OKMEYDANİ\": \"Okmeydani-EAH\",\n  \"OKMEYDANI\": \"Okmeydani-EAH\",\n  \"Sancaktepe\": \"Sancaktepe-EAH\",\n  \"SANCAKTEPE\": \"Sancaktepe-EAH\",\n  \"SANcaktepe\": \"Sancaktepe-EAH\",\n  \"Bağcılar\": \"Bagcilar-EAH\",\n  \"BAGCILAR EAH\": \"Bagcilar-EAH\",\n  \"İzmir Genetik\": \"Izmir-GHDM\",\n  \"İzmir genetik\": \"Izmir-GHDM\",\n  \"Etlik\": \"Etlik-SH\",\n  \"Etlik şehir hastanesi\": \"Etlik-SH\",\n  \"Smartgen\": \"Smartgen\",\n  \"Peralabs\": \"PeraLabs-GHDM\",\n  \"Kanuni\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNİ\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNI SULTAN SULEYMAN E.A.H\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"Dokuz Eylül\": \"Dokuz-Eylul-Unv\",\n  \"Dokuz Eylül üni\": \"Dokuz-Eylul-Unv\",\n  \"Refgen\": \"Refgen\",\n  \"Refgen/Koç üni\": \"Refgen\",\n  \"RP25-224\": \"Refgen\",\n  \"RP25-237\": \"Refgen\",\n  \"Koç Üni.\": \"Koc-Uni\",\n  \"Koç Üniversitesi\": \"Koc-Uni\",\n  \"Florence\": \"Florence-Nightingale\",\n  \"Sapiens\": \"Sapiens-GHDM\",\n  \"Acıbadem\": \"Acıbadem Patoloji\",\n  \"Acıbadem Patoloji\": \"Acıbadem Patoloji\",\n  \"Memorial\": \"Memorial-Sisli-Hastanesi\",\n  \"Memorial PGT\": \"Memorial-Sisli-Hastanesi\",\n  \"Viagen\": \"Viagen\",\n  \"ASM Patoloji\": \"ASM-Patoloji\",\n  \"Genoks\": \"Genoks\",\n  \"Genstar\": \"Genstar\",\n  \"Dnalab\": \"Dnalab\",\n  \"Adnan Menderes\": \"Adnan Menderes\",\n  \"Akdeniz\": \"Akdeniz Uni\",\n  \"Osmangazi\": \"Osmangazi\",\n  \"Osmangazi üni\": \"Osmangazi\",\n  \"İstanbul Genetik\": \"İstanbul Genetik\",\n  \"İstanbul Genetik Grubu\": \"İstanbul Genetik\",\n  \"Jimer\": \"Ozel-Jimer-Hastanesi\",\n};\n\nconst PATOLOJI_MAP = {\n  \"Goztepe-SH\": \"Goztepe-SH-Patoloji\",\n  \"Etlik-SH\": \"Etlik-SH-Patoloji\",\n  \"Umraniye-EAH\": \"Umraniye-EAH-Patoloji\",\n  \"Istanbul-EAH\": \"Istanbul-EAH-Patoloji\",\n  \"Marmara-Pendik-EAH\": \"Marmara Patoloji\",\n  \"Istinye-GHDM\": \"Istinye-Patoloji\",\n};\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const row = { ...item.json };\n\n  // Trim all string fields\n  for (const key of Object.keys(row)) {\n    if (typeof row[key] === 'string') {\n      row[key] = row[key].trim();\n    }\n  }\n\n  // Filter: Örnek tamamen boş ise atla\n  const ornek = (row['Örnek'] || '').trim();\n  if (!ornek) continue;\n\n  // Kurum mapping (BOŞ örnek ise kurum kontrolü yapma)\n  const kurum = row.Kurum || '';\n  const isBosOrnek = ornek.toUpperCase() === 'BOŞ';\n\n  if (!isBosOrnek && (kurum.toUpperCase() === 'BOŞ' || kurum === '-')) continue;\n\n  if (kurum in KURUM_MAP) {\n    let mapped = KURUM_MAP[kurum];\n    if (mapped && (row['Çip'] || row['Cip'] || '').toUpperCase().includes('EPIC') && mapped in PATOLOJI_MAP) {\n      mapped = PATOLOJI_MAP[mapped];\n    }\n    row.Kurum = mapped;\n  }\n\n  results.push({ json: row });\n}\n\nreturn results;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -720,
-        -48
+        -416,
+        0
       ],
       "id": "283bf3d6-cee9-45cd-9a13-15079dd755da",
       "name": "Map Kurum"
-    },
-    {
-      "parameters": {
-        "url": "https://sheets.googleapis.com/v4/spreadsheets/1BqKAsezocz_ECKbgR66WY6hwKW8Es8U-y5HA7IIqsE4/values/Sayfa8!A:Z?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Accept-Encoding",
-              "value": "identity"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -784,
-        -400
-      ],
-      "id": "436c911b-05c4-45cd-8f0d-7fce554c0cb5",
-      "name": "HTTP Request"
     },
     {
       "parameters": {
@@ -406,8 +291,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1328,
-        -272
+        1648,
+        -160
       ],
       "id": "7d513613-5fbf-4684-8258-c37a02ff0dd3",
       "name": "insert idats",
@@ -421,52 +306,91 @@
     },
     {
       "parameters": {
-        "jsCode": "const insertResults = $('Insert idats').all();\nconst insertInputs = $('Switch').all()[0]; // insert branch items\nconst decisionItems = $('Decision code').all().filter(i => i.json.action === 'insert');\n\nconst inserted = insertResults.filter(i => i.json.scan_ref); // RETURNING ile dönenler\nconst insertedKeys = new Set(inserted.map(i => `${i.json.scan_ref}_${i.json.position}`));\n\nconst conflicts = decisionItems.filter(i => \n  !insertedKeys.has(`${i.json.scan_ref}_${i.json.position}`)\n);\n\nif (conflicts.length > 0) {\n  console.log(`${conflicts.length} conflict detected:`);\n  conflicts.forEach(c => console.log(`  scan_ref=${c.json.scan_ref} position=${c.json.position} sample=${c.json.sample_id}`));\n}\n\nreturn conflicts.map(c => ({ json: { ...c.json, status: 'conflict' } }));"
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "sentrix_ids",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1328,
+        -176
+      ],
+      "id": "de816d0f-fd53-4bfe-ab04-19c40f28abc5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        -176
+      ],
+      "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
+      "name": "Fetch Aktif Part1"
+    },
+    {
+      "parameters": {
+        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A6001%3AH15000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -176
+      ],
+      "id": "4c5c74a6-97eb-4b27-a9d8-08e7319757d4",
+      "name": "Fetch Aktif Part2"
+    },
+    {
+      "parameters": {
+        "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/18g81BdIbqReC-FgEgf0zbkmX36C46DFlDw4zqKnznG4/values/Sayfa1%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        -176
+      ],
+      "id": "d9a6f812-bd1a-48ba-b01e-2291d31ede71",
+      "name": "Fetch Sayfa1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sentrixIds = new Set(\n  $('When Executed by Another Workflow').first().json.sentrix_ids.map(String)\n);\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        608,
-        -832
+        -576,
+        0
+      ],
+      "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
+      "name": "Merge All Sheets"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Test amaçlı sahte sentrix_ids\nreturn [{ json: { sentrix_ids: ['210247080001', '210247080017', '210247080022', '210247080063', '210247080080', '210247080106', '210247080108', '210584160019'] } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        -416
       ],
       "id": "518c3bc1-9995-492f-a61d-5c1d3bf8f9f9",
-      "name": "Code in JavaScript"
+      "name": "Test Sentrix IDs"
     }
   ],
   "connections": {
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Execute Command",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Execute Command": {
-      "main": [
-        [
-          {
-            "node": "sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "sheet": {
-      "main": [
-        [
-          {
-            "node": "Map Kurum",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get completed scans": {
       "main": [
         [
@@ -584,12 +508,67 @@
         ]
       ]
     },
-    "HTTP Request": {
+    "insert idats": {
       "main": [
         []
       ]
     },
-    "insert idats": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Fetch Aktif Part1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Aktif Part1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Aktif Part2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Aktif Part2": {
+      "main": [
+        [
+          {
+            "node": "Fetch Sayfa1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Sayfa1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Sheets": {
+      "main": [
+        [
+          {
+            "node": "Map Kurum",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Sentrix IDs": {
       "main": [
         []
       ]
@@ -603,18 +582,9 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "When clicking ‘Execute workflow’": [
-      {
-        "json": {},
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
-  "versionId": "d0f8e97f-a7c4-4d2e-a933-1a5bda99ded8",
-  "activeVersionId": null,
+  "pinData": {},
+  "versionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
+  "activeVersionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
   "triggerCount": 0,
   "shared": [
     {
@@ -625,8 +595,593 @@
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
-  "activeVersion": null,
-  "tags": [],
-  "commitDate": "21-07-2026/0:00",
+  "activeVersion": {
+    "updatedAt": "2026-07-21T13:30:38.000Z",
+    "createdAt": "2026-07-21T13:30:36.583Z",
+    "versionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
+    "workflowId": "gNQvXKZ12sRVaKYt",
+    "nodes": [
+      {
+        "parameters": {
+          "jsCode": "const scans = $('Get completed scans').all().map(i => i.json);\nconst sheetRaw = $('Extract Sentrixs').first().json.sheet;\nconst sheet = JSON.parse(sheetRaw);\nconst careSiteMapping = $('Get care_site_mapping').all().map(i => i.json);\n\nconst scanMap = {};\nscans.forEach(scan => {\n  scanMap[scan.sentrix_id] = scan;\n});\n\nconst careSiteMap = {};\ncareSiteMapping.forEach(row => {\n  careSiteMap[row.care_site_source_value] = row.care_site_ref;\n});\n\nconst results = [];\nsheet.forEach(row => {\n  const scan = scanMap[row.Barkod];\n  if (scan) {\n    results.push({\n      json: {\n        scan_ref: scan.uniqueref,\n        sentrix_id: scan.sentrix_id,\n        chiptype_ref: scan.chiptype_ref,\n        performing_caresite_ref: scan.care_site_ref,\n        position: row.Pozisyon,\n        sample_id: row['Örnek'],\n        requesting_caresite_ref: careSiteMap[row.Kurum] || null\n      }\n    });\n  }\n});\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          368,
+          0
+        ],
+        "id": "d16f3c17-e9b3-402c-9633-f5f39ba254d4",
+        "name": "Merge SQL and Sheet"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT DISTINCT s.uniqueref, s.sentrix_id::text, s.chiptype_ref, s.care_site_ref\nFROM scans s\nWHERE s.status_concept_ref = 29\nAND s.sentrix_id::text IN ({{ $json.barkodlar }})",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -48,
+          0
+        ],
+        "id": "c87bda64-56dc-4d34-96ed-41a2628cad58",
+        "name": "Get completed scans",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT care_site_ref, care_site_source_value \nFROM care_site_mapping \nWHERE care_site_source_value IN ({{ $('Extract Sentrixs').first().json.kurumlar }})",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          144,
+          0
+        ],
+        "id": "464f7a6b-ff2a-4ac9-8db1-880637b8fd2a",
+        "name": "Get care_site_mapping",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "command": "=FOLDER=\"/volume1/ALLDATA/Scans/{{ $json.sentrix_id }}/\"; SENTRIX=\"{{ $json.sentrix_id }}\"; POSITION=\"{{ $json.position }}\"; GREEN=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Grn.idat\" 2>/dev/null | head -1); RED=$(ls \"${FOLDER}${SENTRIX}_${POSITION}_Red.idat\" 2>/dev/null | head -1); TOTAL_RESCAN=$(ls \"${FOLDER}\"Metrics_old*.txt 2>/dev/null | wc -l | tr -d ' '); POS_SCAN_COUNT=0; for f in \"${FOLDER}\"Metrics.txt \"${FOLDER}\"Metrics_old*.txt; do [ -f \"$f\" ] || continue; if grep -q \"${POSITION}_\" \"$f\" 2>/dev/null; then POS_SCAN_COUNT=$((POS_SCAN_COUNT + 1)); fi; done; if [ \"$POS_SCAN_COUNT\" -gt 0 ]; then POS_RESCAN=$((POS_SCAN_COUNT - 1)); else POS_RESCAN=0; fi; IS_RESCANNED=0; if [ \"$POS_SCAN_COUNT\" -gt 1 ]; then if grep -q \"${POSITION}_\" \"${FOLDER}Metrics.txt\" 2>/dev/null; then IS_RESCANNED=1; fi; fi; echo \"{\\\"green_idat_path\\\":\\\"$GREEN\\\",\\\"red_idat_path\\\":\\\"$RED\\\",\\\"total_rescan_count\\\":$TOTAL_RESCAN,\\\"position_rescan_count\\\":$POS_RESCAN,\\\"is_rescanned\\\":$IS_RESCANNED}\""
+        },
+        "type": "n8n-nodes-base.ssh",
+        "typeVersion": 1,
+        "position": [
+          576,
+          0
+        ],
+        "id": "a350611a-a1e7-49a9-a17b-b2b407ff8c69",
+        "name": "Get idat path and rescan count",
+        "credentials": {
+          "sshPassword": {
+            "id": "ygN0iMbDsZngxa5z",
+            "name": "alldata hande"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all();\nconst prevItems = $('Merge SQL and Sheet').all();\nconst results = [];\n\nitems.forEach((item, index) => {\n  try {\n    const parsed = JSON.parse(item.json.stdout);\n    const prev = prevItems[index].json;\n    results.push({\n      json: {\n        scan_ref: prev.scan_ref,\n        sentrix_id: prev.sentrix_id,\n        chiptype_ref: prev.chiptype_ref,\n        performing_caresite_ref: prev.performing_caresite_ref,\n        requesting_caresite_ref: prev.requesting_caresite_ref,\n        position: prev.position,\n        sample_id: prev.sample_id,\n        green_idat_path: parsed.green_idat_path,\n        red_idat_path: parsed.red_idat_path,\n        total_rescan_count: parsed.total_rescan_count,\n        position_rescan_count: parsed.position_rescan_count,\n        is_rescanned: parsed.is_rescanned\n      }\n    });\n  } catch {\n    // parse hatası, atla\n  }\n});\n\nreturn results;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          752,
+          0
+        ],
+        "id": "eef25d12-d233-4f79-8845-313d630fdadb",
+        "name": "Parse"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT uniqueref, rescan_count, scan_ref, position FROM idats \nWHERE scan_ref = {{ $json.scan_ref }} \nAND position = '{{ $json.position }}'",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          944,
+          0
+        ],
+        "id": "d56a1479-f0b9-41ac-82fe-8b08ca47f379",
+        "name": "Check idat exists",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "insert",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals"
+                      },
+                      "id": "813410f3-ad15-4bd9-99fd-a56a77bfdf38"
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "e89ffcf6-45a2-4244-a942-1bd1c89d1494",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "update",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "strict",
+                    "version": 3
+                  },
+                  "conditions": [
+                    {
+                      "id": "b0aaa0b1-d57e-4144-b2e6-164432319d21",
+                      "leftValue": "={{ $json.action }}",
+                      "rightValue": "none",
+                      "operator": {
+                        "type": "string",
+                        "operation": "equals",
+                        "name": "filter.operator.equals"
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.4,
+        "position": [
+          1344,
+          -16
+        ],
+        "id": "c89dc950-a25c-4f27-ab9f-f15029f18337",
+        "name": "Switch"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "tableId": "idats",
+          "filters": {
+            "conditions": [
+              {
+                "keyName": "uniqueref",
+                "condition": "eq",
+                "keyValue": "={{ $json.idat_ref }}"
+              }
+            ]
+          },
+          "fieldsUi": {
+            "fieldValues": [
+              {
+                "fieldId": "rescan_count",
+                "fieldValue": "={{ $json.position_rescan_count }}"
+              },
+              {
+                "fieldId": "updated_at",
+                "fieldValue": "={{ new Date().toISOString() }}"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.supabase",
+        "typeVersion": 1,
+        "position": [
+          1648,
+          0
+        ],
+        "id": "5bfc0a07-0f86-4b9f-8eeb-181567df3abd",
+        "name": "Update a row",
+        "credentials": {
+          "supabaseApi": {
+            "id": "HA1IMjyc0iMX0UIX",
+            "name": "Supabase account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Parse').all().map(i => i.json);\n\nconst existingMap = {};\ncheckResults.forEach(r => {\n  if (r.uniqueref) {\n    existingMap[`${r.scan_ref}_${r.position}`] = r;\n  }\n});\n\nconst results = [];\n\nparseResults.forEach(current => {\n  const key = `${current.scan_ref}_${current.position}`;\n  const dbRecord = existingMap[key];\n\n  if (!dbRecord) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (parseInt(dbRecord.rescan_count) !== current.position_rescan_count) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1136,
+          0
+        ],
+        "id": "0bfe1185-7f13-42e2-a988-2b433db893f4",
+        "name": "Decision code"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sheet = $input.all().map(i => i.json);\nconst barkodlar = [...new Set(sheet.map(row => `'${row.Barkod}'`))].join(',');\nconst kurumlar = [...new Set(sheet.map(row => row.Kurum).filter(Boolean).map(k => `'${k}'`))].join(',');\nreturn [{ json: { barkodlar, kurumlar, sheet: JSON.stringify(sheet) } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -240,
+          0
+        ],
+        "id": "758549dd-9753-4833-9222-6fdeb683a74f",
+        "name": "Extract Sentrixs"
+      },
+      {
+        "parameters": {
+          "jsCode": "const KURUM_MAP = {\n  \"Ümraniye\": \"Umraniye-EAH\",\n  \"ÜMRANİYE\": \"Umraniye-EAH\",\n  \"ÜMRANİYE EAH\": \"Umraniye-EAH\",\n  \"Ümraniye eah\": \"Umraniye-EAH\",\n  \"MERKEZ\": \"Umraniye-EAH\",\n  \"Engin Tıp\": \"Engin-Tip\",\n  \"Engintıp\": \"Engin-Tip\",\n  \"ENGİN TIP GATA\": \"Engin-Tip-GTM-GATA\",\n  \"Gelişim\": \"Gelisim-Tip-Laboratuvar\",\n  \"Gelişim Tıp\": \"Gelisim-Tip-Laboratuvar\",\n  \"Düzen\": \"Duzen-Laboratuvari\",\n  \"Erciyes\": \"Erciyes-Uni\",\n  \"Kayseri\": \"Erciyes-Uni\",\n  \"Kayseri Erciyes üni\": \"Erciyes-Uni\",\n  \"Marmara\": \"Marmara-Pendik-EAH\",\n  \"MARMARA\": \"Marmara-Pendik-EAH\",\n  \"Marmara Patoloji\": \"Marmara-Unv-Patoloji\",\n  \"Zeynep Kamil\": \"Zeynep-Kamil-EAH\",\n  \"ZEYNEP KAMİL\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH\": \"Zeynep-Kamil-EAH\",\n  \"Zeynep Kamil EAH.\": \"Zeynep-Kamil-EAH\",\n  \"Haseki\": \"Haseki-EAH\",\n  \"HASEKİ\": \"Haseki-EAH\",\n  \"HASEKİ E.A.H\": \"Haseki-EAH\",\n  \"Göztepe\": \"Goztepe-SH\",\n  \"GÖZTEPE\": \"Goztepe-SH\",\n  \"GÖZTEPE EAH\": \"Goztepe-SH\",\n  \"Sadi Konuk\": \"Sadi-Konuk-EAH\",\n  \"SADİ KONUK\": \"Sadi-Konuk-EAH\",\n  \"Ecegen\": \"Ecegen\",\n  \"Nesiller\": \"Nesiller\",\n  \"Nesiller Genetik\": \"Nesiller\",\n  \"Istanbul EAH\": \"Istanbul-EAH\",\n  \"Istanbul EAH.\": \"Istanbul-EAH\",\n  \"Istanbul E.A.H\": \"Istanbul-EAH\",\n  \"İstanbul EAH\": \"Istanbul-EAH\",\n  \"İstanbul EAH.\": \"Istanbul-EAH\",\n  \"Istinye\": \"Istinye-GHDM\",\n  \"İstinye\": \"Istinye-GHDM\",\n  \"İstinye üni\": \"Istinye-GHDM\",\n  \"Haydarpaşa\": \"Haydarpasa-Numune-EAH\",\n  \"HAYDARPAŞA\": \"Haydarpasa-Numune-EAH\",\n  \"Haydarpaşa eah\": \"Haydarpasa-Numune-EAH\",\n  \"Şişli Etfal\": \"Sisli-Etfal-EAH\",\n  \"SISLİ ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"SISLI ETFAL EAH\": \"Sisli-Etfal-EAH\",\n  \"Sarıyer Hamidiye\": \"Sisli-Etfal-EAH\",\n  \"Okmeydanı\": \"Okmeydani-EAH\",\n  \"OKMEYDANİ\": \"Okmeydani-EAH\",\n  \"OKMEYDANI\": \"Okmeydani-EAH\",\n  \"Sancaktepe\": \"Sancaktepe-EAH\",\n  \"SANCAKTEPE\": \"Sancaktepe-EAH\",\n  \"SANcaktepe\": \"Sancaktepe-EAH\",\n  \"Bağcılar\": \"Bagcilar-EAH\",\n  \"BAGCILAR EAH\": \"Bagcilar-EAH\",\n  \"İzmir Genetik\": \"Izmir-GHDM\",\n  \"İzmir genetik\": \"Izmir-GHDM\",\n  \"Etlik\": \"Etlik-SH\",\n  \"Etlik şehir hastanesi\": \"Etlik-SH\",\n  \"Smartgen\": \"Smartgen\",\n  \"Peralabs\": \"PeraLabs-GHDM\",\n  \"Kanuni\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNİ\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"KANUNI SULTAN SULEYMAN E.A.H\": \"Kanuni-Sultan-Suleyman-EAH\",\n  \"Dokuz Eylül\": \"Dokuz-Eylul-Unv\",\n  \"Dokuz Eylül üni\": \"Dokuz-Eylul-Unv\",\n  \"Refgen\": \"Refgen\",\n  \"Refgen/Koç üni\": \"Refgen\",\n  \"RP25-224\": \"Refgen\",\n  \"RP25-237\": \"Refgen\",\n  \"Koç Üni.\": \"Koc-Uni\",\n  \"Koç Üniversitesi\": \"Koc-Uni\",\n  \"Florence\": \"Florence-Nightingale\",\n  \"Sapiens\": \"Sapiens-GHDM\",\n  \"Acıbadem\": \"Acıbadem Patoloji\",\n  \"Acıbadem Patoloji\": \"Acıbadem Patoloji\",\n  \"Memorial\": \"Memorial-Sisli-Hastanesi\",\n  \"Memorial PGT\": \"Memorial-Sisli-Hastanesi\",\n  \"Viagen\": \"Viagen\",\n  \"ASM Patoloji\": \"ASM-Patoloji\",\n  \"Genoks\": \"Genoks\",\n  \"Genstar\": \"Genstar\",\n  \"Dnalab\": \"Dnalab\",\n  \"Adnan Menderes\": \"Adnan Menderes\",\n  \"Akdeniz\": \"Akdeniz Uni\",\n  \"Osmangazi\": \"Osmangazi\",\n  \"Osmangazi üni\": \"Osmangazi\",\n  \"İstanbul Genetik\": \"İstanbul Genetik\",\n  \"İstanbul Genetik Grubu\": \"İstanbul Genetik\",\n  \"Jimer\": \"Ozel-Jimer-Hastanesi\",\n};\n\nconst PATOLOJI_MAP = {\n  \"Goztepe-SH\": \"Goztepe-SH-Patoloji\",\n  \"Etlik-SH\": \"Etlik-SH-Patoloji\",\n  \"Umraniye-EAH\": \"Umraniye-EAH-Patoloji\",\n  \"Istanbul-EAH\": \"Istanbul-EAH-Patoloji\",\n  \"Marmara-Pendik-EAH\": \"Marmara Patoloji\",\n  \"Istinye-GHDM\": \"Istinye-Patoloji\",\n};\n\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const row = { ...item.json };\n\n  // Trim all string fields\n  for (const key of Object.keys(row)) {\n    if (typeof row[key] === 'string') {\n      row[key] = row[key].trim();\n    }\n  }\n\n  // Filter: Örnek tamamen boş ise atla\n  const ornek = (row['Örnek'] || '').trim();\n  if (!ornek) continue;\n\n  // Kurum mapping (BOŞ örnek ise kurum kontrolü yapma)\n  const kurum = row.Kurum || '';\n  const isBosOrnek = ornek.toUpperCase() === 'BOŞ';\n\n  if (!isBosOrnek && (kurum.toUpperCase() === 'BOŞ' || kurum === '-')) continue;\n\n  if (kurum in KURUM_MAP) {\n    let mapped = KURUM_MAP[kurum];\n    if (mapped && (row['Çip'] || row['Cip'] || '').toUpperCase().includes('EPIC') && mapped in PATOLOJI_MAP) {\n      mapped = PATOLOJI_MAP[mapped];\n    }\n    row.Kurum = mapped;\n  }\n\n  results.push({ json: row });\n}\n\nreturn results;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -416,
+          0
+        ],
+        "id": "283bf3d6-cee9-45cd-9a13-15079dd755da",
+        "name": "Map Kurum"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "INSERT INTO idats (scan_ref, position, sample_id, green_idat_path, red_idat_path, \n                   performing_caresite_ref, requesting_caresite_ref, rescan_count)\nVALUES (\n  {{ $json.scan_ref }},\n  '{{ $json.position }}',\n  '{{ $json.sample_id }}',\n  '{{ $json.green_idat_path }}',\n  '{{ $json.red_idat_path }}',\n  '{{ $json.performing_caresite_ref }}',\n  {{ $json.requesting_caresite_ref ? $json.requesting_caresite_ref : 'NULL' }},\n  {{ $json.position_rescan_count }}\n)\nON CONFLICT (scan_ref, position) DO NOTHING\nRETURNING *, 'inserted' AS status",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          1648,
+          -160
+        ],
+        "id": "7d513613-5fbf-4684-8258-c37a02ff0dd3",
+        "name": "insert idats",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "workflowInputs": {
+            "values": [
+              {
+                "name": "sentrix_ids",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -1328,
+          -176
+        ],
+        "id": "de816d0f-fd53-4bfe-ab04-19c40f28abc5",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -1136,
+          -176
+        ],
+        "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
+        "name": "Fetch Aktif Part1"
+      },
+      {
+        "parameters": {
+          "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/1L4EGQTZSn0HH2iEGJW5nrAYaeV74nG_37oJSaa1GLC0/values/Aktif%20%C3%96rnekler%21A6001%3AH15000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -944,
+          -176
+        ],
+        "id": "4c5c74a6-97eb-4b27-a9d8-08e7319757d4",
+        "name": "Fetch Aktif Part2"
+      },
+      {
+        "parameters": {
+          "command": "curl -s -g 'https://sheets.googleapis.com/v4/spreadsheets/18g81BdIbqReC-FgEgf0zbkmX36C46DFlDw4zqKnznG4/values/Sayfa1%21A1%3AH6000?key=AIzaSyDwKbA0snP_-YQMTQ_Q9x87cXCcP3QQ_cc'"
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          -736,
+          -176
+        ],
+        "id": "d9a6f812-bd1a-48ba-b01e-2291d31ede71",
+        "name": "Fetch Sayfa1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const sentrixIds = new Set(\n  $('When Executed by Another Workflow').first().json.sentrix_ids.map(String)\n);\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -576,
+          0
+        ],
+        "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
+        "name": "Merge All Sheets"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Test amaçlı sahte sentrix_ids\nreturn [{ json: { sentrix_ids: ['210247080001', '210247080017', '210247080022', '210247080063', '210247080080', '210247080106', '210247080108', '210584160019'] } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1648,
+          -416
+        ],
+        "id": "518c3bc1-9995-492f-a61d-5c1d3bf8f9f9",
+        "name": "Test Sentrix IDs"
+      }
+    ],
+    "connections": {
+      "Get completed scans": {
+        "main": [
+          [
+            {
+              "node": "Get care_site_mapping",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge SQL and Sheet": {
+        "main": [
+          [
+            {
+              "node": "Get idat path and rescan count",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get care_site_mapping": {
+        "main": [
+          [
+            {
+              "node": "Merge SQL and Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get idat path and rescan count": {
+        "main": [
+          [
+            {
+              "node": "Parse",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse": {
+        "main": [
+          [
+            {
+              "node": "Check idat exists",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check idat exists": {
+        "main": [
+          [
+            {
+              "node": "Decision code",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Switch": {
+        "main": [
+          [
+            {
+              "node": "insert idats",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Update a row",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Decision code": {
+        "main": [
+          [
+            {
+              "node": "Switch",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Sentrixs": {
+        "main": [
+          [
+            {
+              "node": "Get completed scans",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Map Kurum": {
+        "main": [
+          [
+            {
+              "node": "Extract Sentrixs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "insert idats": {
+        "main": [
+          []
+        ]
+      },
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "Fetch Aktif Part1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Aktif Part1": {
+        "main": [
+          [
+            {
+              "node": "Fetch Aktif Part2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Aktif Part2": {
+        "main": [
+          [
+            {
+              "node": "Fetch Sayfa1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Sayfa1": {
+        "main": [
+          [
+            {
+              "node": "Merge All Sheets",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge All Sheets": {
+        "main": [
+          [
+            {
+              "node": "Map Kurum",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Test Sentrix IDs": {
+        "main": [
+          []
+        ]
+      }
+    },
+    "authors": "Bio Solutions",
+    "name": "Version 68b529d1",
+    "description": "",
+    "autosaved": false
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-07-21T13:05:00.691Z",
+      "createdAt": "2026-07-21T13:05:00.691Z",
+      "id": "hWWNK2F1nsC6cTZQ",
+      "name": "Hande"
+    }
+  ],
+  "commitDate": "22-07-2026/0:01",
   "fileName": "idats2Supa.json"
 }
