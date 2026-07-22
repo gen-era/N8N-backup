@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-17T03:04:41.631Z",
+  "updatedAt": "2026-07-21T07:13:19.784Z",
   "createdAt": "2026-07-14T12:55:15.959Z",
   "id": "Sg3bpD8pzpg4bvno",
   "name": "download vcf.summary.tsv - burcu copy",
@@ -42,7 +42,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6NTM1ZGZlMDRkNjk0MTAwOWZjNWExMDFiMTUyZGEzMWI4OWU0NGEzNQ=="
             },
             {
               "name": "Accept",
@@ -101,7 +101,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6NTM1ZGZlMDRkNjk0MTAwOWZjNWExMDFiMTUyZGEzMWI4OWU0NGEzNQ=="
             },
             {
               "name": "Accept",
@@ -114,8 +114,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        944,
-        -48
+        656,
+        -32
       ],
       "id": "34aedccb-8a37-437a-9221-8c662041e9f1",
       "name": "getting sample ids using jobid"
@@ -128,21 +128,21 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1216,
-        -96
+        928,
+        -32
       ],
       "id": "d0356997-f225-46a6-8055-f8e6081d6c6f",
       "name": "Split Out samples"
     },
     {
       "parameters": {
-        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $('is SNP').item.json.job_id }}/samples/{{ $json.id }}",
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $('getting sample ids using jobid').item.json.data.job_id }}/samples/{{ $json.id }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MDQxODc1MjNhZWFjYTE0MzNlNThkMGEwNGQyZGVjNmRlMmU4NjRlMA=="
+              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6NTM1ZGZlMDRkNjk0MTAwOWZjNWExMDFiMTUyZGEzMWI4OWU0NGEzNQ=="
             },
             {
               "name": "Accept",
@@ -161,8 +161,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        1440,
-        -96
+        1376,
+        -112
       ],
       "id": "821934a7-4660-4341-8a9e-2945af3fb648",
       "name": "get sample metadata",
@@ -218,40 +218,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "498acf6f-5a40-4354-9350-427f45f4cb5f",
-              "leftValue": "={{ $json.data.results.variants.source_file_url }}",
-              "rightValue": "",
-              "operator": {
-                "type": "string",
-                "operation": "empty",
-                "singleValue": true
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        1840,
-        -208
-      ],
-      "id": "06f5dbc1-5153-480f-b0b4-eddec39c009a",
-      "name": "filter out \"source_file = null\""
-    },
-    {
-      "parameters": {
         "operation": "write",
         "fileName": "=/home/genera/archer_test/{{$binary.data.fileName || 'summary.vcf'}}",
         "options": {
@@ -279,130 +245,6 @@
       ],
       "id": "728fd320-3d14-412d-b02c-a91c13a7326d",
       "name": "ls <target directory> to check files"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "1a176275-47f0-4a2c-8f63-65ba1ae1d291",
-              "leftValue": "={{ $json.complete_time }}",
-              "rightValue": "2022-12-01T00:00:00",
-              "operator": {
-                "type": "dateTime",
-                "operation": "before"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        320,
-        48
-      ],
-      "id": "842f69be-2345-42ea-9643-8d0b746d329d",
-      "name": "time filter (after 01-07-2026)"
-    },
-    {
-      "parameters": {
-        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $json.data.job_id }}",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "page",
-              "value": "1"
-            },
-            {
-              "name": "page_size",
-              "value": "100"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "API-Key YnVyY3Uub3prYW5AZ2VuLWVyYS5jb20udHI6MGJiMWE3MGM2MWQyMjA3MjFlZTc3ZTNkY2VjYmNjZmNkMGNlNjk1Mg=="
-            },
-            {
-              "name": "Accept",
-              "value": "application/json"
-            }
-          ]
-        },
-        "options": {
-          "pagination": {
-            "pagination": {
-              "parameters": {
-                "parameters": [
-                  {
-                    "name": "page",
-                    "value": "={{ $pageCount + 1 }}"
-                  }
-                ]
-              },
-              "paginationCompleteWhen": "other",
-              "completeExpression": "={{ !$response.body.next }}",
-              "limitPagesFetched": true,
-              "maxRequests": 500,
-              "requestInterval": 500
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        2112,
-        -208
-      ],
-      "id": "98874c56-d39a-4a37-b075-e5efdf30814f",
-      "name": "owner = etliksehir jobs1"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "56452cbc-55ad-4017-90c4-7e3910001ef5",
-              "leftValue": "={{ $json.is_snp }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.3,
-      "position": [
-        592,
-        48
-      ],
-      "id": "5b97d5d4-6939-4e33-9733-a1989ee58672",
-      "name": "is SNP"
     },
     {
       "parameters": {
@@ -479,6 +321,39 @@
       "name": "get sample metadata1",
       "retryOnFail": false,
       "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1a176275-47f0-4a2c-8f63-65ba1ae1d291",
+              "leftValue": "={{ $json.complete_time }}",
+              "rightValue": "2022-12-01T00:00:00",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        320,
+        48
+      ],
+      "id": "842f69be-2345-42ea-9643-8d0b746d329d",
+      "name": "time filter "
     }
   ],
   "connections": {
@@ -508,7 +383,7 @@
       "main": [
         [
           {
-            "node": "time filter (after 01-07-2026)",
+            "node": "time filter ",
             "type": "main",
             "index": 0
           }
@@ -570,17 +445,6 @@
         ]
       ]
     },
-    "filter out \"source_file = null\"": {
-      "main": [
-        [
-          {
-            "node": "owner = etliksehir jobs1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "write files to <target directory>": {
       "main": [
         [
@@ -590,34 +454,6 @@
             "index": 0
           }
         ]
-      ]
-    },
-    "time filter (after 01-07-2026)": {
-      "main": [
-        [
-          {
-            "node": "is SNP",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "owner = etliksehir jobs1": {
-      "main": [
-        []
-      ]
-    },
-    "is SNP": {
-      "main": [
-        [
-          {
-            "node": "getting sample ids using jobid",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        []
       ]
     },
     "getting sample ids using jobid1": {
@@ -641,6 +477,17 @@
           }
         ]
       ]
+    },
+    "time filter ": {
+      "main": [
+        [
+          {
+            "node": "getting sample ids using jobid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -652,7 +499,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "cd3b60f2-af14-40f7-ab7b-790dc3511fbd",
+  "versionId": "5ec80eec-de11-42c7-9a2f-a3e0b43fafb7",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -666,6 +513,6 @@
   ],
   "activeVersion": null,
   "tags": [],
-  "commitDate": "21-07-2026/0:00",
+  "commitDate": "22-07-2026/0:01",
   "fileName": "download vcf.summary.tsv - burcu copy.json"
 }
