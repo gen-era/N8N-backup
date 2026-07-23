@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T13:30:36.581Z",
+  "updatedAt": "2026-07-22T10:24:54.880Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -365,7 +365,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const sentrixIds = new Set(\n  $('When Executed by Another Workflow').first().json.sentrix_ids.map(String)\n);\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
+        "jsCode": "let sentrixIdsRaw;\ntry {\n  sentrixIdsRaw = $('When Executed by Another Workflow').first().json.sentrix_ids;\n} catch {\n  sentrixIdsRaw = $('Collect Missing IDs').first().json.sentrix_ids;\n}\nconst sentrixIds = new Set(sentrixIdsRaw.map(String));\n\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -388,6 +388,61 @@
       ],
       "id": "518c3bc1-9995-492f-a61d-5c1d3bf8f9f9",
       "name": "Test Sentrix IDs"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1744,
+        64
+      ],
+      "id": "9390f27f-b0ee-475d-9195-475d334a94c2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT s.sentrix_id::text\nFROM scans s\nWHERE s.status_concept_ref = 29\nAND NOT EXISTS (\n  SELECT 1 FROM idats i WHERE i.scan_ref = s.uniqueref\n)",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1552,
+        64
+      ],
+      "id": "c1bdeaad-13d5-4072-abbd-0a3bf16bcadb",
+      "name": "Find Missing Scans",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json.sentrix_id).filter(Boolean);\nif (items.length === 0) return [];\nreturn [{ json: { sentrix_ids: items } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        64
+      ],
+      "id": "96627d24-d6bb-4306-8fd8-7cec58a2e60e",
+      "name": "Collect Missing IDs"
     }
   ],
   "connections": {
@@ -572,20 +627,59 @@
       "main": [
         []
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Find Missing Scans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Missing Scans": {
+      "main": [
+        [
+          {
+            "node": "Collect Missing IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Missing IDs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Aktif Part1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "staticData": null,
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": [
+        0
+      ]
+    }
+  },
   "meta": {
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
-  "activeVersionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
-  "triggerCount": 0,
+  "versionId": "8e744356-349d-435e-bdcb-f52a56e48cd9",
+  "activeVersionId": "8e744356-349d-435e-bdcb-f52a56e48cd9",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-04-21T09:56:53.908Z",
@@ -596,9 +690,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-21T13:30:38.000Z",
-    "createdAt": "2026-07-21T13:30:36.583Z",
-    "versionId": "68b529d1-6a4f-4e38-99c1-38ab3e90a3c5",
+    "updatedAt": "2026-07-22T10:24:56.000Z",
+    "createdAt": "2026-07-22T10:24:54.882Z",
+    "versionId": "8e744356-349d-435e-bdcb-f52a56e48cd9",
     "workflowId": "gNQvXKZ12sRVaKYt",
     "nodes": [
       {
@@ -960,7 +1054,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const sentrixIds = new Set(\n  $('When Executed by Another Workflow').first().json.sentrix_ids.map(String)\n);\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
+          "jsCode": "let sentrixIdsRaw;\ntry {\n  sentrixIdsRaw = $('When Executed by Another Workflow').first().json.sentrix_ids;\n} catch {\n  sentrixIdsRaw = $('Collect Missing IDs').first().json.sentrix_ids;\n}\nconst sentrixIds = new Set(sentrixIdsRaw.map(String));\n\n// Sheet 1 Part 1 (header burada)\nconst data1 = JSON.parse($('Fetch Aktif Part1').first().json.stdout);\nconst headers1 = data1.values[0];\nconst rows1 = data1.values.slice(1);\n// Sheet 1 Part 2 (header yok)\nlet rows1p2 = [];\ntry {\n  const raw = $('Fetch Aktif Part2').first().json.stdout;\n  if (raw && raw.trim()) {\n    const parsed = JSON.parse(raw);\n    rows1p2 = parsed.values || [];\n  }\n} catch {}\n// Sheet 2 (kendi headerı var)\nconst data2 = JSON.parse($('Fetch Sayfa1').first().json.stdout);\nconst headers2 = data2.values[0];\nconst rows2 = data2.values.slice(1);\n// Objelere çevir\nconst sheet1Rows = [...rows1, ...rows1p2].map(row =>\n  Object.fromEntries(headers1.map((h, i) => [h, row[i] ?? '']))\n);\nconst sheet2Rows = rows2.map(row =>\n  Object.fromEntries(headers2.map((h, i) => [h, row[i] ?? '']))\n);\n// Sadece gelen sentrix_id'lerle eşleşen satırlar\nconst allRows = [...sheet1Rows, ...sheet2Rows];\nconst filtered = allRows.filter(row => sentrixIds.has(String(row.Barkod)));\nif (filtered.length === 0) return [];\nreturn filtered.map(row => ({ json: row }));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -983,6 +1077,61 @@
         ],
         "id": "518c3bc1-9995-492f-a61d-5c1d3bf8f9f9",
         "name": "Test Sentrix IDs"
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours",
+                "hoursInterval": 2
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -1744,
+          64
+        ],
+        "id": "9390f27f-b0ee-475d-9195-475d334a94c2",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "SELECT s.sentrix_id::text\nFROM scans s\nWHERE s.status_concept_ref = 29\nAND NOT EXISTS (\n  SELECT 1 FROM idats i WHERE i.scan_ref = s.uniqueref\n)",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          -1552,
+          64
+        ],
+        "id": "c1bdeaad-13d5-4072-abbd-0a3bf16bcadb",
+        "name": "Find Missing Scans",
+        "alwaysOutputData": true,
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const items = $input.all().map(i => i.json.sentrix_id).filter(Boolean);\nif (items.length === 0) return [];\nreturn [{ json: { sentrix_ids: items } }];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -1360,
+          64
+        ],
+        "id": "96627d24-d6bb-4306-8fd8-7cec58a2e60e",
+        "name": "Collect Missing IDs"
       }
     ],
     "connections": {
@@ -1167,10 +1316,43 @@
         "main": [
           []
         ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Find Missing Scans",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Missing Scans": {
+        "main": [
+          [
+            {
+              "node": "Collect Missing IDs",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Collect Missing IDs": {
+        "main": [
+          [
+            {
+              "node": "Fetch Aktif Part1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 68b529d1",
+    "name": "Version 8e744356",
     "description": "",
     "autosaved": false
   },
@@ -1182,6 +1364,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "22-07-2026/0:01",
+  "commitDate": "23-07-2026/0:00",
   "fileName": "idats2Supa.json"
 }
