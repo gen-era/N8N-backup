@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-03T16:53:13.893Z",
+  "updatedAt": "2026-07-22T14:07:26.246Z",
   "createdAt": "2025-11-19T03:53:23.950Z",
   "id": "Oed2kXGOn8fc2vOD",
   "name": "archer metric retrieval",
@@ -117,7 +117,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -525,7 +525,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -691,7 +691,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -973,7 +973,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1017,7 +1017,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1094,7 +1094,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1138,7 +1138,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1181,7 +1181,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1334,7 +1334,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1461,7 +1461,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -2027,7 +2027,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "541d5cea-8679-4130-9d10-123e851579af",
+  "versionId": "fb7a4372-b601-4ed3-b095-bf58106ac219",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -2040,7 +2040,14 @@
     }
   ],
   "activeVersion": null,
-  "tags": [],
-  "commitDate": "22-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-22T14:06:24.176Z",
+      "createdAt": "2026-07-22T14:06:24.176Z",
+      "id": "B2yZ7fyKMZycahvW",
+      "name": "sinan"
+    }
+  ],
+  "commitDate": "23-07-2026/0:00",
   "fileName": "archer metric retrieval.json"
 }
