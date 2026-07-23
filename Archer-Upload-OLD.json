@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-03T16:53:04.312Z",
+  "updatedAt": "2026-07-22T14:07:36.871Z",
   "createdAt": "2025-12-10T03:45:42.146Z",
   "id": "oXEpDSIgLWrSyzUA",
   "name": "Archer-Upload-OLD",
@@ -172,7 +172,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -405,7 +405,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -475,7 +475,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -515,7 +515,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -556,7 +556,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -596,7 +596,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -640,7 +640,7 @@
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
-          "name": "Postgres account 2"
+          "name": "PG-ALB-1.5"
         }
       }
     },
@@ -1025,7 +1025,7 @@
       }
     ]
   },
-  "versionId": "8d557a7c-588e-49c5-b11e-752de6f02113",
+  "versionId": "a89f17d4-e267-4ae5-9f01-4bf39154c14d",
   "activeVersionId": "8d557a7c-588e-49c5-b11e-752de6f02113",
   "triggerCount": 0,
   "shared": [
@@ -2048,7 +2048,14 @@
     "description": null,
     "autosaved": false
   },
-  "tags": [],
-  "commitDate": "22-07-2026/0:01",
+  "tags": [
+    {
+      "updatedAt": "2026-07-22T14:06:24.176Z",
+      "createdAt": "2026-07-22T14:06:24.176Z",
+      "id": "B2yZ7fyKMZycahvW",
+      "name": "sinan"
+    }
+  ],
+  "commitDate": "23-07-2026/0:00",
   "fileName": "Archer-Upload-OLD.json"
 }
