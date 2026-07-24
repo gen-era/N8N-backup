@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T10:23:31.558Z",
+  "updatedAt": "2026-07-23T12:00:49.571Z",
   "createdAt": "2026-05-29T19:54:21.793Z",
   "id": "5yypZE2MSOSkIDmN",
   "name": "DRAGEN QC v2 - Koza",
@@ -15,8 +15,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1280,
-        0
+        -1344,
+        -192
       ]
     },
     {
@@ -28,8 +28,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -1056,
-        0
+        -1104,
+        224
       ],
       "credentials": {
         "sshPassword": {
@@ -68,8 +68,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -848,
-        0
+        -896,
+        224
       ]
     },
     {
@@ -83,8 +83,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -624,
-        0
+        -672,
+        224
       ],
       "credentials": {
         "postgres": {
@@ -102,8 +102,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -400,
-        0
+        -448,
+        224
       ]
     },
     {
@@ -667,8 +667,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -1280,
-        272
+        -1328,
+        48
       ],
       "id": "1c2007ab-5857-40e3-ac8e-2a42d42c51ab",
       "name": "Her 1 Saatte Bir"
@@ -703,8 +703,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1056,
-        272
+        -928,
+        -32
       ],
       "id": "43c02968-4716-4eb6-b3fe-eea1eefb4736",
       "name": "Calisan Kopya Var mi"
@@ -716,8 +716,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -848,
-        272
+        -720,
+        -32
       ],
       "id": "679ca1ce-24d2-4450-8aec-b1360b6da516",
       "name": "Baska Kopya Sayisi"
@@ -749,8 +749,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
       "position": [
-        -624,
-        272
+        -496,
+        -32
       ],
       "id": "16e7c780-0188-4210-9582-ef3bce219ed6",
       "name": "Bosta mi"
@@ -1041,8 +1041,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "ee5266cc-3a04-4e32-a948-dc56b6ca6b39",
-  "activeVersionId": "7df499d8-f05b-49a7-bb9c-db7bac1f2252",
+  "versionId": "967728f4-43db-4611-aa49-510f063fd6a9",
+  "activeVersionId": "967728f4-43db-4611-aa49-510f063fd6a9",
   "triggerCount": 1,
   "shared": [
     {
@@ -1054,9 +1054,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-12T20:52:52.697Z",
-    "createdAt": "2026-07-12T20:52:52.697Z",
-    "versionId": "7df499d8-f05b-49a7-bb9c-db7bac1f2252",
+    "updatedAt": "2026-07-23T12:00:51.000Z",
+    "createdAt": "2026-07-23T12:00:49.573Z",
+    "versionId": "967728f4-43db-4611-aa49-510f063fd6a9",
     "workflowId": "5yypZE2MSOSkIDmN",
     "nodes": [
       {
@@ -1068,8 +1068,8 @@
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "typeVersion": 1.1,
         "position": [
-          -1280,
-          0
+          -1344,
+          -192
         ]
       },
       {
@@ -1081,8 +1081,8 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          -1060,
-          0
+          -1104,
+          224
         ],
         "credentials": {
           "sshPassword": {
@@ -1121,8 +1121,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          -840,
-          0
+          -896,
+          224
         ]
       },
       {
@@ -1136,8 +1136,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -620,
-          0
+          -672,
+          224
         ],
         "credentials": {
           "postgres": {
@@ -1155,8 +1155,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -400,
-          0
+          -448,
+          224
         ]
       },
       {
@@ -1168,7 +1168,7 @@
         "type": "n8n-nodes-base.splitInBatches",
         "typeVersion": 3,
         "position": [
-          -180,
+          -176,
           0
         ]
       },
@@ -1181,8 +1181,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          60,
-          120
+          64,
+          128
         ]
       },
       {
@@ -1194,8 +1194,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          280,
-          120
+          288,
+          128
         ]
       },
       {
@@ -1223,8 +1223,8 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          500,
-          120
+          512,
+          128
         ]
       },
       {
@@ -1237,7 +1237,7 @@
         "typeVersion": 1,
         "position": [
           720,
-          120
+          128
         ],
         "credentials": {
           "sshPassword": {
@@ -1321,8 +1321,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          940,
-          120
+          944,
+          128
         ]
       },
       {
@@ -1334,8 +1334,8 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          1160,
-          220
+          1168,
+          224
         ],
         "credentials": {
           "sshPassword": {
@@ -1378,8 +1378,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1380,
-          120
+          1392,
+          128
         ],
         "credentials": {
           "postgres": {
@@ -1397,7 +1397,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1380,
+          1392,
           320
         ],
         "retryOnFail": true,
@@ -1424,7 +1424,7 @@
         "typeVersion": 3.2,
         "position": [
           1600,
-          220
+          224
         ]
       },
       {
@@ -1497,8 +1497,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1820,
-          220
+          1824,
+          224
         ],
         "credentials": {
           "postgres": {
@@ -1632,8 +1632,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2040,
-          220
+          2048,
+          224
         ],
         "credentials": {
           "postgres": {
@@ -1678,8 +1678,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1160,
-          -60
+          1168,
+          -64
         ],
         "credentials": {
           "postgres": {
@@ -1697,8 +1697,8 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          2260,
-          120
+          2272,
+          128
         ],
         "credentials": {
           "sshPassword": {
@@ -1712,8 +1712,7 @@
           "rule": {
             "interval": [
               {
-                "field": "hours",
-                "hoursInterval": 1
+                "field": "hours"
               }
             ]
           }
@@ -1721,8 +1720,8 @@
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
         "position": [
-          -1280,
-          260
+          -1328,
+          48
         ],
         "id": "1c2007ab-5857-40e3-ac8e-2a42d42c51ab",
         "name": "Her 1 Saatte Bir"
@@ -1757,8 +1756,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -1060,
-          260
+          -928,
+          -32
         ],
         "id": "43c02968-4716-4eb6-b3fe-eea1eefb4736",
         "name": "Calisan Kopya Var mi"
@@ -1770,8 +1769,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -840,
-          260
+          -720,
+          -32
         ],
         "id": "679ca1ce-24d2-4450-8aec-b1360b6da516",
         "name": "Baska Kopya Sayisi"
@@ -1803,8 +1802,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          -620,
-          260
+          -496,
+          -32
         ],
         "id": "16e7c780-0188-4210-9582-ef3bce219ed6",
         "name": "Bosta mi"
@@ -2081,8 +2080,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": null,
-    "description": null,
+    "name": "Version 967728f4",
+    "description": "",
     "autosaved": false
   },
   "tags": [
@@ -2093,6 +2092,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "23-07-2026/0:00",
+  "commitDate": "24-07-2026/0:01",
   "fileName": "DRAGEN QC v2 - Koza.json"
 }
