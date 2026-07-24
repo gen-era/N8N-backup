@@ -1,0 +1,58 @@
+{
+  "updatedAt": "2026-07-23T11:32:24.000Z",
+  "createdAt": "2026-07-23T11:32:24.235Z",
+  "id": "vtBycJXBI0jdTWt6",
+  "name": "My workflow 19",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "triggerOn": "folder",
+        "path": "/home/genera/run_folder/samplesheets",
+        "events": [
+          "change",
+          "add"
+        ],
+        "options": {
+          "awaitWriteFinish": true,
+          "ignoreInitial": false
+        }
+      },
+      "type": "n8n-nodes-base.localFileTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3535af47-e470-475a-9fdf-ecb46e194416",
+      "name": "Local File Trigger"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "7a3d2495-b815-42a5-ae1c-77fec6642f1e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-23T11:32:24.253Z",
+      "createdAt": "2026-07-23T11:32:24.253Z",
+      "role": "workflow:owner",
+      "workflowId": "vtBycJXBI0jdTWt6",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [],
+  "commitDate": "24-07-2026/0:01",
+  "fileName": "My workflow 19.json"
+}
