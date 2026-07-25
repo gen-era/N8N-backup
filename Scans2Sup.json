@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T13:05:44.322Z",
+  "updatedAt": "2026-07-24T07:15:10.317Z",
   "createdAt": "2026-04-11T06:12:18.527Z",
   "id": "JrRofLmHQcEKINjk",
   "name": "Scans2Sup",
@@ -353,7 +353,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29 || parseInt(dbRecord.status_concept_ref) === 27) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
+        "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 27) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -661,8 +661,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
-  "activeVersionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
+  "versionId": "56c940f6-9fe5-4c02-90ab-f0ff084329c3",
+  "activeVersionId": "56c940f6-9fe5-4c02-90ab-f0ff084329c3",
   "triggerCount": 1,
   "shared": [
     {
@@ -674,9 +674,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-21T12:57:46.000Z",
-    "createdAt": "2026-07-21T12:57:44.131Z",
-    "versionId": "0a6f8877-f149-4eac-93a5-12931602a3f0",
+    "updatedAt": "2026-07-24T07:15:12.000Z",
+    "createdAt": "2026-07-24T07:15:10.318Z",
+    "versionId": "56c940f6-9fe5-4c02-90ab-f0ff084329c3",
     "workflowId": "JrRofLmHQcEKINjk",
     "nodes": [
       {
@@ -1026,7 +1026,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29 || parseInt(dbRecord.status_concept_ref) === 27) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
+          "jsCode": "const dbRows = $('Execute a SQL query').all().map(i => i.json);\nconst allItems = JSON.parse($('list sentrix ids').first().json.items_json);\nconst instruments = $('Execute SQL: Get Instruments').all().map(i => i.json);\nconst kits = $('Execute SQL: Get Kits Mapping').all().map(i => i.json);\n\nconst dbMap = {};\ndbRows.forEach(row => { dbMap[row.sentrix_id] = row; });\n\nconst instrumentMap = {};\ninstruments.forEach(i => { instrumentMap[i.serial_number] = i; });\n\nconst kitsMap = {};\nkits.forEach(k => { kitsMap[k.source_value] = k; });\n\nconst results = [];\n\nfor (const item of allItems) {\n  const { sentrix_id, status, scan_date, instrument_serial, descriptor } = item;\n  const dbRecord = dbMap[sentrix_id];\n  const instrument = instrumentMap[instrument_serial] || {};\n  const kit = kitsMap[descriptor] || {};\n\n  if (!dbRecord) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'insert_completed',\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      results.push({\n        json: {\n          action: 'insert_inprogress',\n          sentrix_id\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 29) {\n    continue;\n  } else if (parseInt(dbRecord.status_concept_ref) === 27) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    }\n  } else if (parseInt(dbRecord.status_concept_ref) === 26) {\n    if (status === 'completed') {\n      results.push({\n        json: {\n          action: 'update_completed',\n          uniqueref: dbRecord.uniqueref,\n          sentrix_id, scan_date,\n          instrument_ref: instrument.uniqueref || null,\n          chiptype_ref: kit.kits_ref || null,\n          care_site_ref: instrument.care_site_ref || null\n        }\n      });\n    } else {\n      const elapsed = (new Date() - new Date(dbRecord.updated_at)) / 1000 / 60;\n      if (elapsed > 60) {\n        results.push({\n          json: {\n            action: 'update_failed',\n            uniqueref: dbRecord.uniqueref,\n            sentrix_id\n          }\n        });\n      }\n    }\n  }\n}\n\nreturn results.length > 0 ? results : [{ json: { action: 'none' } }];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1322,7 +1322,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 0a6f8877",
+    "name": "Version 56c940f6",
     "description": "",
     "autosaved": false
   },
@@ -1334,6 +1334,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "24-07-2026/0:01",
+  "commitDate": "25-07-2026/0:01",
   "fileName": "Scans2Sup.json"
 }
