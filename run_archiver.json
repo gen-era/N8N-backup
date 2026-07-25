@@ -1,0 +1,589 @@
+{
+  "updatedAt": "2026-07-24T07:13:14.317Z",
+  "createdAt": "2026-07-23T11:32:24.235Z",
+  "id": "vtBycJXBI0jdTWt6",
+  "name": "run_archiver",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                5
+              ]
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2d15e49f-8b4e-4c75-b440-f2e40e068f75",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "command": "find /mnt/smb_share/Runs/ -mindepth 1 -maxdepth 2 -type d -regextype posix-extended -regex '.*/[0-9]{6,8}_[A-Za-z0-9]+_[0-9]+_[A-Za-z0-9]+' | sort"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "327d8bac-48a1-4dca-abfa-83eac308c74b",
+      "name": "find all runs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Split the stdout into individual folder paths\nconst stdout = $input.first().json.stdout;\nconst folders = stdout.trim().split('\\n').filter(folder => folder.length > 0);\n\nconst items = folders.map(folder => ({\n  json: {\n    folder_path: folder,\n    folder_name: folder.split('/').pop()\n  }\n}));\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3ce80299-f83d-4934-b1f4-0fd519e8b254",
+      "name": "split items"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "where": {
+          "values": [
+            {
+              "column": "run_id",
+              "value": "={{ $json.folder_name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        624,
+        0
+      ],
+      "id": "f770265b-6d9b-44cc-9d89-0dc89a614a17",
+      "name": "Select rows from a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a0f9177-ff1e-49da-bdd8-1448d71e749b",
+              "leftValue": "={{ $json.created_at }}",
+              "rightValue": "={{ $now.minus(20, 'days') }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "before"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "6a72de7f-0698-4ef1-8ca6-6157c1f0c181",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "d0224db7-4557-4882-b8ca-ffb3c898ebfe",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        208
+      ],
+      "id": "3c5332a7-ab14-402e-92a2-7d062175fd6b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c38f9b3-2ccb-4caa-b828-81c75939b3c3",
+              "name": "folder_path",
+              "value": "={{ $('split items').item.json.folder_path }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "eea3996f-a3c6-4c5b-9e4c-9ffd7ce3c541",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1456,
+        96
+      ],
+      "id": "1d3ccefc-5350-47f6-80f6-b8a24aa678ee",
+      "name": "Wait",
+      "webhookId": "1daf46e6-3099-48c6-bf85-619f47160e51"
+    },
+    {
+      "parameters": {
+        "command": "=SRC=\"{{ $json.folder_path }}\"\nDST=\"/mnt/smb_peta/{{ $json.run_id }}\"\n\n# Copy with checksums, preserving everything\nrsync -avh --checksum --progress \"$SRC/\" \"$DST/\"\n\n# Verify — this re-checksums both sides and should report no differences\nrsync -avhn --checksum \"$SRC/\" \"$DST/\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        96
+      ],
+      "id": "7dd83196-312f-447b-9f8c-cd56bd414dcd",
+      "name": "copy with checksum"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "runs",
+          "mode": "list",
+          "cachedResultName": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "storage_instrument_ref": 24,
+            "run_id": "={{ $('Loop Over Items').item.json.run_id }}",
+            "updated_at": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "run_id"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "instrument_ref",
+              "displayName": "instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_kit_ref",
+              "displayName": "flowcell_kit_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "flowcell_lot",
+              "displayName": "flowcell_lot",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reads_settings_concept_ref",
+              "displayName": "reads_settings_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "storage_instrument_ref",
+              "displayName": "storage_instrument_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow_concept_ref",
+              "displayName": "workflow_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "care_site_ref",
+              "displayName": "care_site_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "part",
+              "displayName": "part",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seq_started_at",
+              "displayName": "seq_started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seq_ended_at",
+              "displayName": "seq_ended_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1904,
+        96
+      ],
+      "id": "53225d6a-186c-4d62-b3b4-8d6bdeedddae",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=rm -rf {{ $('Loop Over Items').item.json.folder_path }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2112,
+        96
+      ],
+      "id": "82285ec6-0e05-4495-bd7f-5fca44b64e27",
+      "name": "delete run",
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "find all runs": {
+      "main": [
+        [
+          {
+            "node": "split items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "find all runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split items": {
+      "main": [
+        [
+          {
+            "node": "Select rows from a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select rows from a table": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "copy with checksum",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "copy with checksum": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "delete run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete run": {
+      "main": [
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4d5384dd-5814-4ab1-82f8-3cf4ed903f52",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-07-23T11:32:24.253Z",
+      "createdAt": "2026-07-23T11:32:24.253Z",
+      "role": "workflow:owner",
+      "workflowId": "vtBycJXBI0jdTWt6",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2026-07-22T14:06:24.176Z",
+      "createdAt": "2026-07-22T14:06:24.176Z",
+      "id": "B2yZ7fyKMZycahvW",
+      "name": "sinan"
+    }
+  ],
+  "commitDate": "25-07-2026/0:01",
+  "fileName": "run_archiver.json"
+}
