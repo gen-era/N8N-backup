@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T13:06:02.194Z",
+  "updatedAt": "2026-07-24T07:06:39.511Z",
   "createdAt": "2026-05-14T07:38:24.154Z",
   "id": "y3uS2LAZLqVb8OjJ",
   "name": "run_dragena_gtc_qc",
@@ -46,8 +46,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        528,
-        256
+        704,
+        240
       ],
       "id": "ed5e29ff-a761-4155-ba0f-6e25169bba76",
       "name": "run_dragena_tmux",
@@ -65,11 +65,56 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        304,
+        272,
         256
       ],
       "id": "5299439a-9b41-44ea-964b-b056ea982d26",
       "name": "pack_process_chips"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        432
+      ],
+      "id": "248af337-4d4c-445c-aa45-09180edc0c69",
+      "name": "Triggered by Idats Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4303ba0a-6021-410d-8b9e-d45158358cce",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "process_batch",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        464,
+        256
+      ],
+      "id": "eef51f81-2022-4bf8-bce2-7ca968e240a0",
+      "name": "If"
     }
   ],
   "connections": {
@@ -104,6 +149,28 @@
       "main": [
         [
           {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triggered by Idats Workflow": {
+      "main": [
+        [
+          {
+            "node": "fetch_scan_and_idats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
             "node": "run_dragena_tmux",
             "type": "main",
             "index": 0
@@ -121,7 +188,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "575bb39c-350c-4ed6-8a91-559d6f9561da",
+  "versionId": "19dca990-b2b7-4f29-9625-a72aac3f85f6",
   "activeVersionId": "7c983054-d4a6-4d54-8bd9-f5bf9a38fc24",
   "triggerCount": 0,
   "shared": [
@@ -746,6 +813,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "24-07-2026/0:01",
+  "commitDate": "25-07-2026/0:01",
   "fileName": "run_dragena_gtc_qc.json"
 }
