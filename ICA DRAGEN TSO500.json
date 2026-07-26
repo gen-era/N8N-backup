@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T10:23:36.971Z",
+  "updatedAt": "2026-07-25T11:03:09.935Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -398,6 +398,157 @@
           "name": "Airtable"
         }
       }
+    },
+    {
+      "parameters": {},
+      "id": "a69a3633-0211-4d53-beaf-de29acaf5891",
+      "name": "Execute DB Upload",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT dop.uniqueref AS dop_id,\n       rd.sample_id,\n       r.account_id AS project_id,\n       rd.r1_path,\n       rd.r2_path,\n       CASE WHEN r.pipeline_name ILIKE '%ctDNA%' THEN 'ctDNA_v2' ELSE 'HT' END AS panel\nFROM data_operations dop\nJOIN data_operation_recipes r ON r.uniqueref = dop.recipe_ref\nJOIN reads rd ON rd.uniqueref = dop.read_ref\nWHERE r.platform_concept_ref = 547\n  AND dop.status_concept_ref = 24\n  AND rd.r1_path IS NOT NULL;",
+        "options": {}
+      },
+      "id": "fdc9cb08-ff05-43db-afd2-343485c9f2eb",
+      "name": "Get Pending ICA DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -720,
+        660
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "command": "=S=\"{{ $json.sample_id }}\"; P=\"{{ $json.project_id }}\"; R1=\"{{ $json.r1_path }}\"; ICA=/volume1/ALLDATA/bios/illumina/icav2; REMOTE=$(\"$ICA\" projectdata list \"/input_folder/$S/\" --project-id \"$P\" --data-type FILE --parent-folder -o json 2>/dev/null | jq -r '[.items[]? | select(.details.name != null)] | length'); [ -z \"$REMOTE\" ] && REMOTE=0; HDR=$(zcat \"$R1\" 2>/dev/null | head -1); UMI=false; echo \"$HDR\" | grep -qE ':[ACGTN]{6,}\\+[ACGTN]{6,}$' && UMI=true; printf '%s|%s\\n' \"$REMOTE\" \"$UMI\""
+      },
+      "id": "be5e9908-c8c3-49ca-a060-2fe1a3c0e93d",
+      "name": "Probe Sample DB",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        660
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = ($json.stdout || '').trim();\nconst parts = out.split('|');\nconst rc = parts[0]; const umi = parts[1];\nconst src = $('Get Pending ICA DB').item.json;\nconst base = p => String(p).substring(String(p).lastIndexOf('/') + 1);\nreturn {\n  json: {\n    dop_id: src.dop_id,\n    SAMPLE_ID: src.sample_id,\n    PROJECT_ID: src.project_id,\n    Panel: src.panel,\n    R1_PATH: src.r1_path,\n    R2_PATH: src.r2_path,\n    R1_NAME: base(src.r1_path),\n    R2_NAME: base(src.r2_path),\n    remote_count: parseInt(rc || '0', 10),\n    HAS_UMI: (umi || 'false').trim()\n  }\n};",
+        "mode": "runOnceForEachItem"
+      },
+      "id": "55511be2-dcfc-46ac-afc4-54d59ceeb78b",
+      "name": "Build Item DB",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8fb53b04-c314-4f71-916a-6b01cf929963",
+              "leftValue": "={{ $json.remote_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "0d8a46c4-d591-4e64-926d-d69b3738693b",
+      "name": "Filter Not Uploaded DB",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -48,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=UPDATE data_operations SET status_concept_ref = 26, updated_at = now() WHERE uniqueref = {{ $json.dop_id }} AND status_concept_ref = 24 RETURNING uniqueref;",
+        "options": {}
+      },
+      "id": "3061fabb-d3fd-47c6-8f7c-baccbd4e63f4",
+      "name": "Mark In Progress DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        176,
+        660
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $('Filter Not Uploaded DB').all().map(i => i.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = Date.now();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\nconst AWS_CONC = 32;\nconst dir = '/volume1/ALLDATA/Temp/ica_db_uploads';\n\nconst sampleBlocks = items.map((item) => {\n  const files = [item.R1_PATH, item.R2_PATH].filter(Boolean);\n  const payload = Buffer.from(JSON.stringify({\n    SAMPLE_ID: item.SAMPLE_ID,\n    PROJECT_ID: item.PROJECT_ID,\n    Panel: item.Panel,\n    HAS_UMI: String(item.HAS_UMI),\n    BATCH_HAS_UMI: batchHasUmi\n  })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d -p ${dir})`,\n`echo '[awsup]' > \"$WD/creds\"`,\n`echo \"aws_access_key_id=$AK\" >> \"$WD/creds\"`,\n`echo \"aws_secret_access_key=$SK\" >> \"$WD/creds\"`,\n`echo \"aws_session_token=$ST\" >> \"$WD/creds\"`,\n`echo '[profile awsup]' > \"$WD/config\"`,\n`echo 'region=us-east-1' >> \"$WD/config\"`,\n`echo 's3=' >> \"$WD/config\"`,\n`echo '    max_concurrent_requests=${AWS_CONC}' >> \"$WD/config\"`,\n`echo '    multipart_threshold=64MB' >> \"$WD/config\"`,\n`echo '    multipart_chunksize=16MB' >> \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 30`,\n`  echo \"[$(date '+%F %T')] webhook -> ${item.SAMPLE_ID}\"`,\n`  echo '${payload}' | base64 -d | curl -s -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst scriptFile = `${dir}/upload_${timestamp}.sh`;\nconst logFile = `${dir}/upload_${timestamp}.log`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=/volume1/ALLDATA/bios/aws/dist/aws`,\n`ICAV2=/volume1/ALLDATA/bios/illumina/icav2`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `mkdir -p ${dir} && cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
+      },
+      "id": "1125e144-3a93-44c4-a048-783fbe845d8c",
+      "name": "Prepare Upload Script DB",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        660
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{ $json.command }}"
+      },
+      "id": "1b77006e-fca3-4a45-b9e9-011c038c15e9",
+      "name": "Send Script DB",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        624,
+        660
+      ],
+      "credentials": {
+        "sshPassword": {
+          "id": "afQJbS7bg7aYGdOW",
+          "name": "Koza ALLData - Can User"
+        }
+      }
     }
   ],
   "connections": {
@@ -590,6 +741,83 @@
           }
         ]
       ]
+    },
+    "Execute DB Upload": {
+      "main": [
+        [
+          {
+            "node": "Get Pending ICA DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Pending ICA DB": {
+      "main": [
+        [
+          {
+            "node": "Probe Sample DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Probe Sample DB": {
+      "main": [
+        [
+          {
+            "node": "Build Item DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Item DB": {
+      "main": [
+        [
+          {
+            "node": "Filter Not Uploaded DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Not Uploaded DB": {
+      "main": [
+        [
+          {
+            "node": "Mark In Progress DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark In Progress DB": {
+      "main": [
+        [
+          {
+            "node": "Prepare Upload Script DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Upload Script DB": {
+      "main": [
+        [
+          {
+            "node": "Send Script DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -602,7 +830,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "176ce0c8-47cc-436f-b908-697d04fbfe73",
+  "versionId": "c8e3fca2-7e49-4940-9391-da440a410bac",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -623,6 +851,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "25-07-2026/0:01",
+  "commitDate": "26-07-2026/0:01",
   "fileName": "ICA DRAGEN TSO500.json"
 }
