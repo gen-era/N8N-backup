@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T10:23:15.005Z",
+  "updatedAt": "2026-07-26T18:14:47.290Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -2588,7 +2588,7 @@
     },
     {
       "parameters": {
-        "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\nrecipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n# Chemistry tag: XLEAP vs Standard SBS. RecipeName is the chemistry signal; FlowCellMode cannot distinguish std/XLEAP.\nchem=\"\"\ncase \"$recipe\" in\n  *XLEAP*|*xleap*) chem=\" (XLEAP)\" ;;\nesac\n# Cycle-capacity tag only to disambiguate 600-cycle kits (e.g. P1 300 vs 600)\ncaptag=\"\"\nif [ -n \"$cyc\" ] && [ \"$cyc\" -ge 600 ] 2>/dev/null; then\n  captag=\" (600 Cycles)\"\nfi\necho \"${fc}${captag}${chem}\""
+        "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NextSeq 500/550: no FlowCellMode, no RecipeName; flowcell signalled by <Chemistry> (e.g. \"NextSeq Mid\" / \"NextSeq High\")\nif ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null && ! grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && grep -q '<Chemistry>' \"$xml_file\" 2>/dev/null; then\n  chem=$(grep -oP '<Chemistry>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$chem\" ]; then\n    echo \"$chem\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\nrecipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n# Chemistry tag: XLEAP vs Standard SBS. RecipeName is the chemistry signal; FlowCellMode cannot distinguish std/XLEAP.\nchem=\"\"\ncase \"$recipe\" in\n  *XLEAP*|*xleap*) chem=\" (XLEAP)\" ;;\nesac\n# Cycle-capacity tag only to disambiguate 600-cycle kits (e.g. P1 300 vs 600)\ncaptag=\"\"\nif [ -n \"$cyc\" ] && [ \"$cyc\" -ge 600 ] 2>/dev/null; then\n  captag=\" (600 Cycles)\"\nfi\necho \"${fc}${captag}${chem}\""
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -4091,8 +4091,8 @@
       }
     ]
   },
-  "versionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
-  "activeVersionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
+  "versionId": "67e1e872-9698-4ecb-b7ff-96bde3bb2bcd",
+  "activeVersionId": "67e1e872-9698-4ecb-b7ff-96bde3bb2bcd",
   "triggerCount": 0,
   "shared": [
     {
@@ -4104,9 +4104,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-20T10:08:57.589Z",
-    "createdAt": "2026-07-20T10:08:57.589Z",
-    "versionId": "8919ef33-2137-4a42-8923-59c295dce4cf",
+    "updatedAt": "2026-07-26T18:14:47.296Z",
+    "createdAt": "2026-07-26T18:14:47.296Z",
+    "versionId": "67e1e872-9698-4ecb-b7ff-96bde3bb2bcd",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -6691,7 +6691,7 @@
       },
       {
         "parameters": {
-          "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\nrecipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n# Chemistry tag: XLEAP vs Standard SBS. RecipeName is the chemistry signal; FlowCellMode cannot distinguish std/XLEAP.\nchem=\"\"\ncase \"$recipe\" in\n  *XLEAP*|*xleap*) chem=\" (XLEAP)\" ;;\nesac\n# Cycle-capacity tag only to disambiguate 600-cycle kits (e.g. P1 300 vs 600)\ncaptag=\"\"\nif [ -n \"$cyc\" ] && [ \"$cyc\" -ge 600 ] 2>/dev/null; then\n  captag=\" (600 Cycles)\"\nfi\necho \"${fc}${captag}${chem}\""
+          "command": "=xml_file=\"{{ $('Start').item.json.path }}RunParameters.xml\"\n# NovaSeq X Plus: RecipeName present, no FlowCellMode\nif grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null; then\n  recipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$recipe\" ]; then\n    echo \"$recipe\"\n    exit 0\n  fi\nfi\n# NextSeq 500/550: no FlowCellMode, no RecipeName; flowcell signalled by <Chemistry> (e.g. \"NextSeq Mid\" / \"NextSeq High\")\nif ! grep -q '<FlowCellMode' \"$xml_file\" 2>/dev/null && ! grep -q '<RecipeName>' \"$xml_file\" 2>/dev/null && grep -q '<Chemistry>' \"$xml_file\" 2>/dev/null; then\n  chem=$(grep -oP '<Chemistry>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n  if [ -n \"$chem\" ]; then\n    echo \"$chem\"\n    exit 0\n  fi\nfi\n# NovaSeq 6000 / NextSeq fallback\nfc=$(grep -oP '<FlowCellMode[^>]*>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\ncyc=$(grep -oP '<CartridgeMode[^>]*>[^<]*\\(\\K[0-9]+(?= Cycles\\))' \"$xml_file\" 2>/dev/null | head -1)\nrecipe=$(grep -oP '<RecipeName>\\K[^<]+' \"$xml_file\" 2>/dev/null | head -1)\n# Chemistry tag: XLEAP vs Standard SBS. RecipeName is the chemistry signal; FlowCellMode cannot distinguish std/XLEAP.\nchem=\"\"\ncase \"$recipe\" in\n  *XLEAP*|*xleap*) chem=\" (XLEAP)\" ;;\nesac\n# Cycle-capacity tag only to disambiguate 600-cycle kits (e.g. P1 300 vs 600)\ncaptag=\"\"\nif [ -n \"$cyc\" ] && [ \"$cyc\" -ge 600 ] 2>/dev/null; then\n  captag=\" (600 Cycles)\"\nfi\necho \"${fc}${captag}${chem}\""
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -8188,6 +8188,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "26-07-2026/0:01",
+  "commitDate": "27-07-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
