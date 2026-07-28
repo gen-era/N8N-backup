@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T10:41:45.526Z",
+  "updatedAt": "2026-07-27T11:49:02.220Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -541,7 +541,8 @@
         "rule": {
           "interval": [
             {
-              "field": "hours"
+              "field": "hours",
+              "triggerAtMinute": 50
             }
           ]
         }
@@ -874,8 +875,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "71d5b44b-1d8d-4ede-b021-b60c39ea8529",
-  "activeVersionId": "71d5b44b-1d8d-4ede-b021-b60c39ea8529",
+  "versionId": "a4486af2-ffca-4afc-a9ea-bd188b511eb5",
+  "activeVersionId": "a4486af2-ffca-4afc-a9ea-bd188b511eb5",
   "triggerCount": 1,
   "shared": [
     {
@@ -887,9 +888,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-12T12:41:27.000Z",
-    "createdAt": "2026-07-12T12:41:23.734Z",
-    "versionId": "71d5b44b-1d8d-4ede-b021-b60c39ea8529",
+    "updatedAt": "2026-07-27T11:49:03.000Z",
+    "createdAt": "2026-07-27T11:49:02.222Z",
+    "versionId": "a4486af2-ffca-4afc-a9ea-bd188b511eb5",
     "workflowId": "hXc7QmBZ2783aPQP",
     "nodes": [
       {
@@ -1427,7 +1428,8 @@
           "rule": {
             "interval": [
               {
-                "field": "hours"
+                "field": "hours",
+                "triggerAtMinute": 50
               }
             ]
           }
@@ -1747,7 +1749,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 71d5b44b",
+    "name": "Version a4486af2",
     "description": "",
     "autosaved": false
   },
@@ -1759,6 +1761,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "27-07-2026/0:00",
+  "commitDate": "28-07-2026/0:01",
   "fileName": "Genomize Upload.json"
 }
