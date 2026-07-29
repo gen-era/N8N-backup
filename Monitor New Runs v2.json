@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T11:09:16.542Z",
+  "updatedAt": "2026-07-28T10:42:14.719Z",
   "createdAt": "2026-06-27T15:47:24.761Z",
   "id": "JNMNKgR7ChTZhvdv",
   "name": "Monitor New Runs v2",
@@ -47,7 +47,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
       },
       "name": "Find Runs",
       "type": "n8n-nodes-base.executeCommand",
@@ -74,7 +74,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD'),\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
+        "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
         "options": {}
       },
       "name": "Classify Runs",
@@ -483,8 +483,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "0ac83c73-173d-4a78-bceb-229ff2d181d6",
-  "activeVersionId": "0ac83c73-173d-4a78-bceb-229ff2d181d6",
+  "versionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
+  "activeVersionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
   "triggerCount": 1,
   "shared": [
     {
@@ -496,9 +496,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-19T12:13:54.000Z",
-    "createdAt": "2026-07-19T12:13:52.723Z",
-    "versionId": "0ac83c73-173d-4a78-bceb-229ff2d181d6",
+    "updatedAt": "2026-07-28T10:42:14.721Z",
+    "createdAt": "2026-07-28T10:42:14.721Z",
+    "versionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
     "workflowId": "JNMNKgR7ChTZhvdv",
     "nodes": [
       {
@@ -542,7 +542,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-*\" \\\n  --exclude \"*.zip\" | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
         },
         "name": "Find Runs",
         "type": "n8n-nodes-base.executeCommand",
@@ -569,7 +569,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD'),\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
+          "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
           "options": {}
         },
         "name": "Classify Runs",
@@ -965,8 +965,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 0ac83c73",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -977,6 +977,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "28-07-2026/0:01",
+  "commitDate": "29-07-2026/0:01",
   "fileName": "Monitor New Runs v2.json"
 }
