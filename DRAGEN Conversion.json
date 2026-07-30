@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-27T10:56:14.865Z",
+  "updatedAt": "2026-07-29T15:09:27.789Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260724_VH01138_17_2225N3KNX",
+              "value": "=20260727_LH00267_0178_A23JFY2LT3",
               "type": "string"
             }
           ]
@@ -47,6 +47,7 @@
           "name": "Koza DRAGEN - Root User"
         }
       },
+      "disabled": true,
       "onError": "continueErrorOutput"
     },
     {
@@ -66,7 +67,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -85,7 +87,8 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -104,7 +107,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -138,7 +142,8 @@
         -464
       ],
       "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
-      "name": "Is it available for Transfer and Conversion"
+      "name": "Is it available for Transfer and Conversion",
+      "disabled": true
     },
     {
       "parameters": {
@@ -157,7 +162,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {},
@@ -187,7 +193,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -206,7 +213,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -227,7 +235,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -249,7 +258,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -293,7 +303,8 @@
         -320
       ],
       "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
-      "name": "Is Run absent on  DRAGEN"
+      "name": "Is Run absent on  DRAGEN",
+      "disabled": true
     },
     {
       "parameters": {
@@ -327,7 +338,8 @@
         80
       ],
       "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
-      "name": "Is SampleSheet Absent"
+      "name": "Is SampleSheet Absent",
+      "disabled": true
     },
     {
       "parameters": {
@@ -348,7 +360,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -369,7 +382,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -409,7 +423,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -443,7 +458,8 @@
         384
       ],
       "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
-      "name": "Is Destination Folder Absent"
+      "name": "Is Destination Folder Absent",
+      "disabled": true
     },
     {
       "parameters": {
@@ -771,7 +787,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -792,7 +809,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -805,7 +823,8 @@
         -80
       ],
       "id": "09850efd-3983-4054-a05b-494442067590",
-      "name": "Generate SampleSheet Content"
+      "name": "Generate SampleSheet Content",
+      "disabled": true
     },
     {
       "parameters": {
@@ -824,7 +843,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -878,7 +898,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1283,7 +1304,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "c88b1748-6597-4950-9c86-f89fe5e3ddc1",
+  "versionId": "9b29d459-358e-490e-bef1-863e2e42a91f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1304,6 +1325,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "29-07-2026/0:01",
+  "commitDate": "30-07-2026/0:01",
   "fileName": "DRAGEN Conversion.json"
 }
