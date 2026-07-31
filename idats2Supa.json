@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-29T13:32:42.582Z",
+  "updatedAt": "2026-07-30T11:54:46.968Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -285,7 +285,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "INSERT INTO idats (scan_ref, position, sample_id, green_idat_path, red_idat_path, \n                   performing_caresite_ref, requesting_caresite_ref, rescan_count)\nVALUES (\n  {{ $json.scan_ref }},\n  '{{ $json.position }}',\n  '{{ $json.sample_id }}',\n  '{{ $json.green_idat_path }}',\n  '{{ $json.red_idat_path }}',\n  '{{ $json.performing_caresite_ref }}',\n  {{ $json.requesting_caresite_ref ? $json.requesting_caresite_ref : 'NULL' }},\n  {{ $json.position_rescan_count }}\n)\nON CONFLICT (scan_ref, position) DO NOTHING\nRETURNING *, 'inserted' AS status",
+        "query": "WITH inserted AS (\n  INSERT INTO idats (scan_ref, position, sample_id, green_idat_path, red_idat_path, \n                     performing_caresite_ref, requesting_caresite_ref, rescan_count)\n  VALUES (\n    {{ $json.scan_ref }},\n    '{{ $json.position }}',\n    '{{ $json.sample_id }}',\n    '{{ $json.green_idat_path }}',\n    '{{ $json.red_idat_path }}',\n    '{{ $json.performing_caresite_ref }}',\n    {{ $json.requesting_caresite_ref ? $json.requesting_caresite_ref : 'NULL' }},\n    {{ $json.position_rescan_count }}\n  )\n  ON CONFLICT (scan_ref, position) DO UPDATE SET position = EXCLUDED.position\n  RETURNING *, 'inserted' AS status\n)\nSELECT i.*, s.sentrix_id\nFROM inserted i\nJOIN scans s ON s.uniqueref = i.scan_ref",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -723,9 +723,24 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "aa2bda00-3154-4b58-aadc-825b37eb90b9",
-  "activeVersionId": "aa2bda00-3154-4b58-aadc-825b37eb90b9",
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "sentrix_ids": [
+            "210264620023",
+            "210264620033",
+            "210575780021"
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "7f8292c4-7298-4583-9256-5a4c18917895",
+  "activeVersionId": "7f8292c4-7298-4583-9256-5a4c18917895",
   "triggerCount": 1,
   "shared": [
     {
@@ -737,9 +752,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-29T13:32:44.000Z",
-    "createdAt": "2026-07-29T13:32:42.584Z",
-    "versionId": "aa2bda00-3154-4b58-aadc-825b37eb90b9",
+    "updatedAt": "2026-07-30T11:54:48.000Z",
+    "createdAt": "2026-07-30T11:54:46.970Z",
+    "versionId": "7f8292c4-7298-4583-9256-5a4c18917895",
     "workflowId": "gNQvXKZ12sRVaKYt",
     "nodes": [
       {
@@ -1021,7 +1036,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "INSERT INTO idats (scan_ref, position, sample_id, green_idat_path, red_idat_path, \n                   performing_caresite_ref, requesting_caresite_ref, rescan_count)\nVALUES (\n  {{ $json.scan_ref }},\n  '{{ $json.position }}',\n  '{{ $json.sample_id }}',\n  '{{ $json.green_idat_path }}',\n  '{{ $json.red_idat_path }}',\n  '{{ $json.performing_caresite_ref }}',\n  {{ $json.requesting_caresite_ref ? $json.requesting_caresite_ref : 'NULL' }},\n  {{ $json.position_rescan_count }}\n)\nON CONFLICT (scan_ref, position) DO NOTHING\nRETURNING *, 'inserted' AS status",
+          "query": "WITH inserted AS (\n  INSERT INTO idats (scan_ref, position, sample_id, green_idat_path, red_idat_path, \n                     performing_caresite_ref, requesting_caresite_ref, rescan_count)\n  VALUES (\n    {{ $json.scan_ref }},\n    '{{ $json.position }}',\n    '{{ $json.sample_id }}',\n    '{{ $json.green_idat_path }}',\n    '{{ $json.red_idat_path }}',\n    '{{ $json.performing_caresite_ref }}',\n    {{ $json.requesting_caresite_ref ? $json.requesting_caresite_ref : 'NULL' }},\n    {{ $json.position_rescan_count }}\n  )\n  ON CONFLICT (scan_ref, position) DO UPDATE SET position = EXCLUDED.position\n  RETURNING *, 'inserted' AS status\n)\nSELECT i.*, s.sentrix_id\nFROM inserted i\nJOIN scans s ON s.uniqueref = i.scan_ref",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1446,7 +1461,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version aa2bda00",
+    "name": "Version 7f8292c4",
     "description": "",
     "autosaved": false
   },
@@ -1458,6 +1473,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "30-07-2026/0:01",
+  "commitDate": "31-07-2026/0:01",
   "fileName": "idats2Supa.json"
 }
