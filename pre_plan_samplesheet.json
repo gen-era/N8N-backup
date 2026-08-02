@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-30T10:24:23.914Z",
+  "updatedAt": "2026-08-01T05:54:46.984Z",
   "createdAt": "2026-05-06T16:48:16.301Z",
   "id": "dJilxhhB8eITosxU",
   "name": "pre_plan_samplesheet",
@@ -409,13 +409,13 @@
             {
               "id": "b71aa86e-53c4-48bb-a114-d1d19f505e8c",
               "name": "index",
-              "value": "={{ $json.index }}",
+              "value": "={{ $if( $json.index.isNotEmpty(), $json.index, $json.index_new ) }}",
               "type": "string"
             },
             {
               "id": "4427c7dd-296e-44a2-95b9-3a610f5eea59",
               "name": "index2",
-              "value": "={{ $json.index2 }}",
+              "value": "={{ $if( $json.index2.isNotEmpty(), $json.index2, $json.index2_new ) }}",
               "type": "string"
             }
           ]
@@ -1230,8 +1230,8 @@
     "When clicking ‘Execute workflow’": [
       {
         "json": {
-          "date": "260728",
-          "instrument": "VH02229",
+          "date": "260729",
+          "instrument": "A01978",
           "part": "A",
           "numCycles": "12",
           "isRevComp": false
@@ -1239,8 +1239,8 @@
       }
     ]
   },
-  "versionId": "5f542a68-dc7b-4f1a-a664-88348af9360e",
-  "activeVersionId": "5f542a68-dc7b-4f1a-a664-88348af9360e",
+  "versionId": "323675e8-2082-4229-a8ed-264af175ce49",
+  "activeVersionId": "323675e8-2082-4229-a8ed-264af175ce49",
   "triggerCount": 1,
   "shared": [
     {
@@ -1252,9 +1252,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-30T10:24:32.000Z",
-    "createdAt": "2026-07-30T10:24:23.918Z",
-    "versionId": "5f542a68-dc7b-4f1a-a664-88348af9360e",
+    "updatedAt": "2026-08-01T05:54:50.000Z",
+    "createdAt": "2026-08-01T05:54:46.986Z",
+    "versionId": "323675e8-2082-4229-a8ed-264af175ce49",
     "workflowId": "dJilxhhB8eITosxU",
     "nodes": [
       {
@@ -1660,13 +1660,13 @@
               {
                 "id": "b71aa86e-53c4-48bb-a114-d1d19f505e8c",
                 "name": "index",
-                "value": "={{ $json.index }}",
+                "value": "={{ $if( $json.index.isNotEmpty(), $json.index, $json.index_new ) }}",
                 "type": "string"
               },
               {
                 "id": "4427c7dd-296e-44a2-95b9-3a610f5eea59",
                 "name": "index2",
-                "value": "={{ $json.index2 }}",
+                "value": "={{ $if( $json.index2.isNotEmpty(), $json.index2, $json.index2_new ) }}",
                 "type": "string"
               }
             ]
@@ -2472,7 +2472,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 5f542a68",
+    "name": "Version 323675e8",
     "description": "",
     "autosaved": false
   },
@@ -2484,6 +2484,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "01-08-2026/0:01",
+  "commitDate": "02-08-2026/0:01",
   "fileName": "pre_plan_samplesheet.json"
 }
