@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T11:07:04.209Z",
+  "updatedAt": "2026-08-04T13:58:24.871Z",
   "createdAt": "2026-05-06T16:48:16.301Z",
   "id": "dJilxhhB8eITosxU",
   "name": "pre_plan_samplesheet",
@@ -1230,9 +1230,9 @@
     "When clicking ‘Execute workflow’": [
       {
         "json": {
-          "date": "260801",
-          "instrument": "A01832R",
-          "part": "A",
+          "date": "260731",
+          "instrument": "A01228",
+          "part": "B",
           "numCycles": "12",
           "isRevComp": false
         }
@@ -1268,7 +1268,7 @@
     ]
   },
   "versionId": "9d07d046-3f6f-4ef9-a147-8e71d8c90a93",
-  "activeVersionId": "323675e8-2082-4229-a8ed-264af175ce49",
+  "activeVersionId": "9d07d046-3f6f-4ef9-a147-8e71d8c90a93",
   "triggerCount": 1,
   "shared": [
     {
@@ -1280,9 +1280,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-01T05:54:50.000Z",
-    "createdAt": "2026-08-01T05:54:46.986Z",
-    "versionId": "323675e8-2082-4229-a8ed-264af175ce49",
+    "updatedAt": "2026-08-04T13:58:29.000Z",
+    "createdAt": "2026-08-03T11:07:04.213Z",
+    "versionId": "9d07d046-3f6f-4ef9-a147-8e71d8c90a93",
     "workflowId": "dJilxhhB8eITosxU",
     "nodes": [
       {
@@ -1911,7 +1911,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Get input data from previous node\nconst items = $input.all();\n\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = 151;\nconst read2Cycles = 151;\nconst index1Cycles = $('When clicking ‘Execute workflow’').first().json.numCycles;\nconst index2Cycles = $('When clicking ‘Execute workflow’').first().json.numCycles;\n\n// --- Helpers ---------------------------------------------------------------\n\n// Parse the numeric count out of an override segment like 'I12', 'N4', 'I0'\nfunction parseCount(part) {\n  if (!part) return 0;\n  const m = String(part).match(/\\d+/);\n  return m ? parseInt(m[0], 10) : 0;\n}\n\n// Build an index override component (e.g. 'I8N4'), omitting any zero-length\n// I or N segment: 'I0N12' -> 'N12', 'I12N0' -> 'I12', 'I8N4' -> 'I8N4'\nfunction buildIndexComponent(iPart, nPart) {\n  const parts = [];\n  if (parseCount(iPart) > 0) parts.push(iPart);\n  if (parseCount(nPart) > 0) parts.push(nPart);\n  return parts.join('');\n}\n\n// ---------------------------------------------------------------------------\n\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\nsamplesheet += '[BCLConvert_Data]\\n';\n\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n}\n\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  const index2 = data.index2 || '';\n\n  // Extract the new fields\n  const sampleProject = data.Sample_Project || '';\n  const preparedBy = data.Prepared_By || '';\n  const requestedBy = data.Requested_By || '';\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const seReads = data.SE_Reads || '';\n  const bdsNumber = data.BDS_Number || '';\n  const panel = data.Panel || '';\n\n  // Per-sample index override fields (shared by both TSO and non-TSO paths)\n  const overrideCycle1I = data['overrideCycle1-I'];\n  const overrideCycle2I = data['overrideCycle2-I'];\n  const overrideCycle1N = data['overrideCycle1-N'];\n  const overrideCycle2N = data['overrideCycle2-N'];\n\n  // Index components: drop any I0 / N0 segment\n  const index1Component = buildIndexComponent(overrideCycle1I, overrideCycle1N);\n  const index2Component = buildIndexComponent(overrideCycle2I, overrideCycle2N);\n\n  // Read components: UMI-aware for TSO-500 kits (U7N1 + read length - 8)\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  let read1Component, read2Component;\n  if (isTSO) {\n    read1Component = `U7N1Y${read1Cycles - 8}`;\n    read2Component = `U7N1Y${read2Cycles - 8}`;\n  } else {\n    read1Component = `Y${read1Cycles}`;\n    read2Component = `Y${read2Cycles}`;\n  }\n\n  const overrideCycles = `${read1Component};${index1Component};${index2Component};${read2Component}`;\n\n  // Dynamic barcode mismatches:\n  //   I > 0  -> 0\n  //   I == 0 -> corresponding IndexNCycles value from [Reads]\n  const barcodeMismatch1 = parseCount(overrideCycle1I) > 0 ? 0 : index1Cycles;\n  const barcodeMismatch2 = parseCount(overrideCycle2I) > 0 ? 0 : index2Cycles;\n\n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},${barcodeMismatch1},${barcodeMismatch2},${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},${barcodeMismatch1},${barcodeMismatch2},${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  }\n});\n\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
+          "jsCode": "// Get input data from previous node\nconst items = $input.all();\n\n// Extract parameters from the first item (assuming these are consistent across items)\nconst read1Cycles = 151;\nconst read2Cycles = 151;\nconst index1Cycles = $('Edit Fields').first().json.numCycles;\nconst index2Cycles = $('Edit Fields').first().json.numCycles;\n\n// --- Helpers ---------------------------------------------------------------\n\n// Parse the numeric count out of an override segment like 'I12', 'N4', 'I0'\nfunction parseCount(part) {\n  if (!part) return 0;\n  const m = String(part).match(/\\d+/);\n  return m ? parseInt(m[0], 10) : 0;\n}\n\n// Build an index override component (e.g. 'I8N4'), omitting any zero-length\n// I or N segment: 'I0N12' -> 'N12', 'I12N0' -> 'I12', 'I8N4' -> 'I8N4'\nfunction buildIndexComponent(iPart, nPart) {\n  const parts = [];\n  if (parseCount(iPart) > 0) parts.push(iPart);\n  if (parseCount(nPart) > 0) parts.push(nPart);\n  return parts.join('');\n}\n\n// ---------------------------------------------------------------------------\n\n// Check if any item has a Lane field\nconst hasLane = items.some(item => item.json.Lane !== undefined && item.json.Lane !== null && item.json.Lane !== '');\n\n// Build the samplesheet\nlet samplesheet = '[Header],\\n';\nsamplesheet += 'FileFormatVersion,2\\n';\nsamplesheet += 'RunName,Demo 2\\n';\nsamplesheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsamplesheet += 'IndexOrientation,Forward\\n\\n';\nsamplesheet += '[Reads]\\n';\nsamplesheet += `Read1Cycles,${read1Cycles}\\n`;\nsamplesheet += `Read2Cycles,${read2Cycles}\\n`;\nsamplesheet += `Index1Cycles,${index1Cycles}\\n`;\nsamplesheet += `Index2Cycles,${index2Cycles}\\n\\n`;\nsamplesheet += '[BCLConvert_Settings]\\n';\nsamplesheet += 'SoftwareVersion,4.3.13\\n';\nsamplesheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsamplesheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsamplesheet += 'FastqCompressionFormat,gzip\\n';\nsamplesheet += '[BCLConvert_Data]\\n';\n\n// Build header row based on whether Lane is present\nif (hasLane) {\n  samplesheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n} else {\n  samplesheet += 'Sample_ID,Index,Index2,OverrideCycles,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2,Sample_Project,Prepared_By,Requested_By,Library_Prep_Kit,SE_Reads,BDS_Number,Panel\\n';\n}\n\n// Add data rows\nitems.forEach(item => {\n  const data = item.json;\n  const sampleID = data.Sample_ID || '';\n  const index = data.index || '';\n  const index2 = data.index2 || '';\n\n  // Extract the new fields\n  const sampleProject = data.Sample_Project || '';\n  const preparedBy = data.Prepared_By || '';\n  const requestedBy = data.Requested_By || '';\n  const libraryPrepKit = data.Library_Prep_Kit || '';\n  const seReads = data.SE_Reads || '';\n  const bdsNumber = data.BDS_Number || '';\n  const panel = data.Panel || '';\n\n  // Per-sample index override fields (shared by both TSO and non-TSO paths)\n  const overrideCycle1I = data['overrideCycle1-I'];\n  const overrideCycle2I = data['overrideCycle2-I'];\n  const overrideCycle1N = data['overrideCycle1-N'];\n  const overrideCycle2N = data['overrideCycle2-N'];\n\n  // Index components: drop any I0 / N0 segment\n  const index1Component = buildIndexComponent(overrideCycle1I, overrideCycle1N);\n  const index2Component = buildIndexComponent(overrideCycle2I, overrideCycle2N);\n\n  // Read components: UMI-aware for TSO-500 kits (U7N1 + read length - 8)\n  const isTSO = libraryPrepKit && libraryPrepKit.toLowerCase().includes('tso-500');\n  let read1Component, read2Component;\n  if (isTSO) {\n    read1Component = `U7N1Y${read1Cycles - 8}`;\n    read2Component = `U7N1Y${read2Cycles - 8}`;\n  } else {\n    read1Component = `Y${read1Cycles}`;\n    read2Component = `Y${read2Cycles}`;\n  }\n\n  const overrideCycles = `${read1Component};${index1Component};${index2Component};${read2Component}`;\n\n  // Dynamic barcode mismatches:\n  //   I > 0  -> 0\n  //   I == 0 -> corresponding IndexNCycles value from [Reads]\n  const barcodeMismatch1 = parseCount(overrideCycle1I) > 0 ? 0 : index1Cycles;\n  const barcodeMismatch2 = parseCount(overrideCycle2I) > 0 ? 0 : index2Cycles;\n\n  if (hasLane) {\n    const lane = data.Lane || '';\n    samplesheet += `${lane},${sampleID},${index},${index2},${overrideCycles},${barcodeMismatch1},${barcodeMismatch2},${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  } else {\n    samplesheet += `${sampleID},${index},${index2},${overrideCycles},${barcodeMismatch1},${barcodeMismatch2},${sampleProject},${preparedBy},${requestedBy},${libraryPrepKit},${seReads},${bdsNumber},${panel}\\n`;\n  }\n});\n\n// Return the samplesheet\nreturn [{\n  binary: {\n    data: {\n      data: Buffer.from(samplesheet).toString('base64'),\n      mimeType: 'text/csv',\n      fileName: `SampleSheet.csv`\n    }\n  }\n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -2500,7 +2500,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 323675e8",
+    "name": "Version 9d07d046",
     "description": "",
     "autosaved": false
   },
@@ -2512,6 +2512,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "04-08-2026/0:01",
+  "commitDate": "05-08-2026/0:00",
   "fileName": "pre_plan_samplesheet.json"
 }
