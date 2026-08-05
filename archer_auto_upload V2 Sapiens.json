@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-22T14:06:43.709Z",
+  "updatedAt": "2026-08-04T14:14:14.915Z",
   "createdAt": "2026-07-03T17:01:01.383Z",
   "id": "a1Mtyp9jfIrABIht",
   "name": "archer_auto_upload V2 Sapiens",
@@ -1149,6 +1149,180 @@
       "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
       "name": "Filter1",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4512,
+        80
+      ],
+      "id": "b152ddeb-16f6-4137-b319-ad15b40dcde9",
+      "name": "Split Out",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.read_ref }}",
+            "recipe_ref": "={{ $json.uniqueref }}",
+            "status_concept_ref": 26,
+            "updated_at": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "read_ref",
+            "recipe_ref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4720,
+        80
+      ],
+      "id": "e967b025-d0c9-4c66-a49d-05d683e8bb08",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -1282,6 +1456,11 @@
           },
           {
             "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
             "type": "main",
             "index": 0
           }
@@ -1678,6 +1857,17 @@
           }
         ]
       ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1695,8 +1885,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "254deb7e-b35e-4473-93da-35e6cc5fb461",
-  "activeVersionId": "254deb7e-b35e-4473-93da-35e6cc5fb461",
+  "versionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
+  "activeVersionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
   "triggerCount": 2,
   "shared": [
     {
@@ -1708,9 +1898,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-22T07:53:18.000Z",
-    "createdAt": "2026-07-22T07:53:16.394Z",
-    "versionId": "254deb7e-b35e-4473-93da-35e6cc5fb461",
+    "updatedAt": "2026-08-04T14:14:18.000Z",
+    "createdAt": "2026-08-04T14:14:14.917Z",
+    "versionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
     "workflowId": "a1Mtyp9jfIrABIht",
     "nodes": [
       {
@@ -2856,6 +3046,180 @@
         "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
         "name": "Filter1",
         "disabled": true
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "items",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          4512,
+          80
+        ],
+        "id": "b152ddeb-16f6-4137-b319-ad15b40dcde9",
+        "name": "Split Out",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "read_ref": "={{ $json.read_ref }}",
+              "recipe_ref": "={{ $json.uniqueref }}",
+              "status_concept_ref": 26,
+              "updated_at": "={{ $now }}"
+            },
+            "matchingColumns": [
+              "read_ref",
+              "recipe_ref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "created_at",
+                "displayName": "created_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "updated_at",
+                "displayName": "updated_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          4720,
+          80
+        ],
+        "id": "e967b025-d0c9-4c66-a49d-05d683e8bb08",
+        "name": "Update rows in a table",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        },
+        "disabled": true
       }
     ],
     "connections": {
@@ -2989,6 +3353,11 @@
             },
             {
               "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split Out",
               "type": "main",
               "index": 0
             }
@@ -3385,10 +3754,21 @@
             }
           ]
         ]
+      },
+      "Split Out": {
+        "main": [
+          [
+            {
+              "node": "Update rows in a table",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 254deb7e",
+    "name": "Version 18c78dd7",
     "description": "",
     "autosaved": false
   },
@@ -3400,6 +3780,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "04-08-2026/0:01",
+  "commitDate": "05-08-2026/0:00",
   "fileName": "archer_auto_upload V2 Sapiens.json"
 }
