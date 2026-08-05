@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-27T11:49:31.201Z",
+  "updatedAt": "2026-08-04T14:13:54.817Z",
   "createdAt": "2026-06-10T06:07:49.804Z",
   "id": "365MNVcdopNK6zo7",
   "name": "ArcherAutoUploadV2 - Koza",
@@ -247,7 +247,7 @@
             },
             {
               "column": "platform_site_id",
-              "value": "={{ $json.items[0].account_id }}"
+              "value": "={{ $('Limit').item.json.items[0].account_id }}"
             }
           ]
         },
@@ -256,8 +256,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        2528,
-        288
+        2592,
+        304
       ],
       "id": "0e29ec6b-81be-41ad-91e0-3ff67127461f",
       "name": "GET Credentials",
@@ -292,7 +292,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2944,
+        3232,
         288
       ],
       "id": "126b84c7-9223-4872-89ce-3c320a9e0e2e",
@@ -307,7 +307,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3712,
+        4128,
         144
       ],
       "id": "1cfcf1e5-7859-4ce3-910a-9ed8afcbd7c5",
@@ -320,7 +320,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        5040,
+        5456,
         160
       ],
       "id": "880adcd2-4f97-471a-95f2-ac8530fd38d5",
@@ -336,7 +336,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        4672,
+        5088,
         160
       ],
       "id": "14bf153e-14ae-4b11-b32c-d5f2f2c9bc8c",
@@ -350,7 +350,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        4032,
+        4448,
         32
       ],
       "id": "69476403-7b65-4bb7-806a-2cfdd6f44140",
@@ -363,7 +363,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        5488,
+        5904,
         112
       ],
       "id": "e43b6426-bbc5-49e7-ab19-9fe85c843414",
@@ -378,7 +378,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        5632,
+        6048,
         448
       ],
       "id": "42966df1-b17c-4458-a152-efb4b4b6db18",
@@ -392,7 +392,7 @@
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        5840,
+        6256,
         448
       ],
       "id": "29e62057-ffac-4872-b5bc-8cd5de237c8a",
@@ -407,7 +407,7 @@
       "type": "n8n-nodes-base.readWriteFile",
       "typeVersion": 1.1,
       "position": [
-        6048,
+        6464,
         448
       ],
       "id": "4a2d7885-cf31-465e-ae4b-e80451a7ab15",
@@ -420,7 +420,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        6256,
+        6672,
         448
       ],
       "id": "29278e58-bf78-4b71-9ae5-f54e65d031c7",
@@ -434,7 +434,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6512,
+        6928,
         448
       ],
       "id": "21dcf151-bd0e-4d75-8774-f66e9e628e02",
@@ -467,7 +467,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        4304,
+        4720,
         32
       ],
       "id": "d09958e2-4df7-417a-87cf-9ccd113474bd",
@@ -484,7 +484,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        4688,
+        5104,
         -16
       ],
       "id": "d46efc27-1d1c-44e4-b4c7-b9545f55bb03",
@@ -503,7 +503,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        5056,
+        5472,
         -16
       ],
       "id": "d141a3ea-24b9-4f5e-aeee-471ff04ac24c",
@@ -542,7 +542,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        5728,
+        6144,
         112
       ],
       "id": "b18d89cd-34da-4b6a-addb-fafe1ef70332",
@@ -553,7 +553,7 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        5984,
+        6400,
         128
       ],
       "id": "58df7271-50b9-4fb2-8801-d649ed36f20f",
@@ -587,8 +587,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        2720,
-        288
+        2848,
+        304
       ],
       "id": "6828c5ef-b569-4536-b0a6-aaf08c96417c",
       "name": "If2"
@@ -603,8 +603,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        2960,
-        512
+        3072,
+        528
       ],
       "id": "90408365-4915-4072-af22-cef7f9365337",
       "name": "Send email",
@@ -621,7 +621,7 @@
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
       "position": [
-        2016,
+        2224,
         128
       ],
       "id": "09a37c62-b17c-43c1-bf43-100435461d38",
@@ -637,7 +637,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        6192,
+        6608,
         128
       ],
       "id": "87e90de8-0252-497f-8272-72d0323d6eb9",
@@ -664,7 +664,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        7264,
+        7680,
         448
       ],
       "id": "5a45fff0-b603-42ac-822d-ae153063e112",
@@ -714,7 +714,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        7536,
+        7952,
         448
       ],
       "id": "a2d0bef1-d493-4b5f-b83c-74b78bfc4f9b",
@@ -758,7 +758,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        7744,
+        8160,
         448
       ],
       "id": "c3b94a9e-e916-46b2-8f57-1eaeb5216a60",
@@ -798,7 +798,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        7968,
+        8384,
         448
       ],
       "id": "0c572728-a36b-437a-87f6-ad349d501ea3",
@@ -829,7 +829,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        8240,
+        8656,
         432
       ],
       "id": "44023d9f-8d3f-4bde-a354-4a19c76e2cb9",
@@ -846,7 +846,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        6448,
+        6864,
         720
       ],
       "id": "bfad0dc6-ff79-499b-a86f-728f2c167819",
@@ -870,7 +870,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        6960,
+        7376,
         448
       ],
       "id": "1e721a70-94db-495a-b127-5c0142378a77",
@@ -947,7 +947,7 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        2640,
+        2848,
         -176
       ],
       "id": "2e3d1b25-ef53-4488-bca3-12f3691dcb65",
@@ -960,7 +960,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2352,
+        2560,
         -176
       ],
       "id": "bbcecb43-9fba-42f0-9d9b-b09539255d62",
@@ -993,7 +993,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        3056,
+        3264,
         -176
       ],
       "id": "56502d92-be76-406b-bab0-0367088bff2d",
@@ -1006,7 +1006,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2848,
+        3056,
         -176
       ],
       "id": "93519b2b-d304-456b-b46c-eea9501a9a32",
@@ -1023,7 +1023,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        3312,
+        3520,
         -160
       ],
       "id": "65c095b5-9193-4123-ac8d-3fc1cf26ece5",
@@ -1044,7 +1044,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3296,
+        3504,
         112
       ],
       "id": "c2dddd73-f2f0-49e2-b91c-bba2b465b569",
@@ -1057,7 +1057,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        6720,
+        7136,
         448
       ],
       "id": "a2ea7780-084d-445c-9ad5-987457c0d94c",
@@ -1069,7 +1069,7 @@
           "options": {
             "caseSensitive": true,
             "leftValue": "",
-            "typeValidation": "strict",
+            "typeValidation": "loose",
             "version": 3
           },
           "conditions": [
@@ -1085,16 +1085,191 @@
           ],
           "combinator": "and"
         },
+        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        1760,
+        1840,
         128
       ],
       "id": "1de8f006-026f-4a64-aa50-188bfc3122e9",
       "name": "Filter"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4448,
+        -176
+      ],
+      "id": "1c1bd183-7eab-46eb-b479-d63ef64c3f4c",
+      "name": "Split Out",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "data_operations",
+          "mode": "list",
+          "cachedResultName": "data_operations"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "read_ref": "={{ $json.read_ref }}",
+            "recipe_ref": "={{ $json.uniqueref }}",
+            "status_concept_ref": 26,
+            "updated_at": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "read_ref",
+            "recipe_ref"
+          ],
+          "schema": [
+            {
+              "id": "uniqueref",
+              "displayName": "uniqueref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "read_ref",
+              "displayName": "read_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recipe_ref",
+              "displayName": "recipe_ref",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status_concept_ref",
+              "displayName": "status_concept_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "performed_at",
+              "displayName": "performed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "batch_source_value",
+              "displayName": "batch_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "error_text",
+              "displayName": "error_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "operator_ref",
+              "displayName": "operator_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "analysis_source_value",
+              "displayName": "analysis_source_value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4656,
+        -176
+      ],
+      "id": "c60ab841-5189-4fed-b333-3f49da318049",
+      "name": "Update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      },
+      "disabled": true
     }
   ],
   "connections": {
@@ -1217,6 +1392,11 @@
           },
           {
             "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
             "type": "main",
             "index": 0
           }
@@ -1608,6 +1788,17 @@
           }
         ]
       ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1624,9 +1815,38 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
-  "activeVersionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
+  "pinData": {
+    "Code in JavaScript3": [
+      {
+        "json": {
+          "job_id": 72699,
+          "job_name": "260617-NX-VP-FOCUSV3-HT-CNV",
+          "success": true,
+          "error": null,
+          "sample_index": 1,
+          "samples_count": 2
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "job_id": 72699,
+          "job_name": "260617-NX-VP-FOCUSV3-HT-CNV",
+          "success": true,
+          "error": null,
+          "sample_index": 2,
+          "samples_count": 2
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "1917294d-ef48-4530-bec3-d9190333ce74",
+  "activeVersionId": "1917294d-ef48-4530-bec3-d9190333ce74",
   "triggerCount": 2,
   "shared": [
     {
@@ -1638,9 +1858,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-04T13:51:26.000Z",
-    "createdAt": "2026-07-04T13:51:06.280Z",
-    "versionId": "e4dc6263-2084-4736-b76a-6c0ed6129fe7",
+    "updatedAt": "2026-08-04T14:13:58.000Z",
+    "createdAt": "2026-08-04T14:13:54.819Z",
+    "versionId": "1917294d-ef48-4530-bec3-d9190333ce74",
     "workflowId": "365MNVcdopNK6zo7",
     "nodes": [
       {
@@ -1884,7 +2104,7 @@
               },
               {
                 "column": "platform_site_id",
-                "value": "={{ $json.items[0].account_id }}"
+                "value": "={{ $('Limit').item.json.items[0].account_id }}"
               }
             ]
           },
@@ -1893,8 +2113,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          2528,
-          288
+          2592,
+          304
         ],
         "id": "0e29ec6b-81be-41ad-91e0-3ff67127461f",
         "name": "GET Credentials",
@@ -1929,7 +2149,7 @@
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
-          2944,
+          3232,
           288
         ],
         "id": "126b84c7-9223-4872-89ce-3c320a9e0e2e",
@@ -1944,7 +2164,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          3712,
+          4128,
           144
         ],
         "id": "1cfcf1e5-7859-4ce3-910a-9ed8afcbd7c5",
@@ -1957,7 +2177,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          5040,
+          5456,
           160
         ],
         "id": "880adcd2-4f97-471a-95f2-ac8530fd38d5",
@@ -1973,7 +2193,7 @@
         "type": "n8n-nodes-base.readWriteFile",
         "typeVersion": 1.1,
         "position": [
-          4672,
+          5088,
           160
         ],
         "id": "14bf153e-14ae-4b11-b32c-d5f2f2c9bc8c",
@@ -1987,7 +2207,7 @@
         "type": "n8n-nodes-base.convertToFile",
         "typeVersion": 1.1,
         "position": [
-          4032,
+          4448,
           32
         ],
         "id": "69476403-7b65-4bb7-806a-2cfdd6f44140",
@@ -2000,7 +2220,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          5488,
+          5904,
           112
         ],
         "id": "e43b6426-bbc5-49e7-ab19-9fe85c843414",
@@ -2015,7 +2235,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          5632,
+          6048,
           448
         ],
         "id": "42966df1-b17c-4458-a152-efb4b4b6db18",
@@ -2029,7 +2249,7 @@
         "type": "n8n-nodes-base.convertToFile",
         "typeVersion": 1.1,
         "position": [
-          5840,
+          6256,
           448
         ],
         "id": "29e62057-ffac-4872-b5bc-8cd5de237c8a",
@@ -2044,7 +2264,7 @@
         "type": "n8n-nodes-base.readWriteFile",
         "typeVersion": 1.1,
         "position": [
-          6048,
+          6464,
           448
         ],
         "id": "4a2d7885-cf31-465e-ae4b-e80451a7ab15",
@@ -2057,7 +2277,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          6256,
+          6672,
           448
         ],
         "id": "29278e58-bf78-4b71-9ae5-f54e65d031c7",
@@ -2071,7 +2291,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          6512,
+          6928,
           448
         ],
         "id": "21dcf151-bd0e-4d75-8774-f66e9e628e02",
@@ -2104,7 +2324,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          4304,
+          4720,
           32
         ],
         "id": "d09958e2-4df7-417a-87cf-9ccd113474bd",
@@ -2121,7 +2341,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          4688,
+          5104,
           -16
         ],
         "id": "d46efc27-1d1c-44e4-b4c7-b9545f55bb03",
@@ -2140,7 +2360,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          5056,
+          5472,
           -16
         ],
         "id": "d141a3ea-24b9-4f5e-aeee-471ff04ac24c",
@@ -2179,7 +2399,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          5728,
+          6144,
           112
         ],
         "id": "b18d89cd-34da-4b6a-addb-fafe1ef70332",
@@ -2190,7 +2410,7 @@
         "type": "n8n-nodes-base.executionData",
         "typeVersion": 1.1,
         "position": [
-          5984,
+          6400,
           128
         ],
         "id": "58df7271-50b9-4fb2-8801-d649ed36f20f",
@@ -2224,8 +2444,8 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          2720,
-          288
+          2848,
+          304
         ],
         "id": "6828c5ef-b569-4536-b0a6-aaf08c96417c",
         "name": "If2"
@@ -2240,8 +2460,8 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          2960,
-          512
+          3072,
+          528
         ],
         "id": "90408365-4915-4072-af22-cef7f9365337",
         "name": "Send email",
@@ -2258,7 +2478,7 @@
         "type": "n8n-nodes-base.limit",
         "typeVersion": 1,
         "position": [
-          2016,
+          2224,
           128
         ],
         "id": "09a37c62-b17c-43c1-bf43-100435461d38",
@@ -2274,7 +2494,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          6192,
+          6608,
           128
         ],
         "id": "87e90de8-0252-497f-8272-72d0323d6eb9",
@@ -2301,7 +2521,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          7264,
+          7680,
           448
         ],
         "id": "5a45fff0-b603-42ac-822d-ae153063e112",
@@ -2351,7 +2571,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          7536,
+          7952,
           448
         ],
         "id": "a2d0bef1-d493-4b5f-b83c-74b78bfc4f9b",
@@ -2395,7 +2615,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          7744,
+          8160,
           448
         ],
         "id": "c3b94a9e-e916-46b2-8f57-1eaeb5216a60",
@@ -2435,7 +2655,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          7968,
+          8384,
           448
         ],
         "id": "0c572728-a36b-437a-87f6-ad349d501ea3",
@@ -2466,7 +2686,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.3,
         "position": [
-          8240,
+          8656,
           432
         ],
         "id": "44023d9f-8d3f-4bde-a354-4a19c76e2cb9",
@@ -2483,7 +2703,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          6448,
+          6864,
           720
         ],
         "id": "bfad0dc6-ff79-499b-a86f-728f2c167819",
@@ -2507,7 +2727,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          6960,
+          7376,
           448
         ],
         "id": "1e721a70-94db-495a-b127-5c0142378a77",
@@ -2584,7 +2804,7 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          2640,
+          2848,
           -176
         ],
         "id": "2e3d1b25-ef53-4488-bca3-12f3691dcb65",
@@ -2597,7 +2817,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2352,
+          2560,
           -176
         ],
         "id": "bbcecb43-9fba-42f0-9d9b-b09539255d62",
@@ -2630,7 +2850,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.3,
         "position": [
-          3056,
+          3264,
           -176
         ],
         "id": "56502d92-be76-406b-bab0-0367088bff2d",
@@ -2643,7 +2863,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          2848,
+          3056,
           -176
         ],
         "id": "93519b2b-d304-456b-b46c-eea9501a9a32",
@@ -2660,7 +2880,7 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          3312,
+          3520,
           -160
         ],
         "id": "65c095b5-9193-4123-ac8d-3fc1cf26ece5",
@@ -2681,7 +2901,7 @@
         "type": "n8n-nodes-base.merge",
         "typeVersion": 3.2,
         "position": [
-          3296,
+          3504,
           112
         ],
         "id": "c2dddd73-f2f0-49e2-b91c-bba2b465b569",
@@ -2694,7 +2914,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          6720,
+          7136,
           448
         ],
         "id": "a2ea7780-084d-445c-9ad5-987457c0d94c",
@@ -2706,7 +2926,7 @@
             "options": {
               "caseSensitive": true,
               "leftValue": "",
-              "typeValidation": "strict",
+              "typeValidation": "loose",
               "version": 3
             },
             "conditions": [
@@ -2722,16 +2942,191 @@
             ],
             "combinator": "and"
           },
+          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.filter",
         "typeVersion": 2.3,
         "position": [
-          1760,
+          1840,
           128
         ],
         "id": "1de8f006-026f-4a64-aa50-188bfc3122e9",
         "name": "Filter"
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "items",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          4448,
+          -176
+        ],
+        "id": "1c1bd183-7eab-46eb-b479-d63ef64c3f4c",
+        "name": "Split Out",
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "schema": {
+            "__rl": true,
+            "mode": "list",
+            "value": "public"
+          },
+          "table": {
+            "__rl": true,
+            "value": "data_operations",
+            "mode": "list",
+            "cachedResultName": "data_operations"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "read_ref": "={{ $json.read_ref }}",
+              "recipe_ref": "={{ $json.uniqueref }}",
+              "status_concept_ref": 26,
+              "updated_at": "={{ $now }}"
+            },
+            "matchingColumns": [
+              "read_ref",
+              "recipe_ref"
+            ],
+            "schema": [
+              {
+                "id": "uniqueref",
+                "displayName": "uniqueref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "read_ref",
+                "displayName": "read_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "recipe_ref",
+                "displayName": "recipe_ref",
+                "required": true,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "status_concept_ref",
+                "displayName": "status_concept_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "performed_at",
+                "displayName": "performed_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "batch_source_value",
+                "displayName": "batch_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "error_text",
+                "displayName": "error_text",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "operator_ref",
+                "displayName": "operator_ref",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "analysis_source_value",
+                "displayName": "analysis_source_value",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "created_at",
+                "displayName": "created_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "updated_at",
+                "displayName": "updated_at",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "dateTime",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          4656,
+          -176
+        ],
+        "id": "c60ab841-5189-4fed-b333-3f49da318049",
+        "name": "Update rows in a table",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        },
+        "disabled": true
       }
     ],
     "connections": {
@@ -2854,6 +3249,11 @@
             },
             {
               "node": "Convert to File",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Split Out",
               "type": "main",
               "index": 0
             }
@@ -3245,14 +3645,25 @@
             }
           ]
         ]
+      },
+      "Split Out": {
+        "main": [
+          [
+            {
+              "node": "Update rows in a table",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version e4dc6263",
+    "name": "Version 1917294d",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "04-08-2026/0:01",
+  "commitDate": "05-08-2026/0:00",
   "fileName": "ArcherAutoUploadV2 - Koza.json"
 }
