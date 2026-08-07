@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T10:23:50.067Z",
+  "updatedAt": "2026-08-06T08:29:02.223Z",
   "createdAt": "2026-01-22T18:50:57.405Z",
   "id": "qQAtjqOqS8h7N0Mx",
   "name": "Webhook - ICA DRAGEN TSO500",
@@ -335,7 +335,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+        "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA,\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
       },
       "id": "7c520c20-992e-4331-bd91-2c3130c68b31",
       "name": "Generate Sample Sheet",
@@ -638,11 +638,6 @@
           },
           {
             "node": "TSO500_ctDNA",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "TSO500_HRD",
             "type": "main",
             "index": 0
           },
@@ -1059,8 +1054,8 @@
       }
     ]
   },
-  "versionId": "59873bca-fd7e-4cd5-b342-4e2dd30318f7",
-  "activeVersionId": "3c18a4f9-cade-4681-9510-f1661fb65c74",
+  "versionId": "dee27e11-6a62-4e7c-8f16-8f091fdcc404",
+  "activeVersionId": "dee27e11-6a62-4e7c-8f16-8f091fdcc404",
   "triggerCount": 1,
   "shared": [
     {
@@ -1072,9 +1067,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-05-11T16:38:29.000Z",
-    "createdAt": "2026-05-11T16:38:26.743Z",
-    "versionId": "3c18a4f9-cade-4681-9510-f1661fb65c74",
+    "updatedAt": "2026-08-06T08:29:02.225Z",
+    "createdAt": "2026-08-06T08:29:02.225Z",
+    "versionId": "dee27e11-6a62-4e7c-8f16-8f091fdcc404",
     "workflowId": "qQAtjqOqS8h7N0Mx",
     "nodes": [
       {
@@ -1406,7 +1401,7 @@
       {
         "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
+          "jsCode": "const sampleId = $input.item.json.sample_id;\nconst projectId = $input.item.json.PROJECT_ID;\nconst files = $input.item.json.files;\n\nconst sampleSheet = `[Header],,,,,,,\nFileFormatVersion,2,,,,,,\nInvestigator Name,Dana Weiner,,,,,,\nExperiment Name,SystemVal_DW,,,,,,\nDate,3/11/2020,,,,,,\nProject,TSO500 HT,,,,,,\n[Reads],,,,,,,\nRead1Cycles,151,,,,,,\nRead2Cycles,151,,,,,,\nIndex1Cycles,10,,,,,,\nIndex2Cycles,10,,,,,,\n[Sequencing_Settings],,,,,,,\nLibraryPrepKits,TSO500,,,,,,\n[BCLConvert_Settings],,,,,,,\nSoftwareVersion,3.10.4,,,,,,\nAdapterRead1,CTGTCTCTTATACACATCTCCGAGCCCACGAGAC,,,,,,\nAdapterRead2,CTGTCTCTTATACACATCTGACGCTGCCGACGA,,,,,,\nAdapterBehavior,trim,,,,,,\nMinimumTrimmedReadLength,35,,,,,,\nMaskShortReads,35,,,,,,\nOverrideCycles,U7N1Y93;I8;I8;U7N1Y93,,,,,,\n,,,,,,,\n[BCLConvert_Data],,,,,,,\nSample_ID,index,index2,,,,,\n${sampleId}-D,GAATACCTAT,ACTCTATTGT\n${sampleId}-R,TACGTGAAGG,CTAATAACCG\n\n,,,,,,,\n[TSO500S_Settings],,,,,,,\n,,,,,,,\n[TSO500S_Data],,,,,,,\nSample_ID,Sample_Name,Index_ID,index,index2,I7_Index_ID,I5_Index_ID,Description,Pair_ID,Sample_Type,Sample_Feature\n${sampleId}-D,${sampleId}-D,UDP0139,GAATACCTAT,ACTCTATTGT,UDP0139,UDP0139,,${sampleId},DNA,HRD\n${sampleId}-R,${sampleId}-R,UDP0140,TACGTGAAGG,CTAATAACCG,UDP0140,UDP0140,,${sampleId},RNA,\n`;\n\nreturn {\n  json: {\n    sample_id: sampleId,\n    sample_sheet_content: sampleSheet,\n    sample_sheet_filename: `SampleSheet_${sampleId}.csv`,\n    files: files,\n    PROJECT_ID: projectId\n  }\n};\n"
         },
         "id": "7c520c20-992e-4331-bd91-2c3130c68b31",
         "name": "Generate Sample Sheet",
@@ -1463,9 +1458,7 @@
         "name": "Code in JavaScript1"
       },
       {
-        "parameters": {
-          "amount": 120
-        },
+        "parameters": {},
         "type": "n8n-nodes-base.wait",
         "typeVersion": 1.1,
         "position": [
@@ -1474,8 +1467,7 @@
         ],
         "id": "7711de67-95cf-4da5-87c2-f44933e09453",
         "name": "Wait",
-        "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf",
-        "disabled": true
+        "webhookId": "37d0f30b-ef9e-4798-8141-beaf5e9272bf"
       },
       {
         "parameters": {
@@ -1712,11 +1704,6 @@
             },
             {
               "node": "TSO500_ctDNA",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "TSO500_HRD",
               "type": "main",
               "index": 0
             },
@@ -2092,8 +2079,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 3c18a4f9",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -2104,6 +2091,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "06-08-2026/0:01",
+  "commitDate": "07-08-2026/0:01",
   "fileName": "Webhook - ICA DRAGEN TSO500.json"
 }
