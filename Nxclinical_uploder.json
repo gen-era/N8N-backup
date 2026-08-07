@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-31T18:59:05.465Z",
+  "updatedAt": "2026-08-06T08:24:05.218Z",
   "createdAt": "2026-06-01T08:05:32.731Z",
   "id": "9z4hRpQRHcHn1c2K",
   "name": "Nxclinical_uploder",
@@ -111,7 +111,8 @@
         -64
       ],
       "id": "1a98b8d0-4468-491c-9baa-2c5022131db4",
-      "name": "run_nxclinical"
+      "name": "run_nxclinical",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -122,8 +123,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1280,
-        -64
+        1424,
+        -160
       ],
       "id": "c4bf8a00-dd2e-4d17-a9b6-a3911d246323",
       "name": "update_operations_completed",
@@ -141,70 +142,11 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        1904,
-        -64
+        2048,
+        -160
       ],
       "id": "0cfcb9a8-4498-4fb5-8cbd-02b95f176e3e",
       "name": "delete_batch_file"
-    },
-    {
-      "parameters": {
-        "fromEmail": "bioinf.notify@gen-era.tech",
-        "toEmail": "hande.beklen@gen-era.com.tr",
-        "subject": "NxClinical Yükleme Bildirimi",
-        "html": "={{ $json.email_body }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.emailSend",
-      "typeVersion": 2.1,
-      "position": [
-        848,
-        -352
-      ],
-      "id": "6dc27558-d57f-472d-a3f2-06f9e8e7a8ae",
-      "name": "Send email",
-      "webhookId": "daa93d16-29fc-4ca3-9df0-383fffdf587c",
-      "credentials": {
-        "smtp": {
-          "id": "clTmxNgA7AqNrh5h",
-          "name": "bioinf.notify@gen-era.tech"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "executeQuery",
-        "query": "SELECT DISTINCT i.sample_id\nFROM data_operations_array doa\nJOIN idats i ON i.uniqueref = doa.idat_ref\nWHERE doa.uniqueref IN (\n  SELECT (value->>'operation_ref')::bigint\n  FROM jsonb_array_elements(\n    ('['\n      || {{ $('group_by_recipe').all().map(g => JSON.parse(g.json.operations).map(o => JSON.stringify(o))).flat().join(',') }}\n      || ']')::jsonb\n  ) AS value\n)\nAND doa.status_concept_ref = 29;",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.postgres",
-      "typeVersion": 2.6,
-      "position": [
-        448,
-        -352
-      ],
-      "id": "794d4a1e-9453-4939-90eb-9014c4d4af06",
-      "name": "get_completed_operations",
-      "executeOnce": true,
-      "credentials": {
-        "postgres": {
-          "id": "vvzB2Z8ymgMiekHW",
-          "name": "PG-ALB-1.5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const items = $input.all().map(i => i.json);\n\nconst sampleList = items.map(i => `<li>${i.sample_id}</li>`).join('\\n');\n\nconst body = `\n<p>Aşağıdaki örnekler NxClinical platformuna yüklenmiştir.</p>\n<ul>\n${sampleList}\n</ul>\n`;\n\nreturn [{\n  json: {\n    email_body: body\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        656,
-        -352
-      ],
-      "id": "02081272-447d-4cec-b006-01082170b98a",
-      "name": "build_email_content"
     },
     {
       "parameters": {
@@ -215,8 +157,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1488,
-        -64
+        1632,
+        -160
       ],
       "id": "e3ae38c9-f305-445d-8006-f1beef719c69",
       "name": "get_operator_mail_and_upload_summary",
@@ -240,8 +182,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1696,
-        -64
+        1840,
+        -160
       ],
       "id": "abb3b239-a605-49b1-a513-c3a9becc6e84",
       "name": "Send upload completed email",
@@ -271,6 +213,56 @@
       ],
       "id": "a58ce6db-9e59-4a09-9214-ec1ecaa383d8",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "command": "cat \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/log.txt\" 2>/dev/null || echo \"Log dosyası bulunamadı\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        64
+      ],
+      "id": "77e03525-4651-4c61-93e2-cd631c587f72",
+      "name": "read_nxclinical_log"
+    },
+    {
+      "parameters": {
+        "jsCode": "const logContent = $('read_nxclinical_log').first().json.stdout || 'Log bulunamadı';\nconst stderr = $('run_nxclinical').first().json.stderr || '';\nconst loopItem = $('build_batch_txt').first().json;\n\nconst body = `\n<p><strong>NxClinical yüklemesi başarısız.</strong></p>\n<table style=\"border-collapse:collapse;border:1px solid #ccc;margin:12px 0;\">\n  <tr><td style=\"padding:8px;border:1px solid #ccc;font-weight:600;\">Server</td><td style=\"padding:8px;border:1px solid #ccc;\">${loopItem.server}:${loopItem.port}</td></tr>\n  <tr><td style=\"padding:8px;border:1px solid #ccc;font-weight:600;\">Recipe Ref</td><td style=\"padding:8px;border:1px solid #ccc;\">${loopItem.recipe_ref}</td></tr>\n</table>\n<p><strong>Stderr:</strong></p>\n<pre style=\"background:#f5f5f5;padding:12px;border-radius:4px;overflow-x:auto;font-size:13px;\">${stderr}</pre>\n<p><strong>Log dosyası:</strong></p>\n<pre style=\"background:#f5f5f5;padding:12px;border-radius:4px;overflow-x:auto;font-size:13px;\">${logContent}</pre>\n<p style=\"color:#666;font-size:13px;\">Operasyonlar On Hold (24) statüsünde bırakıldı, sorun giderildikten sonra otomatik tekrar denenecek.</p>\n`;\n\nreturn [{\n  json: { error_email_body: body }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        64
+      ],
+      "id": "d91e0988-dc90-483d-832a-4a990a4c7826",
+      "name": "build_error_email"
+    },
+    {
+      "parameters": {
+        "fromEmail": "bioinf.notify@gen-era.tech",
+        "toEmail": "hande.beklen@gen-era.com.tr",
+        "subject": "=NxClinical Yükleme Hatası - Recipe {{ $('build_batch_txt').first().json.recipe_ref }}",
+        "html": "={{ $json.error_email_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1840,
+        64
+      ],
+      "id": "bf456669-397a-4f6f-9b6a-03e89f963410",
+      "name": "Send error email",
+      "webhookId": "daa93d16-29fc-4ca3-9df0-383fffdf587c",
+      "credentials": {
+        "smtp": {
+          "id": "clTmxNgA7AqNrh5h",
+          "name": "bioinf.notify@gen-era.tech"
+        }
+      }
     }
   ],
   "connections": {
@@ -309,13 +301,7 @@
     },
     "Loop Over Items": {
       "main": [
-        [
-          {
-            "node": "get_completed_operations",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [],
         [
           {
             "node": "get_idats",
@@ -355,6 +341,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "read_nxclinical_log",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -374,28 +367,6 @@
         [
           {
             "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "get_completed_operations": {
-      "main": [
-        [
-          {
-            "node": "build_email_content",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "build_email_content": {
-      "main": [
-        [
-          {
-            "node": "Send email",
             "type": "main",
             "index": 0
           }
@@ -434,6 +405,39 @@
           }
         ]
       ]
+    },
+    "read_nxclinical_log": {
+      "main": [
+        [
+          {
+            "node": "build_error_email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "build_error_email": {
+      "main": [
+        [
+          {
+            "node": "Send error email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send error email": {
+      "main": [
+        [
+          {
+            "node": "delete_batch_file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -452,16 +456,16 @@
     "Schedule Trigger": [
       {
         "json": {
-          "timestamp": "2026-07-31T12:00:12.015-04:00",
-          "Readable date": "July 31st 2026, 12:00:12 pm",
-          "Readable time": "12:00:12 pm",
-          "Day of week": "Friday",
+          "timestamp": "2026-08-06T04:00:45.013-04:00",
+          "Readable date": "August 6th 2026, 4:00:45 am",
+          "Readable time": "4:00:45 am",
+          "Day of week": "Thursday",
           "Year": "2026",
-          "Month": "July",
-          "Day of month": "31",
-          "Hour": "12",
+          "Month": "August",
+          "Day of month": "06",
+          "Hour": "04",
           "Minute": "00",
-          "Second": "12",
+          "Second": "45",
           "Timezone": "America/New_York (UTC-04:00)"
         },
         "pairedItem": {
@@ -470,8 +474,8 @@
       }
     ]
   },
-  "versionId": "c3dcde9d-3d90-4aa6-8b45-70a2df74352a",
-  "activeVersionId": "c3dcde9d-3d90-4aa6-8b45-70a2df74352a",
+  "versionId": "50056dab-b96d-4c07-9373-fde93fb77b06",
+  "activeVersionId": "50056dab-b96d-4c07-9373-fde93fb77b06",
   "triggerCount": 1,
   "shared": [
     {
@@ -483,9 +487,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-31T18:59:07.000Z",
-    "createdAt": "2026-07-31T18:59:05.468Z",
-    "versionId": "c3dcde9d-3d90-4aa6-8b45-70a2df74352a",
+    "updatedAt": "2026-08-06T08:24:06.000Z",
+    "createdAt": "2026-08-06T08:24:05.220Z",
+    "versionId": "50056dab-b96d-4c07-9373-fde93fb77b06",
     "workflowId": "9z4hRpQRHcHn1c2K",
     "nodes": [
       {
@@ -593,7 +597,8 @@
           -64
         ],
         "id": "1a98b8d0-4468-491c-9baa-2c5022131db4",
-        "name": "run_nxclinical"
+        "name": "run_nxclinical",
+        "onError": "continueErrorOutput"
       },
       {
         "parameters": {
@@ -604,8 +609,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1280,
-          -64
+          1424,
+          -160
         ],
         "id": "c4bf8a00-dd2e-4d17-a9b6-a3911d246323",
         "name": "update_operations_completed",
@@ -623,70 +628,11 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          1904,
-          -64
+          2048,
+          -160
         ],
         "id": "0cfcb9a8-4498-4fb5-8cbd-02b95f176e3e",
         "name": "delete_batch_file"
-      },
-      {
-        "parameters": {
-          "fromEmail": "bioinf.notify@gen-era.tech",
-          "toEmail": "hande.beklen@gen-era.com.tr",
-          "subject": "NxClinical Yükleme Bildirimi",
-          "html": "={{ $json.email_body }}",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.emailSend",
-        "typeVersion": 2.1,
-        "position": [
-          848,
-          -352
-        ],
-        "id": "6dc27558-d57f-472d-a3f2-06f9e8e7a8ae",
-        "name": "Send email",
-        "webhookId": "daa93d16-29fc-4ca3-9df0-383fffdf587c",
-        "credentials": {
-          "smtp": {
-            "id": "clTmxNgA7AqNrh5h",
-            "name": "bioinf.notify@gen-era.tech"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "operation": "executeQuery",
-          "query": "SELECT DISTINCT i.sample_id\nFROM data_operations_array doa\nJOIN idats i ON i.uniqueref = doa.idat_ref\nWHERE doa.uniqueref IN (\n  SELECT (value->>'operation_ref')::bigint\n  FROM jsonb_array_elements(\n    ('['\n      || {{ $('group_by_recipe').all().map(g => JSON.parse(g.json.operations).map(o => JSON.stringify(o))).flat().join(',') }}\n      || ']')::jsonb\n  ) AS value\n)\nAND doa.status_concept_ref = 29;",
-          "options": {}
-        },
-        "type": "n8n-nodes-base.postgres",
-        "typeVersion": 2.6,
-        "position": [
-          448,
-          -352
-        ],
-        "id": "794d4a1e-9453-4939-90eb-9014c4d4af06",
-        "name": "get_completed_operations",
-        "executeOnce": true,
-        "credentials": {
-          "postgres": {
-            "id": "vvzB2Z8ymgMiekHW",
-            "name": "PG-ALB-1.5"
-          }
-        }
-      },
-      {
-        "parameters": {
-          "jsCode": "const items = $input.all().map(i => i.json);\n\nconst sampleList = items.map(i => `<li>${i.sample_id}</li>`).join('\\n');\n\nconst body = `\n<p>Aşağıdaki örnekler NxClinical platformuna yüklenmiştir.</p>\n<ul>\n${sampleList}\n</ul>\n`;\n\nreturn [{\n  json: {\n    email_body: body\n  }\n}];"
-        },
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          656,
-          -352
-        ],
-        "id": "02081272-447d-4cec-b006-01082170b98a",
-        "name": "build_email_content"
       },
       {
         "parameters": {
@@ -697,8 +643,8 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1488,
-          -64
+          1632,
+          -160
         ],
         "id": "e3ae38c9-f305-445d-8006-f1beef719c69",
         "name": "get_operator_mail_and_upload_summary",
@@ -722,8 +668,8 @@
         "type": "n8n-nodes-base.emailSend",
         "typeVersion": 2.1,
         "position": [
-          1696,
-          -64
+          1840,
+          -160
         ],
         "id": "abb3b239-a605-49b1-a513-c3a9becc6e84",
         "name": "Send upload completed email",
@@ -753,6 +699,56 @@
         ],
         "id": "a58ce6db-9e59-4a09-9214-ec1ecaa383d8",
         "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "command": "cat \"/home/genera/nxclinical/BioDiscovery/NxClinical Sample Importer/log.txt\" 2>/dev/null || echo \"Log dosyası bulunamadı\""
+        },
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1424,
+          64
+        ],
+        "id": "77e03525-4651-4c61-93e2-cd631c587f72",
+        "name": "read_nxclinical_log"
+      },
+      {
+        "parameters": {
+          "jsCode": "const logContent = $('read_nxclinical_log').first().json.stdout || 'Log bulunamadı';\nconst stderr = $('run_nxclinical').first().json.stderr || '';\nconst loopItem = $('build_batch_txt').first().json;\n\nconst body = `\n<p><strong>NxClinical yüklemesi başarısız.</strong></p>\n<table style=\"border-collapse:collapse;border:1px solid #ccc;margin:12px 0;\">\n  <tr><td style=\"padding:8px;border:1px solid #ccc;font-weight:600;\">Server</td><td style=\"padding:8px;border:1px solid #ccc;\">${loopItem.server}:${loopItem.port}</td></tr>\n  <tr><td style=\"padding:8px;border:1px solid #ccc;font-weight:600;\">Recipe Ref</td><td style=\"padding:8px;border:1px solid #ccc;\">${loopItem.recipe_ref}</td></tr>\n</table>\n<p><strong>Stderr:</strong></p>\n<pre style=\"background:#f5f5f5;padding:12px;border-radius:4px;overflow-x:auto;font-size:13px;\">${stderr}</pre>\n<p><strong>Log dosyası:</strong></p>\n<pre style=\"background:#f5f5f5;padding:12px;border-radius:4px;overflow-x:auto;font-size:13px;\">${logContent}</pre>\n<p style=\"color:#666;font-size:13px;\">Operasyonlar On Hold (24) statüsünde bırakıldı, sorun giderildikten sonra otomatik tekrar denenecek.</p>\n`;\n\nreturn [{\n  json: { error_email_body: body }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1632,
+          64
+        ],
+        "id": "d91e0988-dc90-483d-832a-4a990a4c7826",
+        "name": "build_error_email"
+      },
+      {
+        "parameters": {
+          "fromEmail": "bioinf.notify@gen-era.tech",
+          "toEmail": "hande.beklen@gen-era.com.tr",
+          "subject": "=NxClinical Yükleme Hatası - Recipe {{ $('build_batch_txt').first().json.recipe_ref }}",
+          "html": "={{ $json.error_email_body }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.emailSend",
+        "typeVersion": 2.1,
+        "position": [
+          1840,
+          64
+        ],
+        "id": "bf456669-397a-4f6f-9b6a-03e89f963410",
+        "name": "Send error email",
+        "webhookId": "daa93d16-29fc-4ca3-9df0-383fffdf587c",
+        "credentials": {
+          "smtp": {
+            "id": "clTmxNgA7AqNrh5h",
+            "name": "bioinf.notify@gen-era.tech"
+          }
+        }
       }
     ],
     "connections": {
@@ -791,13 +787,7 @@
       },
       "Loop Over Items": {
         "main": [
-          [
-            {
-              "node": "get_completed_operations",
-              "type": "main",
-              "index": 0
-            }
-          ],
+          [],
           [
             {
               "node": "get_idats",
@@ -837,6 +827,13 @@
               "type": "main",
               "index": 0
             }
+          ],
+          [
+            {
+              "node": "read_nxclinical_log",
+              "type": "main",
+              "index": 0
+            }
           ]
         ]
       },
@@ -856,28 +853,6 @@
           [
             {
               "node": "Loop Over Items",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "get_completed_operations": {
-        "main": [
-          [
-            {
-              "node": "build_email_content",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "build_email_content": {
-        "main": [
-          [
-            {
-              "node": "Send email",
               "type": "main",
               "index": 0
             }
@@ -916,10 +891,43 @@
             }
           ]
         ]
+      },
+      "read_nxclinical_log": {
+        "main": [
+          [
+            {
+              "node": "build_error_email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "build_error_email": {
+        "main": [
+          [
+            {
+              "node": "Send error email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send error email": {
+        "main": [
+          [
+            {
+              "node": "delete_batch_file",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version c3dcde9d",
+    "name": "Version 50056dab",
     "description": "",
     "autosaved": false
   },
@@ -931,6 +939,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "06-08-2026/0:01",
+  "commitDate": "07-08-2026/0:01",
   "fileName": "Nxclinical_uploder.json"
 }
