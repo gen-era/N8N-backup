@@ -1720,7 +1720,7 @@
   },
   "pinData": {},
   "versionId": "0182469b-f56a-4922-9d50-ac52994b7d73",
-  "activeVersionId": "c099fc5a-0feb-4b90-8346-a5d6600fe6c8",
+  "activeVersionId": "0182469b-f56a-4922-9d50-ac52994b7d73",
   "triggerCount": 1,
   "shared": [
     {
@@ -1732,9 +1732,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-14T18:07:16.711Z",
-    "createdAt": "2026-07-14T18:07:16.711Z",
-    "versionId": "c099fc5a-0feb-4b90-8346-a5d6600fe6c8",
+    "updatedAt": "2026-08-19T13:54:35.000Z",
+    "createdAt": "2026-07-20T11:08:16.003Z",
+    "versionId": "0182469b-f56a-4922-9d50-ac52994b7d73",
     "workflowId": "p5v6HfuZ2iO5nnbC",
     "nodes": [
       {
@@ -2927,7 +2927,7 @@
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
         "position": [
-          -3900,
+          -3904,
           -480
         ],
         "id": "sophia-guard-schedule",
@@ -2963,7 +2963,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.2,
         "position": [
-          -3700,
+          -3696,
           -480
         ],
         "id": "sophia-guard-http",
@@ -2976,7 +2976,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -3480,
+          -3488,
           -480
         ],
         "id": "sophia-guard-count",
@@ -3009,7 +3009,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 2,
         "position": [
-          -3260,
+          -3264,
           -480
         ],
         "id": "sophia-guard-if",
@@ -3437,8 +3437,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": null,
-    "description": null,
+    "name": "Version 0182469b",
+    "description": "",
     "autosaved": false
   },
   "tags": [
@@ -3449,6 +3449,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "19-08-2026/0:07",
+  "commitDate": "20-08-2026/0:00",
   "fileName": "Sophia Upload.json"
 }
