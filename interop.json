@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-22T14:08:30.193Z",
+  "updatedAt": "2026-08-19T12:41:52.186Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
@@ -157,7 +157,10 @@
             "measurement_concept_ref": "={{ $json.concept_id }}",
             "value_as_number": "={{ $json.value }}"
           },
-          "matchingColumns": [],
+          "matchingColumns": [
+            "run_ref",
+            "measurement_concept_ref"
+          ],
           "schema": [
             {
               "id": "uniqueref",
@@ -200,7 +203,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "operation": "upsert"
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
@@ -339,8 +343,8 @@
       }
     ]
   },
-  "versionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
-  "activeVersionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
+  "versionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
+  "activeVersionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
   "triggerCount": 0,
   "shared": [
     {
@@ -352,9 +356,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-04-23T06:33:10.000Z",
-    "createdAt": "2026-04-23T06:33:08.330Z",
-    "versionId": "5968e418-be54-4f16-8c24-c14cc0dc6492",
+    "updatedAt": "2026-08-19T12:41:52.188Z",
+    "createdAt": "2026-08-19T12:41:52.188Z",
+    "versionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
     "workflowId": "SeGWQ7ai2D66eUSG",
     "nodes": [
       {
@@ -508,7 +512,10 @@
               "measurement_concept_ref": "={{ $json.concept_id }}",
               "value_as_number": "={{ $json.value }}"
             },
-            "matchingColumns": [],
+            "matchingColumns": [
+              "run_ref",
+              "measurement_concept_ref"
+            ],
             "schema": [
               {
                 "id": "uniqueref",
@@ -551,7 +558,8 @@
             "attemptToConvertTypes": false,
             "convertFieldsToString": false
           },
-          "options": {}
+          "options": {},
+          "operation": "upsert"
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
@@ -671,8 +679,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 5968e418",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -683,6 +691,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "19-08-2026/0:07",
+  "commitDate": "20-08-2026/0:00",
   "fileName": "interop.json"
 }
