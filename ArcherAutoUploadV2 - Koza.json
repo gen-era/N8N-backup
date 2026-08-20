@@ -1808,7 +1808,7 @@
   "staticData": {
     "node:Schedule Trigger": {
       "recurrenceRules": [
-        0
+        20
       ]
     }
   },
@@ -3664,6 +3664,6 @@
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "19-08-2026/0:07",
+  "commitDate": "20-08-2026/0:00",
   "fileName": "ArcherAutoUploadV2 - Koza.json"
 }
