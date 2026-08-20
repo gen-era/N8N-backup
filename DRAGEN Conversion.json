@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-17T09:07:28.564Z",
+  "updatedAt": "2026-08-19T18:04:16.149Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260812_VH01138_20_2225NYMNX",
+              "value": "=260817_VH01138_21_2225N3VNX",
               "type": "string"
             }
           ]
@@ -142,7 +142,7 @@
     },
     {
       "parameters": {
-        "command": "=SRC=$(ls -d /mnt/koza_alldata/Runs/{{ $('Edit Fields').item.json.run_id }} /mnt/koza_alldata/Runs/DEU-Sync/{{ $('Edit Fields').item.json.run_id }} 2>/dev/null | head -1)\nrclone copy \"$SRC\" /staging/run_folder/{{ $('Edit Fields').item.json.run_id }} \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v"
+        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d /mnt/koza_alldata/Runs/$RUN_ID /mnt/koza_alldata/Runs/DEU-Sync/$RUN_ID 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n    echo \"RUN_NOT_FOUND: $RUN_ID not in /mnt/koza_alldata/Runs or Runs/DEU-Sync\" >&2\n    exit 42\nfi\necho \"SOURCE: $SRC\"\nrclone copy \"$SRC\" /staging/run_folder/$RUN_ID \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v\nRC=$?\nif [ $RC -ne 0 ]; then\n    echo \"RCLONE_FAILED: exit $RC\" >&2\n    exit $RC\nfi\necho \"PULL_OK: $RUN_ID\"\n"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -196,8 +196,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1680,
-        -304
+        1952,
+        -272
       ],
       "id": "68bec732-d444-4824-81d8-6c1fa42b8b22",
       "name": "Check SampleSheet",
@@ -898,6 +898,53 @@
           "name": "Koza DRAGEN - Root User"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "674682f2-6d90-4731-8538-033dfbcd59dd",
+              "leftValue": "={{ $('Pull Run from AllData').item.json.code }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        -464
+      ],
+      "id": "8ff33187-75bb-4cff-b6f8-4aa90f7600d1",
+      "name": "Pull Successful?"
+    },
+    {
+      "parameters": {
+        "errorMessage": "=Pull Run from AllData FAILED for {{ $('Edit Fields').item.json.run_id }} — exit code {{ $('Pull Run from AllData').item.json.code }}\nstdout: {{ $('Pull Run from AllData').item.json.stdout }}\nstderr: {{ $('Pull Run from AllData').item.json.stderr }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -448
+      ],
+      "id": "277697f3-6aca-414b-8c79-657121106dd7",
+      "name": "Stop - Pull Failed"
     }
   ],
   "connections": {
@@ -989,7 +1036,7 @@
       "main": [
         [
           {
-            "node": "Check SampleSheet",
+            "node": "Pull Successful?",
             "type": "main",
             "index": 0
           }
@@ -1271,6 +1318,24 @@
       "main": [
         []
       ]
+    },
+    "Pull Successful?": {
+      "main": [
+        [
+          {
+            "node": "Check SampleSheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop - Pull Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1283,7 +1348,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "be30f5db-d4c2-4dee-a0b7-9124ae8b486a",
+  "versionId": "e10f5630-c171-4a10-a621-bf363ee75ba6",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1304,6 +1369,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "19-08-2026/0:07",
+  "commitDate": "20-08-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
