@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-04T14:13:54.817Z",
+  "updatedAt": "2026-08-20T13:27:25.916Z",
   "createdAt": "2026-06-10T06:07:49.804Z",
   "id": "365MNVcdopNK6zo7",
   "name": "ArcherAutoUploadV2 - Koza",
@@ -1109,8 +1109,7 @@
         -176
       ],
       "id": "1c1bd183-7eab-46eb-b479-d63ef64c3f4c",
-      "name": "Split Out",
-      "disabled": true
+      "name": "Split Out"
     },
     {
       "parameters": {
@@ -1268,8 +1267,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     }
   ],
   "connections": {
@@ -1845,8 +1843,8 @@
       }
     ]
   },
-  "versionId": "1917294d-ef48-4530-bec3-d9190333ce74",
-  "activeVersionId": "1917294d-ef48-4530-bec3-d9190333ce74",
+  "versionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
+  "activeVersionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
   "triggerCount": 2,
   "shared": [
     {
@@ -1858,9 +1856,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-04T14:13:58.000Z",
-    "createdAt": "2026-08-04T14:13:54.819Z",
-    "versionId": "1917294d-ef48-4530-bec3-d9190333ce74",
+    "updatedAt": "2026-08-20T13:27:30.000Z",
+    "createdAt": "2026-08-20T13:27:25.919Z",
+    "versionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
     "workflowId": "365MNVcdopNK6zo7",
     "nodes": [
       {
@@ -2966,8 +2964,7 @@
           -176
         ],
         "id": "1c1bd183-7eab-46eb-b479-d63ef64c3f4c",
-        "name": "Split Out",
-        "disabled": true
+        "name": "Split Out"
       },
       {
         "parameters": {
@@ -3125,8 +3122,7 @@
             "id": "vvzB2Z8ymgMiekHW",
             "name": "PG-ALB-1.5"
           }
-        },
-        "disabled": true
+        }
       }
     ],
     "connections": {
@@ -3659,11 +3655,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 1917294d",
+    "name": "Version d7551824",
     "description": "",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "20-08-2026/0:00",
+  "commitDate": "21-08-2026/0:00",
   "fileName": "ArcherAutoUploadV2 - Koza.json"
 }
