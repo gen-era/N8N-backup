@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-24T08:16:05.636Z",
+  "updatedAt": "2026-08-20T08:02:22.187Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -57,7 +57,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
+        "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        'cluster2027.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -582,97 +582,22 @@
             "user-agent": "curl/7.61.1",
             "accept": "*/*",
             "content-type": "application/json",
-            "content-length": "1447",
-            "expect": "100-continue"
+            "content-length": "263"
           },
           "params": {},
           "query": {},
           "body": {
             "status": "dragena_batch_finished",
-            "run_id": "20260720_152139",
+            "run_id": "20260820_100146",
             "processed_sentrix_ids": [
-              "209787770112",
-              "209789980121",
-              "210569740058",
-              "209789980167",
-              "210569730105",
-              "210569730005",
-              "210247080073",
-              "209789980186",
-              "209789980123",
-              "209787770046",
-              "210569730096",
-              "209787770153",
-              "210247080006",
-              "209787770011",
-              "209787770114",
-              "209789980038",
-              "210569730002",
-              "209787770050",
-              "209787770152",
-              "210569730060",
-              "209787770116",
-              "209787770159",
-              "209789980140",
-              "209787770038",
-              "209787770068",
-              "209789980048",
-              "209787770010",
-              "210569730020",
-              "210584160022",
-              "210569730015",
-              "209789980180",
-              "210569730017",
-              "209787770023",
-              "209787770074",
-              "210575780026",
-              "209787770079",
-              "209787770059",
-              "209789980176",
-              "209787770034",
-              "209787770121",
-              "209789980030",
-              "209789980160",
-              "209787770042",
-              "209787770169",
-              "209789980196",
-              "209787770043",
-              "209787770049",
-              "210569730055",
-              "210569730032",
-              "209789980169",
-              "210569730058",
-              "209789980154",
-              "210575780020",
-              "209789980158",
-              "209787770027",
-              "209787770076",
-              "210569730062",
-              "209789980161",
-              "210247080064",
-              "210569730101",
-              "209787770167",
-              "209787770104",
-              "210569740040",
-              "209787770069",
-              "210569730039",
-              "209789980073",
-              "209789980153",
-              "209787770062",
-              "209787770123",
-              "209789980182",
-              "210569730052",
-              "209787770156",
-              "209787770157",
-              "210247080008",
-              "209789980090",
-              "210584160032",
-              "210569730034",
-              "209789980170",
-              "209787770103"
+              "209787760104",
+              "210247080003",
+              "210584160021",
+              "210569730048",
+              "209787770098"
             ],
             "failed_sentrix_ids": [],
-            "log": "/mnt/koza_alldata/Scans/.logs/dragena_batch_20260720_152139.log"
+            "log": "/mnt/koza_alldata/Scans/.logs/dragena_batch_20260820_100146.log"
           },
           "webhookUrl": "http://localhost:5678/webhook/cb56257e-966e-4e4e-b353-214b63f77495",
           "executionMode": "production"
@@ -683,8 +608,8 @@
       }
     ]
   },
-  "versionId": "5989683d-220f-43b7-bff2-b599db1655ae",
-  "activeVersionId": "5989683d-220f-43b7-bff2-b599db1655ae",
+  "versionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
+  "activeVersionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
   "triggerCount": 1,
   "shared": [
     {
@@ -696,9 +621,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-21T07:50:40.000Z",
-    "createdAt": "2026-07-21T07:50:38.530Z",
-    "versionId": "5989683d-220f-43b7-bff2-b599db1655ae",
+    "updatedAt": "2026-08-20T08:02:24.000Z",
+    "createdAt": "2026-08-20T08:02:22.190Z",
+    "versionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -752,7 +677,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        '2003.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
+          "query": "WITH params AS (\n    SELECT\n        '{{ $json.sentrix_id }}'::text AS sentrix_id,\n        '{{ $json.position }}'::text AS position,\n        '{{ $json.sex_estimate }}'::text AS sex_estimate,\n        '{{ $json.gtc_file_path }}'::text AS gtc_file_path,\n\n        'GSACyto_20044998_A1.bpm'::text AS bpm_name,\n        'GSACyto_20044998_A1.csv'::text AS csv_name,\n        'cluster2027.egt'::text AS egt_name\n),\nscan_ref AS (\n    SELECT\n        s.uniqueref AS scan_ref,\n        s.sentrix_id\n    FROM scans s\n    JOIN params p\n      ON s.sentrix_id = p.sentrix_id\n),\nconcept_refs AS (\n    SELECT\n        MAX(CASE WHEN c.concept_name = p.bpm_name THEN c.uniqueref END)::bigint AS bpm_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.csv_name THEN c.uniqueref END)::bigint AS csv_concept_ref,\n        MAX(CASE WHEN c.concept_name = p.egt_name THEN c.uniqueref END)::bigint AS egt_concept_ref\n    FROM concepts c\n    CROSS JOIN params p\n    WHERE c.concept_name IN (p.bpm_name, p.csv_name, p.egt_name)\n),\nupdated AS (\n    UPDATE idats i\n    SET\n        gtc_file_path = p.gtc_file_path,\n        estimated_gender = NULLIF(p.sex_estimate, ''),\n        manifest_bpm_concept_ref = cr.bpm_concept_ref,\n        manifest_csv_concept_ref = cr.csv_concept_ref,\n        cluster_file_concept_ref = cr.egt_concept_ref,\n        updated_at = NOW()\n    FROM params p\n    JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\n    CROSS JOIN concept_refs cr\n    WHERE i.scan_ref = sr.scan_ref\n      AND i.position = p.position\n      AND cr.bpm_concept_ref IS NOT NULL\n      AND cr.csv_concept_ref IS NOT NULL\n      AND cr.egt_concept_ref IS NOT NULL\n    RETURNING i.uniqueref\n)\nSELECT\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref,\n    COUNT(u.uniqueref) AS updated_idat_count\nFROM params p\nLEFT JOIN scan_ref sr ON sr.sentrix_id = p.sentrix_id\nCROSS JOIN concept_refs cr\nLEFT JOIN updated u ON TRUE\nGROUP BY\n    sr.scan_ref,\n    p.sentrix_id,\n    p.position,\n    p.gtc_file_path,\n    cr.bpm_concept_ref,\n    cr.csv_concept_ref,\n    cr.egt_concept_ref;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -1261,7 +1186,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 5989683d",
+    "name": "Version aa5d6829",
     "description": "",
     "autosaved": false
   },
@@ -1273,6 +1198,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "20-08-2026/0:00",
+  "commitDate": "21-08-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
