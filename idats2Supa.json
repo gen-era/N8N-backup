@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-31T13:58:31.960Z",
+  "updatedAt": "2026-08-20T12:14:44.284Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -464,7 +464,8 @@
         0
       ],
       "id": "c8abf366-a5db-4f9f-8dbb-fdd22371a08a",
-      "name": "fetch zeynep kamil"
+      "name": "fetch zeynep kamil",
+      "retryOnFail": true
     },
     {
       "parameters": {
@@ -484,7 +485,8 @@
         0
       ],
       "id": "de761ecb-0db1-4952-a114-5f284b32f769",
-      "name": "fetch sapiens"
+      "name": "fetch sapiens",
+      "retryOnFail": true
     },
     {
       "parameters": {
@@ -789,16 +791,16 @@
     "Schedule Trigger": [
       {
         "json": {
-          "timestamp": "2026-07-31T02:00:13.023-04:00",
-          "Readable date": "July 31st 2026, 2:00:13 am",
-          "Readable time": "2:00:13 am",
-          "Day of week": "Friday",
+          "timestamp": "2026-08-20T08:00:51.014-04:00",
+          "Readable date": "August 20th 2026, 8:00:51 am",
+          "Readable time": "8:00:51 am",
+          "Day of week": "Thursday",
           "Year": "2026",
-          "Month": "July",
-          "Day of month": "31",
-          "Hour": "02",
+          "Month": "August",
+          "Day of month": "20",
+          "Hour": "08",
           "Minute": "00",
-          "Second": "13",
+          "Second": "51",
           "Timezone": "America/New_York (UTC-04:00)"
         },
         "pairedItem": {
@@ -807,8 +809,8 @@
       }
     ]
   },
-  "versionId": "5b6d3395-f4bf-4649-9e30-d52f16ce790c",
-  "activeVersionId": "5b6d3395-f4bf-4649-9e30-d52f16ce790c",
+  "versionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
+  "activeVersionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
   "triggerCount": 1,
   "shared": [
     {
@@ -820,9 +822,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-31T13:58:33.000Z",
-    "createdAt": "2026-07-31T13:58:31.964Z",
-    "versionId": "5b6d3395-f4bf-4649-9e30-d52f16ce790c",
+    "updatedAt": "2026-08-20T12:14:45.000Z",
+    "createdAt": "2026-08-20T12:14:44.288Z",
+    "versionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
     "workflowId": "gNQvXKZ12sRVaKYt",
     "nodes": [
       {
@@ -1283,7 +1285,8 @@
           0
         ],
         "id": "c8abf366-a5db-4f9f-8dbb-fdd22371a08a",
-        "name": "fetch zeynep kamil"
+        "name": "fetch zeynep kamil",
+        "retryOnFail": true
       },
       {
         "parameters": {
@@ -1303,7 +1306,8 @@
           0
         ],
         "id": "de761ecb-0db1-4952-a114-5f284b32f769",
-        "name": "fetch sapiens"
+        "name": "fetch sapiens",
+        "retryOnFail": true
       },
       {
         "parameters": {
@@ -1591,7 +1595,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 5b6d3395",
+    "name": "Version 3bffb8c9",
     "description": "",
     "autosaved": false
   },
@@ -1603,6 +1607,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "20-08-2026/0:00",
+  "commitDate": "21-08-2026/0:00",
   "fileName": "idats2Supa.json"
 }
