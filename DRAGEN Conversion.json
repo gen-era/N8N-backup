@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T13:40:35.152Z",
+  "updatedAt": "2026-08-21T10:54:36.729Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=20260817_LH00267_0181_B23JGHMLT3",
+              "value": "=260819_NB552613_0010_AHCKKHBGY2",
               "type": "string"
             }
           ]
@@ -31,7 +31,7 @@
     },
     {
       "parameters": {
-        "command": "=/opt/dragen/4.5.4/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').first().json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory /staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true"
+        "command": "=OUT=/staging/fastq_folder/{{ $('Edit Fields').first().json.run_id }}-Fastq\n/opt/dragen/4.5.4/bin/dragen --bcl-conversion-only true --bcl-input-directory /staging/run_folder/{{ $('Edit Fields').first().json.run_id }} --first-tile-only false --no-lane-splitting {{ $('Get Run Ref').first().json.workflow_concept_ref === 18 ? 'false' : 'true' }} --output-directory \"$OUT\" --force --bcl-sampleproject-subdirectories true --bcl-only-matched-reads true\nRC=$?\nif [ $RC -ne 0 ] || [ -s \"$OUT/Logs/Errors.log\" ] || [ ! -s \"$OUT/Reports/Demultiplex_Stats.csv\" ]; then\n  echo \"CONVERSION_FAILED rc=$RC\" >&2\n  cat \"$OUT/Logs/Errors.log\" >&2 2>/dev/null\n  exit 1\nfi\necho \"CONVERSION_OK\""
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -47,7 +47,6 @@
           "name": "Koza DRAGEN - Root User"
         }
       },
-      "disabled": true,
       "onError": "continueErrorOutput"
     },
     {
@@ -67,8 +66,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -87,8 +85,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -107,8 +104,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -142,8 +138,7 @@
         -464
       ],
       "id": "389acea1-996c-4b24-be4f-d01a70d4f286",
-      "name": "Is it available for Transfer and Conversion",
-      "disabled": true
+      "name": "Is it available for Transfer and Conversion"
     },
     {
       "parameters": {
@@ -162,8 +157,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {},
@@ -193,8 +187,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -213,8 +206,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -235,8 +227,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -258,8 +249,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -303,8 +293,7 @@
         -320
       ],
       "id": "50c30386-5c4e-4aa9-87b2-f9d22a9b8f90",
-      "name": "Is Run absent on  DRAGEN",
-      "disabled": true
+      "name": "Is Run absent on  DRAGEN"
     },
     {
       "parameters": {
@@ -338,8 +327,7 @@
         80
       ],
       "id": "cc3c2f0d-f409-444d-be34-5f37a54128d7",
-      "name": "Is SampleSheet Absent",
-      "disabled": true
+      "name": "Is SampleSheet Absent"
     },
     {
       "parameters": {
@@ -360,8 +348,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -382,8 +369,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -423,8 +409,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -458,8 +443,7 @@
         384
       ],
       "id": "8d6eb4c2-946d-4d64-a46b-f56f0bd67b76",
-      "name": "Is Destination Folder Absent",
-      "disabled": true
+      "name": "Is Destination Folder Absent"
     },
     {
       "parameters": {
@@ -472,8 +456,7 @@
         752
       ],
       "id": "0620d715-0659-43e1-9acb-0166e1751d62",
-      "name": "Code in JavaScript",
-      "disabled": true
+      "name": "Code in JavaScript"
     },
     {
       "parameters": {
@@ -486,8 +469,7 @@
         752
       ],
       "id": "6cc1789d-2993-4d94-b5e3-364603d27ebb",
-      "name": "Parse Demux",
-      "disabled": true
+      "name": "Parse Demux"
     },
     {
       "parameters": {
@@ -508,8 +490,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -529,8 +510,7 @@
           "id": "afQJbS7bg7aYGdOW",
           "name": "Koza ALLData - Can User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -720,8 +700,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -735,8 +714,7 @@
         912
       ],
       "id": "d9abe771-36b9-4d6c-be29-7d9ec4294e18",
-      "name": "Find R1R2 File Paths",
-      "disabled": true
+      "name": "Find R1R2 File Paths"
     },
     {
       "parameters": {
@@ -749,8 +727,7 @@
         912
       ],
       "id": "b1610ae6-79e1-424e-8550-f39d7879b1c5",
-      "name": "Parse FASTQ Paths",
-      "disabled": true
+      "name": "Parse FASTQ Paths"
     },
     {
       "parameters": {
@@ -765,8 +742,7 @@
         768
       ],
       "id": "236598de-2a0c-4045-84a3-9acb2c0baaa5",
-      "name": "Merge",
-      "disabled": true
+      "name": "Merge"
     },
     {
       "parameters": {
@@ -829,8 +805,7 @@
         -80
       ],
       "id": "09850efd-3983-4054-a05b-494442067590",
-      "name": "Generate SampleSheet Content",
-      "disabled": true
+      "name": "Generate SampleSheet Content"
     },
     {
       "parameters": {
@@ -849,8 +824,7 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -883,8 +857,7 @@
         768
       ],
       "id": "8f453b48-abdc-4cb1-a023-f38096e27cb2",
-      "name": "Filter",
-      "disabled": true
+      "name": "Filter"
     },
     {
       "parameters": {
@@ -905,8 +878,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -959,8 +931,7 @@
         -464
       ],
       "id": "8ff33187-75bb-4cff-b6f8-4aa90f7600d1",
-      "name": "Pull Successful?",
-      "disabled": true
+      "name": "Pull Successful?"
     },
     {
       "parameters": {
@@ -973,8 +944,7 @@
         -448
       ],
       "id": "277697f3-6aca-414b-8c79-657121106dd7",
-      "name": "Stop - Pull Failed",
-      "disabled": true
+      "name": "Stop - Pull Failed"
     }
   ],
   "connections": {
@@ -1378,7 +1348,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "679eb99b-0951-4d09-bc16-75eb3e5bd458",
+  "versionId": "0772da57-309e-4750-909f-b9bf20941249",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1399,6 +1369,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "21-08-2026/0:00",
+  "commitDate": "22-08-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
