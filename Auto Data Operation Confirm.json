@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-19T17:38:00.780Z",
+  "updatedAt": "2026-08-21T13:43:51.901Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "Auto Data Operation Confirm",
@@ -724,13 +724,13 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "run_id": "260817_A01228_0323_AH57W2DSXG"
+          "run_id": "260819_NB552613_0010_AHCKKHBGY2"
         }
       }
     ]
   },
-  "versionId": "8d45bf4b-25ac-491e-8818-d5f236ea0fd5",
-  "activeVersionId": "b29cd330-4eb7-4de3-8d72-fcad3855ef9e",
+  "versionId": "1a6ac115-bd84-4f02-a80a-aff1e33ea1e4",
+  "activeVersionId": "1a6ac115-bd84-4f02-a80a-aff1e33ea1e4",
   "triggerCount": 0,
   "shared": [
     {
@@ -742,9 +742,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-27T11:18:22.056Z",
-    "createdAt": "2026-07-27T11:18:22.056Z",
-    "versionId": "b29cd330-4eb7-4de3-8d72-fcad3855ef9e",
+    "updatedAt": "2026-08-21T13:43:51.903Z",
+    "createdAt": "2026-08-21T13:43:51.903Z",
+    "versionId": "1a6ac115-bd84-4f02-a80a-aff1e33ea1e4",
     "workflowId": "oja1t4300qVhTLyb",
     "nodes": [
       {
@@ -752,8 +752,7 @@
           "workflowInputs": {
             "values": [
               {
-                "name": "run_id",
-                "type": "string"
+                "name": "run_id"
               }
             ]
           }
@@ -1466,6 +1465,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "21-08-2026/0:00",
+  "commitDate": "22-08-2026/0:00",
   "fileName": "Auto Data Operation Confirm.json"
 }
