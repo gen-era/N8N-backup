@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-21T10:54:36.729Z",
+  "updatedAt": "2026-08-24T12:24:07.465Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260819_NB552613_0010_AHCKKHBGY2",
+              "value": "=260819_VH01138_22_AACNCT3HV",
               "type": "string"
             }
           ]
@@ -759,8 +759,8 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        384
+        2176,
+        768
       ],
       "id": "7ceaf67b-2558-47a3-92b2-12ddc75d99fc",
       "name": "Send email",
@@ -782,11 +782,12 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -736,
-        384
+        1952,
+        768
       ],
       "id": "b1d4f7a2-9c3e-4f8a-b2e1-7d4f8e2a1b9c",
       "name": "Build Email Context",
+      "executeOnce": true,
       "credentials": {
         "postgres": {
           "id": "vvzB2Z8ymgMiekHW",
@@ -1148,11 +1149,6 @@
             "index": 0
           },
           {
-            "node": "Build Email Context",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Cleanup DRAGEN",
             "type": "main",
             "index": 0
@@ -1336,6 +1332,17 @@
           }
         ]
       ]
+    },
+    "Update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Build Email Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1348,7 +1355,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0772da57-309e-4750-909f-b9bf20941249",
+  "versionId": "b1d2f123-6a5c-429c-8ca8-002e489520eb",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1369,6 +1376,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "24-08-2026/0:00",
+  "commitDate": "25-08-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
