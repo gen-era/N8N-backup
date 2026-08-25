@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T08:02:22.187Z",
+  "updatedAt": "2026-08-24T13:59:17.569Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -96,7 +96,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const r = item.json;\n\n  const sentrix_id = r.SentrixBarcode;\n  const position = r.SentrixPosition;\n\n  return {\n    json: {\n      sentrix_id,\n      position,\n      sample_id: r.SampleId,\n      sample_name: r.SampleName,\n\n      dataset_label: r.DatasetLabel,\n\n      row: r.Row,\n      column: r.Column,\n\n      scanner_id: r.ScannerId,\n      scanner_version: r.ScannerVersion,\n      imaging_date: r.ImagingDate,\n      sample_folder_path: r.SampleFolderPath,\n\n      gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n      gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n      functional_qc_status: r[\"Functional QC Status\"],\n      control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n      autosomal_call_rate: r.AutosomalCallRate,\n      call_rate: r.CallRate,\n      log_r_dev: r.LogRDev,\n      sex_estimate: r.SexEstimate,\n\n      registration_score: r.RegistrationScore,\n\n      qc_metrics: {\n        StainingGreenQC: r.StainingGreenQC,\n        StainingRedQC: r.StainingRedQC,\n        ExtensionGreenQC: r.ExtensionGreenQC,\n        ExtensionRedQC: r.ExtensionRedQC,\n        HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n        HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n        RestorationQC: r.RestorationQC,\n        TargetRemovalIQC: r.TargetRemovalIQC,\n        StringencyQC: r.StringencyQC,\n        NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n        NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n        NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n        NonPolymorphicRedQC: r.NonPolymorphicRedQC\n      },\n\n      raw_control_metrics: r\n    }\n  };\n});"
+        "jsCode": "const items = $input.all();\n\n// \"BOŞ\" / \"BOS\" / \"Boş\" / \"boş\" ... tüm varyasyonları yakalamak için normalize et\nfunction isEmptySample(...vals) {\n  for (const v of vals) {\n    if (v === null || v === undefined) continue;\n    let s = String(v).trim();\n    if (s === '') return true;\n    // Türkçe/diakritik normalize: ş->s, ı->i, İ->i vb. + lowercase\n    s = s\n      .toLocaleLowerCase('tr-TR')\n      .normalize('NFD')\n      .replace(/[\\u0300-\\u036f]/g, '') // diakritikleri kaldır\n      .replace(/ş/g, 's')\n      .replace(/ı/g, 'i')\n      .replace(/ç/g, 'c')\n      .replace(/ğ/g, 'g')\n      .replace(/ü/g, 'u')\n      .replace(/ö/g, 'o')\n      .replace(/[^a-z]/g, ''); // harf dışı her şeyi at\n    if (s === 'bos') return true;\n  }\n  return false;\n}\n\nreturn items\n  .filter(item => {\n    const r = item.json;\n    return !isEmptySample(r.SampleName, r.SampleId);\n  })\n  .map(item => {\n    const r = item.json;\n\n    const sentrix_id = r.SentrixBarcode;\n    const position = r.SentrixPosition;\n\n    return {\n      json: {\n        sentrix_id,\n        position,\n        sample_id: r.SampleId,\n        sample_name: r.SampleName,\n\n        dataset_label: r.DatasetLabel,\n\n        row: r.Row,\n        column: r.Column,\n\n        scanner_id: r.ScannerId,\n        scanner_version: r.ScannerVersion,\n        imaging_date: r.ImagingDate,\n        sample_folder_path: r.SampleFolderPath,\n\n        gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n        gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n        functional_qc_status: r[\"Functional QC Status\"],\n        control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n        autosomal_call_rate: r.AutosomalCallRate,\n        call_rate: r.CallRate,\n        log_r_dev: r.LogRDev,\n        sex_estimate: r.SexEstimate,\n\n        registration_score: r.RegistrationScore,\n\n        qc_metrics: {\n          StainingGreenQC: r.StainingGreenQC,\n          StainingRedQC: r.StainingRedQC,\n          ExtensionGreenQC: r.ExtensionGreenQC,\n          ExtensionRedQC: r.ExtensionRedQC,\n          HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n          HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n          RestorationQC: r.RestorationQC,\n          TargetRemovalIQC: r.TargetRemovalIQC,\n          StringencyQC: r.StringencyQC,\n          NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n          NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n          NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n          NonPolymorphicRedQC: r.NonPolymorphicRedQC\n        },\n\n        raw_control_metrics: r\n      }\n    };\n  });"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -608,8 +608,8 @@
       }
     ]
   },
-  "versionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
-  "activeVersionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
+  "versionId": "2c7c0410-808d-4ff2-bdef-1d6cc36d4c2c",
+  "activeVersionId": "2c7c0410-808d-4ff2-bdef-1d6cc36d4c2c",
   "triggerCount": 1,
   "shared": [
     {
@@ -621,9 +621,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-20T08:02:24.000Z",
-    "createdAt": "2026-08-20T08:02:22.190Z",
-    "versionId": "aa5d6829-f72b-4770-b0a5-fb0de7f7b359",
+    "updatedAt": "2026-08-24T13:59:19.000Z",
+    "createdAt": "2026-08-24T13:59:17.574Z",
+    "versionId": "2c7c0410-808d-4ff2-bdef-1d6cc36d4c2c",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -716,7 +716,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const r = item.json;\n\n  const sentrix_id = r.SentrixBarcode;\n  const position = r.SentrixPosition;\n\n  return {\n    json: {\n      sentrix_id,\n      position,\n      sample_id: r.SampleId,\n      sample_name: r.SampleName,\n\n      dataset_label: r.DatasetLabel,\n\n      row: r.Row,\n      column: r.Column,\n\n      scanner_id: r.ScannerId,\n      scanner_version: r.ScannerVersion,\n      imaging_date: r.ImagingDate,\n      sample_folder_path: r.SampleFolderPath,\n\n      gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n      gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n      functional_qc_status: r[\"Functional QC Status\"],\n      control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n      autosomal_call_rate: r.AutosomalCallRate,\n      call_rate: r.CallRate,\n      log_r_dev: r.LogRDev,\n      sex_estimate: r.SexEstimate,\n\n      registration_score: r.RegistrationScore,\n\n      qc_metrics: {\n        StainingGreenQC: r.StainingGreenQC,\n        StainingRedQC: r.StainingRedQC,\n        ExtensionGreenQC: r.ExtensionGreenQC,\n        ExtensionRedQC: r.ExtensionRedQC,\n        HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n        HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n        RestorationQC: r.RestorationQC,\n        TargetRemovalIQC: r.TargetRemovalIQC,\n        StringencyQC: r.StringencyQC,\n        NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n        NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n        NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n        NonPolymorphicRedQC: r.NonPolymorphicRedQC\n      },\n\n      raw_control_metrics: r\n    }\n  };\n});"
+          "jsCode": "const items = $input.all();\n\n// \"BOŞ\" / \"BOS\" / \"Boş\" / \"boş\" ... tüm varyasyonları yakalamak için normalize et\nfunction isEmptySample(...vals) {\n  for (const v of vals) {\n    if (v === null || v === undefined) continue;\n    let s = String(v).trim();\n    if (s === '') return true;\n    // Türkçe/diakritik normalize: ş->s, ı->i, İ->i vb. + lowercase\n    s = s\n      .toLocaleLowerCase('tr-TR')\n      .normalize('NFD')\n      .replace(/[\\u0300-\\u036f]/g, '') // diakritikleri kaldır\n      .replace(/ş/g, 's')\n      .replace(/ı/g, 'i')\n      .replace(/ç/g, 'c')\n      .replace(/ğ/g, 'g')\n      .replace(/ü/g, 'u')\n      .replace(/ö/g, 'o')\n      .replace(/[^a-z]/g, ''); // harf dışı her şeyi at\n    if (s === 'bos') return true;\n  }\n  return false;\n}\n\nreturn items\n  .filter(item => {\n    const r = item.json;\n    return !isEmptySample(r.SampleName, r.SampleId);\n  })\n  .map(item => {\n    const r = item.json;\n\n    const sentrix_id = r.SentrixBarcode;\n    const position = r.SentrixPosition;\n\n    return {\n      json: {\n        sentrix_id,\n        position,\n        sample_id: r.SampleId,\n        sample_name: r.SampleName,\n\n        dataset_label: r.DatasetLabel,\n\n        row: r.Row,\n        column: r.Column,\n\n        scanner_id: r.ScannerId,\n        scanner_version: r.ScannerVersion,\n        imaging_date: r.ImagingDate,\n        sample_folder_path: r.SampleFolderPath,\n\n        gtc_dir: `/volume1/ALLDATA/Scans/GTCs`,\n        gtc_file_path: `/volume1/ALLDATA/Scans/GTCs/${sentrix_id}_${position}.gtc`,\n\n        functional_qc_status: r[\"Functional QC Status\"],\n        control_qc_flag_codes: r[\"Control QC Flag Codes\"] || null,\n\n        autosomal_call_rate: r.AutosomalCallRate,\n        call_rate: r.CallRate,\n        log_r_dev: r.LogRDev,\n        sex_estimate: r.SexEstimate,\n\n        registration_score: r.RegistrationScore,\n\n        qc_metrics: {\n          StainingGreenQC: r.StainingGreenQC,\n          StainingRedQC: r.StainingRedQC,\n          ExtensionGreenQC: r.ExtensionGreenQC,\n          ExtensionRedQC: r.ExtensionRedQC,\n          HybridizationHighMediumQC: r.HybridizationHighMediumQC,\n          HybridizationMediumLowQC: r.HybridizationMediumLowQC,\n          RestorationQC: r.RestorationQC,\n          TargetRemovalIQC: r.TargetRemovalIQC,\n          StringencyQC: r.StringencyQC,\n          NonSpecificBindingGreenQC: r.NonSpecificBindingGreenQC,\n          NonSpecificBindingRedQC: r.NonSpecificBindingRedQC,\n          NonPolymorphicGreenQC: r.NonPolymorphicGreenQC,\n          NonPolymorphicRedQC: r.NonPolymorphicRedQC\n        },\n\n        raw_control_metrics: r\n      }\n    };\n  });"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1186,7 +1186,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version aa5d6829",
+    "name": "Version 2c7c0410",
     "description": "",
     "autosaved": false
   },
@@ -1198,6 +1198,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "24-08-2026/0:00",
+  "commitDate": "25-08-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
