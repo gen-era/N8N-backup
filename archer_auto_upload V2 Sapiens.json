@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-04T14:14:14.915Z",
+  "updatedAt": "2026-08-25T12:31:53.040Z",
   "createdAt": "2026-07-03T17:01:01.383Z",
   "id": "a1Mtyp9jfIrABIht",
   "name": "archer_auto_upload V2 Sapiens",
@@ -1099,59 +1099,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "702bc924-bc8e-4a7f-841b-007a38f2c651",
-              "leftValue": "={{ $json.recipe_ref }}",
-              "rightValue": 430,
-              "operator": {
-                "type": "number",
-                "operation": "notEquals"
-              }
-            },
-            {
-              "id": "9cc43bda-23c3-43d8-980b-b60af3911f14",
-              "leftValue": "={{ $json.recipe_ref }}",
-              "rightValue": 577,
-              "operator": {
-                "type": "number",
-                "operation": "notEquals"
-              }
-            },
-            {
-              "id": "b5981e14-1a76-4870-9a12-822c3db72fc0",
-              "leftValue": "={{ $json.recipe_ref }}",
-              "rightValue": 233,
-              "operator": {
-                "type": "number",
-                "operation": "notEquals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "looseTypeValidation": true,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.3,
-      "position": [
-        2064,
-        384
-      ],
-      "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
-      "name": "Filter1",
-      "disabled": true
-    },
-    {
-      "parameters": {
         "fieldToSplitOut": "items",
         "options": {}
       },
@@ -1162,8 +1109,7 @@
         80
       ],
       "id": "b152ddeb-16f6-4137-b319-ad15b40dcde9",
-      "name": "Split Out",
-      "disabled": true
+      "name": "Split Out"
     },
     {
       "parameters": {
@@ -1321,8 +1267,7 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      },
-      "disabled": true
+      }
     }
   ],
   "connections": {
@@ -1835,7 +1780,7 @@
       "main": [
         [
           {
-            "node": "Filter1",
+            "node": "Limit",
             "type": "main",
             "index": 0
           }
@@ -1845,17 +1790,6 @@
     "Send email2": {
       "main": [
         []
-      ]
-    },
-    "Filter1": {
-      "main": [
-        [
-          {
-            "node": "Limit",
-            "type": "main",
-            "index": 0
-          }
-        ]
       ]
     },
     "Split Out": {
@@ -1885,8 +1819,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
-  "activeVersionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
+  "versionId": "a7161da5-2f1a-40a2-82bc-1f6c2d4af5c3",
+  "activeVersionId": "a7161da5-2f1a-40a2-82bc-1f6c2d4af5c3",
   "triggerCount": 2,
   "shared": [
     {
@@ -1898,9 +1832,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-04T14:14:18.000Z",
-    "createdAt": "2026-08-04T14:14:14.917Z",
-    "versionId": "18c78dd7-039e-40ab-a231-b2fb3b65d89e",
+    "updatedAt": "2026-08-25T12:31:56.000Z",
+    "createdAt": "2026-08-25T12:31:53.044Z",
+    "versionId": "a7161da5-2f1a-40a2-82bc-1f6c2d4af5c3",
     "workflowId": "a1Mtyp9jfIrABIht",
     "nodes": [
       {
@@ -2996,59 +2930,6 @@
       },
       {
         "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "loose",
-              "version": 3
-            },
-            "conditions": [
-              {
-                "id": "702bc924-bc8e-4a7f-841b-007a38f2c651",
-                "leftValue": "={{ $json.recipe_ref }}",
-                "rightValue": 430,
-                "operator": {
-                  "type": "number",
-                  "operation": "notEquals"
-                }
-              },
-              {
-                "id": "9cc43bda-23c3-43d8-980b-b60af3911f14",
-                "leftValue": "={{ $json.recipe_ref }}",
-                "rightValue": 577,
-                "operator": {
-                  "type": "number",
-                  "operation": "notEquals"
-                }
-              },
-              {
-                "id": "b5981e14-1a76-4870-9a12-822c3db72fc0",
-                "leftValue": "={{ $json.recipe_ref }}",
-                "rightValue": 233,
-                "operator": {
-                  "type": "number",
-                  "operation": "notEquals"
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "looseTypeValidation": true,
-          "options": {}
-        },
-        "type": "n8n-nodes-base.filter",
-        "typeVersion": 2.3,
-        "position": [
-          2064,
-          384
-        ],
-        "id": "2ea265ef-0122-4b8a-9e51-fe7cdea3306f",
-        "name": "Filter1",
-        "disabled": true
-      },
-      {
-        "parameters": {
           "fieldToSplitOut": "items",
           "options": {}
         },
@@ -3059,8 +2940,7 @@
           80
         ],
         "id": "b152ddeb-16f6-4137-b319-ad15b40dcde9",
-        "name": "Split Out",
-        "disabled": true
+        "name": "Split Out"
       },
       {
         "parameters": {
@@ -3218,8 +3098,7 @@
             "id": "vvzB2Z8ymgMiekHW",
             "name": "PG-ALB-1.5"
           }
-        },
-        "disabled": true
+        }
       }
     ],
     "connections": {
@@ -3732,7 +3611,7 @@
         "main": [
           [
             {
-              "node": "Filter1",
+              "node": "Limit",
               "type": "main",
               "index": 0
             }
@@ -3742,17 +3621,6 @@
       "Send email2": {
         "main": [
           []
-        ]
-      },
-      "Filter1": {
-        "main": [
-          [
-            {
-              "node": "Limit",
-              "type": "main",
-              "index": 0
-            }
-          ]
         ]
       },
       "Split Out": {
@@ -3768,7 +3636,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 18c78dd7",
+    "name": "Version a7161da5",
     "description": "",
     "autosaved": false
   },
@@ -3780,6 +3648,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "25-08-2026/0:00",
+  "commitDate": "26-08-2026/0:00",
   "fileName": "archer_auto_upload V2 Sapiens.json"
 }
