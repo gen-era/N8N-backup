@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-26T16:10:53.222Z",
+  "updatedAt": "2026-08-27T10:07:13.917Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -305,7 +305,7 @@
     },
     {
       "parameters": {
-        "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/{{ $('Code in JavaScript').item.json.batchSourceValue }}/ genomize/{{ $('Code in JavaScript').item.json.accountId }}.static.seq.genomize.com/external/{{ $('Code in JavaScript').item.json.batchSourceValue }}/"
+        "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/ genomize/{{ $('Code in JavaScript').item.json.accountId }}.static.seq.genomize.com/external/"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -875,8 +875,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "6ded52ef-4bb7-403d-8b29-ee68a436b8e1",
-  "activeVersionId": "6ded52ef-4bb7-403d-8b29-ee68a436b8e1",
+  "versionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
+  "activeVersionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
   "triggerCount": 1,
   "shared": [
     {
@@ -888,9 +888,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-26T16:10:53.224Z",
-    "createdAt": "2026-08-26T16:10:53.224Z",
-    "versionId": "6ded52ef-4bb7-403d-8b29-ee68a436b8e1",
+    "updatedAt": "2026-08-27T10:07:13.919Z",
+    "createdAt": "2026-08-27T10:07:13.919Z",
+    "versionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
     "workflowId": "hXc7QmBZ2783aPQP",
     "nodes": [
       {
@@ -1192,7 +1192,7 @@
       },
       {
         "parameters": {
-          "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/{{ $('Code in JavaScript').item.json.batchSourceValue }}/ genomize/{{ $('Code in JavaScript').item.json.accountId }}.static.seq.genomize.com/external/{{ $('Code in JavaScript').item.json.batchSourceValue }}/"
+          "command": "=/opt/bin/mc mirror --max-workers 2 --retry /tmp/genomize/ genomize/{{ $('Code in JavaScript').item.json.accountId }}.static.seq.genomize.com/external/"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -1761,6 +1761,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "27-08-2026/0:00",
+  "commitDate": "28-08-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
