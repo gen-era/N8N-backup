@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-27T10:07:13.917Z",
+  "updatedAt": "2026-08-28T13:53:11.951Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -155,131 +155,15 @@
     },
     {
       "parameters": {
-        "operation": "upsert",
-        "schema": {
-          "__rl": true,
-          "mode": "list",
-          "value": "public"
-        },
-        "table": {
-          "__rl": true,
-          "value": "data_operations",
-          "mode": "list",
-          "cachedResultName": "data_operations"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "uniqueref": "={{ $json.operation_uniqueref }}",
-            "status_concept_ref": 29,
-            "recipe_ref": "={{ $json.recipe_ref }}",
-            "performed_at": "={{ $now.toISO() }}"
-          },
-          "matchingColumns": [
-            "uniqueref"
-          ],
-          "schema": [
-            {
-              "id": "uniqueref",
-              "displayName": "uniqueref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "read_ref",
-              "displayName": "read_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "recipe_ref",
-              "displayName": "recipe_ref",
-              "required": true,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "status_concept_ref",
-              "displayName": "status_concept_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "performed_at",
-              "displayName": "performed_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "dateTime",
-              "canBeUsedToMatch": false,
-              "removed": false
-            },
-            {
-              "id": "batch_source_value",
-              "displayName": "batch_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "error_text",
-              "displayName": "error_text",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "operator_ref",
-              "displayName": "operator_ref",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": false,
-              "removed": true
-            },
-            {
-              "id": "analysis_source_value",
-              "displayName": "analysis_source_value",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": false,
-              "removed": true
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        },
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations\nSET status_concept_ref = 29,\n    error_text = NULL,\n    performed_at = NOW()\nWHERE uniqueref IN ({{ $json.operationRefs.join(',') }})\nRETURNING uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        928,
-        160
+        2448,
+        -192
       ],
       "id": "b653a3c5-d81c-4688-9386-9d6f0c49be12",
       "name": "Update Data Op as Completed",
@@ -301,7 +185,8 @@
         -48
       ],
       "id": "8a5d13c6-ff7e-4588-b6d8-d850bd3ee117",
-      "name": "Cleanup Symlink"
+      "name": "Cleanup Symlink",
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -314,7 +199,8 @@
         -48
       ],
       "id": "dce3c93f-6be1-4a0b-a7e3-302825a041ff",
-      "name": "Upload Genomize"
+      "name": "Upload Genomize",
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -637,6 +523,76 @@
       ],
       "id": "if-guard-0004",
       "name": "Bosta mi"
+    },
+    {
+      "parameters": {
+        "jsCode": "const runs = $('Upload Genomize').all();\nconst bad = [];\nfor (const r of runs) {\n  const j = r.json || {};\n  const exit = j.exitCode;\n  const errMsg = j.error ? (j.error.message || String(j.error)) : '';\n  const err = ((j.stderr || '') + ' ' + errMsg).trim();\n  const failed = (exit !== undefined && exit !== null && Number(exit) !== 0)\n    || /ERROR|Unable to|connection reset|Access Denied|failed/i.test(err);\n  if (failed) bad.push((err || `exitCode=${exit}`).slice(0, 400));\n}\nconst info = $('Code in JavaScript').first().json;\nreturn [{ json: {\n  ok: bad.length === 0,\n  errorText: bad.length ? ('Genomize mc mirror: ' + bad.join(' | ')).slice(0, 1000) : null,\n  operationRefs: info.operationRefs,\n  batchSourceValue: info.batchSourceValue,\n  accountId: info.accountId\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        -48
+      ],
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Yukleme Sonucu"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aa000000-0000-4000-8000-000000000002",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2240,
+        -48
+      ],
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Yukleme Basarili mi"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE data_operations\nSET status_concept_ref = 27,\n    error_text = $1,\n    performed_at = NOW()\nWHERE uniqueref IN ({{ $json.operationRefs.join(',') }})\nRETURNING uniqueref;",
+        "options": {
+          "queryReplacement": "={{ $json.errorText }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2448,
+        96
+      ],
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Update Data Op as Failed",
+      "credentials": {
+        "postgres": {
+          "id": "vvzB2Z8ymgMiekHW",
+          "name": "PG-ALB-1.5"
+        }
+      }
     }
   ],
   "connections": {
@@ -722,11 +678,6 @@
           },
           {
             "node": "Update Data Op as In Progress",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Update Data Op as Completed",
             "type": "main",
             "index": 0
           }
@@ -859,6 +810,57 @@
         ],
         []
       ]
+    },
+    "Cleanup Symlink": {
+      "main": [
+        [
+          {
+            "node": "Yukleme Sonucu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yukleme Sonucu": {
+      "main": [
+        [
+          {
+            "node": "Yukleme Basarili mi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yukleme Basarili mi": {
+      "main": [
+        [
+          {
+            "node": "Update Data Op as Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Data Op as Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Data Op as Failed": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -875,8 +877,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
-  "activeVersionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
+  "versionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
+  "activeVersionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
   "triggerCount": 1,
   "shared": [
     {
@@ -888,9 +890,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-27T10:07:13.919Z",
-    "createdAt": "2026-08-27T10:07:13.919Z",
-    "versionId": "5fcab46b-3345-4f19-ad74-f30a99074fd8",
+    "updatedAt": "2026-08-28T13:53:11.953Z",
+    "createdAt": "2026-08-28T13:53:11.953Z",
+    "versionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
     "workflowId": "hXc7QmBZ2783aPQP",
     "nodes": [
       {
@@ -1042,131 +1044,15 @@
       },
       {
         "parameters": {
-          "operation": "upsert",
-          "schema": {
-            "__rl": true,
-            "mode": "list",
-            "value": "public"
-          },
-          "table": {
-            "__rl": true,
-            "value": "data_operations",
-            "mode": "list",
-            "cachedResultName": "data_operations"
-          },
-          "columns": {
-            "mappingMode": "defineBelow",
-            "value": {
-              "uniqueref": "={{ $json.operation_uniqueref }}",
-              "status_concept_ref": 29,
-              "recipe_ref": "={{ $json.recipe_ref }}",
-              "performed_at": "={{ $now.toISO() }}"
-            },
-            "matchingColumns": [
-              "uniqueref"
-            ],
-            "schema": [
-              {
-                "id": "uniqueref",
-                "displayName": "uniqueref",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "number",
-                "canBeUsedToMatch": true,
-                "removed": false
-              },
-              {
-                "id": "read_ref",
-                "displayName": "read_ref",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "number",
-                "canBeUsedToMatch": false,
-                "removed": true
-              },
-              {
-                "id": "recipe_ref",
-                "displayName": "recipe_ref",
-                "required": true,
-                "defaultMatch": false,
-                "display": true,
-                "type": "number",
-                "canBeUsedToMatch": false,
-                "removed": false
-              },
-              {
-                "id": "status_concept_ref",
-                "displayName": "status_concept_ref",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "number",
-                "canBeUsedToMatch": false,
-                "removed": false
-              },
-              {
-                "id": "performed_at",
-                "displayName": "performed_at",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "dateTime",
-                "canBeUsedToMatch": false,
-                "removed": false
-              },
-              {
-                "id": "batch_source_value",
-                "displayName": "batch_source_value",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": false,
-                "removed": true
-              },
-              {
-                "id": "error_text",
-                "displayName": "error_text",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": false,
-                "removed": true
-              },
-              {
-                "id": "operator_ref",
-                "displayName": "operator_ref",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "number",
-                "canBeUsedToMatch": false,
-                "removed": true
-              },
-              {
-                "id": "analysis_source_value",
-                "displayName": "analysis_source_value",
-                "required": false,
-                "defaultMatch": false,
-                "display": true,
-                "type": "string",
-                "canBeUsedToMatch": false,
-                "removed": true
-              }
-            ],
-            "attemptToConvertTypes": false,
-            "convertFieldsToString": false
-          },
+          "operation": "executeQuery",
+          "query": "UPDATE data_operations\nSET status_concept_ref = 29,\n    error_text = NULL,\n    performed_at = NOW()\nWHERE uniqueref IN ({{ $json.operationRefs.join(',') }})\nRETURNING uniqueref;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          928,
-          160
+          2448,
+          -192
         ],
         "id": "b653a3c5-d81c-4688-9386-9d6f0c49be12",
         "name": "Update Data Op as Completed",
@@ -1188,7 +1074,8 @@
           -48
         ],
         "id": "8a5d13c6-ff7e-4588-b6d8-d850bd3ee117",
-        "name": "Cleanup Symlink"
+        "name": "Cleanup Symlink",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1201,7 +1088,8 @@
           -48
         ],
         "id": "dce3c93f-6be1-4a0b-a7e3-302825a041ff",
-        "name": "Upload Genomize"
+        "name": "Upload Genomize",
+        "onError": "continueRegularOutput"
       },
       {
         "parameters": {
@@ -1524,6 +1412,76 @@
         ],
         "id": "if-guard-0004",
         "name": "Bosta mi"
+      },
+      {
+        "parameters": {
+          "jsCode": "const runs = $('Upload Genomize').all();\nconst bad = [];\nfor (const r of runs) {\n  const j = r.json || {};\n  const exit = j.exitCode;\n  const errMsg = j.error ? (j.error.message || String(j.error)) : '';\n  const err = ((j.stderr || '') + ' ' + errMsg).trim();\n  const failed = (exit !== undefined && exit !== null && Number(exit) !== 0)\n    || /ERROR|Unable to|connection reset|Access Denied|failed/i.test(err);\n  if (failed) bad.push((err || `exitCode=${exit}`).slice(0, 400));\n}\nconst info = $('Code in JavaScript').first().json;\nreturn [{ json: {\n  ok: bad.length === 0,\n  errorText: bad.length ? ('Genomize mc mirror: ' + bad.join(' | ')).slice(0, 1000) : null,\n  operationRefs: info.operationRefs,\n  batchSourceValue: info.batchSourceValue,\n  accountId: info.accountId\n}}];"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2032,
+          -48
+        ],
+        "id": "a1b2c3d4-0001-4000-8000-000000000001",
+        "name": "Yukleme Sonucu"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "aa000000-0000-4000-8000-000000000002",
+                "leftValue": "={{ $json.ok }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          2240,
+          -48
+        ],
+        "id": "a1b2c3d4-0002-4000-8000-000000000002",
+        "name": "Yukleme Basarili mi"
+      },
+      {
+        "parameters": {
+          "operation": "executeQuery",
+          "query": "UPDATE data_operations\nSET status_concept_ref = 27,\n    error_text = $1,\n    performed_at = NOW()\nWHERE uniqueref IN ({{ $json.operationRefs.join(',') }})\nRETURNING uniqueref;",
+          "options": {
+            "queryReplacement": "={{ $json.errorText }}"
+          }
+        },
+        "type": "n8n-nodes-base.postgres",
+        "typeVersion": 2.6,
+        "position": [
+          2448,
+          96
+        ],
+        "id": "a1b2c3d4-0003-4000-8000-000000000003",
+        "name": "Update Data Op as Failed",
+        "credentials": {
+          "postgres": {
+            "id": "vvzB2Z8ymgMiekHW",
+            "name": "PG-ALB-1.5"
+          }
+        }
       }
     ],
     "connections": {
@@ -1609,11 +1567,6 @@
             },
             {
               "node": "Update Data Op as In Progress",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "Update Data Op as Completed",
               "type": "main",
               "index": 0
             }
@@ -1746,6 +1699,57 @@
           ],
           []
         ]
+      },
+      "Cleanup Symlink": {
+        "main": [
+          [
+            {
+              "node": "Yukleme Sonucu",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Yukleme Sonucu": {
+        "main": [
+          [
+            {
+              "node": "Yukleme Basarili mi",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Yukleme Basarili mi": {
+        "main": [
+          [
+            {
+              "node": "Update Data Op as Completed",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Update Data Op as Failed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update Data Op as Failed": {
+        "main": [
+          [
+            {
+              "node": "Loop Over Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
@@ -1761,6 +1765,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "28-08-2026/0:00",
+  "commitDate": "29-08-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
