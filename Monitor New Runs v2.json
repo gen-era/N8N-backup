@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-28T10:42:14.719Z",
+  "updatedAt": "2026-08-28T13:41:05.857Z",
   "createdAt": "2026-06-27T15:47:24.761Z",
   "id": "JNMNKgR7ChTZhvdv",
   "name": "Monitor New Runs v2",
@@ -74,7 +74,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
+        "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr\n             JOIN concepts c ON c.uniqueref = mr.measurement_concept_ref\n             WHERE mr.run_ref = r.uniqueref\n               AND c.concept_class_id = 'Lane Metric'\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
         "options": {}
       },
       "name": "Classify Runs",
@@ -483,8 +483,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
-  "activeVersionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
+  "versionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
+  "activeVersionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
   "triggerCount": 1,
   "shared": [
     {
@@ -496,9 +496,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-28T10:42:14.721Z",
-    "createdAt": "2026-07-28T10:42:14.721Z",
-    "versionId": "cc16467e-3cf0-4f49-b140-6cf3bb122e77",
+    "updatedAt": "2026-08-28T13:41:05.859Z",
+    "createdAt": "2026-08-28T13:41:05.859Z",
+    "versionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
     "workflowId": "JNMNKgR7ChTZhvdv",
     "nodes": [
       {
@@ -569,7 +569,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr WHERE mr.run_ref = r.uniqueref\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
+          "query": "SELECT * FROM (\n  SELECT fs.run_id, fs.path,\n    CASE\n      WHEN r.uniqueref IS NULL THEN 'new'\n      WHEN r.status_concept_ref IN (24, 26) THEN 'in_progress'\n      WHEN r.status_concept_ref = 29\n           AND NOT EXISTS (\n             SELECT 1 FROM measurement_run mr\n             JOIN concepts c ON c.uniqueref = mr.measurement_concept_ref\n             WHERE mr.run_ref = r.uniqueref\n               AND c.concept_class_id = 'Lane Metric'\n           )\n        THEN 'needs_interop'\n      WHEN r.status_concept_ref IS DISTINCT FROM 27\n           AND (\n             r.instrument_ref IS NULL\n             OR r.flowcell_kit_ref IS NULL\n             OR r.flowcell_lot IS NULL\n             OR r.date IS NULL\n             OR r.reads_settings_concept_ref IS NULL\n             OR r.workflow_concept_ref IS NULL\n             OR r.care_site_ref IS NULL\n             OR r.seq_started_at IS NULL\n             OR r.seq_ended_at IS NULL\n           )\n           AND COALESCE(\n             CASE WHEN fs.run_id ~ '^[0-9]{8}_' THEN to_date(substring(fs.run_id FROM '^[0-9]{8}'), 'YYYYMMDD') ELSE to_date(substring(fs.run_id FROM '^[0-9]{6}'), 'YYMMDD') END,\n             CURRENT_DATE\n           ) > CURRENT_DATE - INTERVAL '30 days'\n        THEN 'incomplete'\n      ELSE NULL\n    END AS reason\n  FROM (VALUES {{ $json.values }}) AS fs(run_id, path)\n  LEFT JOIN runs r ON r.run_id = fs.run_id\n) q\nWHERE q.reason IS NOT NULL",
           "options": {}
         },
         "name": "Classify Runs",
@@ -977,6 +977,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "28-08-2026/0:00",
+  "commitDate": "29-08-2026/0:00",
   "fileName": "Monitor New Runs v2.json"
 }
