@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T12:14:44.284Z",
+  "updatedAt": "2026-08-28T08:03:57.601Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -13,7 +13,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        368,
+        416,
         0
       ],
       "id": "d16f3c17-e9b3-402c-9633-f5f39ba254d4",
@@ -28,7 +28,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -48,
+        0,
         0
       ],
       "id": "c87bda64-56dc-4d34-96ed-41a2628cad58",
@@ -50,7 +50,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        144,
+        192,
         0
       ],
       "id": "464f7a6b-ff2a-4ac9-8db1-880637b8fd2a",
@@ -70,7 +70,7 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        576,
+        656,
         0
       ],
       "id": "a350611a-a1e7-49a9-a17b-b2b407ff8c69",
@@ -89,7 +89,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        752,
+        880,
         0
       ],
       "id": "eef25d12-d233-4f79-8845-313d630fdadb",
@@ -104,7 +104,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        944,
+        1408,
         0
       ],
       "id": "d56a1479-f0b9-41ac-82fe-8b08ca47f379",
@@ -196,7 +196,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        1344,
+        1808,
         -16
       ],
       "id": "c89dc950-a25c-4f27-ab9f-f15029f18337",
@@ -204,12 +204,12 @@
     },
     {
       "parameters": {
-        "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Parse').all().map(i => i.json);\n\nconst existingMap = {};\ncheckResults.forEach(r => {\n  if (r.uniqueref) {\n    existingMap[`${r.scan_ref}_${r.position}`] = r;\n  }\n});\n\nconst results = [];\n\nparseResults.forEach(current => {\n  const key = `${current.scan_ref}_${current.position}`;\n  const dbRecord = existingMap[key];\n\n  if (!dbRecord) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (\n    parseInt(dbRecord.rescan_count) !== current.position_rescan_count ||\n    (!dbRecord.green_idat_path && current.green_idat_path) ||\n    (!dbRecord.red_idat_path && current.red_idat_path)\n  ) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
+        "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Filter Complete Chips').all().map(i => i.json);\n\nconst existingMap = {};\ncheckResults.forEach(r => {\n  if (r.uniqueref) {\n    existingMap[`${r.scan_ref}_${r.position}`] = r;\n  }\n});\n\nconst results = [];\n\nparseResults.forEach(current => {\n  const key = `${current.scan_ref}_${current.position}`;\n  const dbRecord = existingMap[key];\n\n  if (!dbRecord) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (\n    parseInt(dbRecord.rescan_count) !== current.position_rescan_count ||\n    (!dbRecord.green_idat_path && current.green_idat_path) ||\n    (!dbRecord.red_idat_path && current.red_idat_path)\n  ) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1136,
+        1600,
         0
       ],
       "id": "0bfe1185-7f13-42e2-a988-2b433db893f4",
@@ -222,7 +222,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
+        -192,
         0
       ],
       "id": "758549dd-9753-4833-9222-6fdeb683a74f",
@@ -235,7 +235,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -416,
+        -368,
         0
       ],
       "id": "283bf3d6-cee9-45cd-9a13-15079dd755da",
@@ -250,7 +250,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1648,
+        2112,
         -160
       ],
       "id": "7d513613-5fbf-4684-8258-c37a02ff0dd3",
@@ -277,7 +277,7 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -1600,
+        -1552,
         -96
       ],
       "id": "de816d0f-fd53-4bfe-ab04-19c40f28abc5",
@@ -290,8 +290,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -784,
-        224
+        -752,
+        544
       ],
       "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
       "name": "Fetch Aktif Part1"
@@ -304,7 +304,7 @@
       "typeVersion": 1,
       "position": [
         -448,
-        400
+        608
       ],
       "id": "4c5c74a6-97eb-4b27-a9d8-08e7319757d4",
       "name": "Fetch Aktif Part2"
@@ -316,8 +316,8 @@
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
       "position": [
-        -1168,
-        288
+        -1184,
+        544
       ],
       "id": "d9a6f812-bd1a-48ba-b01e-2291d31ede71",
       "name": "Fetch Sayfa1"
@@ -329,7 +329,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -608,
+        -560,
         0
       ],
       "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
@@ -362,7 +362,7 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -1984,
+        -1936,
         160
       ],
       "id": "9390f27f-b0ee-475d-9195-475d334a94c2",
@@ -377,7 +377,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1792,
+        -1744,
         160
       ],
       "id": "c1bdeaad-13d5-4072-abbd-0a3bf16bcadb",
@@ -397,7 +397,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1600,
+        -1552,
         160
       ],
       "id": "96627d24-d6bb-4306-8fd8-7cec58a2e60e",
@@ -440,7 +440,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.3,
       "position": [
-        1888,
+        2352,
         -32
       ],
       "id": "05adc9e0-df0f-4bb1-81ed-c675488c77ff",
@@ -460,7 +460,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        -1088,
+        -1040,
         0
       ],
       "id": "c8abf366-a5db-4f9f-8dbb-fdd22371a08a",
@@ -481,7 +481,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        -864,
+        -816,
         0
       ],
       "id": "de761ecb-0db1-4952-a114-5f284b32f769",
@@ -495,7 +495,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1328,
+        -1280,
         0
       ],
       "id": "6fc173dd-1862-43d4-83c0-7d1a48428a0a",
@@ -510,7 +510,7 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1648,
+        2112,
         48
       ],
       "id": "ceeee1e9-fa0b-442a-81e2-c716bdbd8eee",
@@ -522,6 +522,19 @@
           "name": "PG-ALB-1.5"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\n// 1) Eksik green/red idat'ı olan çipleri (sentrix_id) bul — çip bazında\nconst incompleteSentrix = new Set();\n\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue; // eksik çip -> atla\n  out.push(item);\n}\n\n// Eksik çipler DB'de gtc_file_path/idat NULL kaldığı için bir sonraki\n// çalıştırmada Find Missing Scans tarafından tekrar yakalanır.\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "c693d668-1655-4e43-941b-1c31d89da1b8",
+      "name": "Filter Complete Chips"
     }
   ],
   "connections": {
@@ -573,7 +586,7 @@
       "main": [
         [
           {
-            "node": "Check idat exists",
+            "node": "Filter Complete Chips",
             "type": "main",
             "index": 0
           }
@@ -771,6 +784,17 @@
           }
         ]
       ]
+    },
+    "Filter Complete Chips": {
+      "main": [
+        [
+          {
+            "node": "Check idat exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -787,30 +811,9 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "Schedule Trigger": [
-      {
-        "json": {
-          "timestamp": "2026-08-20T08:00:51.014-04:00",
-          "Readable date": "August 20th 2026, 8:00:51 am",
-          "Readable time": "8:00:51 am",
-          "Day of week": "Thursday",
-          "Year": "2026",
-          "Month": "August",
-          "Day of month": "20",
-          "Hour": "08",
-          "Minute": "00",
-          "Second": "51",
-          "Timezone": "America/New_York (UTC-04:00)"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
-  "versionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
-  "activeVersionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
+  "pinData": {},
+  "versionId": "adee5526-390d-4116-b048-48d9bc763960",
+  "activeVersionId": "adee5526-390d-4116-b048-48d9bc763960",
   "triggerCount": 1,
   "shared": [
     {
@@ -822,9 +825,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-20T12:14:45.000Z",
-    "createdAt": "2026-08-20T12:14:44.288Z",
-    "versionId": "3bffb8c9-eb31-4537-9f84-dc6bca26a42a",
+    "updatedAt": "2026-08-28T08:03:20.000Z",
+    "createdAt": "2026-08-28T08:03:17.921Z",
+    "versionId": "adee5526-390d-4116-b048-48d9bc763960",
     "workflowId": "gNQvXKZ12sRVaKYt",
     "nodes": [
       {
@@ -834,7 +837,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          368,
+          416,
           0
         ],
         "id": "d16f3c17-e9b3-402c-9633-f5f39ba254d4",
@@ -849,7 +852,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -48,
+          0,
           0
         ],
         "id": "c87bda64-56dc-4d34-96ed-41a2628cad58",
@@ -871,7 +874,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          144,
+          192,
           0
         ],
         "id": "464f7a6b-ff2a-4ac9-8db1-880637b8fd2a",
@@ -891,7 +894,7 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          576,
+          656,
           0
         ],
         "id": "a350611a-a1e7-49a9-a17b-b2b407ff8c69",
@@ -910,7 +913,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          752,
+          880,
           0
         ],
         "id": "eef25d12-d233-4f79-8845-313d630fdadb",
@@ -925,7 +928,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          944,
+          1408,
           0
         ],
         "id": "d56a1479-f0b9-41ac-82fe-8b08ca47f379",
@@ -1017,7 +1020,7 @@
         "type": "n8n-nodes-base.switch",
         "typeVersion": 3.4,
         "position": [
-          1344,
+          1808,
           -16
         ],
         "id": "c89dc950-a25c-4f27-ab9f-f15029f18337",
@@ -1025,12 +1028,12 @@
       },
       {
         "parameters": {
-          "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Parse').all().map(i => i.json);\n\nconst existingMap = {};\ncheckResults.forEach(r => {\n  if (r.uniqueref) {\n    existingMap[`${r.scan_ref}_${r.position}`] = r;\n  }\n});\n\nconst results = [];\n\nparseResults.forEach(current => {\n  const key = `${current.scan_ref}_${current.position}`;\n  const dbRecord = existingMap[key];\n\n  if (!dbRecord) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (\n    parseInt(dbRecord.rescan_count) !== current.position_rescan_count ||\n    (!dbRecord.green_idat_path && current.green_idat_path) ||\n    (!dbRecord.red_idat_path && current.red_idat_path)\n  ) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
+          "jsCode": "const checkResults = $('Check idat exists').all().map(i => i.json);\nconst parseResults = $('Filter Complete Chips').all().map(i => i.json);\n\nconst existingMap = {};\ncheckResults.forEach(r => {\n  if (r.uniqueref) {\n    existingMap[`${r.scan_ref}_${r.position}`] = r;\n  }\n});\n\nconst results = [];\n\nparseResults.forEach(current => {\n  const key = `${current.scan_ref}_${current.position}`;\n  const dbRecord = existingMap[key];\n\n  if (!dbRecord) {\n    results.push({ json: { ...current, action: 'insert' } });\n  } else if (\n    parseInt(dbRecord.rescan_count) !== current.position_rescan_count ||\n    (!dbRecord.green_idat_path && current.green_idat_path) ||\n    (!dbRecord.red_idat_path && current.red_idat_path)\n  ) {\n    results.push({ json: { ...current, action: 'update', idat_ref: dbRecord.uniqueref } });\n  } else {\n    results.push({ json: { ...current, action: 'none' } });\n  }\n});\n\nreturn results;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          1136,
+          1600,
           0
         ],
         "id": "0bfe1185-7f13-42e2-a988-2b433db893f4",
@@ -1043,7 +1046,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -240,
+          -192,
           0
         ],
         "id": "758549dd-9753-4833-9222-6fdeb683a74f",
@@ -1056,7 +1059,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -416,
+          -368,
           0
         ],
         "id": "283bf3d6-cee9-45cd-9a13-15079dd755da",
@@ -1071,7 +1074,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1648,
+          2112,
           -160
         ],
         "id": "7d513613-5fbf-4684-8258-c37a02ff0dd3",
@@ -1098,7 +1101,7 @@
         "type": "n8n-nodes-base.executeWorkflowTrigger",
         "typeVersion": 1.1,
         "position": [
-          -1600,
+          -1552,
           -96
         ],
         "id": "de816d0f-fd53-4bfe-ab04-19c40f28abc5",
@@ -1111,8 +1114,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          -784,
-          224
+          -752,
+          544
         ],
         "id": "b7934bb2-522a-4cdd-9fb5-ba303c10f237",
         "name": "Fetch Aktif Part1"
@@ -1125,7 +1128,7 @@
         "typeVersion": 1,
         "position": [
           -448,
-          400
+          608
         ],
         "id": "4c5c74a6-97eb-4b27-a9d8-08e7319757d4",
         "name": "Fetch Aktif Part2"
@@ -1137,8 +1140,8 @@
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
         "position": [
-          -1168,
-          288
+          -1184,
+          544
         ],
         "id": "d9a6f812-bd1a-48ba-b01e-2291d31ede71",
         "name": "Fetch Sayfa1"
@@ -1150,7 +1153,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -608,
+          -560,
           0
         ],
         "id": "132d759d-8122-4205-ab5d-ea583e6f2668",
@@ -1183,7 +1186,7 @@
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.3,
         "position": [
-          -1984,
+          -1936,
           160
         ],
         "id": "9390f27f-b0ee-475d-9195-475d334a94c2",
@@ -1198,7 +1201,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          -1792,
+          -1744,
           160
         ],
         "id": "c1bdeaad-13d5-4072-abbd-0a3bf16bcadb",
@@ -1218,7 +1221,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -1600,
+          -1552,
           160
         ],
         "id": "96627d24-d6bb-4306-8fd8-7cec58a2e60e",
@@ -1261,7 +1264,7 @@
         "type": "n8n-nodes-base.executeWorkflow",
         "typeVersion": 1.3,
         "position": [
-          1888,
+          2352,
           -32
         ],
         "id": "05adc9e0-df0f-4bb1-81ed-c675488c77ff",
@@ -1281,7 +1284,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.3,
         "position": [
-          -1088,
+          -1040,
           0
         ],
         "id": "c8abf366-a5db-4f9f-8dbb-fdd22371a08a",
@@ -1302,7 +1305,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.3,
         "position": [
-          -864,
+          -816,
           0
         ],
         "id": "de761ecb-0db1-4952-a114-5f284b32f769",
@@ -1316,7 +1319,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -1328,
+          -1280,
           0
         ],
         "id": "6fc173dd-1862-43d4-83c0-7d1a48428a0a",
@@ -1331,7 +1334,7 @@
         "type": "n8n-nodes-base.postgres",
         "typeVersion": 2.6,
         "position": [
-          1648,
+          2112,
           48
         ],
         "id": "ceeee1e9-fa0b-442a-81e2-c716bdbd8eee",
@@ -1343,6 +1346,19 @@
             "name": "PG-ALB-1.5"
           }
         }
+      },
+      {
+        "parameters": {
+          "jsCode": "const allItems = $input.all();\n\n// 1) Eksik green/red idat'ı olan çipleri (sentrix_id) bul — çip bazında\nconst incompleteSentrix = new Set();\n\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue; // eksik çip -> atla\n  out.push(item);\n}\n\n// Eksik çipler DB'de gtc_file_path/idat NULL kaldığı için bir sonraki\n// çalıştırmada Find Missing Scans tarafından tekrar yakalanır.\nreturn out;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1088,
+          0
+        ],
+        "id": "c693d668-1655-4e43-941b-1c31d89da1b8",
+        "name": "Filter Complete Chips"
       }
     ],
     "connections": {
@@ -1394,7 +1410,7 @@
         "main": [
           [
             {
-              "node": "Check idat exists",
+              "node": "Filter Complete Chips",
               "type": "main",
               "index": 0
             }
@@ -1592,10 +1608,21 @@
             }
           ]
         ]
+      },
+      "Filter Complete Chips": {
+        "main": [
+          [
+            {
+              "node": "Check idat exists",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 3bffb8c9",
+    "name": "Version adee5526",
     "description": "",
     "autosaved": false
   },
@@ -1607,6 +1634,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "28-08-2026/0:00",
+  "commitDate": "29-08-2026/0:00",
   "fileName": "idats2Supa.json"
 }
