@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-30T04:55:36.185Z",
+  "updatedAt": "2026-08-29T10:52:03.067Z",
   "createdAt": "2026-01-10T08:42:17.222Z",
   "id": "ySPVdNQoeGpVZmNi",
   "name": "ICA DRAGEN TSO500",
@@ -35,7 +35,7 @@
     },
     {
       "parameters": {
-        "command": "=find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' 2>/dev/null | wc -l"
+        "command": "=find /mnt/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ /mnt/smb_share/Conversions/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' 2>/dev/null | wc -l"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -47,14 +47,14 @@
       "name": "Count Local Files",
       "credentials": {
         "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
+          "id": "GFbjD6y2aR2zZy4f",
+          "name": "Maestro - Genera User"
         }
       }
     },
     {
       "parameters": {
-        "command": "=find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' -printf '%p\\n' 2>/dev/null\n"
+        "command": "=find /mnt/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ /mnt/smb_share/Conversions/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*' -printf '%p\\n' 2>/dev/null || true"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -66,8 +66,8 @@
       "name": "List Local Files",
       "credentials": {
         "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
+          "id": "GFbjD6y2aR2zZy4f",
+          "name": "Maestro - Genera User"
         }
       }
     },
@@ -96,7 +96,7 @@
     },
     {
       "parameters": {
-        "command": "=~/bin/icav2 projectdata list /input_folder/{{ $json.SAMPLE_ID }}/ --project-id {{ $json.PROJECT_ID }} --data-type FILE --parent-folder -o json | jq -r '.items[]? | select(.details.name != null) | .details.name'"
+        "command": "=icav2 projectdata list /input_folder/{{ $json.SAMPLE_ID }}/ --project-id {{ $json.PROJECT_ID }} --data-type FILE --parent-folder -o json | jq -r '.items[]? | select(.details.name != null) | .details.name'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -108,8 +108,8 @@
       "name": "List Remote Files",
       "credentials": {
         "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
+          "id": "GFbjD6y2aR2zZy4f",
+          "name": "Maestro - Genera User"
         }
       }
     },
@@ -207,14 +207,14 @@
       "name": "Send Script",
       "credentials": {
         "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
+          "id": "GFbjD6y2aR2zZy4f",
+          "name": "Maestro - Genera User"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const items = $('Filter Files Present on Remote').all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst AWS_CONC = 32;        // test edilen\nconst AWS_CHUNK = '16MB';   // test edilen\n\nconst sampleBlocks = items.map((item) => {\n  const files = item.LOCAL_FILES.split('\\n').map(f => f.trim()).filter(Boolean);\n  const encodedJson = Buffer.from(JSON.stringify({ ...item, BATCH_HAS_UMI: batchHasUmi })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d)`,\n`printf '[awsup]\\\\naws_access_key_id=%s\\\\naws_secret_access_key=%s\\\\naws_session_token=%s\\\\n' \"$AK\" \"$SK\" \"$ST\" > \"$WD/creds\"`,\n`printf '[profile awsup]\\\\nregion=us-east-1\\\\ns3=\\\\n    max_concurrent_requests=${AWS_CONC}\\\\n    multipart_threshold=64MB\\\\n    multipart_chunksize=${AWS_CHUNK}\\\\n' > \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 60`,\n`  echo \"[$(date '+%F %T')] Sending webhook for ${item.SAMPLE_ID}\"`,\n`  echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED for ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\nconst scriptFile = `/tmp/awsup_${timestamp}.sh`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=~/bin/aws`,\n`ICAV2=~/bin/icav2`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
+        "jsCode": "// yol tespiti: Maestro/IlluminaStorage uyumlu (29.08.2026)\nconst items = $('Filter Files Present on Remote').all().map(item => item.json);\nconst webhookUrl = 'http://10.20.0.30:5678/webhook/3883600a-ff60-4431-bcef-16e71ff99971';\nconst timestamp = new Date().getTime();\nconst batchHasUmi = items.every(i => String(i.HAS_UMI).trim() === 'true');\n\nconst AWS_CONC = 32;        // test edilen\nconst AWS_CHUNK = '16MB';   // test edilen\n\nconst sampleBlocks = items.map((item) => {\n  const files = item.LOCAL_FILES.split('\\n').map(f => f.trim()).filter(Boolean);\n  const encodedJson = Buffer.from(JSON.stringify({ ...item, BATCH_HAS_UMI: batchHasUmi })).toString('base64');\n\n  const cpLines = files.map((f) => {\n    const fileName = f.substring(f.lastIndexOf('/') + 1);\n    return `  upload_one \"${f}\" \"s3://$BUCKET/\\${PREFIX}${item.SAMPLE_ID}/${fileName}\" & pids+=($!)`;\n  }).join('\\n');\n\n  return [\n`echo \"[$(date '+%F %T')] === ${item.SAMPLE_ID} START ===\"`,\n`CREDS=$(\"$ICAV2\" projectdata temporarycredentials /input_folder/ --project-id \"${item.PROJECT_ID}\" -o json)`,\n`AK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.accessKey)`,\n`SK=$(echo \"$CREDS\" | jq -r .awsTempCredentials.secretKey)`,\n`ST=$(echo \"$CREDS\" | jq -r .awsTempCredentials.sessionToken)`,\n`BUCKET=$(echo \"$CREDS\" | jq -r .awsTempCredentials.bucket)`,\n`PREFIX=$(echo \"$CREDS\" | jq -r .awsTempCredentials.objectPrefix)`,\n`WD=$(mktemp -d)`,\n`printf '[awsup]\\\\naws_access_key_id=%s\\\\naws_secret_access_key=%s\\\\naws_session_token=%s\\\\n' \"$AK\" \"$SK\" \"$ST\" > \"$WD/creds\"`,\n`printf '[profile awsup]\\\\nregion=us-east-1\\\\ns3=\\\\n    max_concurrent_requests=${AWS_CONC}\\\\n    multipart_threshold=64MB\\\\n    multipart_chunksize=${AWS_CHUNK}\\\\n' > \"$WD/config\"`,\n`export AWS_SHARED_CREDENTIALS_FILE=\"$WD/creds\" AWS_CONFIG_FILE=\"$WD/config\"`,\n`pids=()`,\ncpLines,\n`ok=1; for p in \"\\${pids[@]}\"; do wait $p || ok=0; done`,\n`unset AWS_SHARED_CREDENTIALS_FILE AWS_CONFIG_FILE; rm -rf \"$WD\"`,\n`if [ \"$ok\" = \"1\" ]; then`,\n`  sleep 60`,\n`  echo \"[$(date '+%F %T')] Sending webhook for ${item.SAMPLE_ID}\"`,\n`  echo '${encodedJson}' | base64 -d | curl -X POST \"${webhookUrl}\" -H \"Content-Type: application/json\" -d @- --max-time 30`,\n`else`,\n`  echo \"[$(date '+%F %T')] UPLOAD FAILED for ${item.SAMPLE_ID} - webhook skipped\"`,\n`fi`,\n  ].join('\\n');\n}).join('\\n');\n\nconst logFile = `/tmp/upload_webhook_batch_${timestamp}.log`;\nconst scriptFile = `/tmp/awsup_${timestamp}.sh`;\n\nconst script = [\n`#!/bin/bash`,\n`AWS=$(command -v aws || echo ~/bin/aws)`,\n`ICAV2=$(command -v icav2 || echo ~/bin/icav2)`,\n`upload_one(){ src=\"$1\"; dst=\"$2\"; for a in 1 2 3; do \"$AWS\" s3 cp \"$src\" \"$dst\" --profile awsup && return 0; echo \"retry $a: $src\"; sleep $((a*10)); done; return 1; }`,\nsampleBlocks,\n`echo \"[$(date '+%F %T')] ALL DONE\"`,\n].join('\\n');\n\nconst command = `cat > ${scriptFile} <<'AWSEOF'\\n${script}\\nAWSEOF\\nnohup bash ${scriptFile} > ${logFile} 2>&1 &`;\n\nreturn [{ json: { command, logFile, scriptFile, totalItems: items.length, BATCH_HAS_UMI: batchHasUmi } }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -270,7 +270,7 @@
     },
     {
       "parameters": {
-        "command": "=FILE=$(find /volume1/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*_R1*.fastq.gz' 2>/dev/null | head -1); if [ -z \"$FILE\" ]; then echo 'false'; exit 0; fi; HDR=$(zcat \"$FILE\" 2>/dev/null | head -1); echo \"$HDR\" | grep -qE ':[ACGTN]{6,}\\+[ACGTN]{6,}$' && echo 'true' || echo 'false'"
+        "command": "=FILE=$(find /mnt/illuminastorage/fastq_folder/{{ $json.FOLDER }}/ /mnt/smb_share/Conversions/{{ $json.FOLDER }}/ -type f -name '*{{ $json.SAMPLE_ID }}*_R1*.fastq.gz' 2>/dev/null | head -1); if [ -z \"$FILE\" ]; then echo 'false'; exit 0; fi; HDR=$(zcat \"$FILE\" 2>/dev/null | head -1); echo \"$HDR\" | grep -qE ':[ACGTN]{6,}\\+[ACGTN]{6,}$' && echo 'true' || echo 'false'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -282,8 +282,8 @@
       "name": "Check UMI",
       "credentials": {
         "sshPassword": {
-          "id": "HCIG28cNohf94uhW",
-          "name": "Sapiens IlluminaStorage - Admin User"
+          "id": "GFbjD6y2aR2zZy4f",
+          "name": "Maestro - Genera User"
         }
       }
     },
@@ -830,7 +830,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b185b936-4ca5-4c08-b7cb-06dbb7f0ad7b",
+  "versionId": "4f2ec817-a915-4b27-a28a-f0477ce377eb",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -851,6 +851,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "29-08-2026/0:00",
+  "commitDate": "30-08-2026/0:00",
   "fileName": "ICA DRAGEN TSO500.json"
 }
