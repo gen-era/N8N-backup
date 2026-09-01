@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-28T08:03:57.601Z",
+  "updatedAt": "2026-08-31T07:14:02.160Z",
   "createdAt": "2026-04-21T09:56:53.901Z",
   "id": "gNQvXKZ12sRVaKYt",
   "name": "idats2Supa",
@@ -525,7 +525,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const allItems = $input.all();\n\n// 1) Eksik green/red idat'ı olan çipleri (sentrix_id) bul — çip bazında\nconst incompleteSentrix = new Set();\n\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue; // eksik çip -> atla\n  out.push(item);\n}\n\n// Eksik çipler DB'de gtc_file_path/idat NULL kaldığı için bir sonraki\n// çalıştırmada Find Missing Scans tarafından tekrar yakalanır.\nreturn out;"
+        "jsCode": "const allItems = $input.all();\n\n// BOŞ örnek kontrolü (Türkçe normalize: ş,ı,ç,ğ,ü,ö → s,i,c,g,u,o)\nfunction isBos(v) {\n  if (v === null || v === undefined) return false;\n  let s = String(v).trim().toLowerCase()\n    .replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ç/g, 'c')\n    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o');\n  return s === 'bos';\n}\n\n// 1) Eksik green/red idat'ı olan çipleri bul — BOŞ pozisyonları sayma\nconst incompleteSentrix = new Set();\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  // BOŞ örnek ise bu pozisyonu atla (idat'ı olmaması normal)\n  if (isBos(d.sample_id) || isBos(d.sample_name)) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue;\n  out.push(item);\n}\n\nreturn out;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -812,8 +812,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "adee5526-390d-4116-b048-48d9bc763960",
-  "activeVersionId": "adee5526-390d-4116-b048-48d9bc763960",
+  "versionId": "724dfdc0-9c87-4b65-aa90-0354dc393afa",
+  "activeVersionId": "724dfdc0-9c87-4b65-aa90-0354dc393afa",
   "triggerCount": 1,
   "shared": [
     {
@@ -825,9 +825,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-28T08:03:20.000Z",
-    "createdAt": "2026-08-28T08:03:17.921Z",
-    "versionId": "adee5526-390d-4116-b048-48d9bc763960",
+    "updatedAt": "2026-08-31T07:14:03.000Z",
+    "createdAt": "2026-08-31T07:14:02.163Z",
+    "versionId": "724dfdc0-9c87-4b65-aa90-0354dc393afa",
     "workflowId": "gNQvXKZ12sRVaKYt",
     "nodes": [
       {
@@ -1349,7 +1349,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const allItems = $input.all();\n\n// 1) Eksik green/red idat'ı olan çipleri (sentrix_id) bul — çip bazında\nconst incompleteSentrix = new Set();\n\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue; // eksik çip -> atla\n  out.push(item);\n}\n\n// Eksik çipler DB'de gtc_file_path/idat NULL kaldığı için bir sonraki\n// çalıştırmada Find Missing Scans tarafından tekrar yakalanır.\nreturn out;"
+          "jsCode": "const allItems = $input.all();\n\n// BOŞ örnek kontrolü (Türkçe normalize: ş,ı,ç,ğ,ü,ö → s,i,c,g,u,o)\nfunction isBos(v) {\n  if (v === null || v === undefined) return false;\n  let s = String(v).trim().toLowerCase()\n    .replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ç/g, 'c')\n    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o');\n  return s === 'bos';\n}\n\n// 1) Eksik green/red idat'ı olan çipleri bul — BOŞ pozisyonları sayma\nconst incompleteSentrix = new Set();\nfor (const item of allItems) {\n  const d = item.json;\n  const sentrix = d.sentrix_id;\n  if (!sentrix) continue;\n\n  // BOŞ örnek ise bu pozisyonu atla (idat'ı olmaması normal)\n  if (isBos(d.sample_id) || isBos(d.sample_name)) continue;\n\n  const green = (d.green_idat_path ?? '').toString().trim();\n  const red   = (d.red_idat_path   ?? '').toString().trim();\n  if (green === '' || red === '') {\n    incompleteSentrix.add(sentrix);\n  }\n}\n\n// 2) Sadece TAM çiplerin item'larını geçir; eksik çiplerin tüm pozisyonlarını ele\nconst out = [];\nfor (const item of allItems) {\n  const sentrix = item.json.sentrix_id;\n  if (sentrix && incompleteSentrix.has(sentrix)) continue;\n  out.push(item);\n}\n\nreturn out;"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -1622,7 +1622,7 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version adee5526",
+    "name": "Version 724dfdc0",
     "description": "",
     "autosaved": false
   },
@@ -1634,6 +1634,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "31-08-2026/0:00",
+  "commitDate": "01-09-2026/0:00",
   "fileName": "idats2Supa.json"
 }
