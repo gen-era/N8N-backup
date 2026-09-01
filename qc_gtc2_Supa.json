@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-28T08:33:04.041Z",
+  "updatedAt": "2026-08-31T08:37:37.467Z",
   "createdAt": "2026-05-18T07:33:22.722Z",
   "id": "ax7yGpHaIrokS6zO",
   "name": "qc_gtc2_Supa",
@@ -116,8 +116,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -832,
-        -176
+        -1120,
+        -192
       ],
       "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
       "name": "Webhook",
@@ -130,8 +130,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -608,
-        -176
+        -896,
+        -192
       ],
       "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
       "name": "parse_webhook_payload"
@@ -143,8 +143,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        -400,
-        -176
+        -688,
+        -192
       ],
       "id": "61067405-8848-42a0-b367-6740dc57c7fd",
       "name": "find_qc_xlsx_ssh",
@@ -158,13 +158,13 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const raw =\n  $json.stdout ??\n  $json.data ??\n  $json.output ??\n  '';\n\nconst lines = String(raw)\n  .split('\\n')\n  .map(line => line.trim())\n  .filter(Boolean);\n\nconst jsonLine = [...lines]\n  .reverse()\n  .find(line => line.startsWith('{') && line.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      status: 'parse_failed',\n      message: 'find_qc_xlsx_ssh çıktısında JSON satırı bulunamadı',\n      raw_stdout: raw\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+        "jsCode": "// parse_find_qc_xlsx — runOnceForEachItem\nconst raw = $json.stdout ?? $json.data ?? $json.output ?? '';\nconst lines = String(raw).split('\\n').map(l => l.trim()).filter(Boolean);\nconst jsonLine = [...lines].reverse().find(l => l.startsWith('{') && l.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      ...$json,\n      status: 'parse_failed',\n      is_missing: true,\n      sentrix_id: $json.sentrix_id ?? null,\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\nconst isMissing = (parsed.status !== 'qc_xlsx_found' || !parsed.qc_xlsx);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed,\n    is_missing: isMissing,\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -192,
-        -176
+        -480,
+        -192
       ],
       "id": "bd5afeab-999f-492d-bdcd-85400f46b98c",
       "name": "parse_find_qc_xlsx"
@@ -185,7 +185,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $input.all();\nconst findItems = $('parse_find_qc_xlsx').all();\n\nreturn input.map((item, index) => {\n  const source = findItems[index]?.json || {};\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
+        "jsCode": "return $input.all().map((item, index) => {\n  const qcText = String(item.json.stdout ?? '');\n\n  // Aynı seri numarası birden fazla satırda geçebilir.\n  const sentrixIds = [...new Set(\n    [...qcText.matchAll(/\\bSerial[ \\t]+Number[ \\t]*:[ \\t]*(\\d+)\\b/gi)]\n      .map(match => match[1])\n  )];\n\n  if (sentrixIds.length === 0) {\n    throw new Error(\n      `Kayıt ${index + 1}: stdout içinde Serial Number bulunamadı.`\n    );\n  }\n\n  if (sentrixIds.length > 1) {\n    throw new Error(\n      `Kayıt ${index + 1}: farklı seri numaraları bulundu: ${sentrixIds.join(', ')}`\n    );\n  }\n\n  return {\n    json: {\n      sentrix_id: sentrixIds[0],\n      qc_stdout: qcText\n    },\n    pairedItem: { item: index }\n  };\n});"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -324,7 +324,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $json.idat_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
+        "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $json.idat_ref }}\n    AND doa.uniqueref = {{ $json.data_operations_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
@@ -354,6 +354,40 @@
       ],
       "id": "08264433-726a-4467-a4e6-1d61cc3f6f08",
       "name": "pass_refs_through"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ccb027b4-ee9b-40ea-b5ff-053130008a4a",
+              "leftValue": "={{ $json.is_missing }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        -192
+      ],
+      "id": "d82cf490-648c-49cf-bd05-62cfe4bfcfeb",
+      "name": "If"
     }
   ],
   "connections": {
@@ -443,12 +477,7 @@
       "main": [
         [
           {
-            "node": "Read/Write Files from Disk",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "read_sentrix_qc_ssh",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -563,6 +592,22 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "read_sentrix_qc_ssh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -573,43 +618,9 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "Webhook": [
-      {
-        "json": {
-          "headers": {
-            "host": "10.20.0.30:5678",
-            "user-agent": "curl/7.61.1",
-            "accept": "*/*",
-            "content-type": "application/json",
-            "content-length": "263"
-          },
-          "params": {},
-          "query": {},
-          "body": {
-            "status": "dragena_batch_finished",
-            "run_id": "20260820_100146",
-            "processed_sentrix_ids": [
-              "209787760104",
-              "210247080003",
-              "210584160021",
-              "210569730048",
-              "209787770098"
-            ],
-            "failed_sentrix_ids": [],
-            "log": "/mnt/koza_alldata/Scans/.logs/dragena_batch_20260820_100146.log"
-          },
-          "webhookUrl": "http://localhost:5678/webhook/cb56257e-966e-4e4e-b353-214b63f77495",
-          "executionMode": "production"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
-  "versionId": "c523d6a4-d447-44f3-bcd0-e2d4a325558d",
-  "activeVersionId": "c523d6a4-d447-44f3-bcd0-e2d4a325558d",
+  "pinData": {},
+  "versionId": "c6299bbc-528c-4623-9b15-422c5581a236",
+  "activeVersionId": "c6299bbc-528c-4623-9b15-422c5581a236",
   "triggerCount": 1,
   "shared": [
     {
@@ -621,9 +632,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-28T08:33:05.000Z",
-    "createdAt": "2026-08-28T08:33:04.043Z",
-    "versionId": "c523d6a4-d447-44f3-bcd0-e2d4a325558d",
+    "updatedAt": "2026-08-31T08:37:39.000Z",
+    "createdAt": "2026-08-31T08:37:37.470Z",
+    "versionId": "c6299bbc-528c-4623-9b15-422c5581a236",
     "workflowId": "ax7yGpHaIrokS6zO",
     "nodes": [
       {
@@ -736,8 +747,8 @@
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2.1,
         "position": [
-          -832,
-          -176
+          -1120,
+          -192
         ],
         "id": "c02aa9b9-0814-4237-8952-b917fa637ddd",
         "name": "Webhook",
@@ -750,8 +761,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -608,
-          -176
+          -896,
+          -192
         ],
         "id": "4ddd4c78-64fa-48fd-95af-0227d1c8de60",
         "name": "parse_webhook_payload"
@@ -763,8 +774,8 @@
         "type": "n8n-nodes-base.ssh",
         "typeVersion": 1,
         "position": [
-          -400,
-          -176
+          -688,
+          -192
         ],
         "id": "61067405-8848-42a0-b367-6740dc57c7fd",
         "name": "find_qc_xlsx_ssh",
@@ -778,13 +789,13 @@
       {
         "parameters": {
           "mode": "runOnceForEachItem",
-          "jsCode": "const raw =\n  $json.stdout ??\n  $json.data ??\n  $json.output ??\n  '';\n\nconst lines = String(raw)\n  .split('\\n')\n  .map(line => line.trim())\n  .filter(Boolean);\n\nconst jsonLine = [...lines]\n  .reverse()\n  .find(line => line.startsWith('{') && line.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      status: 'parse_failed',\n      message: 'find_qc_xlsx_ssh çıktısında JSON satırı bulunamadı',\n      raw_stdout: raw\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed\n  }\n};"
+          "jsCode": "// parse_find_qc_xlsx — runOnceForEachItem\nconst raw = $json.stdout ?? $json.data ?? $json.output ?? '';\nconst lines = String(raw).split('\\n').map(l => l.trim()).filter(Boolean);\nconst jsonLine = [...lines].reverse().find(l => l.startsWith('{') && l.endsWith('}'));\n\nif (!jsonLine) {\n  return {\n    json: {\n      ...$json,\n      status: 'parse_failed',\n      is_missing: true,\n      sentrix_id: $json.sentrix_id ?? null,\n    }\n  };\n}\n\nconst parsed = JSON.parse(jsonLine);\nconst isMissing = (parsed.status !== 'qc_xlsx_found' || !parsed.qc_xlsx);\n\nreturn {\n  json: {\n    ...$json,\n    ...parsed,\n    is_missing: isMissing,\n  }\n};"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          -192,
-          -176
+          -480,
+          -192
         ],
         "id": "bd5afeab-999f-492d-bdcd-85400f46b98c",
         "name": "parse_find_qc_xlsx"
@@ -805,7 +816,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const input = $input.all();\nconst findItems = $('parse_find_qc_xlsx').all();\n\nreturn input.map((item, index) => {\n  const source = findItems[index]?.json || {};\n  const sentrixId =\n    source.sentrix_id ||\n    source.sentrix ||\n    source.SentrixBarcode ||\n    null;\n\n  return {\n    json: {\n      sentrix_id: sentrixId,\n      qc_stdout: item.json.stdout ?? ''\n    }\n  };\n});"
+          "jsCode": "return $input.all().map((item, index) => {\n  const qcText = String(item.json.stdout ?? '');\n\n  // Aynı seri numarası birden fazla satırda geçebilir.\n  const sentrixIds = [...new Set(\n    [...qcText.matchAll(/\\bSerial[ \\t]+Number[ \\t]*:[ \\t]*(\\d+)\\b/gi)]\n      .map(match => match[1])\n  )];\n\n  if (sentrixIds.length === 0) {\n    throw new Error(\n      `Kayıt ${index + 1}: stdout içinde Serial Number bulunamadı.`\n    );\n  }\n\n  if (sentrixIds.length > 1) {\n    throw new Error(\n      `Kayıt ${index + 1}: farklı seri numaraları bulundu: ${sentrixIds.join(', ')}`\n    );\n  }\n\n  return {\n    json: {\n      sentrix_id: sentrixIds[0],\n      qc_stdout: qcText\n    },\n    pairedItem: { item: index }\n  };\n});"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -944,7 +955,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $json.idat_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
+          "query": "UPDATE idats i\nSET\n  qc_status = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN 'PASS'::qc_status_enum\n    ELSE 'FAIL'::qc_status_enum\n  END,\n  qc_tag = CASE\n    WHEN m.acr > 0.98 AND m.lrd < 0.2 THEN NULL\n    ELSE ARRAY_REMOVE(ARRAY[\n      CASE WHEN m.acr IS NULL OR m.acr <= 0.98 THEN 'AutosomalCallRate' END,\n      CASE WHEN m.lrd IS NULL OR m.lrd >= 0.2  THEN 'LogRDev' END\n    ], NULL)\n  END,\n  updated_at = NOW()\nFROM (\n  SELECT\n    doa.idat_ref,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'AutosomalCallRate') AS acr,\n    MAX(m.value_as_number) FILTER (WHERE c.concept_name = 'LogRDev')           AS lrd\n  FROM measurement_idats m\n  JOIN data_operations_array doa ON doa.uniqueref = m.data_operations_ref\n  JOIN concepts c ON c.uniqueref = m.measurement_concept_ref\n  WHERE doa.idat_ref = {{ $json.idat_ref }}\n    AND doa.uniqueref = {{ $json.data_operations_ref }}\n    AND c.concept_name IN ('AutosomalCallRate', 'LogRDev')\n  GROUP BY doa.idat_ref\n) m\nWHERE m.idat_ref = i.uniqueref;",
           "options": {}
         },
         "type": "n8n-nodes-base.postgres",
@@ -974,6 +985,40 @@
         ],
         "id": "08264433-726a-4467-a4e6-1d61cc3f6f08",
         "name": "pass_refs_through"
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "ccb027b4-ee9b-40ea-b5ff-053130008a4a",
+                "leftValue": "={{ $json.is_missing }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3,
+        "position": [
+          -272,
+          -192
+        ],
+        "id": "d82cf490-648c-49cf-bd05-62cfe4bfcfeb",
+        "name": "If"
       }
     ],
     "connections": {
@@ -1063,12 +1108,7 @@
         "main": [
           [
             {
-              "node": "Read/Write Files from Disk",
-              "type": "main",
-              "index": 0
-            },
-            {
-              "node": "read_sentrix_qc_ssh",
+              "node": "If",
               "type": "main",
               "index": 0
             }
@@ -1183,10 +1223,26 @@
             }
           ]
         ]
+      },
+      "If": {
+        "main": [
+          [
+            {
+              "node": "Read/Write Files from Disk",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "read_sentrix_qc_ssh",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version c523d6a4",
+    "name": "Version c6299bbc",
     "description": "",
     "autosaved": false
   },
@@ -1198,6 +1254,6 @@
       "name": "Hande"
     }
   ],
-  "commitDate": "31-08-2026/0:00",
+  "commitDate": "01-09-2026/0:00",
   "fileName": "qc_gtc2_Supa.json"
 }
