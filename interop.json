@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-19T12:41:52.186Z",
+  "updatedAt": "2026-09-01T08:23:55.476Z",
   "createdAt": "2025-11-26T02:18:24.185Z",
   "id": "SeGWQ7ai2D66eUSG",
   "name": "interop",
@@ -126,7 +126,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Map ReadNumber to R notation (1→R1, 4→R2)\n  const readMapping = {\n    1: 'R1',\n    4: 'R2'\n  };\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readMapping[readNumber];\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
+        "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Okuma numarasi cihazdan cihaza degisiyor (NovaSeq 1/4, MiSeq i100 farkli).\n  // Sabit tablo yerine, indeks olmayan okumalari lane icinde sirayla numaralandiriyoruz.\n  const readLabelByRow = new Map();\n  const byLane = new Map();\n  for (const row of nonIndexReads) {\n    if (!byLane.has(row.Lane)) byLane.set(row.Lane, []);\n    byLane.get(row.Lane).push(row);\n  }\n  for (const [, rows] of byLane) {\n    rows.sort((a, b) => a.ReadNumber - b.ReadNumber);\n    rows.forEach((row, idx) => readLabelByRow.set(row, `R${idx + 1}`));\n  }\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readLabelByRow.get(row);\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -343,8 +343,8 @@
       }
     ]
   },
-  "versionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
-  "activeVersionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
+  "versionId": "212d7d76-c222-4ed4-8fdf-a8627a266645",
+  "activeVersionId": "212d7d76-c222-4ed4-8fdf-a8627a266645",
   "triggerCount": 0,
   "shared": [
     {
@@ -356,9 +356,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-19T12:41:52.188Z",
-    "createdAt": "2026-08-19T12:41:52.188Z",
-    "versionId": "1a5d2753-b1ed-4985-a4c8-0e64a037092c",
+    "updatedAt": "2026-09-01T08:23:55.478Z",
+    "createdAt": "2026-09-01T08:23:55.478Z",
+    "versionId": "212d7d76-c222-4ed4-8fdf-a8627a266645",
     "workflowId": "SeGWQ7ai2D66eUSG",
     "nodes": [
       {
@@ -481,7 +481,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Map ReadNumber to R notation (1→R1, 4→R2)\n  const readMapping = {\n    1: 'R1',\n    4: 'R2'\n  };\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readMapping[readNumber];\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
+          "jsCode": "// Parse JSON output from summary_interop Lane level\n  const rawOutput = $('Execute Command1').first().json.stdout;\nconst sanitized = rawOutput.replace(/\\bNaN\\b/g, 'null');\nconst jsonOutput = JSON.parse(sanitized);\n\n  // Get concepts from Postgres node\n  const concepts = $('Select rows from a table2').all().map(item => item.json);\n\n  // Filter only non-index reads (IsIndex: 78 = non-index reads)\n  const nonIndexReads = jsonOutput.filter(row => row.IsIndex === 78);\n\n  // Okuma numarasi cihazdan cihaza degisiyor (NovaSeq 1/4, MiSeq i100 farkli).\n  // Sabit tablo yerine, indeks olmayan okumalari lane icinde sirayla numaralandiriyoruz.\n  const readLabelByRow = new Map();\n  const byLane = new Map();\n  for (const row of nonIndexReads) {\n    if (!byLane.has(row.Lane)) byLane.set(row.Lane, []);\n    byLane.get(row.Lane).push(row);\n  }\n  for (const [, rows] of byLane) {\n    rows.sort((a, b) => a.ReadNumber - b.ReadNumber);\n    rows.forEach((row, idx) => readLabelByRow.set(row, `R${idx + 1}`));\n  }\n\n  // Metrics to extract\n  const metricsToSave = [\n    \"Cluster Count\",\n    \"Cluster Count Pf\",\n    \"Error Rate\",\n    \"% Aligned\",\n    \"% >= Q30\",\n    \"% Occupied\",\n    \"Reads\",\n    \"Reads Pf\",\n    \"Yield G\"\n  ];\n\n  // Build output array for database insertion\n  const measurements = [];\n\n  for (const row of nonIndexReads) {\n    const lane = row.Lane;\n    const readNumber = row.ReadNumber;\n    const readLabel = readLabelByRow.get(row);\n\n    // Skip if read number is not in our mapping (safety check)\n    if (!readLabel) {\n      console.warn(`Unknown ReadNumber: ${readNumber}`);\n      continue;\n    }\n\n    for (const metricName of metricsToSave) {\n      const value = row[metricName];\n\n      // Skip null, undefined, NaN, or empty values\n      if (value === null || value === undefined || value === '' ||\n          (typeof value === 'number' && isNaN(value))) {\n        continue;\n      }\n\n      // Construct concept name: \"{Metric} L{Lane} {ReadLabel}\"\n      const conceptName = `${metricName} L${lane} ${readLabel}`;\n\n      // Find matching concept\n      const concept = concepts.find(c => c.concept_name === conceptName);\n\n      if (concept) {\n        measurements.push({\n          concept_id: concept.uniqueref,\n          concept_name: conceptName,\n          value: parseFloat(value),\n          lane: lane,\n          read: readLabel\n        });\n      } else {\n        console.warn(`Concept not found: ${conceptName}`);\n      }\n    }\n  }\n\n  return measurements.map(m => ({ json: m }));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -691,6 +691,6 @@
       "name": "sinan"
     }
   ],
-  "commitDate": "01-09-2026/0:00",
+  "commitDate": "02-09-2026/0:00",
   "fileName": "interop.json"
 }
