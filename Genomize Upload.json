@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-28T13:53:11.951Z",
+  "updatedAt": "2026-09-01T08:14:34.438Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -352,7 +352,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT dop.batch_source_value, ', ' ORDER BY dop.batch_source_value) AS batches,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nWHERE dop.uniqueref IN ({{ $('Loop Over Items').item.json.operations.map(o => o.operation_uniqueref).join(',') }})\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name;",
+        "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT dop.batch_source_value, ', ' ORDER BY dop.batch_source_value) AS batches,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nWHERE dop.uniqueref IN ({{ $('Yukleme Sonucu').first().json.operationRefs.join(',') }})\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name;",
         "options": {}
       },
       "id": "ab10d2ae-13f2-4840-96d1-d75fd6a60c3a",
@@ -877,8 +877,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
-  "activeVersionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
+  "versionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
+  "activeVersionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
   "triggerCount": 1,
   "shared": [
     {
@@ -890,9 +890,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-28T13:53:11.953Z",
-    "createdAt": "2026-08-28T13:53:11.953Z",
-    "versionId": "eaa8b8e8-29a1-4089-bb9d-9b9b32a8218d",
+    "updatedAt": "2026-09-01T08:14:34.445Z",
+    "createdAt": "2026-09-01T08:14:34.445Z",
+    "versionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
     "workflowId": "hXc7QmBZ2783aPQP",
     "nodes": [
       {
@@ -1241,7 +1241,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT dop.batch_source_value, ', ' ORDER BY dop.batch_source_value) AS batches,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nWHERE dop.uniqueref IN ({{ $('Loop Over Items').item.json.operations.map(o => o.operation_uniqueref).join(',') }})\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name;",
+          "query": "SELECT\n    dor.account_id,\n    dor.uniqueref AS recipe_ref,\n    dor.pipeline_id,\n    dor.pipeline_name,\n    STRING_AGG(DISTINCT k.name, ', ' ORDER BY k.name) AS kit_names,\n    STRING_AGG(DISTINCT cs.care_site_name, ', ' ORDER BY cs.care_site_name) AS sample_owners,\n    STRING_AGG(DISTINCT dop.batch_source_value, ', ' ORDER BY dop.batch_source_value) AS batches,\n    COUNT(dop.uniqueref) AS total_data_operations,\n    STRING_AGG(DISTINCT r.run_id, ', ' ORDER BY r.run_id) AS run_ids,\n    STRING_AGG(DISTINCT rd.sample_id, ', ' ORDER BY rd.sample_id) AS sample_ids\nFROM data_operations dop\nINNER JOIN data_operation_recipes dor ON dop.recipe_ref = dor.uniqueref\nINNER JOIN reads rd                   ON dop.read_ref = rd.uniqueref\nINNER JOIN conversions c              ON rd.conversion_ref = c.uniqueref\nINNER JOIN runs r                     ON c.run_ref = r.uniqueref\nLEFT JOIN  kits k                     ON dor.kit_ref = k.uniqueref\nLEFT JOIN  care_site cs               ON rd.requesting_caresite_ref = cs.uniqueref\nWHERE dop.uniqueref IN ({{ $('Yukleme Sonucu').first().json.operationRefs.join(',') }})\nGROUP BY dor.account_id, dor.uniqueref, dor.pipeline_id, dor.pipeline_name;",
           "options": {}
         },
         "id": "ab10d2ae-13f2-4840-96d1-d75fd6a60c3a",
@@ -1765,6 +1765,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "01-09-2026/0:00",
+  "commitDate": "02-09-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
