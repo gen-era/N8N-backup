@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-01T08:14:34.438Z",
+  "updatedAt": "2026-09-02T10:39:10.819Z",
   "createdAt": "2025-12-09T06:56:54.766Z",
   "id": "hXc7QmBZ2783aPQP",
   "name": "Genomize Upload",
@@ -374,7 +374,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT *\nFROM providers\nWHERE uniqueref = {{ $('Expand Recipe Items').item.json.operator_ref }};",
+        "query": "SELECT *\nFROM providers\nWHERE uniqueref = {{ $('Expand Recipe Items').first().json.operator_ref }};",
         "options": {}
       },
       "id": "48dd7feb-856c-4b7f-bbe7-fad21a476544",
@@ -877,8 +877,8 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
-  "activeVersionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
+  "versionId": "02552e34-f95a-4a80-8da5-5023aa1ce125",
+  "activeVersionId": "02552e34-f95a-4a80-8da5-5023aa1ce125",
   "triggerCount": 1,
   "shared": [
     {
@@ -890,9 +890,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-09-01T08:14:34.445Z",
-    "createdAt": "2026-09-01T08:14:34.445Z",
-    "versionId": "94d8dea3-a914-49c4-82d9-35720c1149fa",
+    "updatedAt": "2026-09-02T10:39:10.821Z",
+    "createdAt": "2026-09-02T10:39:10.821Z",
+    "versionId": "02552e34-f95a-4a80-8da5-5023aa1ce125",
     "workflowId": "hXc7QmBZ2783aPQP",
     "nodes": [
       {
@@ -1263,7 +1263,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "SELECT *\nFROM providers\nWHERE uniqueref = {{ $('Expand Recipe Items').item.json.operator_ref }};",
+          "query": "SELECT *\nFROM providers\nWHERE uniqueref = {{ $('Expand Recipe Items').first().json.operator_ref }};",
           "options": {}
         },
         "id": "48dd7feb-856c-4b7f-bbe7-fad21a476544",
@@ -1765,6 +1765,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "02-09-2026/0:00",
+  "commitDate": "03-09-2026/0:00",
   "fileName": "Genomize Upload.json"
 }
