@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-31T16:39:39.663Z",
+  "updatedAt": "2026-09-02T12:00:33.239Z",
   "createdAt": "2026-04-21T10:01:15.748Z",
   "id": "oja1t4300qVhTLyb",
   "name": "Auto Data Operation Confirm",
@@ -297,8 +297,7 @@
       "position": [
         400,
         -224
-      ],
-      "disabled": true
+      ]
     },
     {
       "parameters": {
@@ -724,12 +723,12 @@
     "When Executed by Another Workflow": [
       {
         "json": {
-          "run_id": "260828_NB552613_0013_AH7NCWBGY2"
+          "run_id": "260831_NB552613_0014_AHCJ7MBGY2"
         }
       }
     ]
   },
-  "versionId": "1a6ac115-bd84-4f02-a80a-aff1e33ea1e4",
+  "versionId": "ef0e7e08-9957-42a1-8a68-cfb8e78ace63",
   "activeVersionId": "1a6ac115-bd84-4f02-a80a-aff1e33ea1e4",
   "triggerCount": 0,
   "shared": [
@@ -1465,6 +1464,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "02-09-2026/0:00",
+  "commitDate": "03-09-2026/0:00",
   "fileName": "Auto Data Operation Confirm.json"
 }
