@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-02T11:43:43.750Z",
+  "updatedAt": "2026-09-03T13:13:43.604Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260831_NB552613_0014_AHCJ7MBGY2",
+              "value": "=20260831_LH00267_0186_B23JJKHLT3",
               "type": "string"
             }
           ]
@@ -946,6 +946,46 @@
       ],
       "id": "277697f3-6aca-414b-8c79-657121106dd7",
       "name": "Stop - Pull Failed"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "S2oU9ggilqJrFCxm",
+          "mode": "list",
+          "cachedResultName": "DRAGEN QC v2 - Sentinel"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_ids": "={{ $('Edit Fields').first().json.run_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "run_ids",
+              "displayName": "run_ids",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        992
+      ],
+      "id": "a7c1e4f2-9b3d-4e51-8f6a-2d0c7b91e5aa",
+      "name": "Sentinel Tetikle",
+      "executeOnce": true
     }
   ],
   "connections": {
@@ -1340,6 +1380,11 @@
             "node": "Build Email Context",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Sentinel Tetikle",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1355,7 +1400,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f7444630-449e-4978-815e-20c4b5eedb8d",
+  "versionId": "faa8eaab-507d-4405-8f9a-2be62df528ce",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1376,6 +1421,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "03-09-2026/0:00",
+  "commitDate": "04-09-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
