@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-28T13:41:05.857Z",
+  "updatedAt": "2026-09-04T08:33:18.758Z",
   "createdAt": "2026-06-27T15:47:24.761Z",
   "id": "JNMNKgR7ChTZhvdv",
   "name": "Monitor New Runs v2",
@@ -47,7 +47,7 @@
     },
     {
       "parameters": {
-        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
+        "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/smb_share/Runs/Capa-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
       },
       "name": "Find Runs",
       "type": "n8n-nodes-base.executeCommand",
@@ -483,8 +483,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
-  "activeVersionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
+  "versionId": "dccbb2c3-0ac4-4685-a921-663763ef3136",
+  "activeVersionId": "dccbb2c3-0ac4-4685-a921-663763ef3136",
   "triggerCount": 1,
   "shared": [
     {
@@ -496,9 +496,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-28T13:41:05.859Z",
-    "createdAt": "2026-08-28T13:41:05.859Z",
-    "versionId": "866f38df-42c3-4559-ab2b-d553bc289ac0",
+    "updatedAt": "2026-09-04T08:33:18.762Z",
+    "createdAt": "2026-09-04T08:33:18.762Z",
+    "versionId": "dccbb2c3-0ac4-4685-a921-663763ef3136",
     "workflowId": "JNMNKgR7ChTZhvdv",
     "nodes": [
       {
@@ -542,7 +542,7 @@
       },
       {
         "parameters": {
-          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
+          "command": "=fdfind \"^(25|26|2026|2025)\" /mnt/smb_share/Runs/ /mnt/smb_share/Runs/DEU-Sync/ /mnt/smb_share/Runs/Gazi-Sync/ /mnt/smb_share/Runs/Capa-Sync/ /mnt/illuminastorage/run_folder/ /mnt/illuminastorage/run_folder/Koza-Share/ /mnt/illuminastorage/run_folder/backup/  \\\n  --max-depth 1 \\\n  --exclude \"*-Recopy*\" \\\n  --exclude \"*.lnk\" \\\n  --exclude \"*.zip\" | while IFS= read -r p; do [ -f \"${p}RunInfo.xml\" ] && printf '%s\\n' \"$p\"; done | paste -sd ','"
         },
         "name": "Find Runs",
         "type": "n8n-nodes-base.executeCommand",
@@ -977,6 +977,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "04-09-2026/0:00",
+  "commitDate": "05-09-2026/0:00",
   "fileName": "Monitor New Runs v2.json"
 }
