@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-03T13:13:43.604Z",
+  "updatedAt": "2026-09-04T14:01:29.476Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=20260831_LH00267_0186_B23JJKHLT3",
+              "value": "=260831_A01451_0152_AHH7LNDMX2",
               "type": "string"
             }
           ]
@@ -771,7 +771,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -793,7 +794,8 @@
           "id": "vvzB2Z8ymgMiekHW",
           "name": "PG-ALB-1.5"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -816,7 +818,7 @@
       "typeVersion": 1,
       "position": [
         1072,
-        -80
+        -32
       ],
       "id": "a66319e2-7e07-4617-be4b-1b849b921018",
       "name": "Create SampleSheet.csv",
@@ -1400,7 +1402,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "faa8eaab-507d-4405-8f9a-2be62df528ce",
+  "versionId": "88105d1a-96f0-4c80-9b28-982262f7ff54",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1421,6 +1423,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "04-09-2026/0:00",
+  "commitDate": "05-09-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
