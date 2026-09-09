@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-20T13:27:25.916Z",
+  "updatedAt": "2026-09-08T07:45:05.726Z",
   "createdAt": "2026-06-10T06:07:49.804Z",
   "id": "365MNVcdopNK6zo7",
   "name": "ArcherAutoUploadV2 - Koza",
@@ -929,7 +929,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\n\n// Build a quick lookup: caresite_ref -> priority rank (lower = higher priority)\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Get the incoming groups (assumes each n8n item.json is one group object\n// like { recipe_ref, location, items, count })\nconst groups = $input.all().map(i => i.json);\n\n// Helper: find the best (lowest) priority rank among a group's items.\n// If none of the items match a prioritized caresite, returns Infinity.\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      const rank = priorityRank.get(ref);\n      if (rank < best) best = rank;\n    }\n  }\n  return best;\n}\n\n// Attach priority, stable-sort, then strip the helper field back out\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group)\n  }))\n  .sort((a, b) => {\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // tie-break: keep original relative order (stable sort)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\n// Return as n8n items\nreturn sorted.map(group => ({ json: group }));"
+        "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Küçükten büyüğe sıralama\nconst readsDescending = false;\n\nconst groups = $input.all().map(i => i.json);\n\n// En yüksek (en düşük rank) kurum önceliğini bul\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      best = Math.min(best, priorityRank.get(ref));\n    }\n  }\n  return best;\n}\n\n// Gruptaki toplam read sayısı (örnek boyutu)\nfunction getGroupReads(group) {\n  return group.items.reduce((sum, item) => sum + (Number(item.reads) || 0), 0);\n}\n\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group),\n    reads: getGroupReads(group)\n  }))\n  .sort((a, b) => {\n    // 1) Kurum önceliği\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // 2) Örnek boyutu (toplam reads) — küçükten büyüğe\n    if (a.reads !== b.reads) return readsDescending ? b.reads - a.reads : a.reads - b.reads;\n    // 3) Eşitse orijinal sırayı koru (stable)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\nreturn sorted.map(group => ({ json: group }));"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -1843,8 +1843,8 @@
       }
     ]
   },
-  "versionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
-  "activeVersionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
+  "versionId": "e72ff4b0-4cd6-44c7-b7cc-d2e9e480f3e8",
+  "activeVersionId": "e72ff4b0-4cd6-44c7-b7cc-d2e9e480f3e8",
   "triggerCount": 2,
   "shared": [
     {
@@ -1856,9 +1856,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-20T13:27:30.000Z",
-    "createdAt": "2026-08-20T13:27:25.919Z",
-    "versionId": "d7551824-11ef-4e36-abd1-2df81e24d377",
+    "updatedAt": "2026-09-08T07:45:18.000Z",
+    "createdAt": "2026-09-08T07:45:05.730Z",
+    "versionId": "e72ff4b0-4cd6-44c7-b7cc-d2e9e480f3e8",
     "workflowId": "365MNVcdopNK6zo7",
     "nodes": [
       {
@@ -2784,7 +2784,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\n\n// Build a quick lookup: caresite_ref -> priority rank (lower = higher priority)\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Get the incoming groups (assumes each n8n item.json is one group object\n// like { recipe_ref, location, items, count })\nconst groups = $input.all().map(i => i.json);\n\n// Helper: find the best (lowest) priority rank among a group's items.\n// If none of the items match a prioritized caresite, returns Infinity.\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      const rank = priorityRank.get(ref);\n      if (rank < best) best = rank;\n    }\n  }\n  return best;\n}\n\n// Attach priority, stable-sort, then strip the helper field back out\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group)\n  }))\n  .sort((a, b) => {\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // tie-break: keep original relative order (stable sort)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\n// Return as n8n items\nreturn sorted.map(group => ({ json: group }));"
+          "jsCode": "// Priority list — earlier index = higher priority\nconst priorityOrder = ['143', '155', '213', '217'];\nconst priorityRank = new Map(priorityOrder.map((ref, idx) => [ref, idx]));\n\n// Küçükten büyüğe sıralama\nconst readsDescending = false;\n\nconst groups = $input.all().map(i => i.json);\n\n// En yüksek (en düşük rank) kurum önceliğini bul\nfunction getGroupPriority(group) {\n  let best = Infinity;\n  for (const item of group.items) {\n    const ref = String(item.requesting_caresite_ref);\n    if (priorityRank.has(ref)) {\n      best = Math.min(best, priorityRank.get(ref));\n    }\n  }\n  return best;\n}\n\n// Gruptaki toplam read sayısı (örnek boyutu)\nfunction getGroupReads(group) {\n  return group.items.reduce((sum, item) => sum + (Number(item.reads) || 0), 0);\n}\n\nconst sorted = groups\n  .map((group, originalIndex) => ({\n    group,\n    originalIndex,\n    priority: getGroupPriority(group),\n    reads: getGroupReads(group)\n  }))\n  .sort((a, b) => {\n    // 1) Kurum önceliği\n    if (a.priority !== b.priority) return a.priority - b.priority;\n    // 2) Örnek boyutu (toplam reads) — küçükten büyüğe\n    if (a.reads !== b.reads) return readsDescending ? b.reads - a.reads : a.reads - b.reads;\n    // 3) Eşitse orijinal sırayı koru (stable)\n    return a.originalIndex - b.originalIndex;\n  })\n  .map(x => x.group);\n\nreturn sorted.map(group => ({ json: group }));"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
@@ -3655,11 +3655,11 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version d7551824",
-    "description": "",
+    "name": "Version e72ff4b0",
+    "description": "Boyuta göre önceliklendirme",
     "autosaved": false
   },
   "tags": [],
-  "commitDate": "08-09-2026/0:00",
+  "commitDate": "09-09-2026/0:00",
   "fileName": "ArcherAutoUploadV2 - Koza.json"
 }
