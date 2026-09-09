@@ -1,0 +1,308 @@
+{
+  "updatedAt": "2026-09-08T13:34:34.319Z",
+  "createdAt": "2026-09-08T11:36:26.068Z",
+  "id": "EMhVI24mobZbYREH",
+  "name": "Archer - Job Raporu (jobs API -> 3 sheet Excel -> Gmail)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3ca482dd-c906-4ba0-b624-cd62edac6d6a",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://genera.analysis.archerdx.com/api/jobs/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "page_size",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.next === null || $response.body.next === '' || ($response.body.results || []).length === 0 }}",
+              "limitPagesFetched": true
+            }
+          }
+        }
+      },
+      "id": "e52c87ce-4be3-4213-8578-f57edcbde524",
+      "name": "List Jobs (paginated)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "psKFlagj6vihnCT7",
+          "name": "Archer auth - Burcu"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "ccaacf11-ba99-4d66-a26c-8e7f4c843d2e",
+      "name": "Split Out results",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c_date",
+              "leftValue": "={{ DateTime.fromISO($json.submit_time) >= DateTime.fromISO('2026-09-01T00:00:00', { zone: 'Europe/Istanbul' }) && DateTime.fromISO($json.submit_time) <= DateTime.now() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6ef2b3f7-01fb-48a7-91b3-e9e3bdb9b970",
+      "name": "Filter: submit_time >= 2026-01-01 TRT",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// === Archer Job Raporu: 3 sheet'li Excel üretimi ===\n// Girdi: her item = bir /jobs/{job_id}/ detay yanitindaki \"data\" objesi (samples dahil)\n// require('xlsx') icin self-hosted n8n'de env: NODE_FUNCTION_ALLOW_EXTERNAL=xlsx  (restart gerekir)\nconst XLSX = require('xlsx');\n\n// --- 1) Detaylari sample bazina genislet (Sheet 1 verisi) ---\nconst rows = [];\nfor (const item of $input.all()) {\n  const d = item.json.data || item.json;            // detay {data:{...}} formatinda gelir\n  const base = {\n    submitter: d.user_email ?? null,                // user_email\n    name:      d.name ?? null,                       // name\n    id:        d.job_id ?? null,                     // job_id\n    date:      d.submit_time ?? null,                // submit_time (UTC ISO)\n    panel:     d.target_region_name ?? null,         // target_region_name\n    status:    d.job_status_name ?? null,            // job_status_name\n  };\n  const samples = Array.isArray(d.samples) ? d.samples : [];\n  if (samples.length === 0) {\n    rows.push({ ...base, sample_id: null, sample_name: null });\n  } else {\n    for (const s of samples) {\n      rows.push({ ...base, sample_id: s.id ?? null, sample_name: s.name ?? null });\n    }\n  }\n}\n\n// --- Sheet 1: Samples (kolon sirasi sabit) ---\nconst sheet1Header = ['submitter','name','id','date','panel','status','sample_id','sample_name'];\n\n// --- Sheet 2: Repeats (sample_name, count) -> sadece count > 1 ---\nconst rc = {};\nfor (const r of rows) {\n  const n = r.sample_name;\n  if (n === null || n === undefined || n === '') continue;\n  rc[n] = (rc[n] || 0) + 1;\n}\nconst sheet2 = Object.entries(rc)\n  .filter(([, c]) => c > 1)\n  .sort((a, b) => b[1] - a[1])\n  .map(([sample_name, count]) => ({ sample_name, count }));\n\n// --- Sheet 3: Matris (satir=user_mail, sutun=panel, hucre=sample sayisi) ---\nconst panels = new Set();\nconst byUser = {};\nfor (const r of rows) {\n  const u = r.submitter ?? '(unknown)';\n  const p = r.panel ?? '(none)';\n  panels.add(p);\n  if (!byUser[u]) byUser[u] = {};\n  byUser[u][p] = (byUser[u][p] || 0) + 1;\n}\nconst panelList = [...panels].sort();\nconst sheet3 = Object.keys(byUser).sort().map((u) => {\n  const row = { user_mail: u };\n  for (const p of panelList) row[p] = byUser[u][p] || 0;\n  return row;\n});\n\n// --- Workbook olustur ---\nconst wb = XLSX.utils.book_new();\n\nconst ws1 = XLSX.utils.json_to_sheet(\n  rows.length ? rows : [{}], { header: sheet1Header }\n);\nXLSX.utils.book_append_sheet(wb, ws1, 'Samples');\n\nconst ws2 = XLSX.utils.json_to_sheet(\n  sheet2.length ? sheet2 : [{ sample_name: '(no repeats)', count: '' }],\n  { header: ['sample_name', 'count'] }\n);\nXLSX.utils.book_append_sheet(wb, ws2, 'Repeats');\n\nconst ws3 = XLSX.utils.json_to_sheet(\n  sheet3.length ? sheet3 : [{ user_mail: '(no data)' }],\n  { header: ['user_mail', ...panelList] }\n);\nXLSX.utils.book_append_sheet(wb, ws3, 'Matrix');\n\nconst base64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });\nconst stamp = DateTime.now().setZone('Europe/Istanbul').toFormat('yyyyLLdd');\nconst fileName = `archer_job_raporu_${stamp}.xlsx`;\n\nreturn [{\n  json: {\n    total_samples: rows.length,\n    repeat_names: sheet2.length,\n    users: sheet3.length,\n    panels: panelList.length,\n  },\n  binary: {\n    data: {\n      data: base64,\n      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',\n      fileName,\n      fileExtension: 'xlsx',\n    },\n  },\n}];\n"
+      },
+      "id": "c69b602e-0575-4770-ae2f-a489ae5d4af2",
+      "name": "Build 3-sheet Excel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "seherburcuozkan@gmail.com",
+        "toEmail": "bburcuozkn@hotmail.com",
+        "subject": "==Archer Job Raporu - {{ $now.setZone('Europe/Istanbul').toFormat('dd.LL.yyyy') }}",
+        "emailFormat": "text",
+        "text": "==Merhaba,\n\nEkte 1 Ocak 2026'dan bugüne kadar submit edilen Archer joblarına ait rapor bulunmaktadır.\n\nToplam sample: {{ $json.total_samples }}\nTekrar eden sample sayısı: {{ $json.repeat_names }}\nKullanıcı sayısı: {{ $json.users }}\nPanel sayısı: {{ $json.panels }}\n\nOtomatik olarak n8n üzerinden gönderilmiştir.",
+        "options": {
+          "attachments": "=data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "cb024712-135b-4f72-8f32-61891537e561",
+      "name": "Send email",
+      "webhookId": "081ff57e-4f38-4243-869c-c94b13c31883",
+      "credentials": {
+        "smtp": {
+          "id": "MWvCNbGzeH7DXoRO",
+          "name": "burcu gmail"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        128
+      ],
+      "id": "8bd4f8d2-9898-4208-9f5c-23bfb9684fa2",
+      "name": "Failed job_ids"
+    },
+    {
+      "parameters": {
+        "url": "=https://genera.analysis.archerdx.com/api/jobs/{{ $json.job_id }}/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 100
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "cc183f6b-dffb-41b9-b7a8-1d95084a4182",
+      "name": "Job Detail (per job_id)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "psKFlagj6vihnCT7",
+          "name": "Archer auth - Burcu"
+        }
+      },
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "List Jobs (paginated)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List Jobs (paginated)": {
+      "main": [
+        [
+          {
+            "node": "Split Out results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out results": {
+      "main": [
+        [
+          {
+            "node": "Filter: submit_time >= 2026-01-01 TRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: submit_time >= 2026-01-01 TRT": {
+      "main": [
+        [
+          {
+            "node": "Job Detail (per job_id)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build 3-sheet Excel": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Detail (per job_id)": {
+      "main": [
+        [
+          {
+            "node": "Build 3-sheet Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed job_ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5299a463-5c69-4212-94b9-ee55401dcee2",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-09-08T11:36:26.073Z",
+      "createdAt": "2026-09-08T11:36:26.073Z",
+      "role": "workflow:owner",
+      "workflowId": "EMhVI24mobZbYREH",
+      "projectId": "wmZSbmn0RiQYcSpN"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2026-07-28T13:34:24.423Z",
+      "createdAt": "2026-07-28T13:34:24.423Z",
+      "id": "8tT6kipzz0gNORGX",
+      "name": "Burcu"
+    }
+  ],
+  "commitDate": "09-09-2026/0:00",
+  "fileName": "Archer - Job Raporu (jobs API -> 3 sheet Excel -> Gmail).json"
+}
