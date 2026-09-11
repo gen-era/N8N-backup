@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-23T12:00:49.571Z",
+  "updatedAt": "2026-09-10T13:30:01.970Z",
   "createdAt": "2026-05-29T19:54:21.793Z",
   "id": "5yypZE2MSOSkIDmN",
   "name": "DRAGEN QC v2 - Koza",
@@ -75,7 +75,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
+        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND c.storage_instrument_ref = 6\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
         "options": {}
       },
       "id": "Claim All Pending",
@@ -1041,8 +1041,8 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "967728f4-43db-4611-aa49-510f063fd6a9",
-  "activeVersionId": "967728f4-43db-4611-aa49-510f063fd6a9",
+  "versionId": "65c9b988-67dc-4bdc-87ab-baed9a672b8d",
+  "activeVersionId": "65c9b988-67dc-4bdc-87ab-baed9a672b8d",
   "triggerCount": 1,
   "shared": [
     {
@@ -1054,9 +1054,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-23T12:00:51.000Z",
-    "createdAt": "2026-07-23T12:00:49.573Z",
-    "versionId": "967728f4-43db-4611-aa49-510f063fd6a9",
+    "updatedAt": "2026-09-10T13:30:01.972Z",
+    "createdAt": "2026-09-10T13:30:01.972Z",
+    "versionId": "65c9b988-67dc-4bdc-87ab-baed9a672b8d",
     "workflowId": "5yypZE2MSOSkIDmN",
     "nodes": [
       {
@@ -1128,7 +1128,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref IS DISTINCT FROM 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
+          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND c.storage_instrument_ref = 6\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
           "options": {}
         },
         "id": "Claim All Pending",
@@ -2080,8 +2080,8 @@
       }
     },
     "authors": "Bio Solutions",
-    "name": "Version 967728f4",
-    "description": "",
+    "name": null,
+    "description": null,
     "autosaved": false
   },
   "tags": [
@@ -2092,6 +2092,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "10-09-2026/0:00",
+  "commitDate": "11-09-2026/0:00",
   "fileName": "DRAGEN QC v2 - Koza.json"
 }
