@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-24T06:24:38.364Z",
+  "updatedAt": "2026-09-10T13:30:02.206Z",
   "createdAt": "2026-05-30T05:53:43.483Z",
   "id": "p8NYmUwJkEVaDlyp",
   "name": "DRAGEN QC v2 - Sapiens",
@@ -31,15 +31,15 @@
         -1056,
         0
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "sshPassword": {
           "id": "ibmyt2kAsGpHbe7o",
           "name": "Sapiens DRAGEN 2 - Root User"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
       "parameters": {
@@ -78,7 +78,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref = 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
+        "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND c.storage_instrument_ref = 12\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
         "options": {}
       },
       "id": "Claim All Pending",
@@ -189,15 +189,15 @@
         720,
         128
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "sshPassword": {
           "id": "ibmyt2kAsGpHbe7o",
           "name": "Sapiens DRAGEN 2 - Root User"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
       "parameters": {
@@ -290,15 +290,15 @@
         1168,
         224
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "sshPassword": {
           "id": "ibmyt2kAsGpHbe7o",
           "name": "Sapiens DRAGEN 2 - Root User"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
       "parameters": {
@@ -656,15 +656,15 @@
         2272,
         128
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "credentials": {
         "sshPassword": {
           "id": "ibmyt2kAsGpHbe7o",
           "name": "Sapiens DRAGEN 2 - Root User"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000
+      }
     },
     {
       "parameters": {
@@ -683,7 +683,8 @@
         272
       ],
       "id": "475b9eb1-c73c-4783-ad85-4d25996dc6a5",
-      "name": "Her 1 Saatte Bir"
+      "name": "Her 1 Saatte Bir",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1053,9 +1054,9 @@
   },
   "meta": null,
   "pinData": {},
-  "versionId": "bef894f6-da58-4cf2-afde-cdcc105bc911",
-  "activeVersionId": "bef894f6-da58-4cf2-afde-cdcc105bc911",
-  "triggerCount": 1,
+  "versionId": "585a8ad8-dca4-42bd-845c-7367ff9d5231",
+  "activeVersionId": "585a8ad8-dca4-42bd-845c-7367ff9d5231",
+  "triggerCount": 0,
   "shared": [
     {
       "updatedAt": "2026-05-30T05:53:43.489Z",
@@ -1066,9 +1067,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-24T06:24:38.366Z",
-    "createdAt": "2026-07-24T06:24:38.366Z",
-    "versionId": "bef894f6-da58-4cf2-afde-cdcc105bc911",
+    "updatedAt": "2026-09-10T13:30:02.208Z",
+    "createdAt": "2026-09-10T13:30:02.208Z",
+    "versionId": "585a8ad8-dca4-42bd-845c-7367ff9d5231",
     "workflowId": "p8NYmUwJkEVaDlyp",
     "nodes": [
       {
@@ -1096,15 +1097,15 @@
           -1056,
           0
         ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
         "credentials": {
           "sshPassword": {
             "id": "ibmyt2kAsGpHbe7o",
             "name": "Sapiens DRAGEN 2 - Root User"
           }
-        },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 5000
+        }
       },
       {
         "parameters": {
@@ -1143,7 +1144,7 @@
       {
         "parameters": {
           "operation": "executeQuery",
-          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND i.care_site_ref = 172\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
+          "query": "WITH claimed AS (\n  UPDATE data_operations dop\n  SET status_concept_ref = 26\n  WHERE dop.uniqueref IN (\n    SELECT d.uniqueref\n    FROM data_operations d\n    JOIN reads rd       ON rd.uniqueref = d.read_ref\n    JOIN conversions c  ON c.uniqueref  = rd.conversion_ref\n    JOIN runs r         ON r.uniqueref  = c.run_ref\n    JOIN instruments i  ON i.uniqueref  = r.instrument_ref\n    WHERE d.recipe_ref IN (SELECT uniqueref FROM data_operation_recipes WHERE platform_concept_ref = 549 AND kit_ref IS NOT NULL)\n      AND d.status_concept_ref = 24\n      AND c.storage_instrument_ref = 12\n    FOR UPDATE OF d SKIP LOCKED\n  )\n  RETURNING dop.uniqueref AS data_op_ref, dop.read_ref, dop.recipe_ref\n)\nSELECT cl.data_op_ref, cl.read_ref,\n       rd.sample_id, rd.lane, rd.kit_ref, rd.sample_project,\n       rd.conversion_ref, c.id_source_value, c.run_ref,\n       rp.pipeline_id AS bed_file\nFROM claimed cl\nJOIN reads rd      ON rd.uniqueref = cl.read_ref\nJOIN conversions c ON c.uniqueref  = rd.conversion_ref\nJOIN data_operation_recipes rp ON rp.uniqueref = cl.recipe_ref\nORDER BY cl.data_op_ref;",
           "options": {}
         },
         "id": "Claim All Pending",
@@ -1254,15 +1255,15 @@
           720,
           128
         ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
         "credentials": {
           "sshPassword": {
             "id": "ibmyt2kAsGpHbe7o",
             "name": "Sapiens DRAGEN 2 - Root User"
           }
-        },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 5000
+        }
       },
       {
         "parameters": {
@@ -1355,15 +1356,15 @@
           1168,
           224
         ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
         "credentials": {
           "sshPassword": {
             "id": "ibmyt2kAsGpHbe7o",
             "name": "Sapiens DRAGEN 2 - Root User"
           }
-        },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 5000
+        }
       },
       {
         "parameters": {
@@ -1721,15 +1722,15 @@
           2272,
           128
         ],
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000,
         "credentials": {
           "sshPassword": {
             "id": "ibmyt2kAsGpHbe7o",
             "name": "Sapiens DRAGEN 2 - Root User"
           }
-        },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 5000
+        }
       },
       {
         "parameters": {
@@ -1748,7 +1749,8 @@
           272
         ],
         "id": "475b9eb1-c73c-4783-ad85-4d25996dc6a5",
-        "name": "Her 1 Saatte Bir"
+        "name": "Her 1 Saatte Bir",
+        "disabled": true
       },
       {
         "parameters": {
@@ -2116,6 +2118,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "10-09-2026/0:00",
+  "commitDate": "11-09-2026/0:00",
   "fileName": "DRAGEN QC v2 - Sapiens.json"
 }
