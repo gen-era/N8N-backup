@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-07T11:54:55.184Z",
+  "updatedAt": "2026-09-10T12:56:16.432Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260904_VH01138_27_AAF2VF3HV",
+              "value": "=260909_A01978_0221_BHWH2YDRX7",
               "type": "string"
             }
           ]
@@ -70,7 +70,7 @@
     },
     {
       "parameters": {
-        "command": "=SRC=$(ls -d /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }} /volume1/ALLDATA/Runs/DEU-Sync/{{ $('Edit Fields').item.json.run_id }} 2>/dev/null | head -1)\ndu -sb \"$SRC\" | awk '{print $1}'"
+        "command": "=SRC=$(ls -d /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }} /volume1/ALLDATA/Runs/DEU-Sync/{{ $('Edit Fields').item.json.run_id }} /volume1/ALLDATA/Runs/Sapiens-Sync/{{ $('Edit Fields').item.json.run_id }} 2>/dev/null | head -1)\ndu -sb \"$SRC\" | awk '{print $1}'"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -142,7 +142,7 @@
     },
     {
       "parameters": {
-        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d /mnt/koza_alldata/Runs/$RUN_ID /mnt/koza_alldata/Runs/DEU-Sync/$RUN_ID 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n    echo \"RUN_NOT_FOUND: $RUN_ID not in /mnt/koza_alldata/Runs or Runs/DEU-Sync\" >&2\n    exit 42\nfi\necho \"SOURCE: $SRC\"\nrclone copy \"$SRC\" /staging/run_folder/$RUN_ID \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v\nRC=$?\nif [ $RC -ne 0 ]; then\n    echo \"RCLONE_FAILED: exit $RC\" >&2\n    exit $RC\nfi\necho \"PULL_OK: $RUN_ID\"\n"
+        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d /mnt/koza_alldata/Runs/$RUN_ID /mnt/koza_alldata/Runs/DEU-Sync/$RUN_ID /mnt/koza_alldata/Runs/Sapiens-Sync/$RUN_ID 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n    echo \"RUN_NOT_FOUND: $RUN_ID not in /mnt/koza_alldata/Runs, Runs/DEU-Sync or Runs/Sapiens-Sync\" >&2\n    exit 42\nfi\necho \"SOURCE: $SRC\"\nrclone copy \"$SRC\" /staging/run_folder/$RUN_ID \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v\nRC=$?\nif [ $RC -ne 0 ]; then\n    echo \"RCLONE_FAILED: exit $RC\" >&2\n    exit $RC\nfi\necho \"PULL_OK: $RUN_ID\"\n"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -771,7 +771,8 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -1400,7 +1401,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "37fee60a-c2f0-4bc3-b68a-c560ea6b446a",
+  "versionId": "0afc6edd-f49f-43f6-9ae1-cf2f72f4234d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1421,6 +1422,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "10-09-2026/0:00",
+  "commitDate": "11-09-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
