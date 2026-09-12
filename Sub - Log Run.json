@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-29T13:01:40.217Z",
+  "updatedAt": "2026-09-11T04:22:43.409Z",
   "createdAt": "2025-12-19T09:20:34.249Z",
   "id": "FAYzdm9tCCVfsNlo",
   "name": "Sub - Log Run",
@@ -2601,7 +2601,7 @@
     },
     {
       "parameters": {
-        "command": "=grep -oP '(?<=NumCycles=\")[^\"]*' {{ $('Start').item.json.path }}RunInfo.xml | paste -sd'-'"
+        "command": "=RI=\"{{ $('Start').item.json.path }}RunInfo.xml\"\ngrep -o '<Read [^>]*>' \"$RI\" | awk '\n  { nc = \"\"; idx = \"\";\n    if (match($0, /NumCycles=\"[0-9]+\"/)) nc = substr($0, RSTART + 11, RLENGTH - 12);\n    if (match($0, /IsIndexedRead=\"[YN]\"/)) idx = substr($0, RSTART + 15, RLENGTH - 16);\n    if (idx == \"Y\") { i[++ni] = nc } else if (idx == \"N\") { r[++nr] = nc }\n  }\n  END { printf \"%s-%s-%s-%s\\n\", r[1], i[1], i[2], r[2] }\n'"
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
@@ -4091,8 +4091,8 @@
       }
     ]
   },
-  "versionId": "b36914cf-4c01-4e2a-b86b-43c92985789c",
-  "activeVersionId": "b36914cf-4c01-4e2a-b86b-43c92985789c",
+  "versionId": "23c4873b-722a-4226-a5a0-4ca3b3c2d237",
+  "activeVersionId": "23c4873b-722a-4226-a5a0-4ca3b3c2d237",
   "triggerCount": 0,
   "shared": [
     {
@@ -4104,9 +4104,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-29T13:01:40.220Z",
-    "createdAt": "2026-07-29T13:01:40.220Z",
-    "versionId": "b36914cf-4c01-4e2a-b86b-43c92985789c",
+    "updatedAt": "2026-09-11T04:22:43.412Z",
+    "createdAt": "2026-09-11T04:22:43.412Z",
+    "versionId": "23c4873b-722a-4226-a5a0-4ca3b3c2d237",
     "workflowId": "FAYzdm9tCCVfsNlo",
     "nodes": [
       {
@@ -6704,7 +6704,7 @@
       },
       {
         "parameters": {
-          "command": "=grep -oP '(?<=NumCycles=\")[^\"]*' {{ $('Start').item.json.path }}RunInfo.xml | paste -sd'-'"
+          "command": "=RI=\"{{ $('Start').item.json.path }}RunInfo.xml\"\ngrep -o '<Read [^>]*>' \"$RI\" | awk '\n  { nc = \"\"; idx = \"\";\n    if (match($0, /NumCycles=\"[0-9]+\"/)) nc = substr($0, RSTART + 11, RLENGTH - 12);\n    if (match($0, /IsIndexedRead=\"[YN]\"/)) idx = substr($0, RSTART + 15, RLENGTH - 16);\n    if (idx == \"Y\") { i[++ni] = nc } else if (idx == \"N\") { r[++nr] = nc }\n  }\n  END { printf \"%s-%s-%s-%s\\n\", r[1], i[1], i[2], r[2] }\n'"
         },
         "type": "n8n-nodes-base.executeCommand",
         "typeVersion": 1,
@@ -8188,6 +8188,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "11-09-2026/0:00",
+  "commitDate": "12-09-2026/0:00",
   "fileName": "Sub - Log Run.json"
 }
