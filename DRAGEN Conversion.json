@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-10T12:56:16.432Z",
+  "updatedAt": "2026-09-11T12:00:27.928Z",
   "createdAt": "2025-11-28T08:38:31.327Z",
   "id": "gwp1kOT0jKnrCvpw",
   "name": "DRAGEN Conversion",
@@ -13,7 +13,7 @@
             {
               "id": "ce63fa13-4bda-4f12-92ba-2e0d48605b97",
               "name": "run_id",
-              "value": "=260909_A01978_0221_BHWH2YDRX7",
+              "value": "=260909_NB552613_0016_AHCHTJBGY2",
               "type": "string"
             }
           ]
@@ -56,8 +56,8 @@
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
       "position": [
-        1072,
-        320
+        1360,
+        352
       ],
       "id": "86e8c7ed-fbcc-46d2-a573-d22e1fdc4c39",
       "name": "Push Conversion to AllData",
@@ -70,7 +70,7 @@
     },
     {
       "parameters": {
-        "command": "=SRC=$(ls -d /volume1/ALLDATA/Runs/{{ $('Edit Fields').item.json.run_id }} /volume1/ALLDATA/Runs/DEU-Sync/{{ $('Edit Fields').item.json.run_id }} /volume1/ALLDATA/Runs/Sapiens-Sync/{{ $('Edit Fields').item.json.run_id }} 2>/dev/null | head -1)\ndu -sb \"$SRC\" | awk '{print $1}'"
+        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d \"/volume1/ALLDATA/Runs/$RUN_ID\" /volume1/ALLDATA/Runs/*/\"$RUN_ID\" 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n  echo \"RUN_NOT_FOUND: $RUN_ID not under /volume1/ALLDATA/Runs or any first-level subfolder\" >&2\n  exit 42\nfi\necho \"SOURCE: $SRC\" >&2\ndu -sb \"$SRC\" | awk '{print $1}'\n"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -142,7 +142,7 @@
     },
     {
       "parameters": {
-        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d /mnt/koza_alldata/Runs/$RUN_ID /mnt/koza_alldata/Runs/DEU-Sync/$RUN_ID /mnt/koza_alldata/Runs/Sapiens-Sync/$RUN_ID 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n    echo \"RUN_NOT_FOUND: $RUN_ID not in /mnt/koza_alldata/Runs, Runs/DEU-Sync or Runs/Sapiens-Sync\" >&2\n    exit 42\nfi\necho \"SOURCE: $SRC\"\nrclone copy \"$SRC\" /staging/run_folder/$RUN_ID \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v\nRC=$?\nif [ $RC -ne 0 ]; then\n    echo \"RCLONE_FAILED: exit $RC\" >&2\n    exit $RC\nfi\necho \"PULL_OK: $RUN_ID\"\n"
+        "command": "=RUN_ID=\"{{ $('Edit Fields').item.json.run_id }}\"\nSRC=$(ls -d \"/mnt/koza_alldata/Runs/$RUN_ID\" /mnt/koza_alldata/Runs/*/\"$RUN_ID\" 2>/dev/null | head -1)\nif [ -z \"$SRC\" ]; then\n    echo \"RUN_NOT_FOUND: $RUN_ID not under /mnt/koza_alldata/Runs or any first-level subfolder\" >&2\n    exit 42\nfi\necho \"SOURCE: $SRC\"\nrclone copy \"$SRC\" /staging/run_folder/$RUN_ID \\\n    --transfers=32 \\\n    --checkers=256 \\\n    --multi-thread-streams=8 \\\n    --buffer-size=64M \\\n    --include \"*.bgzf\" \\\n    --include \"*.bcl\" \\\n    --include \"*.cbcl\" \\\n    --include \"*.filter\" \\\n    --include \"*.locs\" \\\n    --include \"*.clocs\" \\\n    --include \"*s.locs\" \\\n    --include \"*.bci\" \\\n    --include \"*.bin\" \\\n    --include \"*.xml\" \\\n    --include \"SampleSheet.csv\" \\\n    --include \"InterOp/**\" \\\n    --stats=10s \\\n    -v\nRC=$?\nif [ $RC -ne 0 ]; then\n    echo \"RCLONE_FAILED: exit $RC\" >&2\n    exit $RC\nfi\necho \"PULL_OK: $RUN_ID\"\n"
       },
       "type": "n8n-nodes-base.ssh",
       "typeVersion": 1,
@@ -359,8 +359,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        848,
-        320
+        1136,
+        352
       ],
       "id": "3c7ed7ab-feec-4f6e-ad02-5dbcc0338b40",
       "name": "Update Conversion to In Completed",
@@ -771,8 +771,7 @@
           "id": "clTmxNgA7AqNrh5h",
           "name": "bioinf.notify@gen-era.tech"
         }
-      },
-      "disabled": true
+      }
     },
     {
       "parameters": {
@@ -798,7 +797,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\nconst instrumentModel = $('Get Run Ref').item.json.instrument_model;\n\n// Illumina i5 orientation taxonomy:\n// - Revcomp chemistry (NextSeq 1000/2000, NovaSeq X/X Plus, iSeq, NovaSeq 6000 v1.5 reagent):\n//   SampleSheet'e i5'in RC'sini yaz. DRAGEN RunInfo.xml IsReverseComplement=\"Y\" gorur ve\n//   demux'ta SS yazimini bir kez daha RC eder -> demux key = forward, raw forward ile match.\n// - Forward chemistry (NovaSeq 6000 v1.0 reagent, MiSeq, HiSeq, NextSeq 550):\n//   SampleSheet'e i5'i forward (kit dokumantasyonu) yaz.\n// Empirik dogrulama: 260508_VH01138_4 (NextSeq 2000) needsRC=true gerektirdi\n// (Top_Unknown'da SS forward i5 %85.5 oraninda direkt eslesti).\nconst RC_INSTRUMENTS = [\n  'Illumina NextSeq 1000',\n  'Illumina NextSeq 2000',\n  'Illumina NovaSeq X',\n  'Illumina NovaSeq X Plus',\n  'Illumina NovaSeq X-Plus',\n  'Illumina iSeq 100',\n];\nconst needsRC = RC_INSTRUMENTS.includes(instrumentModel);\n\n// Reverse complement helper (UMI fix 2026-05-19)\nfunction reverseComplement(seq) {\n  if (!seq) return seq;\n  const complement = { A: 'T', T: 'A', G: 'C', C: 'G', N: 'N' };\n  return seq.toUpperCase().split('').reverse().map(b => complement[b] ?? b).join('');\n}\n\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\nlet sampleSheet = '[Header],\\n';\nsampleSheet += 'FileFormatVersion,2\\n';\nsampleSheet += `RunName,${runId}\\n`;\nsampleSheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsampleSheet += 'IndexOrientation,Forward\\n\\n';\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,4.3.13\\n';\nsampleSheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsampleSheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += '[BCLConvert_Data]\\n';\n\nif (hasLanes) {\n  sampleSheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n} else {\n  sampleSheet += 'Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n}\n\nfor (const sample of samples) {\n  const s = sample.json;\n\n  const i5Sequence = needsRC ? reverseComplement(s.index2) : s.index2;\n\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = i5Sequence ? i5Sequence.length : 0;\n\n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n\n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n\n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    // NextSeq 2000 / NovaSeq X / iSeq i5 ters yonden okur:\n    // 10 cycle'lik i5 okumada 8bp gercek adapter cycle 3-10'da, ilk 2 cycle template/linker artigi.\n    // Bu sequencer'lar icin mask N<n>I<i5> formatinda olmali (mask onde, indeks arkada).\n    // NovaSeq 6000 v1.0 / MiSeq / HiSeq forward okur -> I<i5>N<n> (mevcut sira).\n    // i7 her platformda forward; index1Part: I<n>N<m> dogru, dokunulmadi.\n    index2Part = needsRC ? `N${mask2}I${i5Length}` : `I${i5Length}N${mask2}`;\n  }\n\n  // TSO500 (UMI) kit'leri için Read1/Read2 başında 7bp UMI + 1 mask:\n  // Detect with normalized substring (whitespace/dash/underscore stripped).\n  const libraryPrepKit = s.library_prep_kit || '';\n  const normalizedKit = libraryPrepKit.toLowerCase().replace(/[\\s\\-_]/g, '');\n  const isTSO = normalizedKit.includes('tso500') || normalizedKit.includes('trusightoncology500');\n  const read1Part = isTSO ? `U7N1Y${parseInt(readsSettings.read1cycles) - 8}` : `Y${readsSettings.read1cycles}`;\n  const read2Part = isTSO ? `U7N1Y${parseInt(readsSettings.read2cycles) - 8}` : `Y${readsSettings.read2cycles}`;\n  const overrideCycles = `${read1Part};${index1Part};${index2Part};${read2Part}`;\n\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${laneValue},${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
+        "jsCode": "const readsSettings = $('Get Reads Settings').first().json;\nconst samples = $('Get Planned Reads').all();\nconst runId = $('Edit Fields').item.json.run_id;\nconst instrumentModel = $('Get Run Ref').item.json.instrument_model;\n\n// Illumina i5 orientation taxonomy:\n// - Revcomp chemistry (NextSeq 1000/2000, NovaSeq X/X Plus, iSeq, NovaSeq 6000 v1.5 reagent):\n//   SampleSheet'e i5'in RC'sini yaz. DRAGEN RunInfo.xml IsReverseComplement=\"Y\" gorur ve\n//   demux'ta SS yazimini bir kez daha RC eder -> demux key = forward, raw forward ile match.\n// - Forward chemistry (NovaSeq 6000 v1.0 reagent, MiSeq, HiSeq, NextSeq 550):\n//   SampleSheet'e i5'i forward (kit dokumantasyonu) yaz.\n// Empirik dogrulama: 260508_VH01138_4 (NextSeq 2000) needsRC=true gerektirdi\n// (Top_Unknown'da SS forward i5 %85.5 oraninda direkt eslesti).\nconst RC_INSTRUMENTS = [\n  'Illumina NextSeq 1000',\n  'Illumina NextSeq 2000',\n  'Illumina NovaSeq X',\n  'Illumina NovaSeq X Plus',\n  'Illumina NovaSeq X-Plus',\n  'Illumina iSeq 100',\n  'Illumina MiSeq i100',\n];\nconst needsRC = RC_INSTRUMENTS.includes(instrumentModel);\n\n// MiSeq i100 RunInfo.xml'de index okumalarini basa yazar (I1;I2;R1;R2).\n// Order-dependent OverrideCycles RunInfo sirasina gore dogrulandigi icin\n// Y151;I8;I10;Y151 \"Integers must be ... less than or equal to the read length\"\n// hatasi verir. Etiketli (order-independent) form sirayi onemsiz kilar.\n// DRAGEN 4.3+ destekler; 4.5.4'te per-sample kolonda test edildi (2026-09-11).\nconst LABELED_CYCLES_INSTRUMENTS = ['Illumina MiSeq i100'];\nconst needsLabeledCycles = LABELED_CYCLES_INSTRUMENTS.includes(instrumentModel);\n\n// Reverse complement helper (UMI fix 2026-05-19)\nfunction reverseComplement(seq) {\n  if (!seq) return seq;\n  const complement = { A: 'T', T: 'A', G: 'C', C: 'G', N: 'N' };\n  return seq.toUpperCase().split('').reverse().map(b => complement[b] ?? b).join('');\n}\n\nconst hasLanes = samples.some(sample => {\n  const lane = sample.json.lane;\n  return lane && lane !== 0 && lane !== '0' && lane !== '';\n});\n\nlet sampleSheet = '[Header],\\n';\nsampleSheet += 'FileFormatVersion,2\\n';\nsampleSheet += `RunName,${runId}\\n`;\nsampleSheet += 'InstrumentPlatform,NovaSeqXSeries\\n';\nsampleSheet += 'IndexOrientation,Forward\\n\\n';\nsampleSheet += '[Reads]\\n';\nsampleSheet += `Read1Cycles,${readsSettings.read1cycles}\\n`;\nsampleSheet += `Read2Cycles,${readsSettings.read2cycles}\\n`;\nsampleSheet += `Index1Cycles,${readsSettings.index1cycles}\\n`;\nsampleSheet += `Index2Cycles,${readsSettings.index2cycles}\\n\\n`;\nsampleSheet += '[BCLConvert_Settings]\\n';\nsampleSheet += 'SoftwareVersion,4.3.13\\n';\nsampleSheet += 'AdapterRead1,CTGTCTCTTATACACATCT+AGATCGGAAGAGCACACGTCTGAACTCCAGTCA\\n';\nsampleSheet += 'AdapterRead2,CTGTCTCTTATACACATCT+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT\\n';\nsampleSheet += 'FastqCompressionFormat,gzip\\n';\nsampleSheet += '[BCLConvert_Data]\\n';\n\nif (hasLanes) {\n  sampleSheet += 'Lane,Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n} else {\n  sampleSheet += 'Sample_ID,Index,Index2,OverrideCycles,Sample_Project,BarcodeMismatchesIndex1,BarcodeMismatchesIndex2\\n';\n}\n\nfor (const sample of samples) {\n  const s = sample.json;\n\n  const i5Sequence = needsRC ? reverseComplement(s.index2) : s.index2;\n\n  const i7Length = s.index ? s.index.length : 0;\n  const i5Length = i5Sequence ? i5Sequence.length : 0;\n\n  const index1Cycles = parseInt(readsSettings.index1cycles);\n  const index2Cycles = parseInt(readsSettings.index2cycles);\n\n  let index1Part = '';\n  if (i7Length === index1Cycles) {\n    index1Part = `I${i7Length}`;\n  } else {\n    const mask1 = index1Cycles - i7Length;\n    index1Part = `I${i7Length}N${mask1}`;\n  }\n\n  let index2Part = '';\n  if (i5Length === index2Cycles) {\n    index2Part = `I${i5Length}`;\n  } else {\n    const mask2 = index2Cycles - i5Length;\n    // NextSeq 2000 / NovaSeq X / iSeq i5 ters yonden okur:\n    // 10 cycle'lik i5 okumada 8bp gercek adapter cycle 3-10'da, ilk 2 cycle template/linker artigi.\n    // Bu sequencer'lar icin mask N<n>I<i5> formatinda olmali (mask onde, indeks arkada).\n    // NovaSeq 6000 v1.0 / MiSeq / HiSeq forward okur -> I<i5>N<n> (mevcut sira).\n    // i7 her platformda forward; index1Part: I<n>N<m> dogru, dokunulmadi.\n    index2Part = needsRC ? `N${mask2}I${i5Length}` : `I${i5Length}N${mask2}`;\n  }\n\n  // TSO500 (UMI) kit'leri için Read1/Read2 başında 7bp UMI + 1 mask:\n  // Detect with normalized substring (whitespace/dash/underscore stripped).\n  const libraryPrepKit = s.library_prep_kit || '';\n  const normalizedKit = libraryPrepKit.toLowerCase().replace(/[\\s\\-_]/g, '');\n  const isTSO = normalizedKit.includes('tso500') || normalizedKit.includes('trusightoncology500');\n  const read1Part = isTSO ? `U7N1Y${parseInt(readsSettings.read1cycles) - 8}` : `Y${readsSettings.read1cycles}`;\n  const read2Part = isTSO ? `U7N1Y${parseInt(readsSettings.read2cycles) - 8}` : `Y${readsSettings.read2cycles}`;\n  const overrideCycles = needsLabeledCycles\n    ? `R1:${read1Part};I1:${index1Part};I2:${index2Part};R2:${read2Part}`\n    : `${read1Part};${index1Part};${index2Part};${read2Part}`;\n\n  if (hasLanes) {\n    const laneValue = (s.lane && s.lane !== 0 && s.lane !== '0') ? s.lane : '';\n    sampleSheet += `${laneValue},${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  } else {\n    sampleSheet += `${s.sample_id},${s.index},${i5Sequence},${overrideCycles},${s.sample_project},0,0\\n`;\n  }\n}\n\nreturn {\n  json: {\n    sampleSheet: sampleSheet,\n    fileName: `SampleSheet_${runId}.csv`,\n    run_id: runId\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -870,8 +869,8 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        800,
-        544
+        992,
+        592
       ],
       "id": "6ed9f621-ef32-4842-976f-f5b11dd553b4",
       "name": "Update Conversion to On Hold",
@@ -899,7 +898,8 @@
           "id": "roUCz67T2VbHNQzo",
           "name": "Koza DRAGEN - Root User"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -987,6 +987,40 @@
       "id": "a7c1e4f2-9b3d-4e51-8f6a-2d0c7b91e5aa",
       "name": "Sentinel Tetikle",
       "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1cd71c91-39cf-4598-a8de-e7a8e0710501",
+              "leftValue": "={{ $json.code }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        352
+      ],
+      "id": "872d6a24-590d-470b-98f8-31327437d8bd",
+      "name": "Conversion OK?"
     }
   ],
   "connections": {
@@ -1005,7 +1039,7 @@
       "main": [
         [
           {
-            "node": "Update Conversion to In Completed",
+            "node": "Conversion OK?",
             "type": "main",
             "index": 0
           }
@@ -1389,6 +1423,24 @@
           }
         ]
       ]
+    },
+    "Conversion OK?": {
+      "main": [
+        [
+          {
+            "node": "Update Conversion to In Completed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Conversion to On Hold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1401,7 +1453,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0afc6edd-f49f-43f6-9ae1-cf2f72f4234d",
+  "versionId": "307fbfea-6334-4c8d-a26c-6cdc5f2fb9a6",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
@@ -1422,6 +1474,6 @@
       "name": "Can"
     }
   ],
-  "commitDate": "11-09-2026/0:00",
+  "commitDate": "12-09-2026/0:00",
   "fileName": "DRAGEN Conversion.json"
 }
