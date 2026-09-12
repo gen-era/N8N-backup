@@ -1,20 +1,20 @@
 {
-  "updatedAt": "2026-09-10T13:44:09.728Z",
-  "createdAt": "2026-09-09T07:51:28.349Z",
-  "id": "5RoG806PAJ0AYW7k",
+  "updatedAt": "2026-09-08T13:34:34.319Z",
+  "createdAt": "2026-09-08T11:36:26.068Z",
+  "id": "EMhVI24mobZbYREH",
   "name": "Archer - Job Raporu (jobs API -> 3 sheet Excel -> Gmail)",
   "active": false,
   "isArchived": false,
   "nodes": [
     {
       "parameters": {},
-      "id": "6983c28c-568d-498a-b89a-0282bfcf6f22",
+      "id": "3ca482dd-c906-4ba0-b624-cd62edac6d6a",
       "name": "Manual Trigger",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        944,
-        2400
+        0,
+        0
       ]
     },
     {
@@ -49,13 +49,13 @@
           }
         }
       },
-      "id": "340a42fd-c451-4aa0-8e06-5db0a18704e9",
+      "id": "e52c87ce-4be3-4213-8578-f57edcbde524",
       "name": "List Jobs (paginated)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1280,
-        2448
+        208,
+        0
       ],
       "credentials": {
         "httpBasicAuth": {
@@ -69,13 +69,13 @@
         "fieldToSplitOut": "results",
         "options": {}
       },
-      "id": "8a4d66c1-a080-4f1d-aeba-11c0e72bc09c",
+      "id": "ccaacf11-ba99-4d66-a26c-8e7f4c843d2e",
       "name": "Split Out results",
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        1600,
-        2448
+        432,
+        0
       ]
     },
     {
@@ -90,7 +90,7 @@
           "conditions": [
             {
               "id": "c_date",
-              "leftValue": "={{ DateTime.fromISO($json.submit_time) >= $now.setZone('UTC').startOf('month').minus({ months: 1 }) && DateTime.fromISO($json.submit_time) < $now.setZone('UTC').startOf('month') }}",
+              "leftValue": "={{ DateTime.fromISO($json.submit_time) >= DateTime.fromISO('2026-09-01T00:00:00', { zone: 'Europe/Istanbul' }) && DateTime.fromISO($json.submit_time) <= DateTime.now() }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -103,33 +103,46 @@
         },
         "options": {}
       },
-      "id": "216cdb05-0271-4ce8-9b7b-e99077590fcd",
-      "name": "Filter: onceki ay",
+      "id": "6ef2b3f7-01fb-48a7-91b3-e9e3bdb9b970",
+      "name": "Filter: submit_time >= 2026-01-01 TRT",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2,
       "position": [
-        1872,
-        2448
+        640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// === Archer Job Raporu: 3 sheet'li Excel üretimi ===\n// Girdi: her item = bir /jobs/{job_id}/ detay yanitindaki \"data\" objesi (samples dahil)\n// require('xlsx') icin self-hosted n8n'de env: NODE_FUNCTION_ALLOW_EXTERNAL=xlsx  (restart gerekir)\nconst XLSX = require('xlsx');\n\n// --- 1) Detaylari sample bazina genislet (Sheet 1 verisi) ---\nconst rows = [];\nfor (const item of $input.all()) {\n  const d = item.json.data || item.json;            // detay {data:{...}} formatinda gelir\n  const base = {\n    submitter: d.user_email ?? null,                // user_email\n    name:      d.name ?? null,                       // name\n    id:        d.job_id ?? null,                     // job_id\n    date:      d.submit_time ?? null,                // submit_time (UTC ISO)\n    panel:     d.target_region_name ?? null,         // target_region_name\n    status:    d.job_status_name ?? null,            // job_status_name\n  };\n  const samples = Array.isArray(d.samples) ? d.samples : [];\n  if (samples.length === 0) {\n    rows.push({ ...base, sample_id: null, sample_name: null });\n  } else {\n    for (const s of samples) {\n      rows.push({ ...base, sample_id: s.id ?? null, sample_name: s.name ?? null });\n    }\n  }\n}\n\n// --- Sheet 1: Samples (kolon sirasi sabit) ---\nconst sheet1Header = ['submitter','name','id','date','panel','status','sample_id','sample_name'];\n\n// --- Sheet 2: Repeats (sample_name, count) -> sadece count > 1 ---\nconst rc = {};\nfor (const r of rows) {\n  const n = r.sample_name;\n  if (n === null || n === undefined || n === '') continue;\n  rc[n] = (rc[n] || 0) + 1;\n}\nconst sheet2 = Object.entries(rc)\n  .filter(([, c]) => c > 1)\n  .sort((a, b) => b[1] - a[1])\n  .map(([sample_name, count]) => ({ sample_name, count }));\n\n// --- Sheet 3: Matris (satir=user_mail, sutun=panel, hucre=sample sayisi) ---\nconst panels = new Set();\nconst byUser = {};\nfor (const r of rows) {\n  const u = r.submitter ?? '(unknown)';\n  const p = r.panel ?? '(none)';\n  panels.add(p);\n  if (!byUser[u]) byUser[u] = {};\n  byUser[u][p] = (byUser[u][p] || 0) + 1;\n}\nconst panelList = [...panels].sort();\nconst sheet3 = Object.keys(byUser).sort().map((u) => {\n  const row = { user_mail: u };\n  for (const p of panelList) row[p] = byUser[u][p] || 0;\n  return row;\n});\n\n// --- Workbook olustur ---\nconst wb = XLSX.utils.book_new();\n\nconst ws1 = XLSX.utils.json_to_sheet(\n  rows.length ? rows : [{}], { header: sheet1Header }\n);\nXLSX.utils.book_append_sheet(wb, ws1, 'Samples');\n\nconst ws2 = XLSX.utils.json_to_sheet(\n  sheet2.length ? sheet2 : [{ sample_name: '(no repeats)', count: '' }],\n  { header: ['sample_name', 'count'] }\n);\nXLSX.utils.book_append_sheet(wb, ws2, 'Repeats');\n\nconst ws3 = XLSX.utils.json_to_sheet(\n  sheet3.length ? sheet3 : [{ user_mail: '(no data)' }],\n  { header: ['user_mail', ...panelList] }\n);\nXLSX.utils.book_append_sheet(wb, ws3, 'Matrix');\n\nconst base64 = XLSX.write(wb, { type: 'base64', bookType: 'xlsx' });\nconst stamp = DateTime.now().setZone('Europe/Istanbul').toFormat('yyyyLLdd');\nconst fileName = `archer_job_raporu_${stamp}.xlsx`;\n\nreturn [{\n  json: {\n    total_samples: rows.length,\n    repeat_names: sheet2.length,\n    users: sheet3.length,\n    panels: panelList.length,\n  },\n  binary: {\n    data: {\n      data: base64,\n      mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',\n      fileName,\n      fileExtension: 'xlsx',\n    },\n  },\n}];\n"
+      },
+      "id": "c69b602e-0575-4770-ae2f-a489ae5d4af2",
+      "name": "Build 3-sheet Excel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -80
       ]
     },
     {
       "parameters": {
         "fromEmail": "seherburcuozkan@gmail.com",
-        "toEmail": "burcu.ozkan@gen-era.com.tr",
-        "subject": "=Archer Job Raporu - {{ $now.setZone('UTC').toFormat('dd.LL.yyyy') }}",
+        "toEmail": "bburcuozkn@hotmail.com",
+        "subject": "==Archer Job Raporu - {{ $now.setZone('Europe/Istanbul').toFormat('dd.LL.yyyy') }}",
         "emailFormat": "text",
-        "text": "=Merhabalar,\n\nEkte {{ $now.setZone('UTC').startOf('month').minus({ months: 1 }).toFormat('yyyy-LL-dd') }} – {{ $now.setZone('UTC').startOf('month').minus({ days: 1 }).toFormat('yyyy-LL-dd') }} tarihleri arasindaki Archer kayitlari bulunmaktadir.\n\nToplam sample: {{ JSON.parse($('Build XLSX').item.json.stdout).total_samples }}\nTekrar eden sample sayisi: {{ JSON.parse($('Build XLSX').item.json.stdout).repeat_names }}\nKullanici sayisi: {{ JSON.parse($('Build XLSX').item.json.stdout).users }}\nPanel sayisi: {{ JSON.parse($('Build XLSX').item.json.stdout).panels }}",
+        "text": "==Merhaba,\n\nEkte 1 Ocak 2026'dan bugüne kadar submit edilen Archer joblarına ait rapor bulunmaktadır.\n\nToplam sample: {{ $json.total_samples }}\nTekrar eden sample sayısı: {{ $json.repeat_names }}\nKullanıcı sayısı: {{ $json.users }}\nPanel sayısı: {{ $json.panels }}\n\nOtomatik olarak n8n üzerinden gönderilmiştir.",
         "options": {
-          "attachments": "data"
+          "attachments": "=data"
         }
       },
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        3488,
-        2448
+        1328,
+        0
       ],
-      "id": "d521da39-6546-4873-b39a-420d3a7d2fad",
+      "id": "cb024712-135b-4f72-8f32-61891537e561",
       "name": "Send email",
       "webhookId": "081ff57e-4f38-4243-869c-c94b13c31883",
       "credentials": {
@@ -144,10 +157,10 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        2752,
-        2608
+        1072,
+        128
       ],
-      "id": "b7e15c34-9522-4d4e-990a-ec321a32df35",
+      "id": "8bd4f8d2-9898-4208-9f5c-23bfb9684fa2",
       "name": "Failed job_ids"
     },
     {
@@ -162,20 +175,20 @@
               "batchInterval": 100
             }
           },
-          "timeout": 30000
+          "timeout": 60000
         }
       },
-      "id": "ebc403f1-03fb-4ee1-a684-371bee69b431",
+      "id": "cc183f6b-dffb-41b9-b7a8-1d95084a4182",
       "name": "Job Detail (per job_id)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2512,
-        2448
+        864,
+        0
       ],
       "retryOnFail": true,
       "maxTries": 3,
-      "waitBetweenTries": 2000,
+      "waitBetweenTries": 5000,
       "credentials": {
         "httpBasicAuth": {
           "id": "psKFlagj6vihnCT7",
@@ -183,108 +196,6 @@
         }
       },
       "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Job detaylarini sample bazina genislet, tek JSON binary uret (require yok)\nconst rows = [];\nfor (const item of $input.all()) {\n  const d = item.json.data || item.json;\n  const base = {\n    submitter: d.user_email ?? null,\n    name:      d.name ?? null,\n    id:        d.job_id ?? null,\n    date:      d.submit_time ?? null,\n    panel:     d.target_region_name ?? null,\n    status:    d.job_status_name ?? null,\n  };\n  const samples = Array.isArray(d.samples) ? d.samples : [];\n  if (samples.length === 0) {\n    rows.push({ ...base, sample_id: null, sample_name: null });\n  } else {\n    for (const s of samples) {\n      rows.push({ ...base, sample_id: s.id ?? null, sample_name: s.name ?? null });\n    }\n  }\n}\nconst base64 = Buffer.from(JSON.stringify(rows), 'utf8').toString('base64');\nreturn [{\n  json: { count: rows.length },\n  binary: { data: { data: base64, mimeType: 'application/json', fileName: 'archer_in.json', fileExtension: 'json' } },\n}];\n"
-      },
-      "id": "1617564d-2b8c-487b-a930-6124e32105be",
-      "name": "Expand rows",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2688,
-        2368
-      ]
-    },
-    {
-      "parameters": {
-        "operation": "write",
-        "fileName": "=/tmp/archer_{{ $execution.id }}_in.json",
-        "options": {}
-      },
-      "id": "4c87896b-49be-429e-8c15-83fe17c50979",
-      "name": "Write JSON",
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        2896,
-        2368
-      ]
-    },
-    {
-      "parameters": {
-        "command": "=/home/genera/archer_burcu/venv/bin/python3 /home/genera/archer_burcu/build.py /tmp/archer_{{ $execution.id }}_in.json /tmp/ARCHER_{{ $now.setZone('UTC').startOf('month').minus({ months: 1 }).toFormat('yyyy-LL-dd') }}_{{ $now.setZone('UTC').startOf('month').minus({ days: 1 }).toFormat('yyyy-LL-dd') }}.xlsx"
-      },
-      "id": "d6413213-bd63-462f-9ad2-ad2d266d1bf7",
-      "name": "Build XLSX",
-      "type": "n8n-nodes-base.executeCommand",
-      "typeVersion": 1,
-      "position": [
-        3088,
-        2368
-      ]
-    },
-    {
-      "parameters": {
-        "fileSelector": "=/tmp/ARCHER_{{ $now.setZone('UTC').startOf('month').minus({ months: 1 }).toFormat('yyyy-LL-dd') }}_{{ $now.setZone('UTC').startOf('month').minus({ days: 1 }).toFormat('yyyy-LL-dd') }}.xlsx",
-        "options": {}
-      },
-      "id": "18a7056f-2245-4f4d-b37e-591ae2b92e99",
-      "name": "Read XLSX",
-      "type": "n8n-nodes-base.readWriteFile",
-      "typeVersion": 1,
-      "position": [
-        3296,
-        2368
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "cronExpression",
-              "expression": "0 5 1 * *"
-            }
-          ]
-        }
-      },
-      "id": "21d95155-2328-4e73-bd5f-7b04c36da273",
-      "name": "Schedule Trigger",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        944,
-        2624
-      ]
-    },
-    {
-      "parameters": {
-        "batchSize": 50,
-        "options": {}
-      },
-      "id": "85e2286a-37ca-4b1c-af20-cc0f5c365047",
-      "name": "Loop Over Items",
-      "type": "n8n-nodes-base.splitInBatches",
-      "typeVersion": 3,
-      "position": [
-        2096,
-        2448
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Job detayini yalnizca gerekli alanlara indir (dev settings/sequence bloklarini at)\nreturn $input.all().map(item => {\n  const d = item.json.data || item.json;\n  const s = Array.isArray(d.samples) ? d.samples : [];\n  return { json: {\n    user_email: d.user_email ?? null,\n    name: d.name ?? null,\n    job_id: d.job_id ?? null,\n    submit_time: d.submit_time ?? null,\n    target_region_name: d.target_region_name ?? null,\n    job_status_name: d.job_status_name ?? null,\n    samples: s.map(x => ({ id: x.id ?? null, name: x.name ?? null })),\n  }};\n});\n"
-      },
-      "id": "31bf3b6c-ea22-4717-ab36-9aa025d5662b",
-      "name": "Trim response",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2752,
-        2288
-      ]
     }
   ],
   "connections": {
@@ -314,7 +225,29 @@
       "main": [
         [
           {
-            "node": "Filter: onceki ay",
+            "node": "Filter: submit_time >= 2026-01-01 TRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: submit_time >= 2026-01-01 TRT": {
+      "main": [
+        [
+          {
+            "node": "Job Detail (per job_id)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build 3-sheet Excel": {
+      "main": [
+        [
+          {
+            "node": "Send email",
             "type": "main",
             "index": 0
           }
@@ -325,7 +258,7 @@
       "main": [
         [
           {
-            "node": "Trim response",
+            "node": "Build 3-sheet Excel",
             "type": "main",
             "index": 0
           }
@@ -338,90 +271,6 @@
           }
         ]
       ]
-    },
-    "Expand rows": {
-      "main": [
-        [
-          {
-            "node": "Write JSON",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Write JSON": {
-      "main": [
-        [
-          {
-            "node": "Build XLSX",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Build XLSX": {
-      "main": [
-        [
-          {
-            "node": "Read XLSX",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read XLSX": {
-      "main": [
-        [
-          {
-            "node": "Send email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filter: onceki ay": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Loop Over Items": {
-      "main": [
-        [
-          {
-            "node": "Expand rows",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Job Detail (per job_id)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trim response": {
-      "main": [
-        [
-          {
-            "node": "Loop Over Items",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -429,17 +278,19 @@
     "availableInMCP": false
   },
   "staticData": null,
-  "meta": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
   "pinData": {},
-  "versionId": "d1fb6fcb-9f04-4b8c-a215-f363c8c55e50",
+  "versionId": "5299a463-5c69-4212-94b9-ee55401dcee2",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
     {
-      "updatedAt": "2026-09-09T07:51:28.370Z",
-      "createdAt": "2026-09-09T07:51:28.370Z",
+      "updatedAt": "2026-09-08T11:36:26.073Z",
+      "createdAt": "2026-09-08T11:36:26.073Z",
       "role": "workflow:owner",
-      "workflowId": "5RoG806PAJ0AYW7k",
+      "workflowId": "EMhVI24mobZbYREH",
       "projectId": "wmZSbmn0RiQYcSpN"
     }
   ],
